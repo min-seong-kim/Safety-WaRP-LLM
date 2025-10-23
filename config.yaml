@@ -1,0 +1,80 @@
+# Safety-WaRP-LLM Configuration File
+
+# Model Configuration
+model:
+  name: meta-llama/Llama-3-8B
+  dtype: bfloat16  # float32, float16, bfloat16
+  device: cuda:0
+  trust_remote_code: true
+
+# Phase 1: Basis Construction
+phase1:
+  # Data
+  safety_samples: 100
+  batch_size: 4
+  
+  # Layers
+  target_layers: all  # all, early, middle, late
+  layer_type: ffn_down  # ffn_down, ffn_up, attn_q, attn_k, attn_v
+  
+  # Output
+  save_basis: true
+  basis_format: pt  # Format: pt (torch), numpy
+
+# Phase 2: Importance Scoring
+phase2:
+  # Data
+  safety_samples: 100
+  batch_size: 4
+  
+  # Threshold
+  importance_threshold: 0.1  # Fraction of coefficients to keep
+  use_quantile: true
+  
+  # Output
+  save_masks: true
+
+# Phase 3: Incremental Learning
+phase3:
+  # Data
+  utility_samples: 500  # GSM8K samples
+  batch_size: 4
+  
+  # Training
+  learning_rate: 1e-4
+  epochs: 3
+  warmup_steps: 100
+  weight_decay: 0.01
+  gradient_accumulation_steps: 4
+  
+  # Optimization
+  optimizer: adamw
+  scheduler: cosine
+  
+  # Output
+  save_checkpoints: true
+  save_every: 100
+
+# Paths
+paths:
+  data_dir: ./data
+  checkpoint_dir: ./checkpoints
+  log_dir: ./logs
+  output_dir: ./outputs
+
+# Logging
+logging:
+  level: INFO  # DEBUG, INFO, WARNING, ERROR
+  use_tensorboard: false
+  use_wandb: false
+  log_every: 10
+
+# Hardware
+hardware:
+  num_workers: 0
+  pin_memory: true
+  mixed_precision: true
+  gradient_checkpointing: true
+
+# Seed
+seed: 42
