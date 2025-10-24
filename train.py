@@ -5,7 +5,7 @@ Safety-WaRP-LLM: Phase 1 - Basis Construction
 사용 방법:
     python train.py \
         --phase 1 \
-        --model_name meta-llama/Llama-3-8B \
+        --model_name meta-llama/Llama-3.1-8B-Instruct \
         --safety_samples 100 \
         --batch_size 4 \
         --device cuda:0 \
@@ -38,7 +38,7 @@ def parse_args():
                         help='실행할 phase (1: Basis, 2: Importance, 3: Learning)')
     
     # 모델 설정
-    parser.add_argument('--model_name', type=str, default='meta-llama/Llama-3-8B',
+    parser.add_argument('--model_name', type=str, default='meta-llama/Llama-3.1-8B-Instruct',
                         help='사용할 LLM 모델 이름')
     parser.add_argument('--model_dir', type=str, default=None,
                         help='저장된 모델 체크포인트 경로')
@@ -51,11 +51,28 @@ def parse_args():
     
     # 레이어 설정
     parser.add_argument('--target_layers', type=str, default='all',
-                        choices=['all', 'early', 'middle', 'late'],
-                        help='타겟 레이어 범위 (all: 0-31, early: 0-10, middle: 11-21, late: 22-31)')
+                        help='타겟 레이어 범위. 옵션: all, early, middle, late, last, 또는 쉼표로 구분된 범위 (예: 31, 0-5, 30-31)')
     parser.add_argument('--layer_type', type=str, default='ffn_down',
                         choices=['ffn_down', 'ffn_up', 'attn_q', 'attn_k', 'attn_v'],
                         help='타겟 레이어 타입')
+    
+    # Phase 2 설정
+    parser.add_argument('--basis_dir', type=str, default=None,
+                        help='Phase 1에서 저장된 basis 디렉토리 경로')
+    parser.add_argument('--keep_ratio', type=float, default=0.1,
+                        help='유지할 중요 계수의 비율 (Phase 2)')
+    
+    # Phase 3 설정
+    parser.add_argument('--masks_dir', type=str, default=None,
+                        help='Phase 2에서 저장된 masks 디렉토리 경로')
+    parser.add_argument('--utility_samples', type=int, default=1000,
+                        help='유틸리티 데이터 샘플 수 (GSM8K train)')
+    parser.add_argument('--epochs', type=int, default=3,
+                        help='훈련 에포크 수')
+    parser.add_argument('--learning_rate', type=float, default=5e-5,
+                        help='학습률')
+    parser.add_argument('--weight_decay', type=float, default=0.01,
+                        help='Weight decay')
     
     # 계산 설정
     parser.add_argument('--device', type=str, default='cuda',
@@ -111,6 +128,18 @@ def log_config(logger, args):
     logger.info(f"Safety Samples: {args.safety_samples}")
     logger.info(f"Target Layers: {args.target_layers}")
     logger.info(f"Layer Type: {args.layer_type}")
+    
+    # Phase 2 설정
+    if args.phase >= 2:
+        logger.info(f"Keep Ratio: {args.keep_ratio}")
+    
+    # Phase 3 설정
+    if args.phase >= 3:
+        logger.info(f"Utility Samples: {args.utility_samples}")
+        logger.info(f"Epochs: {args.epochs}")
+        logger.info(f"Learning Rate: {args.learning_rate}")
+        logger.info(f"Weight Decay: {args.weight_decay}")
+    
     logger.info(f"Experiment Dir: {args.exp_dir}")
     logger.info(f"Seed: {args.seed}")
     logger.info("="*60)
@@ -230,19 +259,112 @@ def run_phase1(args, logger):
 def run_phase2(args, logger):
     """
     Phase 2: Importance Scoring
-    (아직 구현 안함 - Phase 1 완료 후 진행)
+    
+    절차:
+    1. Phase 1에서 저장된 basis 로드
+    2. 모델 가중치를 basis 공간으로 재매개변수화
+    3. 안전 데이터로 모델 실행 (teacher forcing)
+    4. 손실 계산 (token-level cross-entropy)
+    5. 역전파로 gradient 계산
+    6. 계수별 importance 점수 계산 (gradient magnitude)
+    7. Quantile 기반 임계값으로 마스크 생성
+    8. 마스크 저장
     """
-    logger.info("Phase 2 is not yet implemented.")
-    logger.info("Please complete Phase 1 first.")
+    logger.info("Starting Phase 2: Importance Scoring")
+    logger.info("-" * 60)
+    
+    # 필수 인자 확인
+    if args.basis_dir is None:
+        logger.error("Phase 2 requires --basis_dir argument")
+        logger.error("Usage: python train.py --phase 2 --basis_dir /path/to/basis")
+        raise ValueError("Missing --basis_dir argument")
+    
+    if not os.path.exists(args.basis_dir):
+        logger.error(f"Basis directory not found: {args.basis_dir}")
+        raise FileNotFoundError(f"Basis directory not found: {args.basis_dir}")
+    
+    from models.phase2_importance import Phase2ImportanceScorer
+    
+    # Step 1: 모델 로드
+    logger.info("\n[Step 1] Loading model...")
+    scorer = Phase2ImportanceScorer(args, logger, args.basis_dir)
+    scorer.load_model()
+    logger.info(f"✓ Model loaded: {args.model_name}")
+    
+    # Step 2: Basis 로드
+    logger.info("\n[Step 2] Loading basis from Phase 1...")
+    scorer.load_basis()
+    logger.info(f"✓ Basis loaded: {len(scorer.basis_data)} layers")
+    
+    # Step 3: 안전 데이터 로드
+    logger.info("\n[Step 3] Loading safety data (do-not-answer)...")
+    scorer.load_safety_data()
+    logger.info(f"✓ Safety data loaded: batch_size={args.batch_size}")
+    
+    # Step 4: 가중치 재매개변수화
+    logger.info("\n[Step 4] Reparameterizing weights to basis space...")
+    scorer.reparameterize_weights()
+    logger.info(f"✓ Weights reparameterized")
+    
+    # Step 5: Importance 계산
+    logger.info("\n[Step 5] Computing importance scores...")
+    scorer.compute_importance()
+    logger.info(f"✓ Importance scores computed for {len(scorer.importances)} layers")
+    
+    # Step 6: 마스크 생성
+    logger.info("\n[Step 6] Generating importance masks...")
+    scorer.generate_masks(keep_ratio=args.keep_ratio)
+    logger.info(f"✓ Masks generated with keep_ratio={args.keep_ratio}")
+    
+    # Step 7: 마스크 저장
+    logger.info("\n[Step 7] Saving masks and metadata...")
+    masks_path = scorer.save_masks()
+    logger.info(f"✓ Masks saved to {masks_path}")
+    
+    # 최종 리포트
+    logger.info("\n" + "-" * 60)
+    logger.info("Phase 2 Summary:")
+    logger.info(f"  - Total layers processed: {len(scorer.masks)}")
+    logger.info(f"  - Safety samples processed: {args.safety_samples}")
+    logger.info(f"  - Keep ratio: {args.keep_ratio}")
+    logger.info(f"  - Average loss: {scorer.stats['total_loss'] / len(scorer.dataloader):.4f}")
+    logger.info(f"  - Output directory: {args.exp_dir}")
 
 
 def run_phase3(args, logger):
     """
-    Phase 3: Incremental Learning
-    (아직 구현 안함 - Phase 1, 2 완료 후 진행)
+    Phase 3: Incremental Learning with Masked Gradient Updates
+    
+    Phase 1 basis + Phase 2 masks를 사용하여
+    GSM8K 데이터로 미세조정하되, 안전 중요 방향은 보호
     """
-    logger.info("Phase 3 is not yet implemented.")
-    logger.info("Please complete Phase 1 and 2 first.")
+    from models.phase3_learning import Phase3IncrementalLearner
+    
+    try:
+        # 필수 인자 확인
+        if args.basis_dir is None:
+            logger.error("--basis_dir is required for Phase 3")
+            raise ValueError("--basis_dir is required for Phase 3")
+        
+        if args.masks_dir is None:
+            logger.error("--masks_dir is required for Phase 3")
+            raise ValueError("--masks_dir is required for Phase 3")
+        
+        # Phase 3 실행
+        learner = Phase3IncrementalLearner(
+            args=args,
+            logger=logger,
+            basis_dir=args.basis_dir,
+            masks_dir=args.masks_dir
+        )
+        
+        learner.train()
+        
+        logger.info(f"✓ Phase 3 completed successfully!")
+        
+    except Exception as e:
+        logger.error(f"✗ Error in Phase 3: {str(e)}", exc_info=True)
+        raise
 
 
 if __name__ == '__main__':

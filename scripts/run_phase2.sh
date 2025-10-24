@@ -1,22 +1,26 @@
 #!/bin/bash
 
-# Safety-WaRP-LLM: Phase 1 - Basis Construction
-# 안전 데이터로부터 FFN down_proj 활성화 기반 basis 계산
+# Safety-WaRP-LLM: Phase 2 - Importance Scoring
+# Phase 1에서 저장된 basis를 사용하여 중요한 가중치 방향을 식별
 
-set -e  # 에러 발생시 스크립트 중단
+set -e
 
 echo "=================================================="
-echo "Safety-WaRP-LLM: Phase 1 - Basis Construction"
+echo "Safety-WaRP-LLM: Phase 2 - Importance Scoring"
 echo "=================================================="
 
 # 설정
-PHASE=1
+PHASE=2
 MODEL_NAME="meta-llama/Llama-3.1-8B-Instruct"
-SAFETY_SAMPLES=50  # 테스트용 작은 샘플 수
+SAFETY_SAMPLES=50  # 테스트용
 BATCH_SIZE=4
 DEVICE="cuda:0"
+KEEP_RATIO=0.1
 SEED=42
 DEBUG=false
+
+# Phase 1 basis 디렉토리 (자동 감지 또는 수동 지정)
+PHASE1_DIR="${1:-}"
 
 # 경로
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -24,38 +28,32 @@ PROJECT_ROOT="$SCRIPT_DIR/.."
 OUTPUT_DIR="$PROJECT_ROOT/checkpoints"
 LOG_DIR="$PROJECT_ROOT/logs"
 
-# 선택적 인자 처리
-while [[ $# -gt 0 ]]; do
-    case $1 in
-        --samples)
-            SAFETY_SAMPLES="$2"
-            shift 2
-            ;;
-        --batch-size)
-            BATCH_SIZE="$2"
-            shift 2
-            ;;
-        --device)
-            DEVICE="$2"
-            shift 2
-            ;;
-        --debug)
-            DEBUG=true
-            shift
-            ;;
-        *)
-            echo "Unknown option: $1"
-            exit 1
-            ;;
-    esac
-done
+# Phase 1 기본 디렉토리가 없으면 가장 최근 디렉토리 찾기
+if [ -z "$PHASE1_DIR" ] || [ ! -d "$PHASE1_DIR" ]; then
+    echo "[*] Finding most recent Phase 1 basis directory..."
+    PHASE1_DIR=$(ls -td "$OUTPUT_DIR"/phase1_* 2>/dev/null | head -1)
+    if [ -z "$PHASE1_DIR" ]; then
+        echo "ERROR: No Phase 1 basis directory found!"
+        echo "Please specify basis directory: bash scripts/run_phase2.sh /path/to/basis"
+        exit 1
+    fi
+fi
+
+# Phase 1 basis 경로 확인
+BASIS_PATH="$PHASE1_DIR/checkpoints/basis"
+if [ ! -d "$BASIS_PATH" ]; then
+    echo "ERROR: Basis directory not found: $BASIS_PATH"
+    exit 1
+fi
 
 echo ""
 echo "Configuration:"
 echo "  Phase: $PHASE"
 echo "  Model: $MODEL_NAME"
+echo "  Basis Directory: $BASIS_PATH"
 echo "  Safety Samples: $SAFETY_SAMPLES"
 echo "  Batch Size: $BATCH_SIZE"
+echo "  Keep Ratio: $KEEP_RATIO"
 echo "  Device: $DEVICE"
 echo "  Seed: $SEED"
 echo "  Debug: $DEBUG"
@@ -67,17 +65,20 @@ python --version
 python -c "import torch; print(f'PyTorch version: {torch.__version__}'); print(f'CUDA available: {torch.cuda.is_available()}')"
 
 echo ""
-echo "[*] Running Phase 1..."
+echo "[*] Running Phase 2..."
 echo "=================================================="
 
-# Phase 1 실행
-python "$PROJECT_ROOT/train.py" \
+# Phase 2 실행
+cd "$PROJECT_ROOT"
+python train.py \
     --phase "$PHASE" \
     --model_name "$MODEL_NAME" \
+    --basis_dir "$BASIS_PATH" \
     --safety_samples "$SAFETY_SAMPLES" \
     --batch_size "$BATCH_SIZE" \
     --target_layers "all" \
     --layer_type "ffn_down" \
+    --keep_ratio "$KEEP_RATIO" \
     --device "$DEVICE" \
     --dtype "bfloat16" \
     --output_dir "$OUTPUT_DIR" \
@@ -87,7 +88,7 @@ python "$PROJECT_ROOT/train.py" \
 
 echo ""
 echo "=================================================="
-echo "✓ Phase 1 completed!"
+echo "✓ Phase 2 completed!"
 echo "=================================================="
 echo ""
 echo "Results saved to:"

@@ -57,6 +57,59 @@ class Phase1BasiBuilder:
             'layers_processed': 0,
         }
     
+    def _parse_target_layers(self, num_layers):
+        """
+        타겟 레이어 범위를 파싱하는 헬퍼 함수
+        
+        지원 형식:
+        - 'all': 모든 레이어 (0-31)
+        - 'early': 초반 레이어 (0-10)
+        - 'middle': 중간 레이어 (11-21)
+        - 'late': 후반 레이어 (22-31)
+        - 'last': 마지막 레이어 (31)
+        - '31': 특정 레이어 (31번)
+        - '0-5': 범위 (0-5)
+        - '30-31': 범위 (30-31)
+        
+        Returns:
+            list: 레이어 인덱스 리스트
+        """
+        target = self.args.target_layers.strip()
+        
+        # 사전정의 범위
+        if target == 'all':
+            return list(range(num_layers))
+        elif target == 'early':
+            return list(range(0, min(11, num_layers)))
+        elif target == 'middle':
+            return list(range(11, min(22, num_layers)))
+        elif target == 'late':
+            return list(range(22, num_layers))
+        elif target == 'last':
+            return [num_layers - 1]
+        
+        # 범위 파싱: "0-5" 또는 "30-31" 형식
+        if '-' in target:
+            try:
+                start, end = target.split('-')
+                start, end = int(start.strip()), int(end.strip())
+                return list(range(start, min(end + 1, num_layers)))
+            except ValueError:
+                self.logger.error(f"Invalid range format: {target}. Use format like '0-5' or '30-31'")
+                raise
+        
+        # 단일 레이어: "31" 형식
+        try:
+            layer_idx = int(target)
+            if 0 <= layer_idx < num_layers:
+                return [layer_idx]
+            else:
+                self.logger.error(f"Layer index {layer_idx} out of range [0, {num_layers-1}]")
+                raise ValueError(f"Invalid layer index: {layer_idx}")
+        except ValueError:
+            self.logger.error(f"Invalid target_layers format: {target}")
+            raise
+    
     def load_model(self):
         """
         LLaMA 모델 로드
@@ -180,14 +233,7 @@ class Phase1BasiBuilder:
         try:
             # 타겟 레이어 범위 결정
             num_layers = len(self.model.model.layers)
-            if self.args.target_layers == 'all':
-                layer_indices = list(range(num_layers))
-            elif self.args.target_layers == 'early':
-                layer_indices = list(range(0, min(11, num_layers)))
-            elif self.args.target_layers == 'middle':
-                layer_indices = list(range(11, min(22, num_layers)))
-            elif self.args.target_layers == 'late':
-                layer_indices = list(range(22, num_layers))
+            layer_indices = self._parse_target_layers(num_layers)
             
             self.logger.info(f"Registering hooks for layer type: {self.args.layer_type}")
             self.logger.info(f"Target layer indices: {layer_indices}")
@@ -273,8 +319,10 @@ class Phase1BasiBuilder:
             self.logger.info(f"  - Layers with activations: {len(self.activations)}")
             for layer_idx in sorted(self.activations.keys())[:3]:  # 처음 3개만 출력
                 act_list = self.activations[layer_idx]
-                total_act = torch.cat(act_list, dim=0)
-                self.logger.info(f"    - Layer {layer_idx}: {len(act_list)} batches, shape={total_act.shape}, dtype={total_act.dtype}")
+                # 각 배치를 (batch*seq, hidden)으로 평탄화 후 합침
+                flattened_acts = [act.reshape(-1, act.shape[-1]) for act in act_list]
+                total_act = torch.cat(flattened_acts, dim=0)
+                self.logger.info(f"    - Layer {layer_idx}: {len(act_list)} batches, flattened_shape={total_act.shape}, dtype={total_act.dtype}")
             
             if len(self.activations) > 3:
                 self.logger.info(f"    - ... and {len(self.activations) - 3} more layers")
@@ -299,19 +347,20 @@ class Phase1BasiBuilder:
         try:
             self.logger.info("Computing SVD decomposition...")
             
-            for layer_idx in sorted(self.activations.keys()):
+            # tqdm 진행바 추가
+            layer_indices = sorted(self.activations.keys())
+            pbar = tqdm(layer_indices, desc="SVD Decomposition", disable=False)
+            
+            for layer_idx in pbar:
+                pbar.set_description(f"SVD Decomposition [Layer {layer_idx}/{len(layer_indices)-1}]")
+                
                 # 활성화를 (num_tokens, hidden_dim)으로 평탄화
                 act_list = self.activations[layer_idx]
-                activations_tensor = torch.cat(act_list, dim=0)  # (total_tokens, hidden_dim)
                 
-                # 평탄화: (total_tokens, hidden_dim) -> (total_tokens, hidden_dim)
-                batch_size, seq_len, hidden_dim = activations_tensor.shape if activations_tensor.dim() == 3 else (activations_tensor.shape[0], 1, activations_tensor.shape[1])
-                
-                if activations_tensor.dim() == 3:
-                    # (batch, seq, hidden) -> (batch*seq, hidden)
-                    activations_flat = activations_tensor.reshape(-1, activations_tensor.shape[-1])
-                else:
-                    activations_flat = activations_tensor
+                # 각 배치를 (batch*seq, hidden)으로 평탄화한 후 합침
+                # 이유: 배치마다 시퀀스 길이가 다를 수 있음 (padding)
+                flattened_acts = [act.reshape(-1, act.shape[-1]) for act in act_list]
+                activations_flat = torch.cat(flattened_acts, dim=0)  # (total_tokens, hidden_dim)
                 
                 self.logger.info(f"Layer {layer_idx}:")
                 self.logger.info(f"  - Activation shape: {activations_flat.shape}")
@@ -319,8 +368,11 @@ class Phase1BasiBuilder:
                 self.logger.info(f"  - Activation device: {activations_flat.device}")
                 
                 # 공분산 행렬 계산: Φ Φ^T
+                # bfloat16에서 SVD가 지원되지 않으므로 float32로 변환
+                activations_float32 = activations_flat.float()
+                
                 # 정규화 (mean centering)
-                activations_centered = activations_flat - activations_flat.mean(dim=0, keepdim=True)
+                activations_centered = activations_float32 - activations_float32.mean(dim=0, keepdim=True)
                 
                 # 공분산: (hidden_dim, hidden_dim)
                 cov_matrix = (activations_centered.T @ activations_centered) / (activations_centered.shape[0] - 1)
@@ -328,8 +380,9 @@ class Phase1BasiBuilder:
                 
                 self.logger.debug(f"  - Covariance shape: {cov_matrix.shape}")
                 self.logger.debug(f"  - Covariance trace: {cov_matrix.trace():.4f}")
+                self.logger.debug(f"  - Covariance dtype: {cov_matrix.dtype}")
                 
-                # SVD 분해: U, S, V^T
+                # SVD 분해: U, S, V^T (float32에서 실행)
                 U, S, Vh = torch.linalg.svd(cov_matrix, full_matrices=False)
                 
                 self.svd_results[layer_idx] = {
@@ -350,7 +403,7 @@ class Phase1BasiBuilder:
                 self.logger.info(f"  - Top-10 variance ratio: {var_ratio:.2f}%")
                 
                 # 메모리 정리
-                del activations_tensor, activations_centered, cov_matrix
+                del activations_flat, activations_float32, activations_centered, cov_matrix
                 torch.cuda.empty_cache() if torch.cuda.is_available() else None
             
             self.logger.info(f"✓ SVD computation completed")

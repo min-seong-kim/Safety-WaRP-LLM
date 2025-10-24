@@ -99,7 +99,9 @@ python train.py \
 **Parameters**:
 - `--safety_samples`: Number of samples from do-not-answer dataset (default: 100)
 - `--batch_size`: Batch size for activation collection (default: 4)
-- `--target_layers`: Layer range to process (all/early/middle/late)
+- `--target_layers`: Layer range to process
+  - Predefined: `all` (0-31), `early` (0-10), `middle` (11-21), `late` (22-31), `last` (31)
+  - Custom: single layer `31`, range `30-31`, `0-5`
 - `--layer_type`: Layer component (ffn_down/ffn_up/attn_q/attn_k/attn_v)
 - `--dtype`: Model precision (float32/float16/bfloat16)
 
@@ -125,7 +127,122 @@ checkpoints/phase1_YYYYMMDD_HHMMSS/
 
 ```bash
 # Coming soon
-python train.py --phase 2 ...
+python train.py \
+    --phase 2 \
+    --basis_dir ./checkpoints/phase1_TIMESTAMP/checkpoints/basis \
+    --safety_samples 100 \
+    --batch_size 4 \
+    --keep_ratio 0.1 \
+    --device cuda:0 \
+    --dtype bfloat16
+```
+
+**Parameters**:
+- `--basis_dir`: Path to Phase 1 basis checkpoint (required)
+- `--safety_samples`: Number of samples for importance scoring (default: 50)
+- `--batch_size`: Batch size for processing (default: 4)
+- `--keep_ratio`: Fraction of directions to keep as "important" (default: 0.1 = top 10%)
+- `--target_layers`: Which layers to score (default: all)
+
+**Output**: Importance masks saved to `checkpoints/phase2_TIMESTAMP/checkpoints/masks/`
+
+**Example - Quick Test**:
+```bash
+python train.py --phase 2 \
+    --basis_dir ./checkpoints/phase1_latest/checkpoints/basis \
+    --safety_samples 10 \
+    --target_layers last
+```
+
+**Example - Full Run**:
+```bash
+python train.py --phase 2 \
+    --basis_dir ./checkpoints/phase1_latest/checkpoints/basis \
+    --safety_samples 100 \
+    --batch_size 2 \
+    --keep_ratio 0.15
+```
+
+**Example - Aggressive Pruning (top 5%)**:
+```bash
+python train.py --phase 2 \
+    --basis_dir ./checkpoints/phase1_latest/checkpoints/basis \
+    --safety_samples 50 \
+    --keep_ratio 0.05
+```
+
+Or use the shell script:
+```bash
+bash scripts/run_phase2.sh  # Auto-detects latest Phase 1 basis
+```
+
+See `scripts/phase2_examples.sh` for more examples.
+
+### Layer Selection Examples
+
+You can control which layers to process using `--target_layers`:
+
+```bash
+# Predefined ranges
+python train.py --phase 1 --target_layers all       # All layers (0-31)
+python train.py --phase 1 --target_layers early     # Early layers (0-10)
+python train.py --phase 1 --target_layers middle    # Middle layers (11-21)
+python train.py --phase 1 --target_layers late      # Late layers (22-31)
+python train.py --phase 1 --target_layers last      # Last layer (31)
+
+# Custom ranges
+python train.py --phase 1 --target_layers 31        # Single layer (layer 31 only)
+python train.py --phase 1 --target_layers 30-31     # Range (layers 30-31)
+python train.py --phase 1 --target_layers 0-5       # Range (layers 0-5)
+```
+
+### Phase 3: Incremental Learning
+
+**Goal**: Fine-tune on GSM8K with masked gradient updates to protect safety
+
+```bash
+# Using shell script (recommended)
+bash scripts/run_phase3.sh  # Auto-detects Phase 1/2 results
+
+# Or direct Python command
+python train.py \
+    --phase 3 \
+    --basis_dir ./checkpoints/phase1_TIMESTAMP/checkpoints/basis \
+    --masks_dir ./checkpoints/phase2_TIMESTAMP/checkpoints/masks \
+    --utility_samples 1000 \
+    --epochs 3 \
+    --batch_size 2 \
+    --learning_rate 5e-5 \
+    --device cuda:0 \
+    --dtype bfloat16
+```
+
+**Parameters**:
+- `--basis_dir`: Path to Phase 1 basis checkpoint (required)
+- `--masks_dir`: Path to Phase 2 masks checkpoint (required)
+- `--utility_samples`: Number of GSM8K train samples (default: 1000)
+- `--epochs`: Training epochs (default: 3)
+- `--batch_size`: Batch size for training (default: 2)
+- `--learning_rate`: Learning rate (default: 5e-5)
+
+**Output**: Fine-tuned model saved to `checkpoints/phase3_TIMESTAMP/checkpoints/`
+
+**Example - Quick Test**:
+```bash
+python train.py --phase 3 \
+    --basis_dir ./checkpoints/phase1_latest/checkpoints/basis \
+    --masks_dir ./checkpoints/phase2_latest/checkpoints/masks \
+    --utility_samples 50 \
+    --epochs 1
+```
+
+See `scripts/phase3_examples.sh` for more examples.
+
+## 📊 Configuration
+
+### Recommended Settings
+
+````
 ```
 
 ### Phase 3: Incremental Learning
@@ -157,6 +274,26 @@ python train.py --phase 1 \
     --dtype bfloat16
 ```
 
+#### Phase 2 - Small GPU (24GB - RTX 4090)
+```bash
+python train.py --phase 2 \
+    --basis_dir ./checkpoints/phase1_TIMESTAMP/checkpoints/basis \
+    --safety_samples 30 \
+    --batch_size 2 \
+    --keep_ratio 0.1 \
+    --dtype float16
+```
+
+#### Phase 2 - Large GPU (40GB+ - A100)
+```bash
+python train.py --phase 2 \
+    --basis_dir ./checkpoints/phase1_TIMESTAMP/checkpoints/basis \
+    --safety_samples 100 \
+    --batch_size 4 \
+    --keep_ratio 0.1 \
+    --dtype bfloat16
+```
+
 ### Environment Variables
 
 ```bash
@@ -185,14 +322,18 @@ Safety-WaRP-LLM/
 │
 ├── models/
 │   ├── __init__.py
-│   ├── phase1_basis.py       # Phase 1: Basis construction
-│   ├── phase2_importance.py  # Phase 2: Importance scoring (TODO)
-│   └── phase3_learning.py    # Phase 3: Incremental learning (TODO)
+│   ├── phase1_basis.py       # Phase 1: Basis construction ✓
+│   ├── phase2_importance.py  # Phase 2: Importance scoring ✓
+│   ├── phase3_learning.py    # Phase 3: Incremental learning ✓
+│   └── safety_evaluator.py   # Safety evaluation metrics ✓
 │
 ├── scripts/
-│   ├── run_phase1.sh         # Shell script for Phase 1
-│   ├── run_phase2.sh         # Phase 2 script (TODO)
-│   └── run_phase3.sh         # Phase 3 script (TODO)
+│   ├── run_phase1.sh         # Shell script for Phase 1 ✓
+│   ├── run_phase2.sh         # Phase 2 script ✓
+│   ├── phase2_examples.sh    # Phase 2 example commands ✓
+│   ├── run_phase3.sh         # Phase 3 script ✓
+│   ├── phase3_examples.sh    # Phase 3 example commands ✓
+│   └── run_evaluation.sh     # Safety evaluation script ✓
 │
 ├── checkpoints/              # Saved models & basis
 ├── logs/                     # Training logs
@@ -237,6 +378,43 @@ python -c "from datasets import load_dataset; \
 ```bash
 # Reinstall dependencies
 pip install -r requirements.txt --force-reinstall --no-cache-dir
+```
+
+**5. Phase 2: Basis Directory Not Found**
+```bash
+# Verify Phase 1 basis exists
+ls -la ./checkpoints/phase1_*/checkpoints/basis/
+
+# If missing, run Phase 1 first
+python train.py --phase 1 --safety_samples 50
+
+# Then update basis_dir for Phase 2
+python train.py --phase 2 --basis_dir ./checkpoints/phase1_TIMESTAMP/checkpoints/basis
+```
+
+**6. Phase 2: Gradient Computation Issues**
+```bash
+# If gradients are NaN or Inf:
+# 1. Reduce keep_ratio to avoid extreme importance differences
+python train.py --phase 2 --keep_ratio 0.2  # More conservative
+
+# 2. Check for numerical instability with float32
+python train.py --phase 2 --dtype float32
+
+# 3. Debug with smaller dataset and debug mode
+python train.py --phase 2 --safety_samples 5 --batch_size 1 --debug
+```
+
+**7. Phase 2: Insufficient Memory During Importance Scoring**
+```bash
+# Reduce batch size
+python train.py --phase 2 --batch_size 1
+
+# Process fewer samples
+python train.py --phase 2 --safety_samples 10
+
+# Use gradient checkpointing (if available)
+python train.py --phase 2 --gradient_checkpointing
 ```
 
 ## 📚 Datasets Used
