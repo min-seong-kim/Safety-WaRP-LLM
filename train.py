@@ -95,6 +95,16 @@ def parse_args():
     parser.add_argument('--debug', action='store_true',
                         help='디버그 모드')
     
+    # HuggingFace Hub 설정 (Phase 3)
+    parser.add_argument('--push_to_hub', action='store_true',
+                        help='Phase 3 완료 후 HuggingFace Hub에 업로드')
+    parser.add_argument('--hub_model_id', type=str, default='kmseong/WaRP-Safety-Llama3_8B_Instruct',
+                        help='HuggingFace Hub 모델 ID (format: username/model_name)')
+    parser.add_argument('--hf_token', type=str, default=None,
+                        help='HuggingFace API 토큰 (None이면 환경변수 HUGGINGFACE_TOKEN 사용)')
+    parser.add_argument('--hub_private', action='store_true',
+                        help='HuggingFace Hub에 비공개로 업로드')
+    
     return parser.parse_args()
 
 
@@ -139,6 +149,12 @@ def log_config(logger, args):
         logger.info(f"Epochs: {args.epochs}")
         logger.info(f"Learning Rate: {args.learning_rate}")
         logger.info(f"Weight Decay: {args.weight_decay}")
+        
+        # HuggingFace Hub 설정
+        if args.push_to_hub:
+            logger.info(f"Push to Hub: {args.push_to_hub}")
+            logger.info(f"Hub Model ID: {args.hub_model_id}")
+            logger.info(f"Hub Private: {args.hub_private}")
     
     logger.info(f"Experiment Dir: {args.exp_dir}")
     logger.info(f"Seed: {args.seed}")
@@ -339,6 +355,7 @@ def run_phase3(args, logger):
     GSM8K 데이터로 미세조정하되, 안전 중요 방향은 보호
     """
     from models.phase3_learning import Phase3IncrementalLearner
+    from utils import upload_model_to_huggingface
     
     try:
         # 필수 인자 확인
@@ -361,6 +378,43 @@ def run_phase3(args, logger):
         learner.train()
         
         logger.info(f"✓ Phase 3 completed successfully!")
+        
+        # HuggingFace 업로드 (선택사항)
+        if args.push_to_hub:
+            logger.info("\n" + "="*60)
+            logger.info("Uploading model to HuggingFace Hub...")
+            logger.info("="*60)
+            
+            # 미세조정 모델 경로
+            model_path = os.path.join(args.exp_dir, 'checkpoints', 'checkpoints', 'phase3_best.pt')
+            
+            # 실제로는 모델이 .pt가 아니라 디렉토리 형식이므로 저장된 경로 확인
+            # Phase3IncrementalLearner의 save_checkpoint에서 모델을 어떻게 저장하는지 확인 필요
+            
+            # 모델 저장 디렉토리 (transformers 형식)
+            model_save_dir = os.path.join(args.exp_dir, 'checkpoints', 'final_model')
+            os.makedirs(model_save_dir, exist_ok=True)
+            
+            # 모델 저장 (transformers 형식)
+            logger.info(f"Saving model to {model_save_dir}...")
+            learner.model.save_pretrained(model_save_dir)
+            learner.tokenizer.save_pretrained(model_save_dir)
+            logger.info("✓ Model saved")
+            
+            # HuggingFace에 업로드
+            upload_success = upload_model_to_huggingface(
+                model_path=model_save_dir,
+                repo_id=args.hub_model_id,
+                hf_token=args.hf_token,
+                commit_message=f"WaRP Safety-Aligned Model - Phase 3 Complete",
+                private=args.hub_private,
+                logger=logger
+            )
+            
+            if upload_success:
+                logger.info(f"\n✓ Model successfully uploaded to https://huggingface.co/{args.hub_model_id}")
+            else:
+                logger.warning("Failed to upload model to HuggingFace Hub")
         
     except Exception as e:
         logger.error(f"✗ Error in Phase 3: {str(e)}", exc_info=True)
