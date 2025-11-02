@@ -292,13 +292,33 @@ class Phase3IncrementalLearner:
     
     def register_mask_hooks(self):
         """
-        마스킹 hook 등록
-        Backward pass에서 중요 방향의 gradient를 0으로 설정
+        Forward와 Backward hook 등록
+        - Forward: weight를 basis_coeff @ U.T로 복원
+        - Backward: 중요 방향의 gradient를 0으로 설정
         
         Mask shape: (d_out,) e.g., (4096,)
         Weight gradient shape: (d_out, d_in) e.g., (14336, 14336)
         → mask를 (d_out, 1)로 reshape하여 broadcast
         """
+        def make_forward_hook(layer_idx, U):
+            def forward_hook(module, input, output):
+                """
+                Forward pass에서 weight를 basis_coeff @ U.T로 복원
+                basis_coeff = W_original @ U이므로
+                W_reconstructed = basis_coeff @ U.T
+                """
+                if hasattr(module, 'basis_coeff'):
+                    basis_coeff = module.basis_coeff  # (d_out, d_in)
+                    # U.T를 이용해 weight 복원
+                    weight_restored = basis_coeff @ U.T  # (d_out, d_in)
+                    
+                    # 복원된 weight로 output 재계산
+                    x = input[0]
+                    output_restored = torch.nn.functional.linear(x, weight_restored, module.bias)
+                    return output_restored
+                return output
+            return forward_hook
+        
         def make_backward_hook(layer_idx, mask):
             def backward_hook(grad):
                 """
@@ -320,14 +340,19 @@ class Phase3IncrementalLearner:
             layer = self.model.model.layers[layer_idx]
             target_module = layer.mlp.down_proj
             mask = self.masks[layer_idx]
+            U = self.basis_data[layer_idx]['U']  # Phase 1에서 로드된 U
             
-            # Backward hook 등록
-            hook = target_module.weight.register_hook(make_backward_hook(layer_idx, mask))
-            self.hook_handles.append(hook)
+            # Forward hook 등록: weight 복원 (basis_coeff @ U.T)
+            forward_hook = target_module.register_forward_hook(make_forward_hook(layer_idx, U))
+            self.hook_handles.append(forward_hook)
             
-            self.logger.debug(f"Mask hook registered for layer {layer_idx}")
+            # Backward hook 등록: gradient masking
+            backward_hook = target_module.weight.register_hook(make_backward_hook(layer_idx, mask))
+            self.hook_handles.append(backward_hook)
+            
+            self.logger.debug(f"Forward and backward hooks registered for layer {layer_idx}")
         
-        self.logger.info(f"✓ {len(self.hook_handles)} mask hooks registered")
+        self.logger.info(f"✓ {len(self.hook_handles)} hooks registered (forward + backward)")
     
     def unregister_hooks(self):
         """Hook 제거"""

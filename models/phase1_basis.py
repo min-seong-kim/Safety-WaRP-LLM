@@ -44,6 +44,7 @@ class Phase1BasiBuilder:
         
         # 활성화 수집을 위한 저장소
         self.activations = {}  # layer_idx -> (batch_size, seq_len, hidden_dim) 리스트
+        self.attention_masks = []  # attention mask 저장 (padding 마스킹용)
         self.covariance_matrices = {}  # layer_idx -> 공분산 행렬
         self.svd_results = {}  # layer_idx -> {'U': U, 'S': S, 'Vh': Vh}
         
@@ -222,7 +223,7 @@ class Phase1BasiBuilder:
             def hook(module, input, output):
                 # input[0]: (batch_size, seq_len, hidden_dim)
                 activation = input[0].detach()
-                
+                # 이게 얕은 복사로 이후에 Activation 값들을 저장 가능 
                 if layer_idx not in self.activations:
                     self.activations[layer_idx] = []
                 
@@ -266,16 +267,18 @@ class Phase1BasiBuilder:
     
     def collect_activations(self):
         """
-        안전 데이터에 대해 모델을 실행하고 활성화 수집
+        안전 데이터에 대해 모델을 실행하고 활성화 수집 (패딩 마스크 적용)
         
         Log:
         - 배치별 처리 상황
         - 각 레이어의 활성화 수집 통계
         - 활성화 형태 및 크기
+        - 유효 토큰 수 (패딩 제외)
         """
         try:
             self.logger.info("Collecting activations from safety data...")
             
+            # Activation 값을 수집하면서 attention mask도 저장
             with torch.no_grad():
                 progress_bar = tqdm(
                     self.dataloader,
@@ -296,6 +299,10 @@ class Phase1BasiBuilder:
                         max_length=512
                     )
                     
+                    # ✅ attention_mask 저장 (패딩 마스킹용)
+                    attention_mask = inputs['attention_mask']  # (batch, seq_len)
+                    self.attention_masks.append(attention_mask)
+                    
                     # GPU로 이동
                     inputs = {k: v.to(self.model.device) for k, v in inputs.items()}
                     
@@ -305,24 +312,22 @@ class Phase1BasiBuilder:
                     # 통계 업데이트
                     batch_size = len(prompts)
                     seq_len = inputs['input_ids'].shape[1]
+                    valid_tokens = attention_mask.sum().item()  # 유효 토큰 수
                     self.stats['total_samples'] += batch_size
-                    self.stats['total_tokens'] += batch_size * seq_len
+                    self.stats['total_tokens'] += valid_tokens
                     
                     if self.args.debug and batch_idx < 2:
-                        self.logger.debug(f"Batch {batch_idx}: processed {batch_size} samples, {seq_len} tokens")
+                        self.logger.debug(f"Batch {batch_idx}: {batch_size} samples, seq_len={seq_len}, valid_tokens={valid_tokens}")
             
             self.logger.info(f"✓ Activation collection completed")
             self.logger.info(f"  - Total samples: {self.stats['total_samples']}")
-            self.logger.info(f"  - Total tokens: {self.stats['total_tokens']}")
+            self.logger.info(f"  - Total valid tokens (after masking): {self.stats['total_tokens']}")
             
             # 각 레이어의 활성화 통계
             self.logger.info(f"  - Layers with activations: {len(self.activations)}")
             for layer_idx in sorted(self.activations.keys())[:3]:  # 처음 3개만 출력
                 act_list = self.activations[layer_idx]
-                # 각 배치를 (batch*seq, hidden)으로 평탄화 후 합침
-                flattened_acts = [act.reshape(-1, act.shape[-1]) for act in act_list]
-                total_act = torch.cat(flattened_acts, dim=0)
-                self.logger.info(f"    - Layer {layer_idx}: {len(act_list)} batches, flattened_shape={total_act.shape}, dtype={total_act.dtype}")
+                self.logger.info(f"    - Layer {layer_idx}: {len(act_list)} batches collected (masking will be applied in SVD step)")
             
             if len(self.activations) > 3:
                 self.logger.info(f"    - ... and {len(self.activations) - 3} more layers")
@@ -333,19 +338,23 @@ class Phase1BasiBuilder:
     
     def compute_svd(self):
         """
-        수집된 활성화로부터 공분산 행렬을 계산하고 SVD 분해
+        수집된 활성화로부터 공분산 행렬을 계산하고 SVD 분해 (패딩 마스킹 적용)
+        
+        핵심: attention_mask를 사용하여 패딩된 토큰의 활성화를 제거하고 
+        유효한 토큰의 활성화만으로 공분산과 SVD를 계산
         
         Log:
         - SVD 계산 진행상황
         - 각 레이어의 특이값(singular values)
-        - 재구성 오류
+        - 유효 토큰 수 (패딩 제외)
         
         수식:
-        - Φ Φ^T = U Σ U^T (공분산의 SVD)
-        - U는 basis 벡터
+        - Φ (filtered by attention_mask) = valid activations
+        - Cov = Φ^T Φ / (N-1)
+        - Cov = U Σ U^T (SVD 분해)
         """
         try:
-            self.logger.info("Computing SVD decomposition...")
+            self.logger.info("Computing SVD decomposition (with attention mask filtering)...")
             
             # tqdm 진행바 추가
             layer_indices = sorted(self.activations.keys())
@@ -357,17 +366,33 @@ class Phase1BasiBuilder:
                 # 활성화를 (num_tokens, hidden_dim)으로 평탄화
                 act_list = self.activations[layer_idx]
                 
-                # 각 배치를 (batch*seq, hidden)으로 평탄화한 후 합침
-                # 이유: 배치마다 시퀀스 길이가 다를 수 있음 (padding)
-                flattened_acts = [act.reshape(-1, act.shape[-1]) for act in act_list]
-                activations_flat = torch.cat(flattened_acts, dim=0)  # (total_tokens, hidden_dim)
+                # ✅ 핵심: attention mask를 사용하여 유효한 활성화만 추출
+                valid_activations = []
+                
+                for batch_idx, act in enumerate(act_list):
+                    # act: (batch, seq_len, hidden_dim)
+                    # mask: (batch, seq_len)
+                    batch_size, seq_len, hidden_dim = act.shape
+                    mask = self.attention_masks[batch_idx].to(act.device)  # attention mask 로드
+                    
+                    # act를 (batch*seq_len, hidden_dim)로 reshape하고 mask 적용
+                    act_reshaped = act.reshape(batch_size * seq_len, hidden_dim)  # (batch*seq_len, hidden_dim)
+                    mask_flat = mask.reshape(-1)  # (batch*seq_len,)
+                    
+                    # 유효한 위치만 선택 (attention_mask == 1인 부분)
+                    valid_act = act_reshaped[mask_flat == 1]  # (valid_tokens, hidden_dim)
+                    
+                    valid_activations.append(valid_act)
+                
+                # 유효한 활성화들만 결합
+                activations_flat = torch.cat(valid_activations, dim=0)  # (total_valid_tokens, hidden_dim)
                 
                 self.logger.info(f"Layer {layer_idx}:")
-                self.logger.info(f"  - Activation shape: {activations_flat.shape}")
+                self.logger.info(f"  - Activation shape (after masking): {activations_flat.shape}")
                 self.logger.info(f"  - Activation dtype: {activations_flat.dtype}")
                 self.logger.info(f"  - Activation device: {activations_flat.device}")
                 
-                # 공분산 행렬 계산: Φ Φ^T
+                # 공분산 행렬 계산
                 # bfloat16에서 SVD가 지원되지 않으므로 float32로 변환
                 activations_float32 = activations_flat.float()
                 
@@ -375,12 +400,13 @@ class Phase1BasiBuilder:
                 activations_centered = activations_float32 - activations_float32.mean(dim=0, keepdim=True)
                 
                 # 공분산: (hidden_dim, hidden_dim)
-                cov_matrix = (activations_centered.T @ activations_centered) / (activations_centered.shape[0] - 1)
+                # unbiased estimator: 분모를 (N-1)로 설정
+                cov_matrix = (activations_centered.T @ activations_centered) / max(activations_centered.shape[0] - 1, 1)
                 self.covariance_matrices[layer_idx] = cov_matrix
                 
-                self.logger.debug(f"  - Covariance shape: {cov_matrix.shape}")
-                self.logger.debug(f"  - Covariance trace: {cov_matrix.trace():.4f}")
-                self.logger.debug(f"  - Covariance dtype: {cov_matrix.dtype}")
+                self.logger.info(f"  - Covariance shape: {cov_matrix.shape}")
+                self.logger.info(f"  - Covariance trace: {cov_matrix.trace():.4f}")
+                self.logger.info(f"  - Covariance dtype: {cov_matrix.dtype}")
                 
                 # SVD 분해: U, S, V^T (float32에서 실행)
                 U, S, Vh = torch.linalg.svd(cov_matrix, full_matrices=False)
@@ -458,6 +484,7 @@ class Phase1BasiBuilder:
                 'total_tokens': self.stats['total_tokens'],
                 'total_samples': self.stats['total_samples'],
                 'dtype': self.args.dtype,
+                'notes': 'Activations filtered using attention_mask (padding tokens excluded)',
             }
             
             metadata_path = os.path.join(basis_dir, 'metadata.json')

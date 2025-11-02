@@ -202,7 +202,7 @@ class Phase2ImportanceScorer:
         모델 가중치를 basis 공간으로 재매개변수화
         
         변환:
-        W_original -> basis_coeff = W_original @ U^T
+        W_original -> basis_coeff = W_original @ U
         
         그런 후 gradient는 basis_coeff에 대해 계산되고,
         importance = ||∇basis_coeff||로 계산됨
@@ -232,8 +232,8 @@ class Phase2ImportanceScorer:
                 model_dtype = W_original.dtype
                 U = U.to(dtype=model_dtype, device=W_original.device)
                 
-                # 재매개변수화: basis_coeff = W @ U^T
-                basis_coeff = W_original @ U.T  # (d_out, d_in)
+                # 재매개변수화: basis_coeff = W @ U
+                basis_coeff = W_original @ U  # (d_out, d_in)
                 
                 # basis_coeff를 Parameter로 등록하여 gradient tracking 활성화
                 # 하지만 원본 weight는 그대로 둠
@@ -255,20 +255,152 @@ class Phase2ImportanceScorer:
     
     def compute_importance(self):
         """
-        안전 데이터에 대해 importance 점수 계산
-        
-        절차:
-        1. 배치 반복
-        2. Teacher forcing: 모델 입력은 harmful_prompt, 목표는 safety_response
-        3. Loss 계산: token-level cross-entropy
-        4. 역전파
-        5. 각 basis_coeff의 gradient 수집
-        6. Importance = ||gradient||
-        
-        Log:
-        - 배치별 손실
-        - 각 레이어의 importance 통계
+            안전 데이터에 대해 importance 점수 계산 (attention mask 적용)
+            
+            절차:
+            1. 배치 반복
+            2. Teacher forcing: 모델 입력은 harmful_prompt, 목표는 safety_response
+            3. Loss 계산: token-level cross-entropy (유효 토큰만)
+            4. 역전파
+            5. 각 basis_coeff의 gradient 수집
+            6. Importance = ||gradient||
+            
+            ✅ 개선: attention_mask를 사용하여 패딩 토큰을 제외하고 계산
+            
+            Log:
+            - 배치별 손실
+            - 각 레이어의 importance 통계
         """
+        try:
+            self.logger.info("Computing importance scores...")
+            
+            # 각 레이어의 importance 초기화
+            target_indices = self._parse_target_layers(len(self.model.model.layers))
+            importances = {idx: [] for idx in target_indices}
+            
+            progress_bar = tqdm(
+                self.dataloader,
+                desc="Computing importance",
+                total=len(self.dataloader)
+            )
+            
+            total_loss = 0.0
+            total_batches = 0
+            
+            for batch_idx, batch in enumerate(progress_bar):
+                harmful_prompts = batch['harmful_prompt']
+                safety_responses = batch['safety_response']
+                
+                # 결합된 입력-목표 시퀀스 생성 (Teacher Forcing)
+                # Format: "{harmful_prompt}\n{safety_response}"
+                combined_texts = [
+                    f"{q}\n{a}" 
+                    for q, a in zip(harmful_prompts, safety_responses)
+                ]
+                
+                # 결합된 텍스트 토큰화
+                combined = self.tokenizer(
+                    combined_texts,
+                    return_tensors='pt',
+                    padding=True,
+                    truncation=True,
+                    max_length=512
+                )
+                combined_ids = combined['input_ids'].to(self.model.device)
+                combined_attn = combined['attention_mask'].to(self.model.device)
+                
+                # 기울기 계산 활성화
+                self.model.zero_grad()
+                
+                # 모델 실행
+                with torch.enable_grad():
+                    outputs = self.model(
+                        input_ids=combined_ids,
+                        attention_mask=combined_attn
+                    )
+                    logits = outputs.logits  # (batch, seq_len, vocab_size)
+                    
+                    # Teacher forcing: shift targets
+                    # logits[:, :-1, :] -> 마지막 토큰 제외 (다음 토큰 예측)
+                    # combined_ids[:, 1:] -> 첫 토큰 제외 (목표 토큰)
+                    pred_logits = logits[:, :-1, :].contiguous()  # (batch, seq_len-1, vocab_size)
+                    target_ids_shift = combined_ids[:, 1:].contiguous()  # (batch, seq_len-1)
+                    
+                    # ✅ 핵심: attention_mask를 shift하여 패딩된 위치 제외
+                    attention_mask_shift = combined_attn[:, 1:].contiguous()  # (batch, seq_len-1)
+                    
+                    # 유효한 토큰: attention_mask == 1 AND token_id != pad_token
+                    valid_mask = (attention_mask_shift == 1) & (target_ids_shift != self.tokenizer.pad_token_id)
+                    
+                    # 모든 유효한 위치를 평탄화
+                    pred_logits_flat = pred_logits[valid_mask]  # (num_valid, vocab_size)
+                    target_ids_flat = target_ids_shift[valid_mask]  # (num_valid,)
+                    
+                    # Loss 계산 (유효한 토큰만)
+                    if len(target_ids_flat) > 0:
+                        loss = nn.CrossEntropyLoss()(
+                            pred_logits_flat,
+                            target_ids_flat
+                        )
+                        
+                        # 역전파
+                        loss.backward()
+                        
+                        total_loss += loss.item()
+                        total_batches += 1
+                        
+                        # Importance 수집: 각 layer의 weight gradient -> basis space에서 역변환
+                        for layer_idx in target_indices:
+                            if layer_idx not in self.basis_data:
+                                continue
+                            
+                            layer = self.model.model.layers[layer_idx]
+                            target_module = layer.mlp.down_proj
+                            
+                            # Weight gradient 얻기
+                            if target_module.weight.grad is not None:
+                                W_grad = target_module.weight.grad  # (d_out, d_in), dtype: bfloat16
+                                U = self.basis_data[layer_idx]['U']  # dtype: float32
+                                
+                                # U를 W_grad와 같은 dtype으로 변환
+                                U_casted = U.to(W_grad.dtype)
+                                
+                                # Gradient를 basis space로 변환
+                                # ∂L/∂coeff = (∂L/∂W) @ U
+                                coeff_grad = W_grad @ U_casted  # (d_out, d_in)
+                                
+                                # Importance = ||gradient per output neuron|| (L2 norm across input)
+                                importance = torch.norm(coeff_grad, dim=1, p=2)
+                                importances[layer_idx].append(importance.detach().cpu())
+                            else:
+                                self.logger.debug(f"Layer {layer_idx}: No weight gradient computed")
+                    else:
+                        self.logger.warning(f"Batch {batch_idx}: No valid tokens after masking")
+                
+                progress_bar.update(1)
+            
+            # 누적 importance 계산
+            self.importances = {}
+            for layer_idx in target_indices:
+                if len(importances[layer_idx]) > 0:
+                    # 모든 배치의 importance를 평균
+                    layer_importances = torch.stack(importances[layer_idx], dim=0)
+                    # bfloat16을 float32로 변환한 후 numpy로 변환
+                    self.importances[layer_idx] = layer_importances.mean(dim=0).float().cpu().numpy()
+                    
+                    self.logger.info(f"Layer {layer_idx}:")
+                    self.logger.info(f"  - Mean importance: {self.importances[layer_idx].mean():.6f}")
+                    self.logger.info(f"  - Std importance: {self.importances[layer_idx].std():.6f}")
+            
+            avg_loss = total_loss / max(total_batches, 1)
+            self.logger.info(f"✓ Importance computation completed")
+            self.logger.info(f"  - Average loss (valid tokens only): {avg_loss:.4f}")
+            self.logger.info(f"  - Total batches processed: {total_batches}")
+            self.stats['total_loss'] = total_loss
+            
+        except Exception as e:
+            self.logger.error(f"Failed to compute importance: {str(e)}", exc_info=True)
+            raise
         try:
             self.logger.info("Computing importance scores...")
             
@@ -360,8 +492,8 @@ class Phase2ImportanceScorer:
                                 U_casted = U.to(W_grad.dtype)
                                 
                                 # Gradient를 basis space로 변환
-                                # ∂L/∂coeff = (∂L/∂W) @ U^T
-                                coeff_grad = W_grad @ U_casted.T  # (d_out, d_in)
+                                # ∂L/∂coeff = (∂L/∂W) @ U
+                                coeff_grad = W_grad @ U_casted  # (d_out, d_in)
                                 
                                 # Importance = ||gradient per output neuron|| (L2 norm across input)
                                 importance = torch.norm(coeff_grad, dim=1, p=2)
