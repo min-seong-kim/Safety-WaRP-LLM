@@ -306,40 +306,54 @@ def run_phase2(args, logger):
     scorer = Phase2ImportanceScorer(args, logger, args.basis_dir)
     scorer.load_model()
     logger.info(f"✓ Model loaded: {args.model_name}")
-    
+
     # Step 2: Basis 로드
     logger.info("\n[Step 2] Loading basis from Phase 1...")
     scorer.load_basis()
     logger.info(f"✓ Basis loaded: {len(scorer.basis_data)} layers")
-    
+
     # Step 3: 안전 데이터 로드
     logger.info("\n[Step 3] Loading safety data (do-not-answer)...")
     scorer.load_safety_data()
     logger.info(f"✓ Safety data loaded: batch_size={args.batch_size}")
-    
+
     # Step 4: 가중치 재매개변수화
     logger.info("\n[Step 4] Reparameterizing weights to basis space...")
     scorer.reparameterize_weights()
     logger.info(f"✓ Weights reparameterized")
-    
+
     # Step 5: Importance 계산
     logger.info("\n[Step 5] Computing importance scores...")
     scorer.compute_importance()
     logger.info(f"✓ Importance scores computed for {len(scorer.importances)} layers")
-    
+
     # Step 6: 마스크 생성
     logger.info("\n[Step 6] Generating importance masks...")
     scorer.generate_masks(keep_ratio=args.keep_ratio)
     logger.info(f"✓ Masks generated with keep_ratio={args.keep_ratio}")
-    
-    # Step 7: 마스크 저장
-    logger.info("\n[Step 7] Saving masks and metadata...")
+
+    # Step 7: 안전하게 fine-tuning된 모델 저장
+    logger.info("\n[Step 7] Saving fine-tuned model...")
+    finetuned_model_path = scorer.save_finetuned_model()
+    logger.info(f"✓ Fine-tuned model saved to {finetuned_model_path}")
+
+    # Step 8: 학습된 basis coefficients 저장
+    logger.info("\n[Step 8] Saving basis coefficients...")
+    coeffs_path = scorer.save_basis_coefficients()
+    logger.info(f"✓ Basis coefficients saved to {coeffs_path}")
+
+    # Step 9: 마스크 저장
+    logger.info("\n[Step 9] Saving masks and metadata...")
     masks_path = scorer.save_masks()
     logger.info(f"✓ Masks saved to {masks_path}")
     
     # 최종 리포트
     logger.info("\n" + "-" * 60)
-    logger.info("Phase 2 Summary:")
+    logger.info("Phase 2 Summary (Outputs):")
+    logger.info(f"  1. Fine-tuned model: {finetuned_model_path}")
+    logger.info(f"  2. Basis coefficients: {coeffs_path}")
+    logger.info(f"  3. Importance masks: {masks_path}")
+    logger.info("\nPhase 2 Statistics:")
     logger.info(f"  - Total layers processed: {len(scorer.masks)}")
     logger.info(f"  - Safety samples processed: {args.safety_samples}")
     logger.info(f"  - Keep ratio: {args.keep_ratio}")

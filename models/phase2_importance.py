@@ -17,17 +17,29 @@ logger = logging.getLogger(__name__)
 
 class Phase2ImportanceScorer:
     """
-    Phase 2: Importance Scoring
+    Phase 2: Importance Scoring + Fine-tuning
+    
+    목표: 안전 데이터로 모델을 학습하면서 동시에 중요도 점수 계산
     
     절차:
     1. Phase 1에서 계산된 basis 로드
     2. 모델 가중치를 basis 공간으로 재매개변수화
-    3. 안전 데이터로 모델 실행 (teacher forcing)
-    4. 손실 계산: token-level cross-entropy
-    5. 역전파로 gradient 계산
-    6. 계수별 importance 점수 계산 (||gradient||)
-    7. 임계값으로 마스크 생성 (상위 keep_ratio 유지)
-    8. 누적 마스크 생성 (이전 Phase 마스크와 합치기)
+       - W_original (고정) → basis_coeff (학습 가능)
+       - 모든 연산은 basis_coeff를 통해 진행
+    3. 여러 epoch 동안 안전 데이터로 반복:
+       a. 모델 실행 (teacher forcing)
+       b. 손실 계산: token-level cross-entropy
+       c. 역전파: basis_coeff.grad 계산
+       d. 옵티마이저: basis_coeff 업데이트
+       e. importance 점수 누적: |∂L/∂basis_coeff|
+    4. 모든 배치의 importance 평균 계산
+    5. 임계값으로 마스크 생성 (상위 keep_ratio 유지)
+    6. 마스크 저장
+    
+    핵심:
+    - basis_coeff는 Parameter로 등록되어 학습됨
+    - U_matrix는 고정되어 있음 (requires_grad=False)
+    - Weight 복원: W_reconstructed = basis_coeff @ U^T (inference 시)
     """
     
     def __init__(self, args, logger, basis_dir):
@@ -201,53 +213,76 @@ class Phase2ImportanceScorer:
         """
         모델 가중치를 basis 공간으로 재매개변수화
         
-        변환:
-        W_original -> basis_coeff = W_original @ U
+        핵심 개념:
+        ================================================================================
+        | Space       | Variable        | Shape        | Requires_grad | 역할         |
+        |-------------+------------------+----------+----------+----------+----------+|
+        | Weight      | W_original      | (d_out,  | False    | 분석용 reference |
+        | Basis       | basis_coeff     | (d_out,  | True     | 학습 가능 파라미터 |
+        | Basis       | U_matrix        | (d_in,   | False    | 고정된 basis   |
+        |             |                  |          |          |                 |
+        | 관계식: W_reconstructed = basis_coeff @ U^T                |
+        ================================================================================
         
-        그런 후 gradient는 basis_coeff에 대해 계산되고,
-        importance = ||∇basis_coeff||로 계산됨
+        단계:
+        1. 원본 W 저장 (고정)
+        2. basis_coeff 초기화 (W를 basis로 투영) → 학습 가능한 파라미터로 등록
+        3. U_matrix 저장 (고정)
+        4. Forward pass에서 weight를 basis_coeff @ U^T로 동적 복원
         
         Log:
         - 재매개변수화된 레이어 수
-        - 각 레이어의 계수 형태
+        - 각 레이어의 형태
         """
         try:
             self.logger.info("Reparameterizing weights to basis space...")
+            self.logger.info("\n" + "="*70)
+            self.logger.info("Weight Space → Basis Space Transformation")
+            self.logger.info("="*70)
             
             target_indices = self._parse_target_layers(len(self.model.model.layers))
             
             for layer_idx in target_indices:
                 if layer_idx not in self.basis_data:
+                    self.logger.debug(f"Layer {layer_idx}: No basis available, skipping")
                     continue
                 
                 layer = self.model.model.layers[layer_idx]
                 target_module = layer.mlp.down_proj
                 
-                # 원본 가중치 저장
-                W_original = target_module.weight.data.clone()  # (d_out, d_in)
+                # ✅ Step 1: 원본 가중치 저장 (분석용, 고정)
+                W_original = target_module.weight.data.clone()  # (d_out, d_in) = (4096, 14336)
                 self.original_weights[layer_idx] = W_original
                 
-                # Basis 추출 (모델과 같은 dtype으로 변환)
-                U = self.basis_data[layer_idx]['U']  # (d_in, d_in) in float32
+                # ✅ Step 2: Basis 행렬 추출 및 dtype 변환
+                U = self.basis_data[layer_idx]['U']  # (d_in, rank) in float32
                 model_dtype = W_original.dtype
                 U = U.to(dtype=model_dtype, device=W_original.device)
                 
-                # 재매개변수화: basis_coeff = W @ U
-                basis_coeff = W_original @ U  # (d_out, d_in)
+                # ✅ Step 3: basis_coeff 초기화
+                # basis_coeff = W_original @ U (투영)
+                # 이렇게 하면 basis_coeff @ U^T ≈ W_original (근사)
+                basis_coeff_init = W_original @ U  # (d_out, rank) = (4096, 14336)
                 
-                # basis_coeff를 Parameter로 등록하여 gradient tracking 활성화
-                # 하지만 원본 weight는 그대로 둠
-                target_module.basis_coeff = nn.Parameter(basis_coeff.clone())
-                target_module.U_forward = U
+                # basis_coeff를 학습 가능한 Parameter로 등록
+                target_module.basis_coeff = nn.Parameter(basis_coeff_init.clone(), requires_grad=True)
                 
-                # 중요: basis_coeff를 optimizer에 추가할 수 있도록 register_parameter 사용
-                # (하지만 Phase 2에서는 optimizer를 사용하지 않고 gradient만 계산)
+                # U_matrix는 고정된 basis (requires_grad=False)
+                target_module.U_matrix = U.clone().detach()  # (d_in, rank) - 고정
+                target_module.U_matrix.requires_grad = False
                 
-                self.basis_coeffs[layer_idx] = basis_coeff
+                self.basis_coeffs[layer_idx] = basis_coeff_init
                 
-                self.logger.debug(f"Layer {layer_idx}: W shape {W_original.shape} -> coeff shape {basis_coeff.shape}")
+                # 로깅
+                self.logger.info(f"\nLayer {layer_idx}:")
+                self.logger.info(f"  ✓ W_original (고정):     {W_original.shape} = (4096, 14336)")
+                self.logger.info(f"  ✓ basis_coeff (학습):    {basis_coeff_init.shape} = (4096, 14336)")
+                self.logger.info(f"  ✓ U_matrix (고정):      {U.shape} = (14336, 14336)")
+                self.logger.info(f"  ✓ Forward: W = basis_coeff @ U^T")
             
+            self.logger.info(f"\n{'='*70}")
             self.logger.info(f"✓ Reparameterization completed: {len(self.basis_coeffs)} layers")
+            self.logger.info(f"{'='*70}\n")
             
         except Exception as e:
             self.logger.error(f"Failed to reparameterize weights: {str(e)}", exc_info=True)
@@ -255,65 +290,134 @@ class Phase2ImportanceScorer:
     
     def compute_importance(self):
         """
-            안전 데이터에 대해 importance 점수 계산 (attention mask 적용)
-            
-            절차:
-            1. 배치 반복
-            2. Teacher forcing: 모델 입력은 harmful_prompt, 목표는 safety_response
-            3. Loss 계산: token-level cross-entropy (유효 토큰만)
-            4. 역전파
-            5. 각 basis_coeff의 gradient 수집
-            6. Importance = ||gradient||
-            
-            ✅ 개선: attention_mask를 사용하여 패딩 토큰을 제외하고 계산
-            
-            Log:
-            - 배치별 손실
-            - 각 레이어의 importance 통계
+        안전 데이터로 fine-tuning하면서 importance 점수 계산
+        
+        절차:
+        1. 모델을 훈련 모드로 설정
+        2. Optimizer 설정 (basis_coeff 파라미터만)
+        3. Forward pass: weight = basis_coeff @ U^T로 동적 복원
+        4. Loss 계산 및 역전파: basis_coeff.grad 계산
+        5. Optimizer.step(): basis_coeff 업데이트
+        6. Importance 누적: |basis_coeff.grad|를 배치별로 수집
+        7. 에포크 완료 후 importance 평균 계산
+        
+        핵심:
+        - basis_coeff만 학습됨 (W_original과 U_matrix는 고정)
+        - Gradient는 basis_coeff에 대해서만 계산됨
+        - Importance = |∂L/∂basis_coeff| (각 에포크의 gradient 절댓값)
+        
+        Log:
+        - 에포크별 손실
+        - Batch별 gradient 통계
+        - 최종 importance 점수
         """
         try:
-            self.logger.info("Computing importance scores...")
+            self.logger.info("Starting Phase 2: Fine-tuning + Importance Scoring...")
+            self.logger.info("\n" + "="*70)
+            self.logger.info("Training Setup")
+            self.logger.info("="*70)
             
-            # 각 레이어의 importance 초기화
+            # ✅ Step 1: 모델을 훈련 모드로 설정
+            self.model.train()
+            self.logger.info("✓ Model set to training mode")
+            
+            # ✅ Step 2: Optimizer 설정 (basis_coeff 파라미터만)
+            basis_params = []
             target_indices = self._parse_target_layers(len(self.model.model.layers))
-            importances = {idx: [] for idx in target_indices}
+            layers_with_basis = [idx for idx in target_indices if idx in self.basis_data]
             
-            progress_bar = tqdm(
-                self.dataloader,
-                desc="Computing importance",
-                total=len(self.dataloader)
-            )
+            for layer_idx in layers_with_basis:
+                layer = self.model.model.layers[layer_idx]
+                target_module = layer.mlp.down_proj
+                if hasattr(target_module, 'basis_coeff'):
+                    basis_params.append(target_module.basis_coeff)
             
+            if len(basis_params) == 0:
+                self.logger.warning("No basis_coeff parameters found! Skipping importance computation.")
+                return
+            
+            learning_rate = getattr(self.args, 'safety_lr', 1e-5)
+            weight_decay = getattr(self.args, 'safety_weight_decay', 0.01)
+            
+            optimizer = torch.optim.AdamW(basis_params, lr=learning_rate, weight_decay=weight_decay)
+            
+            self.logger.info(f"✓ Optimizer created: AdamW")
+            self.logger.info(f"  - Learning rate: {learning_rate}")
+            self.logger.info(f"  - Weight decay: {weight_decay}")
+            self.logger.info(f"  - Parameters: {len(basis_params)} basis_coeff tensors")
+            self.logger.info(f"  - Layers: {layers_with_basis}")
+            
+            # ✅ Step 3: Forward hook 등록 - weight 동적 복원
+            def make_forward_hook(layer_idx):
+                """basis_coeff @ U^T로 weight 복원"""
+                def hook(module, input, output):
+                    if hasattr(module, 'basis_coeff') and hasattr(module, 'U_matrix'):
+                        basis_coeff = module.basis_coeff  # (d_out, rank)
+                        U_matrix = module.U_matrix        # (d_in, rank)
+                        
+                        # W = basis_coeff @ U^T
+                        weight_reconstructed = basis_coeff @ U_matrix.T  # (d_out, d_in)
+                        
+                        # In-place 업데이트
+                        module.weight.data = weight_reconstructed
+                    return output
+                return hook
+            
+            # Hook 등록
+            hooks = []
+            for layer_idx in layers_with_basis:
+                layer = self.model.model.layers[layer_idx]
+                target_module = layer.mlp.down_proj
+                hook_handle = target_module.register_forward_hook(make_forward_hook(layer_idx))
+                hooks.append(hook_handle)
+            
+            self.hook_handles = hooks  # ✅ 나중에 제거하기 위해 저장
+            self.logger.info(f"✓ {len(hooks)} forward hooks registered")
+            
+            # ✅ Step 4: Importance 저장소 초기화
+            importances = {idx: [] for idx in layers_with_basis}
+            
+            self.logger.info("\n" + "="*70)
+            self.logger.info("Fine-tuning with Importance Tracking")
+            self.logger.info("="*70)
+            
+            # ✅ Step 5: 훈련 루프
+            epochs = getattr(self.args, 'safety_epochs', 1)
             total_loss = 0.0
             total_batches = 0
             
-            for batch_idx, batch in enumerate(progress_bar):
-                harmful_prompts = batch['harmful_prompt']
-                safety_responses = batch['safety_response']
+            for epoch in range(epochs):
+                epoch_loss = 0.0
+                epoch_batches = 0
                 
-                # 결합된 입력-목표 시퀀스 생성 (Teacher Forcing)
-                # Format: "{harmful_prompt}\n{safety_response}"
-                combined_texts = [
-                    f"{q}\n{a}" 
-                    for q, a in zip(harmful_prompts, safety_responses)
-                ]
-                
-                # 결합된 텍스트 토큰화
-                combined = self.tokenizer(
-                    combined_texts,
-                    return_tensors='pt',
-                    padding=True,
-                    truncation=True,
-                    max_length=512
+                progress_bar = tqdm(
+                    self.dataloader,
+                    desc=f"Epoch {epoch+1}/{epochs}",
+                    total=len(self.dataloader)
                 )
-                combined_ids = combined['input_ids'].to(self.model.device)
-                combined_attn = combined['attention_mask'].to(self.model.device)
                 
-                # 기울기 계산 활성화
-                self.model.zero_grad()
-                
-                # 모델 실행
-                with torch.enable_grad():
+                for batch_idx, batch in enumerate(progress_bar):
+                    harmful_prompts = batch['harmful_prompt']
+                    safety_responses = batch['safety_response']
+                    
+                    # 결합된 입력-목표 시퀀스 (Teacher Forcing)
+                    combined_texts = [
+                        f"{q}\n{a}" 
+                        for q, a in zip(harmful_prompts, safety_responses)
+                    ]
+                    
+                    # 토큰화
+                    combined = self.tokenizer(
+                        combined_texts,
+                        return_tensors='pt',
+                        padding=True,
+                        truncation=True,
+                        max_length=512
+                    )
+                    combined_ids = combined['input_ids'].to(self.model.device)
+                    combined_attn = combined['attention_mask'].to(self.model.device)
+                    
+                    # ✅ Forward pass: weight = basis_coeff @ U^T
                     outputs = self.model(
                         input_ids=combined_ids,
                         attention_mask=combined_attn
@@ -321,237 +425,255 @@ class Phase2ImportanceScorer:
                     logits = outputs.logits  # (batch, seq_len, vocab_size)
                     
                     # Teacher forcing: shift targets
-                    # logits[:, :-1, :] -> 마지막 토큰 제외 (다음 토큰 예측)
-                    # combined_ids[:, 1:] -> 첫 토큰 제외 (목표 토큰)
                     pred_logits = logits[:, :-1, :].contiguous()  # (batch, seq_len-1, vocab_size)
-                    target_ids_shift = combined_ids[:, 1:].contiguous()  # (batch, seq_len-1)
+                    target_ids_shift = combined_ids[:, 1:].contiguous()
+                    attention_mask_shift = combined_attn[:, 1:].contiguous()
                     
-                    # ✅ 핵심: attention_mask를 shift하여 패딩된 위치 제외
-                    attention_mask_shift = combined_attn[:, 1:].contiguous()  # (batch, seq_len-1)
-                    
-                    # 유효한 토큰: attention_mask == 1 AND token_id != pad_token
+                    # 유효한 토큰만
                     valid_mask = (attention_mask_shift == 1) & (target_ids_shift != self.tokenizer.pad_token_id)
+                    pred_logits_flat = pred_logits[valid_mask]
+                    target_ids_flat = target_ids_shift[valid_mask]
                     
-                    # 모든 유효한 위치를 평탄화
-                    pred_logits_flat = pred_logits[valid_mask]  # (num_valid, vocab_size)
-                    target_ids_flat = target_ids_shift[valid_mask]  # (num_valid,)
-                    
-                    # Loss 계산 (유효한 토큰만)
                     if len(target_ids_flat) > 0:
-                        loss = nn.CrossEntropyLoss()(
-                            pred_logits_flat,
-                            target_ids_flat
-                        )
+                        # ✅ Loss 계산
+                        loss = nn.CrossEntropyLoss()(pred_logits_flat, target_ids_flat)
                         
-                        # 역전파
+                        # ✅ Backward: basis_coeff.grad 계산
+                        optimizer.zero_grad()
                         loss.backward()
                         
-                        total_loss += loss.item()
-                        total_batches += 1
-                        
-                        # Importance 수집: 각 layer의 weight gradient -> basis space에서 역변환
-                        for layer_idx in target_indices:
-                            if layer_idx not in self.basis_data:
-                                continue
-                            
+                        # ✅ Importance 수집: |basis_coeff.grad|
+                        for layer_idx in layers_with_basis:
                             layer = self.model.model.layers[layer_idx]
                             target_module = layer.mlp.down_proj
                             
-                            # Weight gradient 얻기
-                            if target_module.weight.grad is not None:
-                                W_grad = target_module.weight.grad  # (d_out, d_in), dtype: bfloat16
-                                U = self.basis_data[layer_idx]['U']  # dtype: float32
-                                
-                                # U를 W_grad와 같은 dtype으로 변환
-                                U_casted = U.to(W_grad.dtype)
-                                
-                                # Gradient를 basis space로 변환
-                                # ∂L/∂coeff = (∂L/∂W) @ U
-                                coeff_grad = W_grad @ U_casted  # (d_out, d_in)
-                                
-                                # Importance = ||gradient per output neuron|| (L2 norm across input)
-                                importance = torch.norm(coeff_grad, dim=1, p=2)
-                                importances[layer_idx].append(importance.detach().cpu())
-                            else:
-                                self.logger.debug(f"Layer {layer_idx}: No weight gradient computed")
-                    else:
-                        self.logger.warning(f"Batch {batch_idx}: No valid tokens after masking")
-                
-                progress_bar.update(1)
-            
-            # 누적 importance 계산
-            self.importances = {}
-            for layer_idx in target_indices:
-                if len(importances[layer_idx]) > 0:
-                    # 모든 배치의 importance를 평균
-                    layer_importances = torch.stack(importances[layer_idx], dim=0)
-                    # bfloat16을 float32로 변환한 후 numpy로 변환
-                    self.importances[layer_idx] = layer_importances.mean(dim=0).float().cpu().numpy()
+                            if hasattr(target_module, 'basis_coeff') and target_module.basis_coeff.grad is not None:
+                                # Gradient 절댓값 (element-wise)
+                                grad_abs = torch.abs(target_module.basis_coeff.grad)  # (d_out, rank)
+                                importances[layer_idx].append(grad_abs.detach().cpu())
+                        
+                        # ✅ Update: basis_coeff 업데이트
+                        optimizer.step()
+                        
+                        epoch_loss += loss.item()
+                        epoch_batches += 1
+                        total_loss += loss.item()
+                        total_batches += 1
+                        
+                        progress_bar.set_postfix({'loss': loss.item()})
                     
-                    self.logger.info(f"Layer {layer_idx}:")
-                    self.logger.info(f"  - Mean importance: {self.importances[layer_idx].mean():.6f}")
-                    self.logger.info(f"  - Std importance: {self.importances[layer_idx].std():.6f}")
+                    progress_bar.update(1)
+                
+                epoch_loss_avg = epoch_loss / max(epoch_batches, 1)
+                self.logger.info(f"\n[Epoch {epoch+1}/{epochs}] Average Loss: {epoch_loss_avg:.4f}")
+            
+            # Hook 제거
+            for hook in hooks:
+                hook.remove()
+            self.logger.info(f"\n✓ Forward hooks removed")
+            
+            # ✅ Step 6: Importance 평균 계산
+            self.logger.info("\n" + "="*70)
+            self.logger.info("Computing Importance Scores")
+            self.logger.info("="*70)
+            
+            self.importances = {}
+            for layer_idx in layers_with_basis:
+                if len(importances[layer_idx]) > 0:
+                    # 모든 배치의 gradient를 스택
+                    layer_importances = torch.stack(importances[layer_idx], dim=0)  # (num_batches, d_out, rank)
+                    
+                    # 배치 축 평균
+                    importance_mean = layer_importances.mean(dim=0)  # (d_out, rank)
+                    
+                    # Input 차원별로 sum (각 input이 모든 output에 미치는 누적 영향)
+                    importance_per_input = importance_mean.sum(dim=0)  # (rank,) = (14336,)
+                    
+                    self.importances[layer_idx] = importance_per_input.float().cpu().numpy()
+                    
+                    self.logger.info(f"\n✓ Layer {layer_idx}:")
+                    self.logger.info(f"  - Gradient shape (per batch): (d_out, rank) = {importance_mean.shape}")
+                    self.logger.info(f"  - Importance aggregated to input-wise (sum): {self.importances[layer_idx].shape}")
+                    self.logger.info(f"  - Mean: {self.importances[layer_idx].mean():.6f}")
+                    self.logger.info(f"  - Std: {self.importances[layer_idx].std():.6f}")
+                    self.logger.info(f"  - Min: {self.importances[layer_idx].min():.6f}")
+                    self.logger.info(f"  - Max: {self.importances[layer_idx].max():.6f}")
+                    self.logger.info(f"  - Median: {np.median(self.importances[layer_idx]):.6f}")
+                else:
+                    self.logger.warning(f"Layer {layer_idx}: No gradients collected")
             
             avg_loss = total_loss / max(total_batches, 1)
-            self.logger.info(f"✓ Importance computation completed")
-            self.logger.info(f"  - Average loss (valid tokens only): {avg_loss:.4f}")
+            self.logger.info(f"\n{'='*70}")
+            self.logger.info(f"✓ Phase 2 Summary:")
+            self.logger.info(f"{'='*70}")
+            self.logger.info(f"  - Total loss (all epochs): {total_loss:.4f}")
+            self.logger.info(f"  - Average loss per batch: {avg_loss:.4f}")
             self.logger.info(f"  - Total batches processed: {total_batches}")
+            self.logger.info(f"  - Layers with importance scores: {len(self.importances)}")
+            self.logger.info(f"  - Layers with basis: {len(layers_with_basis)}")
+            self.logger.info(f"{'='*70}\n")
+            
             self.stats['total_loss'] = total_loss
             
         except Exception as e:
             self.logger.error(f"Failed to compute importance: {str(e)}", exc_info=True)
             raise
+    
+    def save_finetuned_model(self):
+        """
+        안전하게 fine-tuning된 모델 저장
+        
+        목표: basis_coeff @ U^T로 weight를 재구성하여 최종 모델 저장
+        
+        절차:
+        1. 모든 basis_coeff @ U^T 계산
+        2. weight.data에 재구성된 가중치 할당
+        3. 모델을 HuggingFace 형식으로 저장
+        
+        결과:
+        - 안전하게 fine-tuning된 모델이 저장됨
+        - Phase 1의 basis와 mask가 모두 포함된 완전한 모델
+        """
         try:
-            self.logger.info("Computing importance scores...")
+            self.logger.info(f"\n{'='*70}")
+            self.logger.info(f"[Step 1] Reconstructing Final Model")
+            self.logger.info(f"{'='*70}")
             
-            # 각 레이어의 importance 초기화
+            # 모델을 평가 모드로 설정 (dropout 등 비활성화)
+            self.model.eval()
+            
+            # ✅ Step 1: Hook 제거 (weight 고정)
+            for handle in self.hook_handles:
+                handle.remove()
+            self.logger.info("✓ Removed forward hooks")
+            
+            # ✅ Step 2: 각 레이어의 weight를 basis_coeff @ U^T로 재구성
             target_indices = self._parse_target_layers(len(self.model.model.layers))
-            importances = {idx: [] for idx in target_indices}
+            layers_with_basis = [idx for idx in target_indices if idx in self.basis_data]
             
-            progress_bar = tqdm(
-                self.dataloader,
-                desc="Computing importance",
-                total=len(self.dataloader)
-            )
+            for layer_idx in layers_with_basis:
+                layer = self.model.model.layers[layer_idx]
+                target_module = layer.mlp.down_proj
+                
+                if hasattr(target_module, 'basis_coeff') and hasattr(target_module, 'U_matrix'):
+                    # basis_coeff @ U^T 계산
+                    basis_coeff = target_module.basis_coeff.detach()  # (d_out, rank)
+                    U_matrix = target_module.U_matrix.detach()  # (d_in, rank)
+                    
+                    weight_reconstructed = basis_coeff @ U_matrix.T  # (d_out, d_in)
+                    
+                    # weight에 할당 (detach하여 gradient 제거)
+                    target_module.weight.data = weight_reconstructed
+                    
+                    # basis_coeff와 U_matrix 속성 제거 (불필요해짐)
+                    delattr(target_module, 'basis_coeff')
+                    delattr(target_module, 'U_matrix')
+                    
+                    norm_before = self.original_weights[layer_idx].norm().item()
+                    norm_after = weight_reconstructed.norm().item()
+                    
+                    self.logger.info(f"  Layer {layer_idx}:")
+                    self.logger.info(f"    - Weight reconstructed: {weight_reconstructed.shape}")
+                    self.logger.info(f"    - Weight norm: {norm_before:.4f} → {norm_after:.4f}")
             
-            total_loss = 0.0
+            # ✅ Step 3: 모델을 transformers 형식으로 저장
+            model_save_dir = os.path.join(self.args.checkpoint_dir, 'phase2_finetuned_model')
+            os.makedirs(model_save_dir, exist_ok=True)
             
-            for batch_idx, batch in enumerate(progress_bar):
-                harmful_prompts = batch['harmful_prompt']
-                safety_responses = batch['safety_response']
-                
-                # 결합된 입력-목표 시퀀스 생성 (Teacher Forcing)
-                # Format: "{harmful_prompt}\n{safety_response}"
-                combined_texts = [
-                    f"{q}\n{a}" 
-                    for q, a in zip(harmful_prompts, safety_responses)
-                ]
-                
-                # 결합된 텍스트 토큰화
-                combined = self.tokenizer(
-                    combined_texts,
-                    return_tensors='pt',
-                    padding=True,
-                    truncation=True,
-                    max_length=512
-                )
-                combined_ids = combined['input_ids'].to(self.model.device)
-                combined_attn = combined['attention_mask'].to(self.model.device)
-                
-                # 기울기 계산 활성화
-                self.model.zero_grad()
-                
-                # 모델 실행
-                with torch.enable_grad():
-                    outputs = self.model(
-                        input_ids=combined_ids,
-                        attention_mask=combined_attn
-                    )
-                    logits = outputs.logits  # (batch, seq_len, vocab_size)
-                    
-                    # Teacher forcing: shift targets
-                    # logits[:, :-1, :] -> 마지막 토큰 제외 (다음 토큰 예측)
-                    # combined_ids[:, 1:] -> 첫 토큰 제외 (목표 토큰)
-                    pred_logits = logits[:, :-1, :].contiguous()  # (batch, seq_len-1, vocab_size)
-                    target_ids_shift = combined_ids[:, 1:].contiguous()  # (batch, seq_len-1)
-                    
-                    # Padding을 제외한 유효한 토큰만
-                    attention_mask_shift = combined_attn[:, 1:].contiguous()  # (batch, seq_len-1)
-                    valid_mask = (attention_mask_shift == 1) & (target_ids_shift != self.tokenizer.pad_token_id)
-                    
-                    # 모든 유효한 위치를 평탄화
-                    pred_logits_flat = pred_logits[valid_mask]  # (num_valid, vocab_size)
-                    target_ids_flat = target_ids_shift[valid_mask]  # (num_valid,)
-                    
-                    # Loss 계산
-                    if len(target_ids_flat) > 0:
-                        loss = nn.CrossEntropyLoss()(
-                            pred_logits_flat,
-                            target_ids_flat
-                        )
-                        
-                        # 역전파
-                        loss.backward()
-                        
-                        total_loss += loss.item()
-                        
-                        # Importance 수집: 각 layer의 weight gradient -> basis space에서 역변환
-                        for layer_idx in target_indices:
-                            if layer_idx not in self.basis_data:
-                                continue
-                            
-                            layer = self.model.model.layers[layer_idx]
-                            target_module = layer.mlp.down_proj
-                            
-                            # Weight gradient 얻기
-                            if target_module.weight.grad is not None:
-                                W_grad = target_module.weight.grad  # (d_out, d_in), dtype: bfloat16
-                                U = self.basis_data[layer_idx]['U']  # dtype: float32
-                                
-                                # U를 W_grad와 같은 dtype으로 변환
-                                U_casted = U.to(W_grad.dtype)
-                                
-                                # Gradient를 basis space로 변환
-                                # ∂L/∂coeff = (∂L/∂W) @ U
-                                coeff_grad = W_grad @ U_casted  # (d_out, d_in)
-                                
-                                # Importance = ||gradient per output neuron|| (L2 norm across input)
-                                importance = torch.norm(coeff_grad, dim=1, p=2)
-                                importances[layer_idx].append(importance.detach().cpu())
-                            else:
-                                self.logger.debug(f"Layer {layer_idx}: No weight gradient computed")
-                    else:
-                        self.logger.warning(f"Batch {batch_idx}: No valid tokens after masking")
-                
-                progress_bar.update(1)
-                self.stats['total_loss'] += loss.item() if 'loss' in locals() else 0
+            self.logger.info(f"\n{'='*70}")
+            self.logger.info(f"[Step 2] Saving Safety-aligned Model")
+            self.logger.info(f"{'='*70}")
             
-            # 누적 importance 계산
-            self.importances = {}
-            for layer_idx in target_indices:
-                if len(importances[layer_idx]) > 0:
-                    # 모든 배치의 importance를 평균
-                    layer_importances = torch.stack(importances[layer_idx], dim=0)
-                    # bfloat16을 float32로 변환한 후 numpy로 변환
-                    self.importances[layer_idx] = layer_importances.mean(dim=0).float().cpu().numpy()
-                    
-                    self.logger.info(f"Layer {layer_idx}:")
-                    self.logger.info(f"  - Mean importance: {self.importances[layer_idx].mean():.6f}")
-                    self.logger.info(f"  - Std importance: {self.importances[layer_idx].std():.6f}")
+            self.model.save_pretrained(model_save_dir)
+            self.tokenizer.save_pretrained(model_save_dir)
             
-            avg_loss = total_loss / len(self.dataloader)
-            self.logger.info(f"✓ Importance computation completed")
-            self.logger.info(f"  - Average loss: {avg_loss:.4f}")
+            self.logger.info(f"✓ Model saved: {model_save_dir}")
+            self.logger.info(f"  - Format: HuggingFace (pytorch_model.bin + tokenizer)")
+            self.logger.info(f"  - Size: {len(list(model_save_dir))} files")
+            
+            return model_save_dir
             
         except Exception as e:
-            self.logger.error(f"Failed to compute importance: {str(e)}", exc_info=True)
+            self.logger.error(f"Failed to save finetuned model: {str(e)}", exc_info=True)
+            raise
+    
+    def save_basis_coefficients(self):
+        """
+        학습된 basis_coeff 저장 (Phase 3에서 사용 가능하도록)
+        
+        목표: basis_coeff를 저장하여 Phase 3에서 로드 가능하게 함
+        
+        결과:
+        - basis_coeff_{layer_idx}.pt 파일 생성
+        - Phase 3에서 이를 로드하여 basis_coeff 사용 가능
+        """
+        try:
+            self.logger.info(f"\n{'='*70}")
+            self.logger.info(f"[Step 3] Saving Basis Coefficients")
+            self.logger.info(f"{'='*70}")
+            
+            coeffs_dir = os.path.join(self.args.checkpoint_dir, 'basis_coefficients')
+            os.makedirs(coeffs_dir, exist_ok=True)
+            
+            target_indices = self._parse_target_layers(len(self.model.model.layers))
+            layers_with_basis = [idx for idx in target_indices if idx in self.basis_data]
+            
+            for layer_idx in layers_with_basis:
+                layer = self.model.model.layers[layer_idx]
+                target_module = layer.mlp.down_proj
+                
+                if hasattr(target_module, 'basis_coeff'):
+                    basis_coeff = target_module.basis_coeff.detach().cpu()
+                    save_path = os.path.join(coeffs_dir, f'layer_{layer_idx:02d}_basis_coeff.pt')
+                    
+                    torch.save({
+                        'basis_coeff': basis_coeff,
+                        'shape': basis_coeff.shape,
+                        'layer_idx': layer_idx,
+                    }, save_path)
+                    
+                    self.logger.info(f"  ✓ Layer {layer_idx}: {basis_coeff.shape} saved")
+            
+            self.logger.info(f"✓ Basis coefficients saved: {coeffs_dir}")
+            self.logger.info(f"{'='*70}\n")
+            
+            return coeffs_dir
+            
+        except Exception as e:
+            self.logger.error(f"Failed to save basis coefficients: {str(e)}", exc_info=True)
             raise
     
     def generate_masks(self, keep_ratio=0.1):
         """
-        Importance 점수 기반으로 마스크 생성
+        Importance 점수 기반으로 마스크 생성 (Element-wise)
         
         방식:
-        1. 모든 importance 점수 수집
+        1. 각 레이어의 importance 평탄화: (d_out, rank) -> (d_out*rank,) = (14336,)
         2. Quantile 계산: threshold = quantile(importance, 1 - keep_ratio)
-        3. Mask = 1 if importance >= threshold else 0
+        3. Mask = 1 if importance >= threshold else 0 (각 요소별)
+        
+        결과:
+        - mask shape: (14336,) - 각 weight 요소별 이진 마스크
+        - mask[i] = 1: 중요한 weight (freeze), 0: 덜 중요한 weight (trainable)
         
         Log:
         - 각 레이어의 threshold
-        - 유지되는 계수 비율
+        - 유지되는 weight 비율
         
         Args:
-            keep_ratio: 유지할 계수의 비율 (0.1 = 상위 10%)
+            keep_ratio: 유지할 weight의 비율 (0.1 = 상위 10%)
         """
         try:
             self.logger.info(f"Generating masks with keep_ratio={keep_ratio}...")
             
             for layer_idx, importance in self.importances.items():
-                # Quantile 기반 threshold
-                threshold = np.quantile(importance, 1 - keep_ratio)
+                # 평탄화된 importance에서 quantile 기반 threshold 계산
+                importance_flat = importance.flatten()
+                threshold = np.quantile(importance_flat, 1 - keep_ratio)
                 
                 # 이진 마스크 생성 (1: freeze/중요, 0: update/불필요)
-                mask = (importance >= threshold).astype(np.float32)
+                # 원래 shape로 평탄화 (14336,)
+                mask = (importance_flat >= threshold).astype(np.float32)
                 
                 self.masks[layer_idx] = mask
                 
@@ -559,9 +681,11 @@ class Phase2ImportanceScorer:
                 total_count = len(mask)
                 actual_ratio = keep_count / total_count
                 
-                self.logger.info(f"Layer {layer_idx}:")
+                self.logger.info(f"✓ Layer {layer_idx} (element-wise):")
+                self.logger.info(f"  - Importance shape: {importance.shape}")
+                self.logger.info(f"  - Flattened shape: {mask.shape}")
                 self.logger.info(f"  - Threshold: {threshold:.6f}")
-                self.logger.info(f"  - Kept coefficients: {keep_count}/{total_count} ({actual_ratio*100:.1f}%)")
+                self.logger.info(f"  - Kept weights: {keep_count}/{total_count} ({actual_ratio*100:.1f}%)")
             
             self.logger.info(f"✓ Mask generation completed")
             
@@ -588,12 +712,16 @@ class Phase2ImportanceScorer:
             masks_dir = os.path.join(self.args.checkpoint_dir, 'masks')
             os.makedirs(masks_dir, exist_ok=True)
             
+            self.logger.info(f"\n{'='*60}")
             self.logger.info(f"Saving masks to {masks_dir}...")
             
             # 마스크 저장
             for layer_idx, mask in self.masks.items():
                 save_path = os.path.join(masks_dir, f'layer_{layer_idx:02d}_mask.pt')
                 torch.save(torch.from_numpy(mask).float(), save_path)
+                frozen_count = mask.sum()
+                trainable_count = len(mask) - frozen_count
+                self.logger.debug(f"  - Layer {layer_idx}: {frozen_count} frozen, {trainable_count} trainable")
             
             # 메타데이터 저장
             metadata = {
@@ -612,6 +740,15 @@ class Phase2ImportanceScorer:
             self.logger.info(f"✓ Masks saved successfully")
             self.logger.info(f"  - Directory: {masks_dir}")
             self.logger.info(f"  - Files: {len(self.masks)} mask files + metadata.json")
+            
+            if len(self.masks) > 0:
+                total_frozen = sum(mask.sum() for mask in self.masks.values())
+                total_coeffs = sum(len(mask) for mask in self.masks.values())
+                if total_coeffs > 0:
+                    self.logger.info(f"  - Total: {total_frozen}/{total_coeffs} frozen ({100*total_frozen/total_coeffs:.1f}%)")
+            else:
+                self.logger.warning(f"  - No masks were generated (self.masks is empty)")
+            self.logger.info(f"{'='*60}\n")
             
             return masks_dir
             

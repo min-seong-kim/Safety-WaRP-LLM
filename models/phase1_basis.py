@@ -299,7 +299,7 @@ class Phase1BasiBuilder:
                         max_length=512
                     )
                     
-                    # ✅ attention_mask 저장 (패딩 마스킹용)
+                    # attention_mask 저장 (패딩 마스킹용)
                     attention_mask = inputs['attention_mask']  # (batch, seq_len)
                     self.attention_masks.append(attention_mask)
                     
@@ -366,7 +366,7 @@ class Phase1BasiBuilder:
                 # 활성화를 (num_tokens, hidden_dim)으로 평탄화
                 act_list = self.activations[layer_idx]
                 
-                # ✅ 핵심: attention mask를 사용하여 유효한 활성화만 추출
+                # 핵심: attention mask를 사용하여 유효한 활성화만 추출
                 valid_activations = []
                 
                 for batch_idx, act in enumerate(act_list):
