@@ -11,15 +11,15 @@ echo "========================================================================"
 
 # 설정
 MODEL_NAME="meta-llama/Llama-3.1-8B-Instruct"
-SAFETY_SAMPLES=50
-UTILITY_SAMPLES=50
+SAFETY_SAMPLES=5000
+UTILITY_SAMPLES=0
 BATCH_SIZE=4
 DTYPE="bfloat16"
 DEVICE="cuda"
-EPOCHS=1
-LEARNING_RATE=1e-6
+EPOCHS=3
+LEARNING_RATE=1e-5
 KEEP_RATIO=0.1
-TARGET_LAYERS="last"
+TARGET_LAYERS="29-31"
 
 # 기본 디렉토리
 BASE_OUTPUT_DIR="./checkpoints"
@@ -64,13 +64,10 @@ echo "========================================================================"
 
 python train.py \
     --phase 2 \
-    --model_name $MODEL_NAME \
     --basis_dir $PHASE1_BASIS_DIR \
     --safety_samples $SAFETY_SAMPLES \
     --batch_size $BATCH_SIZE \
     --keep_ratio $KEEP_RATIO \
-    --dtype $DTYPE \
-    --device $DEVICE \
     --output_dir $BASE_OUTPUT_DIR \
     --debug 2>&1 | tee phase2.log
 
@@ -94,14 +91,12 @@ echo "========================================================================"
 
 python train.py \
     --phase 3 \
-    --model_name $MODEL_NAME \
     --basis_dir $PHASE1_BASIS_DIR \
     --masks_dir $PHASE2_MASKS_DIR \
     --utility_samples $UTILITY_SAMPLES \
     --batch_size $BATCH_SIZE \
     --epochs $EPOCHS \
     --learning_rate $LEARNING_RATE \
-    --dtype $DTYPE \
     --device $DEVICE \
     --output_dir $BASE_OUTPUT_DIR \
     --debug 2>&1 | tee phase3.log

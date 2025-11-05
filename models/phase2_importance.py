@@ -326,14 +326,23 @@ class Phase2ImportanceScorer:
             target_indices = self._parse_target_layers(len(self.model.model.layers))
             layers_with_basis = [idx for idx in target_indices if idx in self.basis_data]
             
+            self.logger.debug(f"[Phase2] Target indices: {target_indices}")
+            self.logger.debug(f"[Phase2] Layers in basis_data: {sorted(self.basis_data.keys())}")
+            self.logger.debug(f"[Phase2] Layers with basis (intersection): {layers_with_basis}")
+            
             for layer_idx in layers_with_basis:
                 layer = self.model.model.layers[layer_idx]
                 target_module = layer.mlp.down_proj
                 if hasattr(target_module, 'basis_coeff'):
                     basis_params.append(target_module.basis_coeff)
+                    self.logger.debug(f"[Phase2] Layer {layer_idx}: basis_coeff FOUND, requires_grad={target_module.basis_coeff.requires_grad}")
+                else:
+                    self.logger.warning(f"[Phase2] Layer {layer_idx}: basis_coeff NOT FOUND!")
             
             if len(basis_params) == 0:
-                self.logger.warning("No basis_coeff parameters found! Skipping importance computation.")
+                self.logger.error("No basis_coeff parameters found! Skipping importance computation.")
+                self.logger.error(f"  - layers_with_basis: {layers_with_basis}")
+                self.logger.error(f"  - basis_data keys: {sorted(self.basis_data.keys())}")
                 return
             
             learning_rate = getattr(self.args, 'safety_lr', 1e-5)
@@ -443,14 +452,21 @@ class Phase2ImportanceScorer:
                         loss.backward()
                         
                         # ✅ Importance 수집: |basis_coeff.grad|
+                        batch_importance_collected = 0
                         for layer_idx in layers_with_basis:
                             layer = self.model.model.layers[layer_idx]
                             target_module = layer.mlp.down_proj
                             
-                            if hasattr(target_module, 'basis_coeff') and target_module.basis_coeff.grad is not None:
-                                # Gradient 절댓값 (element-wise)
-                                grad_abs = torch.abs(target_module.basis_coeff.grad)  # (d_out, rank)
-                                importances[layer_idx].append(grad_abs.detach().cpu())
+                            if hasattr(target_module, 'basis_coeff'):
+                                if target_module.basis_coeff.grad is not None:
+                                    # Gradient 절댓값 (element-wise)
+                                    grad_abs = torch.abs(target_module.basis_coeff.grad)  # (d_out, rank)
+                                    importances[layer_idx].append(grad_abs.detach().cpu())
+                                    batch_importance_collected += 1
+                                else:
+                                    self.logger.debug(f"[Batch {batch_idx}] Layer {layer_idx}: gradient is None!")
+                            else:
+                                self.logger.debug(f"[Batch {batch_idx}] Layer {layer_idx}: no basis_coeff!")
                         
                         # ✅ Update: basis_coeff 업데이트
                         optimizer.step()
@@ -493,6 +509,7 @@ class Phase2ImportanceScorer:
                     
                     self.logger.info(f"\n✓ Layer {layer_idx}:")
                     self.logger.info(f"  - Gradient shape (per batch): (d_out, rank) = {importance_mean.shape}")
+                    self.logger.info(f"  - Batches collected: {len(importances[layer_idx])}")
                     self.logger.info(f"  - Importance aggregated to input-wise (sum): {self.importances[layer_idx].shape}")
                     self.logger.info(f"  - Mean: {self.importances[layer_idx].mean():.6f}")
                     self.logger.info(f"  - Std: {self.importances[layer_idx].std():.6f}")
@@ -500,7 +517,7 @@ class Phase2ImportanceScorer:
                     self.logger.info(f"  - Max: {self.importances[layer_idx].max():.6f}")
                     self.logger.info(f"  - Median: {np.median(self.importances[layer_idx]):.6f}")
                 else:
-                    self.logger.warning(f"Layer {layer_idx}: No gradients collected")
+                    self.logger.error(f"✗ Layer {layer_idx}: No gradients collected! importances[{layer_idx}] = {importances[layer_idx]}")
             
             avg_loss = total_loss / max(total_batches, 1)
             self.logger.info(f"\n{'='*70}")

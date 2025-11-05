@@ -1015,7 +1015,7 @@ class Phase3IncrementalLearner:
                 optimizer,
                 lr_lambda=lambda step: get_linear_lr(step, total_steps)
             )
-            
+            [[]]
             self.logger.info(f"✓ Optimizer configured:")
             self.logger.info(f"  - Algorithm: AdamW")
             self.logger.info(f"  - Learning rate (initial): {self.args.learning_rate}")
