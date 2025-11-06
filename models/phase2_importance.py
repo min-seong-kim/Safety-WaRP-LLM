@@ -333,11 +333,31 @@ class Phase2ImportanceScorer:
             for layer_idx in layers_with_basis:
                 layer = self.model.model.layers[layer_idx]
                 target_module = layer.mlp.down_proj
+                
+                # basis_coeff 생성 또는 재사용
+                if not hasattr(target_module, 'basis_coeff'):
+                    basis_info = self.basis_data[layer_idx]
+                    U = basis_info['U']  # (d_out, rank)
+                    S = basis_info['S']  # (rank,)
+                    Vh = basis_info['Vh']  # (rank, d_in)
+                    
+                    # basis_coeff 초기화: U @ sqrt(S)로 초기화
+                    # (이렇게 하면 basis_coeff @ Vh ≈ U @ S^(1/2) @ S^(1/2) @ Vh ≈ 원본 가중치에 가까움)
+                    basis_coeff = torch.nn.Parameter(
+                        U @ torch.diag(torch.sqrt(S))
+                    )
+                    target_module.basis_coeff = basis_coeff
+                    target_module.basis_coeff.requires_grad_(True)
+                    
+                    # U_matrix도 저장 (forward에서 사용)
+                    target_module.U_matrix = U
+                    
+                    self.logger.debug(f"[Phase2] Layer {layer_idx}: basis_coeff created (shape: {basis_coeff.shape})")
+                
+                # basis_coeff를 optimizer에 추가
                 if hasattr(target_module, 'basis_coeff'):
                     basis_params.append(target_module.basis_coeff)
-                    self.logger.debug(f"[Phase2] Layer {layer_idx}: basis_coeff FOUND, requires_grad={target_module.basis_coeff.requires_grad}")
-                else:
-                    self.logger.warning(f"[Phase2] Layer {layer_idx}: basis_coeff NOT FOUND!")
+                    self.logger.debug(f"[Phase2] Layer {layer_idx}: basis_coeff added to optimizer, requires_grad={target_module.basis_coeff.requires_grad}")
             
             if len(basis_params) == 0:
                 self.logger.error("No basis_coeff parameters found! Skipping importance computation.")
@@ -356,38 +376,42 @@ class Phase2ImportanceScorer:
             self.logger.info(f"  - Parameters: {len(basis_params)} basis_coeff tensors")
             self.logger.info(f"  - Layers: {layers_with_basis}")
             
-            # ✅ Step 3: Forward hook 등록 - weight 동적 복원
-            def make_forward_hook(layer_idx):
-                """basis_coeff @ U^T로 weight 복원"""
-                def hook(module, input, output):
-                    if hasattr(module, 'basis_coeff') and hasattr(module, 'U_matrix'):
-                        basis_coeff = module.basis_coeff  # (d_out, rank)
-                        U_matrix = module.U_matrix        # (d_in, rank)
-                        
-                        # W = basis_coeff @ U^T
-                        weight_reconstructed = basis_coeff @ U_matrix.T  # (d_out, d_in)
-                        
-                        # In-place 업데이트
-                        module.weight.data = weight_reconstructed
-                    return output
-                return hook
+            # ✅ Step 3: Forward 메서드 교체 - autograd 호환 (hook 대신 사용)
+            # forward hook 대신 actual forward method를 교체하여 gradient graph가 끊기지 않도록 함
+            self.original_forwards = {}
             
-            # Hook 등록
-            hooks = []
             for layer_idx in layers_with_basis:
                 layer = self.model.model.layers[layer_idx]
                 target_module = layer.mlp.down_proj
-                hook_handle = target_module.register_forward_hook(make_forward_hook(layer_idx))
-                hooks.append(hook_handle)
+                
+                # 원본 forward 저장
+                self.original_forwards[layer_idx] = target_module.forward
+                
+                # 새 forward 메서드 생성 (클로저로 basis_coeff와 U_matrix 캡처)
+                def make_new_forward(module, orig_forward, layer_idx):
+                    def new_forward(x):
+                        # basis_coeff @ U^T @ x^T
+                        if hasattr(module, 'basis_coeff') and hasattr(module, 'U_matrix'):
+                            basis_coeff = module.basis_coeff  # (d_out, rank)
+                            U_matrix = module.U_matrix        # (d_in, rank)
+                            weight_reconstructed = basis_coeff @ U_matrix.T  # (d_out, d_in)
+                            # Linear forward: y = x @ W^T + bias
+                            return torch.nn.functional.linear(x, weight_reconstructed, module.bias)
+                        else:
+                            # fallback to original
+                            return orig_forward(x)
+                    return new_forward
+                
+                target_module.forward = make_new_forward(target_module, self.original_forwards[layer_idx], layer_idx)
             
-            self.hook_handles = hooks  # ✅ 나중에 제거하기 위해 저장
-            self.logger.info(f"✓ {len(hooks)} forward hooks registered")
+            self.logger.info(f"✓ Forward 메서드 {len(layers_with_basis)}개 레이어에서 교체됨 (autograd 호환)")
             
             # ✅ Step 4: Importance 저장소 초기화
             importances = {idx: [] for idx in layers_with_basis}
             
             self.logger.info("\n" + "="*70)
             self.logger.info("Fine-tuning with Importance Tracking")
+
             self.logger.info("="*70)
             
             # ✅ Step 5: 훈련 루프
@@ -483,10 +507,13 @@ class Phase2ImportanceScorer:
                 epoch_loss_avg = epoch_loss / max(epoch_batches, 1)
                 self.logger.info(f"\n[Epoch {epoch+1}/{epochs}] Average Loss: {epoch_loss_avg:.4f}")
             
-            # Hook 제거
-            for hook in hooks:
-                hook.remove()
-            self.logger.info(f"\n✓ Forward hooks removed")
+            # Forward 메서드 복원
+            for layer_idx in layers_with_basis:
+                layer = self.model.model.layers[layer_idx]
+                target_module = layer.mlp.down_proj
+                target_module.forward = self.original_forwards[layer_idx]
+            
+            self.logger.info(f"\n✓ Forward 메서드 복원됨")
             
             # ✅ Step 6: Importance 평균 계산
             self.logger.info("\n" + "="*70)
@@ -559,10 +586,16 @@ class Phase2ImportanceScorer:
             # 모델을 평가 모드로 설정 (dropout 등 비활성화)
             self.model.eval()
             
-            # ✅ Step 1: Hook 제거 (weight 고정)
-            for handle in self.hook_handles:
-                handle.remove()
-            self.logger.info("✓ Removed forward hooks")
+            # ✅ Step 1: 원본 forward 메서드 복원 (forward hook 제거 대신 forward 메서드 복원)
+            target_indices = self._parse_target_layers(len(self.model.model.layers))
+            layers_with_basis = [idx for idx in target_indices if idx in self.basis_data]
+            
+            if hasattr(self, 'original_forwards'):
+                for layer_idx in layers_with_basis:
+                    layer = self.model.model.layers[layer_idx]
+                    target_module = layer.mlp.down_proj
+                    target_module.forward = self.original_forwards[layer_idx]
+                self.logger.info("✓ Original forward methods restored")
             
             # ✅ Step 2: 각 레이어의 weight를 basis_coeff @ U^T로 재구성
             target_indices = self._parse_target_layers(len(self.model.model.layers))
