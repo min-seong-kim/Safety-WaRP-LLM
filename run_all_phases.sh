@@ -11,7 +11,7 @@ echo "========================================================================"
 
 # 설정
 MODEL_NAME="meta-llama/Llama-3.1-8B-Instruct"
-SAFETY_SAMPLES=5000
+SAFETY_SAMPLES=500
 UTILITY_SAMPLES=0
 BATCH_SIZE=4
 DTYPE="bfloat16"
@@ -19,7 +19,7 @@ DEVICE="cuda"
 EPOCHS=3
 LEARNING_RATE=1e-5
 KEEP_RATIO=0.1
-TARGET_LAYERS="29-31"
+TARGET_LAYERS=31
 
 # 기본 디렉토리
 BASE_OUTPUT_DIR="./checkpoints"

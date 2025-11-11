@@ -6,7 +6,7 @@ Phase 3 완료 후 만들어진 모델을 HuggingFace Hub에 업로드하는 스
 
 Usage:
     python upload_to_huggingface.py \
-        --model_path ./checkpoints/phase3_TIMESTAMP/checkpoints/checkpoints/phase3_best.pt \
+        --model_path ./checkpoints/phase3_20251109_190831/checkpoints/checkpoints/phase3_best.pt \
         --hf_model_id kmseong/WaRP-Safety-Llama3_8B_Instruct \
         --hf_token your_huggingface_token
 """

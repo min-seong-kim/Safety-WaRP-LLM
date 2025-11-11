@@ -94,6 +94,7 @@ class BasisLinear(torch.autograd.Function):
         Backward pass: 마스킹을 적용하여 frozen directions의 gradient 제거
         
         grad_output: gradient w.r.t. output 
+            - LLM 종류마다 배치 차원이 다를 수 있음
             - 2D: (batch_size, out_features)
             - 3D: (batch_size, seq_len, out_features) for LLM
         Returns: (grad_x, grad_basis_coeff, grad_U, grad_bias, grad_mask)
@@ -148,14 +149,6 @@ class BasisLinear(torch.autograd.Function):
         # ✅ CRITICAL: backward는 forward의 inputs와 같은 개수의 gradient를 반환해야 함
         # forward inputs: (x, basis_coeff, U, bias, mask)
         # U와 mask는 모두 non-trainable이므로 None을 반환
-        
-        # Debug output
-        # print(f"[BasisLinear backward return values]")
-        # print(f"  - grad_x type: {type(grad_x)}, requires_grad: {getattr(grad_x, 'requires_grad', 'N/A')}")
-        # print(f"  - grad_basis_coeff type: {type(grad_basis_coeff)}, requires_grad: {getattr(grad_basis_coeff, 'requires_grad', 'N/A')}")
-        # print(f"  - grad_U type: {type(grad_U)}, value: {grad_U}")
-        # print(f"  - grad_bias type: {type(grad_bias)}, requires_grad: {getattr(grad_bias, 'requires_grad', 'N/A')}")
-        # print(f"  - Returning 5 values: (grad_x, grad_basis_coeff, grad_U={grad_U}, grad_bias, None)")
         
         return grad_x, grad_basis_coeff, grad_U, grad_bias, None
 
@@ -618,7 +611,7 @@ class Phase3IncrementalLearner:
         """
         try:
             self.logger.info("  Reconstructing weights from learned basis_coeff...")
-            
+                                     
             for layer_idx in sorted(self.masks.keys()):
                 layer = self.model.model.layers[layer_idx]
                 target_module = layer.mlp.down_proj
@@ -724,13 +717,18 @@ class Phase3IncrementalLearner:
             )
             loss = outputs.loss
             
-            # ✅ GSM8K 파인튜닝 검증: 손실 값 기록
+            # ✅ Gradient accumulation: loss를 accumulation_steps로 나누기
+            scaled_loss = loss / self.gradient_accumulation_steps
+            
+            # ✅ GSM8K 파인튜닝 검증: 손실 값 기록 (스케일링되지 않은 원본 loss 기록)
             loss_improvements.append(loss.item())
             
             # Backward pass
-            optimizer.zero_grad()
-            loss.backward()
-
+            scaled_loss.backward()
+            
+            # ✅ Gradient accumulation 스텝인지 확인
+            should_step = ((batch_idx + 1) % self.gradient_accumulation_steps == 0) or (batch_idx == len(self.train_loader) - 1)
+            
             # After backward, apply element-wise mask to basis_coeff.grad to freeze important inputs
             batch_frozen_grad = 0.0
             batch_trainable_grad = 0.0
@@ -765,7 +763,7 @@ class Phase3IncrementalLearner:
                 else:
                     frozen_norm_before = 0.0
 
-                # ✅ 마스킹 적용
+                # ✅ 마스킹 적용: WaRP의 핵심 - frozen direction의 gradient를 0으로 설정
                 if frozen_idx.any():
                     basis_param.grad[:, frozen_idx] = 0.0
 
@@ -804,17 +802,22 @@ class Phase3IncrementalLearner:
                     'num_trainable': trainable_idx.sum().item(),
                 })
             
-            # Gradient clipping
-            total_norm = torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
+            # ✅ Gradient accumulation: 스텝에서만 업데이트
+            if should_step:
+                # ✅ Gradient clipping (max_grad_norm=0.3, finetune_gsm8k.py와 동일)
+                total_norm = torch.nn.utils.clip_grad_norm_(self.model.parameters(), 0.3)
+                
+                # Update
+                optimizer.step()
+                optimizer.zero_grad()
+                
+                if lr_scheduler:
+                    lr_scheduler.step()
+                
+                num_batches += 1
             
-            # Update
-            optimizer.step()
-            if lr_scheduler:
-                lr_scheduler.step()
-            
-            total_loss += loss.item()
+            total_loss += loss.item()  # 스케일링되지 않은 원본 loss 누적
             total_masked_grad_norm += batch_masked_before
-            num_batches += 1
             
             # 배치 로그 저장
             batch_logs.append({
@@ -827,6 +830,7 @@ class Phase3IncrementalLearner:
                 'trainable_grad': batch_trainable_grad,
                 'param_norm': batch_param_norm,
                 'layer_logs': layer_logs,
+                'is_update_step': should_step,
             })
             
             # ✅ GSM8K 파인튜닝 검증: 손실 개선도 계산
@@ -840,7 +844,8 @@ class Phase3IncrementalLearner:
             progress_bar.set_postfix({
                 'loss': f'{loss.item():.4f}',
                 'frzn_norm': f'{batch_frozen_grad:.6f}',
-                'train_norm': f'{batch_trainable_grad:.4f}'
+                'train_norm': f'{batch_trainable_grad:.4f}',
+                'accum': f'{((batch_idx + 1) % self.gradient_accumulation_steps) or self.gradient_accumulation_steps}/{self.gradient_accumulation_steps}' if not should_step else '✓'
             })
             
             # 매 N개 배치마다 상세 로그 출력
@@ -859,7 +864,8 @@ class Phase3IncrementalLearner:
                     f"Trainable grad: {batch_trainable_grad:.4f} | "
                     f"Param norm: {batch_param_norm:.4f} | "
                     f"Tokens: {num_tokens_batch}/{seq_length*batch_size} | "
-                    f"LR: {current_lr:.2e}"
+                    f"LR: {current_lr:.2e} | "
+                    f"Update steps: {num_batches}"
                 )
                 
                 # 레이어별 상세 정보 출력
@@ -875,12 +881,14 @@ class Phase3IncrementalLearner:
                         f"trainable({layer_log['num_trainable']})"
                     )
         
-        # 에포크 통계
-        avg_loss = total_loss / max(num_batches, 1)
-        avg_frozen_grad = total_frozen_grad_norm / max(num_batches, 1)
-        avg_trainable_grad = total_trainable_grad_norm / max(num_batches, 1)
-        avg_masked_before = total_masked_grad_norm / max(num_batches, 1)
-        avg_param_norm = total_param_norm / max(num_batches, 1)
+        # 에포크 통계 (num_batches는 gradient accumulation 스텝 횟수)
+        avg_loss = total_loss / max(len(batch_logs), 1)  # 모든 forward pass로 나누기
+        num_update_steps = num_batches
+        
+        avg_frozen_grad = total_frozen_grad_norm / max(len(batch_logs), 1)
+        avg_trainable_grad = total_trainable_grad_norm / max(len(batch_logs), 1)
+        avg_masked_before = total_masked_grad_norm / max(len(batch_logs), 1)
+        avg_param_norm = total_param_norm / max(len(batch_logs), 1)
         
         # ✅ GSM8K 파인튜닝 검증: 손실 수렴 분석
         loss_array = np.array(loss_improvements)
@@ -900,7 +908,7 @@ class Phase3IncrementalLearner:
         
         # 에포크 완료 로그
         self.logger.info(f"\n{'='*70}")
-        self.logger.info(f"Epoch {epoch+1} Summary - GSM8K 파인튜닝 검증")
+        self.logger.info(f"Epoch {epoch+1} Summary - GSM8K 파인튜닝 (SFT 스타일 훈련)")
         self.logger.info(f"{'='*70}")
         self.logger.info(f"  [손실 함수]")
         self.logger.info(f"    • 평균 손실 (Loss): {avg_loss:.4f}")
@@ -916,11 +924,13 @@ class Phase3IncrementalLearner:
         self.logger.info(f"    • Trainable 방향 그래디언트: {avg_trainable_grad:.4f}")
         self.logger.info(f"    • 그래디언트 비율 (Trainable/Frozen): {avg_trainable_grad/max(avg_frozen_grad, 1e-8):.1f}x")
         
-        self.logger.info(f"  [데이터 통계]")
-        self.logger.info(f"    • 총 배치: {num_batches}")
+        self.logger.info(f"  [데이터 및 훈련 통계]")
+        self.logger.info(f"    • 총 Forward 패스: {len(batch_logs)}")
+        self.logger.info(f"    • 총 Gradient Accumulation 스텝 (업데이트): {num_update_steps}")
+        self.logger.info(f"    • Accumulation 비율: {self.gradient_accumulation_steps}x")
         self.logger.info(f"    • 총 토큰: {total_tokens:,}")
-        self.logger.info(f"    • 배치당 평균 토큰: {total_tokens / max(num_batches, 1):.1f}")
-        self.logger.info(f"    • 배치당 평균 시퀀스 길이: {sum(b['seq_length'] for b in batch_logs) / max(num_batches, 1):.1f}")
+        self.logger.info(f"    • 배치당 평균 토큰: {total_tokens / max(len(batch_logs), 1):.1f}")
+        self.logger.info(f"    • 배치당 평균 시퀀스 길이: {sum(b['seq_length'] for b in batch_logs) / max(len(batch_logs), 1):.1f}")
         
         self.logger.info(f"  [파라미터 업데이트]")
         self.logger.info(f"    • 파라미터 norm: {avg_param_norm:.4f}")
@@ -933,9 +943,9 @@ class Phase3IncrementalLearner:
         
         if is_gradient_ok and is_loss_stable:
             if loss_convergence_pct > 1.0:
-                self.logger.info(f"    ✅ 파인튜닝 진행 중! (손실 수렴 O, 그래디언트 흐름 O)")
+                self.logger.info(f"    ✅ 파인튜닝 진행 중! (손실 수렴 O, 그래디언트 흐름 O, SFT 스타일 훈련 적용됨)")
             elif is_converging:
-                self.logger.info(f"    ✅ 파인튜닝 진행 중! (손실 안정적, 그래디언트 흐름 O)")
+                self.logger.info(f"    ✅ 파인튜닝 진행 중! (손실 안정적, 그래디언트 흐름 O, SFT 스타일 훈련 적용됨)")
             else:
                 self.logger.info(f"    ⚠️ 파인튜닝 진행 (손실이 천천히 수렴 중)")
         else:
@@ -994,34 +1004,50 @@ class Phase3IncrementalLearner:
             self.logger.info(f"✓ Total dimensions: {total_frozen} frozen, {total_trainable} trainable")
             
             # 3. Optimizer 설정
-            self.logger.info("\n[Step 5] Setting up optimizer...")
+            self.logger.info("\n[Step 5] Setting up optimizer and scheduler (SFTTrainer style)...")
+            
+            # ✅ gradient accumulation 설정 (effective batch: 4 * 16 = 64)
+            self.gradient_accumulation_steps = 16
+            
+            # ✅ gradient checkpointing 활성화 (메모리 절감: ~50%)
+            if hasattr(self.model.config, 'gradient_checkpointing'):
+                self.model.gradient_checkpointing_enable()
+                self.logger.info(f"✓ Gradient checkpointing enabled")
+            
             optimizer = optim.AdamW(
                 self.model.parameters(),
                 lr=self.args.learning_rate,
                 weight_decay=self.args.weight_decay
             )
             
-            # Learning rate scheduler (간단한 선형 감소)
+            # ✅ Learning rate scheduler: Cosine annealing with warmup (SFTTrainer 방식)
             total_steps = len(self.train_loader) * self.args.epochs
+            warmup_steps = int(total_steps * 0.05)  # 5% warmup (finetune_gsm8k.py와 동일)
             
-            # Linear scheduler 구현
-            def get_linear_lr(step, total_steps, warmup_steps=0.1):
-                warmup_steps = int(total_steps * warmup_steps)
+            def cosine_lr_lambda(step):
+                """Cosine annealing with linear warmup"""
                 if step < warmup_steps:
                     return float(step) / float(max(1, warmup_steps))
-                return max(0.0, float(total_steps - step) / float(max(1, total_steps - warmup_steps)))
+                progress = float(step - warmup_steps) / float(max(1, total_steps - warmup_steps))
+                return max(0.0, 0.5 * (1.0 + np.cos(np.pi * progress)))
             
             lr_scheduler = optim.lr_scheduler.LambdaLR(
                 optimizer,
-                lr_lambda=lambda step: get_linear_lr(step, total_steps)
+                lr_lambda=cosine_lr_lambda
             )
-            [[]]
-            self.logger.info(f"✓ Optimizer configured:")
+            
+            self.logger.info(f"✓ Optimizer configured (matching SFTTrainer):")
             self.logger.info(f"  - Algorithm: AdamW")
             self.logger.info(f"  - Learning rate (initial): {self.args.learning_rate}")
             self.logger.info(f"  - Weight decay: {self.args.weight_decay}")
-            self.logger.info(f"  - Scheduler: Linear decay with 10% warmup")
+            self.logger.info(f"  - Batch size: {self.args.batch_size}")
+            self.logger.info(f"  - Gradient accumulation steps: {self.gradient_accumulation_steps}")
+            self.logger.info(f"  - Effective batch size: {self.args.batch_size * self.gradient_accumulation_steps}")
+            self.logger.info(f"  - Scheduler: Cosine decay with 5% warmup")
             self.logger.info(f"  - Total training steps: {total_steps}")
+            self.logger.info(f"  - Warmup steps: {warmup_steps}")
+            self.logger.info(f"  - Max grad norm: 0.3")
+            self.logger.info(f"  - Gradient checkpointing: Enabled")
             
             # 4. 훈련
             self.logger.info("\n[Step 6] Starting training...")
@@ -1092,7 +1118,7 @@ class Phase3IncrementalLearner:
             self.restore_original_forwards()
             
             self.logger.info("\n" + "="*70)
-            self.logger.info("PHASE 3 TRAINING FINAL SUMMARY - GSM8K 파인튜닝 결과 분석")
+            self.logger.info("PHASE 3 TRAINING FINAL SUMMARY - SFT 스타일 GSM8K 파인튜닝 결과")
             self.logger.info("="*70)
             
             # 전체 에포크에 대한 손실 분석
@@ -1123,13 +1149,22 @@ class Phase3IncrementalLearner:
                 convergence_improvement_pct = (convergence_improvement / first_third) * 100 if first_third > 0 else 0
                 self.logger.info(f"    • 전반부 vs 후반부 수렴: {convergence_improvement:.4f} ({convergence_improvement_pct:.2f}%)")
             
+            self.logger.info(f"\n  [SFT 스타일 훈련 구성]")
+            self.logger.info(f"    • Per-device batch size: {self.args.batch_size}")
+            self.logger.info(f"    • Gradient accumulation steps: {self.gradient_accumulation_steps}")
+            self.logger.info(f"    • Effective batch size: {self.args.batch_size * self.gradient_accumulation_steps}")
+            self.logger.info(f"    • Gradient checkpointing: Enabled (메모리 절감)")
+            self.logger.info(f"    • LR scheduler: Cosine annealing with 5% warmup")
+            self.logger.info(f"    • Max grad norm: 0.3")
+            self.logger.info(f"    • Optimizer: AdamW with weight decay {self.args.weight_decay}")
+            
             self.logger.info(f"\n  [훈련 통계]")
             self.logger.info(f"    • 총 훈련 시간: {total_training_time:.2f}s ({total_training_time/60:.2f} min)")
             self.logger.info(f"    • 총 에포크: {self.args.epochs}")
             self.logger.info(f"    • 에포크당 평균 시간: {total_training_time/max(self.args.epochs, 1):.2f}s")
             self.logger.info(f"    • 체크포인트 디렉토리: {self.args.checkpoint_dir}")
             
-            self.logger.info(f"\n  [보호된 안전 메커니즘]")
+            self.logger.info(f"\n  [보호된 안전 메커니즘 (WaRP)]")
             self.logger.info(f"    • 총 Frozen 차원: {total_frozen:,}")
             self.logger.info(f"    • 총 Trainable 차원: {total_trainable:,}")
             if total_frozen + total_trainable > 0:
@@ -1137,7 +1172,7 @@ class Phase3IncrementalLearner:
             else:
                 self.logger.info(f"    • Frozen 비율: N/A (마스크 데이터 없음)")
             
-            self.logger.info(f"\n  [GSM8K 파인튜닝 최종 판정]")
+            self.logger.info(f"\n  [최종 판정: SFT 스타일 GSM8K 파인튜닝 성공도]")
             
             # 판정 기준 계산
             loss_improvement_ok = total_loss_improvement_pct > 3  # 3% 이상 개선

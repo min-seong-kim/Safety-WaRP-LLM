@@ -20,7 +20,7 @@ class Phase1BasiBuilder:
     Phase 1: Basis Construction Builder
     
     절차:
-    1. 모델 로드 (LLaMA 3 8B)
+    1. 모델 로드 (LLaMA 3 8B instruction)
     2. 안전 데이터 로드 (do-not-answer)
     3. Forward hook을 통해 각 FFN down_proj의 입력값 수집
     4. 수집된 활성화로부터 공분산 행렬 계산
@@ -242,7 +242,7 @@ class Phase1BasiBuilder:
             # 각 레이어에 훅 등록
             for layer_idx in layer_indices:
                 layer = self.model.model.layers[layer_idx]
-                
+                # AutoModelForCausalLM -> 각 transformer -> layer 접근
                 if self.args.layer_type == 'ffn_down':
                     target_module = layer.mlp.down_proj
                 elif self.args.layer_type == 'ffn_up':
@@ -299,7 +299,7 @@ class Phase1BasiBuilder:
                         max_length=512
                     )
                     
-                    # attention_mask 저장 (패딩 마스킹용)
+                    # attention_mask 저장 (패딩 마스킹용, 이후 activation의 공분산 구할때 padding 제거에 사용)
                     attention_mask = inputs['attention_mask']  # (batch, seq_len)
                     self.attention_masks.append(attention_mask)
                     
