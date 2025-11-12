@@ -98,8 +98,40 @@ python train.py \
 - `--target_layers`: Layer range to process
   - Predefined: `all` (0-31), `early` (0-10), `middle` (11-21), `late` (22-31), `last` (31)
   - Custom: single layer `31`, range `30-31`, `0-5`
-- `--layer_type`: Layer component (ffn_down/ffn_up/attn_q/attn_k/attn_v)
+- `--layer_type`: Layer component to analyze and mask
 - `--dtype`: Model precision (float32/float16/bfloat16)
+
+### Supported Layer Types
+
+Safety-WaRP now supports **5 different layer types** that can be specified via `--layer_type`:
+
+| Layer Type | Component | Shape | Default | Example |
+|-----------|-----------|-------|---------|---------|
+| `ffn_down` | MLP Down Projection | (4096, 14336) | ✅ Yes | `--layer_type ffn_down` |
+| `ffn_up` | MLP Up Projection | (14336, 4096) | - | `--layer_type ffn_up` |
+| `attn_q` | Self-Attention Q | (4096, 4096) | - | `--layer_type attn_q` |
+| `attn_k` | Self-Attention K | (4096, 4096) | - | `--layer_type attn_k` |
+| `attn_v` | Self-Attention V | (4096, 4096) | - | `--layer_type attn_v` |
+
+**Important**: Each phase (1, 2, 3) processes the same layer type. To analyze multiple layer types, run phases separately:
+
+```bash
+# Phase 1-3 with FFN Down
+python train.py --phase 1 --layer_type ffn_down --target_layers all
+python train.py --phase 2 --layer_type ffn_down --basis_dir <basis_path>
+python train.py --phase 3 --layer_type ffn_down --masks_dir <masks_path>
+
+# Then repeat with FFN Up
+python train.py --phase 1 --layer_type ffn_up --target_layers all
+python train.py --phase 2 --layer_type ffn_up --basis_dir <basis_path>
+python train.py --phase 3 --layer_type ffn_up --masks_dir <masks_path>
+```
+
+### Layer Type Characteristics
+
+- **FFN Down/Up**: Process MLP transformations (14K → 4K → 14K). Larger gradient flow.
+- **Attention Q/K/V**: Process query/key/value projections. Captures attention mechanisms.
+- **Recommendation**: Start with `ffn_down` (baseline), then test `ffn_up` and `attn_*` for comprehensive coverage.
 
 **Output**:
 ```
@@ -119,16 +151,17 @@ checkpoints/phase1_YYYYMMDD_HHMMSS/
 
 ### Phase 2: Importance Scoring
 
-*(Implementation coming in next iteration)*
+**Goal**: Identify important weight directions using safety data
 
 ```bash
-# Coming soon
+# Using previously computed Phase 1 basis
 python train.py \
     --phase 2 \
     --basis_dir ./checkpoints/phase1_TIMESTAMP/checkpoints/basis \
     --safety_samples 100 \
     --batch_size 4 \
     --keep_ratio 0.1 \
+    --layer_type ffn_down \
     --device cuda:0 \
     --dtype bfloat16
 ```
@@ -138,15 +171,17 @@ python train.py \
 - `--safety_samples`: Number of samples for importance scoring (default: 50)
 - `--batch_size`: Batch size for processing (default: 4)
 - `--keep_ratio`: Fraction of directions to keep as "important" (default: 0.1 = top 10%)
-- `--target_layers`: Which layers to score (default: all)
+- `--layer_type`: **MUST match Phase 1 layer_type** (ffn_down/ffn_up/attn_q/attn_k/attn_v)
+- `--target_layers`: Which layers to score (default: all, must match Phase 1)
 
 **Output**: Importance masks saved to `checkpoints/phase2_TIMESTAMP/checkpoints/masks/`
 
-**Example - Quick Test**:
+**Example - Test with FFN Up (matching Phase 1)**:
 ```bash
 python train.py --phase 2 \
-    --basis_dir ./checkpoints/phase1_latest/checkpoints/basis \
+    --basis_dir ./checkpoints/phase1_ffn_up/checkpoints/basis \
     --safety_samples 10 \
+    --layer_type ffn_up \
     --target_layers last
 ```
 
@@ -176,10 +211,10 @@ See `scripts/phase2_examples.sh` for more examples.
 
 ### Layer Selection Examples
 
-You can control which layers to process using `--target_layers`:
+You can control which layers to process using `--target_layers` and `--layer_type`:
 
 ```bash
-# Predefined ranges
+# Predefined ranges with FFN Down (default)
 python train.py --phase 1 --target_layers all       # All layers (0-31)
 python train.py --phase 1 --target_layers early     # Early layers (0-10)
 python train.py --phase 1 --target_layers middle    # Middle layers (11-21)
@@ -190,6 +225,17 @@ python train.py --phase 1 --target_layers last      # Last layer (31)
 python train.py --phase 1 --target_layers 31        # Single layer (layer 31 only)
 python train.py --phase 1 --target_layers 30-31     # Range (layers 30-31)
 python train.py --phase 1 --target_layers 0-5       # Range (layers 0-5)
+
+# Different layer types
+python train.py --phase 1 --layer_type ffn_down --target_layers all    # MLP down
+python train.py --phase 1 --layer_type ffn_up --target_layers all      # MLP up
+python train.py --phase 1 --layer_type attn_q --target_layers all      # Attention Q
+python train.py --phase 1 --layer_type attn_k --target_layers all      # Attention K
+python train.py --phase 1 --layer_type attn_v --target_layers all      # Attention V
+
+# Combined: specific layer type + layer range
+python train.py --phase 1 --layer_type ffn_up --target_layers last     # MLP up on layer 31
+python train.py --phase 1 --layer_type attn_q --target_layers 0-5      # Attention Q on layers 0-5
 ```
 
 ### Phase 3: Downstream Learning
@@ -200,7 +246,7 @@ python train.py --phase 1 --target_layers 0-5       # Range (layers 0-5)
 # Using shell script (recommended)
 bash scripts/run_phase3.sh  # Auto-detects Phase 1/2 results
 
-# Or direct Python command
+# Or direct Python command with matching layer_type
 python train.py \
     --phase 3 \
     --basis_dir ./checkpoints/phase1_TIMESTAMP/checkpoints/basis \
@@ -209,6 +255,7 @@ python train.py \
     --epochs 3 \
     --batch_size 2 \
     --learning_rate 5e-5 \
+    --layer_type ffn_down \
     --device cuda:0 \
     --dtype bfloat16
 ```
@@ -220,17 +267,28 @@ python train.py \
 - `--epochs`: Training epochs (default: 3)
 - `--batch_size`: Batch size for training (default: 2)
 - `--learning_rate`: Learning rate (default: 5e-5)
+- `--layer_type`: **MUST match Phase 1 & 2 layer_type**
 
 **Output**: Fine-tuned model saved to `checkpoints/phase3_TIMESTAMP/checkpoints/`
 
-**Example - Quick Test**:
+**Example - Quick Test with FFN Up**:
 ```bash
 python train.py --phase 3 \
-    --basis_dir ./checkpoints/phase1_latest/checkpoints/basis \
-    --masks_dir ./checkpoints/phase2_latest/checkpoints/masks \
+    --basis_dir ./checkpoints/phase1_ffn_up/checkpoints/basis \
+    --masks_dir ./checkpoints/phase2_ffn_up/checkpoints/masks \
     --utility_samples 50 \
-    --epochs 1
+    --epochs 1 \
+    --layer_type ffn_up
+```
+
+**Example - Attention Layer Test**:
+```bash
+python train.py --phase 3 \
+    --basis_dir ./checkpoints/phase1_attn_q/checkpoints/basis \
+    --masks_dir ./checkpoints/phase2_attn_q/checkpoints/masks \
+    --utility_samples 100 \
+    --epochs 1 \
+    --layer_type attn_q
 ```
 
 See `scripts/phase3_examples.sh` for more examples.
-

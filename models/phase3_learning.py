@@ -527,7 +527,7 @@ class Phase3IncrementalLearner:
 
             for layer_idx in sorted(self.masks.keys()):
                 layer = self.model.model.layers[layer_idx]
-                target_module = layer.mlp.down_proj
+                target_module = self._get_target_module(layer)
 
                 # load mask and U
                 mask = self.masks[layer_idx]
@@ -584,7 +584,7 @@ class Phase3IncrementalLearner:
         try:
             for layer_idx, original_forward in self.original_forwards.items():
                 layer = self.model.model.layers[layer_idx]
-                target_module = layer.mlp.down_proj
+                target_module = self._get_target_module(layer)
                 target_module.forward = original_forward
                 # remove attached parameter if exists
                 if hasattr(target_module, 'basis_coeff'):
@@ -601,6 +601,29 @@ class Phase3IncrementalLearner:
         except Exception as e:
             self.logger.error(f"Failed to restore forwards: {str(e)}", exc_info=True)
     
+    def _get_target_module(self, layer):
+        """
+        주어진 layer에서 layer_type에 맞는 모듈 반환
+        
+        Args:
+            layer: transformer layer 객체
+            
+        Returns:
+            target_module: 선택된 projection 모듈
+        """
+        if self.args.layer_type == 'ffn_down':
+            return layer.mlp.down_proj
+        elif self.args.layer_type == 'ffn_up':
+            return layer.mlp.up_proj
+        elif self.args.layer_type == 'attn_q':
+            return layer.self_attn.q_proj
+        elif self.args.layer_type == 'attn_k':
+            return layer.self_attn.k_proj
+        elif self.args.layer_type == 'attn_v':
+            return layer.self_attn.v_proj
+        else:
+            raise ValueError(f"Unknown layer type: {self.args.layer_type}")
+    
     def _reconstruct_and_save_final_model(self):
         """
         ✅ 최종 모델 저장 전: basis_coeff @ U^T를 계산하여 원본 weight로 복원
@@ -614,7 +637,7 @@ class Phase3IncrementalLearner:
                                      
             for layer_idx in sorted(self.masks.keys()):
                 layer = self.model.model.layers[layer_idx]
-                target_module = layer.mlp.down_proj
+                target_module = self._get_target_module(layer)
                 
                 if not hasattr(target_module, 'basis_coeff'):
                     self.logger.warning(f"  Layer {layer_idx}: basis_coeff not found, skipping")
@@ -738,7 +761,7 @@ class Phase3IncrementalLearner:
 
             for layer_idx in sorted(self.masks.keys()):
                 layer = self.model.model.layers[layer_idx]
-                target_module = layer.mlp.down_proj
+                target_module = self._get_target_module(layer)
 
                 if not hasattr(target_module, 'basis_coeff'):
                     continue
@@ -990,7 +1013,7 @@ class Phase3IncrementalLearner:
             total_trainable = 0
             for layer_idx in sorted(self.masks.keys()):
                 layer = self.model.model.layers[layer_idx]
-                target_module = layer.mlp.down_proj
+                target_module = self._get_target_module(layer)
                 mask = target_module._warp_mask
                 num_frozen = (mask == 1).sum().item()
                 num_trainable = (mask == 0).sum().item()
@@ -1103,7 +1126,7 @@ class Phase3IncrementalLearner:
             total_trainable = 0
             for layer_idx in sorted(self.masks.keys()):
                 layer = self.model.model.layers[layer_idx]
-                target_module = layer.mlp.down_proj
+                target_module = self._get_target_module(layer)
                 if hasattr(target_module, '_warp_mask'):
                     mask = target_module._warp_mask
                     num_frozen = (mask == 1).sum().item()
@@ -1224,7 +1247,7 @@ class Phase3IncrementalLearner:
         try:
             for layer_idx in sorted(self.masks.keys()):
                 layer = self.model.model.layers[layer_idx]
-                target_module = layer.mlp.down_proj
+                target_module = self._get_target_module(layer)
 
                 if not hasattr(target_module, 'basis_coeff') or not hasattr(target_module, 'U_matrix'):
                     continue
@@ -1262,5 +1285,5 @@ class Phase3IncrementalLearner:
             # restore original weights to continue training unaffected
             for layer_idx, orig_w in orig_weights.items():
                 layer = self.model.model.layers[layer_idx]
-                target_module = layer.mlp.down_proj
+                target_module = self._get_target_module(layer)
                 target_module.weight.data.copy_(orig_w)

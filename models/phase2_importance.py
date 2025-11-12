@@ -248,7 +248,20 @@ class Phase2ImportanceScorer:
                     continue
                 
                 layer = self.model.model.layers[layer_idx]
-                target_module = layer.mlp.down_proj
+                
+                # Select target module based on layer_type
+                if self.args.layer_type == 'ffn_down':
+                    target_module = layer.mlp.down_proj
+                elif self.args.layer_type == 'ffn_up':
+                    target_module = layer.mlp.up_proj
+                elif self.args.layer_type == 'attn_q':
+                    target_module = layer.self_attn.q_proj
+                elif self.args.layer_type == 'attn_k':
+                    target_module = layer.self_attn.k_proj
+                elif self.args.layer_type == 'attn_v':
+                    target_module = layer.self_attn.v_proj
+                else:
+                    raise ValueError(f"Unknown layer type: {self.args.layer_type}")
                 
                 # ✅ Step 1: 원본 가중치 저장 (분석용, 고정)
                 W_original = target_module.weight.data.clone()  # (d_out, d_in) = (4096, 14336)
@@ -351,7 +364,7 @@ class Phase2ImportanceScorer:
             
             for layer_idx in layers_with_basis:
                 layer = self.model.model.layers[layer_idx]
-                target_module = layer.mlp.down_proj
+                target_module = self._get_target_module(layer)
                 
                 # basis_coeff 생성 또는 재사용
                 if not hasattr(target_module, 'basis_coeff'):
@@ -408,7 +421,7 @@ class Phase2ImportanceScorer:
             
             for layer_idx in layers_with_basis:
                 layer = self.model.model.layers[layer_idx]
-                target_module = layer.mlp.down_proj
+                target_module = self._get_target_module(layer)
                 
                 # 원본 forward 저장
                 self.original_forwards[layer_idx] = target_module.forward
@@ -505,7 +518,7 @@ class Phase2ImportanceScorer:
                         batch_importance_collected = 0
                         for layer_idx in layers_with_basis:
                             layer = self.model.model.layers[layer_idx]
-                            target_module = layer.mlp.down_proj
+                            target_module = self._get_target_module(layer)
                             
                             if hasattr(target_module, 'basis_coeff'):
                                 if target_module.basis_coeff.grad is not None:
@@ -650,7 +663,7 @@ class Phase2ImportanceScorer:
             
             for layer_idx in layers_with_basis:
                 layer = self.model.model.layers[layer_idx]
-                target_module = layer.mlp.down_proj
+                target_module = self._get_target_module(layer)
                 
                 if hasattr(target_module, 'basis_coeff') and hasattr(target_module, 'U_matrix'):
                     self.logger.debug(f"\n  Layer {layer_idx} 처리 중...")
@@ -726,7 +739,7 @@ class Phase2ImportanceScorer:
             
             for layer_idx in layers_with_basis:
                 layer = self.model.model.layers[layer_idx]
-                target_module = layer.mlp.down_proj
+                target_module = self._get_target_module(layer)
                 
                 if hasattr(target_module, 'basis_coeff'):
                     basis_coeff = target_module.basis_coeff.detach().cpu()
@@ -882,6 +895,29 @@ class Phase2ImportanceScorer:
         except Exception as e:
             self.logger.error(f"Failed to save masks: {str(e)}", exc_info=True)
             raise
+    
+    def _get_target_module(self, layer):
+        """
+        주어진 layer에서 layer_type에 맞는 모듈 반환
+        
+        Args:
+            layer: transformer layer 객체
+            
+        Returns:
+            target_module: 선택된 projection 모듈
+        """
+        if self.args.layer_type == 'ffn_down':
+            return layer.mlp.down_proj
+        elif self.args.layer_type == 'ffn_up':
+            return layer.mlp.up_proj
+        elif self.args.layer_type == 'attn_q':
+            return layer.self_attn.q_proj
+        elif self.args.layer_type == 'attn_k':
+            return layer.self_attn.k_proj
+        elif self.args.layer_type == 'attn_v':
+            return layer.self_attn.v_proj
+        else:
+            raise ValueError(f"Unknown layer type: {self.args.layer_type}")
     
     def _parse_target_layers(self, num_layers):
         """타겟 레이어 파싱 (Phase 1과 동일)"""

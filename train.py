@@ -1,15 +1,30 @@
 """
-Safety-WaRP-LLM: Phase 1 - Basis Construction
-기본 목표: 안전 데이터로부터 FFN down_proj 활성화 기반 SVD 계산
+Safety-WaRP-LLM: Multi-Layer Support (Phase 1, 2, 3)
+목표: 다양한 레이어 타입으로 안전 기반 구성 및 마스킹
 
-사용 방법:
-    python train.py \
-        --phase 1 \
-        --model_name meta-llama/Llama-3.1-8B-Instruct \
-        --safety_samples 100 \
-        --batch_size 4 \
-        --device cuda:0 \
-        --seed 42
+사용 방법 - Phase 1 (FFN Down Projection):
+    python train.py --phase 1 --model_name meta-llama/Llama-3.1-8B-Instruct --layer_type ffn_down --target_layers all
+
+사용 방법 - Phase 1 (FFN Up Projection):
+    python train.py --phase 1 --model_name meta-llama/Llama-3.1-8B-Instruct --layer_type ffn_up --target_layers all
+
+사용 방법 - Phase 1 (Attention Q Projection):
+    python train.py --phase 1 --model_name meta-llama/Llama-3.1-8B-Instruct --layer_type attn_q --target_layers last
+
+지원되는 Layer Types:
+    - ffn_down: MLP down projection (기본값)
+    - ffn_up: MLP up projection
+    - attn_q: Self-attention Q projection
+    - attn_k: Self-attention K projection
+    - attn_v: Self-attention V projection
+
+Target Layers 옵션:
+    - all: 모든 레이어 (0-31)
+    - early: 초반 레이어 (0-10)
+    - middle: 중간 레이어 (11-21)
+    - late: 후반 레이어 (22+)
+    - last: 마지막 레이어만
+    - 범위: 0-5, 30-31, 31 등
 """
 
 import os
@@ -51,10 +66,21 @@ def parse_args():
     
     # 레이어 설정
     parser.add_argument('--target_layers', type=str, default='all',
-                        help='타겟 레이어 범위. 옵션: all, early, middle, late, last, 또는 쉼표로 구분된 범위 (예: 31, 0-5, 30-31)')
+                        help='타겟 레이어 범위. 옵션: all, early (0-10), middle (11-21), late (22+), last, 또는 범위 (예: 31, 0-5, 30-31)')
     parser.add_argument('--layer_type', type=str, default='ffn_down',
                         choices=['ffn_down', 'ffn_up', 'attn_q', 'attn_k', 'attn_v'],
-                        help='타겟 레이어 타입')
+                        help='''타겟 레이어 타입. 각 phase에서 모든 target_layers에 동일하게 적용됨.
+                        - ffn_down: MLP down projection (기본값)
+                        - ffn_up: MLP up projection
+                        - attn_q: Self-attention Q projection
+                        - attn_k: Self-attention K projection
+                        - attn_v: Self-attention V projection
+                        
+                        예제:
+                          Phase 1: python train.py --phase 1 --layer-type ffn_up --target-layers all
+                          Phase 1: python train.py --phase 1 --layer-type attn_q --target-layers last
+                          Phase 1: python train.py --phase 1 --layer-type attn_v --target-layers 0-5,31''')
+
     
     # Phase 2 설정
     parser.add_argument('--basis_dir', type=str, default=None,
