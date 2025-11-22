@@ -1,44 +1,29 @@
 """
 Safety-WaRP-LLM: Multi-Layer Support (Phase 1, 2, 3)
-목표: 다양한 레이어 타입으로 안전 기반 구성 및 마스킹
 
-사용 방법 - Phase 1 (FFN Down Projection):
-    python train.py --phase 1 --model_name meta-llama/Llama-3.1-8B-Instruct --layer_type ffn_down --target_layers all
-
-사용 방법 - Phase 1 (FFN Up Projection):
-    python train.py --phase 1 --model_name meta-llama/Llama-3.1-8B-Instruct --layer_type ffn_up --target_layers all
-
-사용 방법 - Phase 1 (Attention Q Projection):
-    python train.py --phase 1 --model_name meta-llama/Llama-3.1-8B-Instruct --layer_type attn_q --target_layers last
-
-지원되는 Layer Types:
-    - ffn_down: MLP down projection (기본값)
+Support Layer Types:
+    - ffn_down: MLP down projection (default)
     - ffn_up: MLP up projection
     - attn_q: Self-attention Q projection
     - attn_k: Self-attention K projection
     - attn_v: Self-attention V projection
 
-Target Layers 옵션:
-    - all: 모든 레이어 (0-31)
-    - early: 초반 레이어 (0-10)
-    - middle: 중간 레이어 (11-21)
-    - late: 후반 레이어 (22+)
-    - last: 마지막 레이어만
-    - 범위: 0-5, 30-31, 31 등
+Target Layers options:
+    - all: all layers (0-31)
+    - early: early layers (0-10)
+    - middle: middle layers (11-21)
+    - late: late layers (22+)
+    - last: last layer only
+    - range: e.g., 0-5, 30-31, 31
 """
 
 import os
-import sys
 import argparse
-import json
-import torch
 import logging
 from datetime import datetime
-from pathlib import Path
 
 # 로컬 임포트
-from utils import setup_logger, set_seed, ensure_dir, save_config, load_config, AverageTracker
-from data.data_loader import create_safety_dataloader
+from utils import setup_logger, set_seed, ensure_dir, save_config
 from models.phase1_basis import Phase1BasiBuilder
 
 
@@ -66,19 +51,9 @@ def parse_args():
     
     # 레이어 설정
     parser.add_argument('--target_layers', type=str, default='all',
-                        help='타겟 레이어 범위. 옵션: all, early (0-10), middle (11-21), late (22+), last, 또는 범위 (예: 31, 0-5, 30-31)')
+                        help='타겟 레이어 범위.')
     parser.add_argument('--layer_type', type=str, default='ffn_down',
-                        help='''처리할 layer types (쉼표로 구분 가능).
-                        - Phase 1: 여러 타입 동시 처리 가능 --layer_type ffn_down,ffn_up
-                        - Phase 2, 3: 단일 타입만 지원 --layer_type ffn_down
-                        
-                        지원 타입: ffn_down, ffn_up, attn_q, attn_k, attn_v
-                        
-                        예제:
-                          Phase 1: python train.py --phase 1 --layer_type ffn_down,ffn_up --target-layers all
-                          Phase 1: python train.py --phase 1 --layer_type ffn_down,ffn_up,attn_q --target-layers 30-31
-                          Phase 2: python train.py --phase 2 --layer_type ffn_down
-                          Phase 3: python train.py --phase 3 --layer_type ffn_up''')
+                        help='''처리할 layer types (쉼표로 구분)''')
 
     
     # Phase 2 설정
@@ -234,7 +209,7 @@ def main():
             logger.info("="*60)
             run_phase3(args, logger)
         
-        logger.info("\n" + "="*60)
+        logger.info("="*60)
         logger.info(f"✓ Phase {args.phase} completed successfully!")
         logger.info("="*60)
         
@@ -259,33 +234,33 @@ def run_phase1(args, logger):
     logger.info("-" * 60)
     
     # Step 1: 모델 로드
-    logger.info("\n[Step 1] Loading model...")
+    logger.info("[Step 1] Loading model...")
     builder = Phase1BasiBuilder(args, logger)
     builder.load_model()
     logger.info(f"✓ Model loaded: {args.model_name}")
     
     # Step 2: 안전 데이터 로드
-    logger.info("\n[Step 2] Loading safety data (do-not-answer)...")
+    logger.info("[Step 2] Loading safety data (do-not-answer)...")
     builder.load_safety_data()
     logger.info(f"✓ Safety data loaded: batch_size={args.batch_size}")
     
     # Step 3: 활성화 수집 (hook 등록)
-    logger.info("\n[Step 3] Registering forward hooks...")
+    logger.info("[Step 3] Registering forward hooks...")
     builder.register_activation_hooks()
     logger.info(f"✓ Hooks registered for layer types: {args.layer_type}")
     
     # Step 4-5: 활성화 수집 및 공분산 계산
-    logger.info("\n[Step 4-5] Collecting activations and computing covariance...")
+    logger.info("[Step 4-5] Collecting activations and computing covariance...")
     builder.collect_activations()
     logger.info(f"✓ Activations collected from {len(builder.activations)} layers")
     
     # Step 6: SVD 분해
-    logger.info("\n[Step 6] Computing SVD decomposition...")
+    logger.info("[Step 6] Computing SVD decomposition...")
     builder.compute_svd()
     logger.info(f"✓ SVD computed for all layers")
     
     # Step 7: Basis 저장
-    logger.info("\n[Step 7] Saving basis and metadata...")
+    logger.info("[Step 7] Saving basis and metadata...")
     basis_path = builder.save_basis()
     logger.info(f"✓ Basis saved to {basis_path}")
     
@@ -328,61 +303,60 @@ def run_phase2(args, logger):
     
     # Phase 2는 여러 layer_type을 동시에 처리 가능
     logger.info(f"Phase 2: Processing layer_type={args.layer_type}")
-    logger.info("(여러 layer_type은 쉼표로 구분: ffn_down,ffn_up)")
     
     # Step 1: 모델 로드
-    logger.info("\n[Step 1] Loading model...")
+    logger.info("[Step 1] Loading model...")
     scorer = Phase2ImportanceScorer(args, logger, args.basis_dir)
     scorer.load_model()
     logger.info(f"✓ Model loaded: {args.model_name}")
 
     # Step 2: Basis 로드 (여러 layer_type 동시 로드 가능)
-    logger.info("\n[Step 2] Loading basis from Phase 1...")
+    logger.info("[Step 2] Loading basis from Phase 1...")
     scorer.load_basis()
     logger.info(f"✓ Basis loaded: {len(scorer.basis_data)} (layer, type) combinations")
 
     # Step 3: 안전 데이터 로드
-    logger.info("\n[Step 3] Loading safety data (do-not-answer)...")
+    logger.info("[Step 3] Loading safety data (do-not-answer)...")
     scorer.load_safety_data()
     logger.info(f"✓ Safety data loaded: batch_size={args.batch_size}")
 
     # Step 4: 가중치 재매개변수화 (모든 layer_type 동시 처리)
-    logger.info("\n[Step 4] Reparameterizing weights to basis space...")
+    logger.info("[Step 4] Reparameterizing weights to basis space...")
     scorer.reparameterize_weights()
     logger.info(f"✓ Weights reparameterized for all layer types")
 
     # Step 5: Importance 계산 (모든 layer_type 동시 처리)
-    logger.info("\n[Step 5] Computing importance scores...")
+    logger.info("[Step 5] Computing importance scores...")
     scorer.compute_importance()
     logger.info(f"✓ Importance scores computed for {len(scorer.importances)} (layer, type) combinations")
 
     # Step 6: 마스크 생성 (모든 layer_type)
-    logger.info("\n[Step 6] Generating importance masks...")
+    logger.info("[Step 6] Generating importance masks...")
     scorer.generate_masks(keep_ratio=args.keep_ratio)
     logger.info(f"✓ Masks generated with keep_ratio={args.keep_ratio}")
 
     # Step 7: 안전하게 fine-tuning된 모델 저장
-    logger.info("\n[Step 7] Saving fine-tuned model...")
+    logger.info("[Step 7] Saving fine-tuned model...")
     finetuned_model_path = scorer.save_finetuned_model()
     logger.info(f"✓ Fine-tuned model saved to {finetuned_model_path}")
 
     # Step 8: 학습된 basis coefficients 저장
-    logger.info("\n[Step 8] Saving basis coefficients...")
+    logger.info("[Step 8] Saving basis coefficients...")
     coeffs_path = scorer.save_basis_coefficients()
     logger.info(f"✓ Basis coefficients saved to {coeffs_path}")
 
     # Step 9: 마스크 저장
-    logger.info("\n[Step 9] Saving masks and metadata...")
+    logger.info("[Step 9] Saving masks and metadata...")
     masks_path = scorer.save_masks()
     logger.info(f"✓ Masks saved to {masks_path}")
     
     # 최종 리포트
-    logger.info("\n" + "-" * 60)
+    logger.info("-" * 60)
     logger.info("Phase 2 Summary (Outputs):")
     logger.info(f"  1. Fine-tuned model: {finetuned_model_path}")
     logger.info(f"  2. Basis coefficients: {coeffs_path}")
     logger.info(f"  3. Importance masks: {masks_path}")
-    logger.info("\nPhase 2 Statistics:")
+    logger.info("Phase 2 Statistics:")
     logger.info(f"  - Total layers processed: {len(scorer.masks)}")
     logger.info(f"  - Safety samples processed: {args.safety_samples}")
     logger.info(f"  - Keep ratio: {args.keep_ratio}")
@@ -396,6 +370,9 @@ def run_phase3(args, logger):
     
     Phase 1 basis + Phase 2 masks를 사용하여
     GSM8K 데이터로 미세조정하되, 안전 중요 방향은 보호
+    
+    ✅ 모든 layer_type을 동시에 처리 (e.g., --layer_type 'ffn_down,ffn_up,attn_q,attn_k,attn_v')
+       단일 train loop에서 모든 10개 (layer_idx, layer_type) 조합을 동시 학습
     """
     from models.phase3_learning import Phase3IncrementalLearner
     from utils import upload_model_to_huggingface
@@ -410,68 +387,60 @@ def run_phase3(args, logger):
             logger.error("--masks_dir is required for Phase 3")
             raise ValueError("--masks_dir is required for Phase 3")
         
-        # Phase 3는 한 번에 한 가지 layer_type만 처리
+        # 처리할 layer_types 파싱
         layer_types = [lt.strip() for lt in args.layer_type.split(',')]
         
-        if len(layer_types) > 1:
-            logger.warning(f"Phase 3는 한 번에 한 가지 layer_type만 처리 가능합니다.")
-            logger.warning(f"주어진 layer_types: {layer_types}")
-            logger.warning(f"첫 번째 layer_type '{layer_types[0]}'만 처리합니다.")
-            layer_type_to_process = layer_types[0]
-        else:
-            layer_type_to_process = layer_types[0]
+        logger.info(f"{'='*60}")
+        logger.info(f"Phase 3: Processing {len(layer_types)} layer type(s) SIMULTANEOUSLY")
+        logger.info(f"{'='*60}")
+        logger.info(f"Layer types to process: {layer_types}")
+        logger.info(f"Architecture: Single train loop with all {len(layer_types)} types active")
         
-        # args.layer_type을 단일 값으로 설정
-        args.layer_type = layer_type_to_process
-        logger.info(f"Processing layer_type: {layer_type_to_process}")
+        # 모든 layer_type을 한 번에 처리 (순차 루프 제거)
+        logger.info(f"[Phase 3] Initializing learner for simultaneous multi-layer training...")
         
-        # Phase 3 실행
+        # Phase 3 실행 (모든 layer_type 동시 처리)
         learner = Phase3IncrementalLearner(
             args=args,
             logger=logger,
             basis_dir=args.basis_dir,
             masks_dir=args.masks_dir
         )
-
         
         learner.train()
         
-        logger.info(f"✓ Phase 3 completed successfully!")
+        logger.info(f"{'='*60}")
+        logger.info(f"✓ Phase 3 completed for all {len(layer_types)} layer type(s) simultaneously!")
+        logger.info(f"{'='*60}")
         
         # HuggingFace 업로드 (선택사항)
         if args.push_to_hub:
-            logger.info("\n" + "="*60)
-            logger.info("Uploading model to HuggingFace Hub...")
+            logger.info("="*60)
+            logger.info("Uploading final model to HuggingFace Hub...")
             logger.info("="*60)
             
-            # 미세조정 모델 경로
-            model_path = os.path.join(args.exp_dir, 'checkpoints', 'checkpoints', 'phase3_best.pt')
-            
-            # 실제로는 모델이 .pt가 아니라 디렉토리 형식이므로 저장된 경로 확인
-            # Phase3IncrementalLearner의 save_checkpoint에서 모델을 어떻게 저장하는지 확인 필요
-            
             # 모델 저장 디렉토리 (transformers 형식)
-            model_save_dir = os.path.join(args.exp_dir, 'checkpoints', 'final_model')
+            model_save_dir = os.path.join(args.exp_dir, 'checkpoints', 'final_model_all_layers')
             os.makedirs(model_save_dir, exist_ok=True)
             
             # 모델 저장 (transformers 형식)
-            logger.info(f"Saving model to {model_save_dir}...")
+            logger.info(f"Saving final model to {model_save_dir}...")
             learner.model.save_pretrained(model_save_dir)
             learner.tokenizer.save_pretrained(model_save_dir)
-            logger.info("✓ Model saved")
+            logger.info("✓ Final model saved")
             
             # HuggingFace에 업로드
             upload_success = upload_model_to_huggingface(
                 model_path=model_save_dir,
                 repo_id=args.hub_model_id,
                 hf_token=args.hf_token,
-                commit_message=f"WaRP Safety-Aligned Model - Phase 3 Complete",
+                commit_message=f"WaRP Safety-Aligned Model - Phase 3 Complete (All {len(layer_types)} Layer Types - Simultaneous)",
                 private=args.hub_private,
                 logger=logger
             )
             
             if upload_success:
-                logger.info(f"\n✓ Model successfully uploaded to https://huggingface.co/{args.hub_model_id}")
+                logger.info(f"✓ Model successfully uploaded to https://huggingface.co/{args.hub_model_id}")
             else:
                 logger.warning("Failed to upload model to HuggingFace Hub")
         

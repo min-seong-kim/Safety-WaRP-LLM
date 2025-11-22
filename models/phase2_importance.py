@@ -6,7 +6,6 @@ Phase 2: Importance Scoring
 import torch
 import torch.nn as nn
 import numpy as np
-from collections import OrderedDict
 import os
 import json
 from tqdm import tqdm
@@ -122,14 +121,8 @@ class Phase2ImportanceScorer:
             for layer_type in layer_types:
                 layer_type_dir = os.path.join(self.basis_dir, layer_type)
                 
-                if os.path.isdir(layer_type_dir):
-                    # 새로운 구조: layer_type별 하위 디렉토리
-                    self.logger.info(f"  - Layer type '{layer_type}': Using new structure")
-                    search_dir = layer_type_dir
-                else:
-                    # 구형 구조: layer_type별 디렉토리 없음
-                    self.logger.info(f"  - Layer type '{layer_type}': Using old structure")
-                    search_dir = self.basis_dir
+                self.logger.info(f"  - Layer type '{layer_type}': Using new structure")
+                search_dir = layer_type_dir
                 
                 # 해당 layer_type의 모든 layer_*_svd.pt 파일 찾기
                 svd_files = sorted(glob.glob(os.path.join(search_dir, 'layer_*_svd.pt')))
@@ -269,7 +262,6 @@ class Phase2ImportanceScorer:
         """
         try:
             self.logger.info("Reparameterizing weights to basis space...")
-            self.logger.info("\n" + "="*70)
             self.logger.info("Weight Space → Basis Space Transformation (Multiple Layer Types)")
             self.logger.info("="*70)
             
@@ -300,38 +292,39 @@ class Phase2ImportanceScorer:
                     else:
                         raise ValueError(f"Unknown layer type: {layer_type}")
                     
-                    # ✅ Step 1: 원본 가중치 저장 (분석용, 고정)
+                    # Step 1: 원본 가중치 저장 (분석용, 고정)
                     W_original = target_module.weight.data.clone()
                     self.original_weights[key] = W_original
                     
-                    # ✅ Step 2: Basis 행렬 추출 및 dtype 변환
-                    U = self.basis_data[key]['U']
-                    model_dtype = W_original.dtype
-                    U = U.to(dtype=model_dtype, device=W_original.device)
+                    # Step 2: Basis 행렬 추출 및 dtype 변환
+                    VT_forward = self.basis_data[key]['Vh']
                     
-                    # ✅ Step 3: basis_coeff 초기화
-                    basis_coeff_init = W_original @ U
+                    model_dtype = W_original.dtype
+                    VT_forward = VT_forward.to(dtype=model_dtype, device=W_original.device)
+                    
+                    # Step 3: basis_coeff 초기화
+                    basis_coeff_init = W_original @ VT_forward.t()
                     
                     # basis_coeff를 학습 가능한 Parameter로 등록
                     # 주의: 같은 module을 여러 layer_type에서 재사용하면 안되므로, 
                     # 추가 속성으로 저장 (나중에 참조용)
                     target_module.basis_coeff = nn.Parameter(basis_coeff_init.clone(), requires_grad=True)
-                    target_module.U_matrix = U.clone().detach()
-                    target_module.U_matrix.requires_grad = False
+                    target_module.VT_forward = VT_forward.clone().detach()  # Vh matrix for reconstruction
+                    target_module.VT_forward.requires_grad = False
                     
                     self.basis_coeffs[key] = basis_coeff_init
                     
                     # 로깅
-                    self.logger.info(f"\nLayer {layer_idx} ({layer_type}):")
+                    self.logger.info(f"Layer {layer_idx} ({layer_type}):")
                     self.logger.info(f"  ✓ W_original (고정):     {W_original.shape}")
                     self.logger.info(f"  ✓ basis_coeff (학습):    {basis_coeff_init.shape}")
-                    self.logger.info(f"  ✓ U_matrix (고정):      {U.shape}")
-                    self.logger.info(f"  ✓ Forward: W = basis_coeff @ U^T")
+                    self.logger.info(f"  ✓ VT_forward (고정):     {VT_forward.shape} (Vh matrix)")
+                    self.logger.info(f"  ✓ Forward: W = basis_coeff @ VT_forward")
             
-            self.logger.info(f"\n{'='*70}")
+            self.logger.info(f"{'='*70}")
             self.logger.info(f"✓ Reparameterization completed: {len(self.basis_coeffs)} (layer, type) combinations")
 
-            self.logger.info(f"{'='*70}\n")
+            self.logger.info(f"{'='*70}")
             
         except Exception as e:
             self.logger.error(f"Failed to reparameterize weights: {str(e)}", exc_info=True)
@@ -341,77 +334,52 @@ class Phase2ImportanceScorer:
         """
         안전 데이터로 fine-tuning하면서 importance 점수 계산
         
-        ✨ WaRP의 핵심:
-        ==============================================================================
-        | 단계 | 연산 공간 | 목적 | 수식 |
-        |------|-----------|------|------|
-        | Forward | 원본 가중치 | 모델 실행 | W = basis_coeff @ U^T |
-        | Backward | 기저 공간 | Gradient 계산 | ∂L/∂basis_coeff (chain rule 자동) |
-        | Importance | 기저 공간 | 중요도 점수 | importance = |∂L/∂basis_coeff| |
-        | Update | 기저 공간 | 파라미터 갱신 | basis_coeff -= lr * ∂L/∂basis_coeff |
-        ==============================================================================
-        
-        절차:
+        과정:
         1. 모델을 훈련 모드로 설정
         2. Optimizer 설정 (basis_coeff 파라미터만)
-        3. Forward pass: weight = basis_coeff @ U^T로 동적 복원 (원본 가중치 공간)
+        3. Forward pass: weight = basis_coeff @ Vh로 동적 복원 (원본 가중치 공간)
         4. Loss 계산 및 역전파: ∂L/∂basis_coeff 계산 (기저 공간에서)
-        5. Importance 수집: |∂L/∂basis_coeff| ← 파인튜닝 과정 중 수집!
+        5. Importance 수집: |∂L/∂basis_coeff| ← 파인튜닝 과정 중 수집
         6. Optimizer.step(): basis_coeff 업데이트 (기저 공간에서)
         7. 에포크 완료 후 importance 평균 계산
         
         핵심:
-        - Forward: 원본 가중치 공간 (W = basis_coeff @ U^T)
+        - Forward: 원본 가중치 공간 (W = basis_coeff @ Vh)
         - Backward: 기저 공간 (gradient는 basis_coeff에 대해)
         - Importance: 기저 공간에서 수집 (파인튜닝과 동시)
-        - 이렇게 해야 WaRP가 제대로 동작함!
-        
-        Log:
-        - 에포크별 손실
-        - Batch별 gradient 통계
-        - Forward/Backward 공간 검증
-        - 최종 importance 점수
+
         """
         try:
             self.logger.info("Starting Phase 2: Fine-tuning + Importance Scoring...")
-            self.logger.info("\n" + "="*70)
-            self.logger.info("WaRP Phase 2: 안전 파인튜닝 + 중요도 점수 계산")
             self.logger.info("="*70)
-            self.logger.info("Forward: 원본 가중치 공간 (W = basis_coeff @ U^T)")
+            self.logger.info("Forward: 원본 가중치 공간 (W = basis_coeff @ Vh)")
             self.logger.info("Backward: 기저 공간 (∂L/∂basis_coeff 계산)")
-            self.logger.info("Importance: 파인튜닝 과정 중 수집!")
-            self.logger.info("="*70)
-            self.logger.info("\n" + "="*70)
+            self.logger.info("Importance: 파인튜닝 과정 중 수집")
             self.logger.info("Training Setup")
             self.logger.info("="*70)
             
-            # ✅ Step 0: 모든 parameter를 requires_grad=False로 설정
+            # Step 0: 모든 parameter를 requires_grad=False로 설정
             # WaRP layer가 아닌 나머지는 gradient 계산 불필요
-            self.logger.info("\n" + "="*70)
             self.logger.info("Step 0: Freeze 모든 parameter (WaRP layer 제외)")
             self.logger.info("="*70)
             
             for param in self.model.parameters():
                 param.requires_grad = False
             
-            self.logger.info("✓ 모든 parameter를 requires_grad=False로 설정")
-            self.logger.info("  → 목표: WaRP layer의 basis_coeff만 업데이트")
-            self.logger.info("  → 효과: 불필요한 gradient 계산 제거, 메모리/시간 절약")
-            
-            # ✅ Step 1: 모델을 훈련 모드로 설정 (Dropout 등 활성화)
+            # Step 1: 모델을 훈련 모드로 설정 (Dropout 등 활성화)
             self.model.train()
             self.logger.info("✓ Model set to training mode")
             
-            # ✅ Step 2: Optimizer 설정 (basis_coeff 파라미터만) - Multiple Layer Types
+            # Step 2: Optimizer 설정 (basis_coeff 파라미터만) - Multiple Layer Types
             basis_params = []
             target_indices = self._parse_target_layers(len(self.model.model.layers))
             # (layer_idx, layer_type) 튜플로 filter
             layers_with_basis = [key for key in self.basis_data.keys() 
                                 if key[0] in target_indices]
             
-            self.logger.debug(f"[Phase2] Target indices: {target_indices}")
-            self.logger.debug(f"[Phase2] Layers in basis_data: {sorted(self.basis_data.keys())}")
-            self.logger.debug(f"[Phase2] Layers with basis (intersection): {sorted(layers_with_basis)}")
+            self.logger.info(f"Target indices: {target_indices}")
+            self.logger.info(f"Layers in basis_data: {sorted(self.basis_data.keys())}")
+            self.logger.info(f"Layers with basis (intersection): {sorted(layers_with_basis)}")
             
             for layer_idx, layer_type in layers_with_basis:
                 layer = self.model.model.layers[layer_idx]
@@ -420,45 +388,45 @@ class Phase2ImportanceScorer:
                 # basis_coeff 생성 또는 재사용
                 if not hasattr(target_module, 'basis_coeff'):
                     basis_info = self.basis_data[(layer_idx, layer_type)]
-                    U = basis_info['U']  # orthonormal basis
+                    VT_forward = basis_info['Vh']  # (rank, d_out)
                     
-                    # 올바른 초기화: W_original @ U
+                    # 올바른 초기화: W_original @ Vh.T
                     # 이렇게 하면:
-                    #   W_reconstructed = basis_coeff @ U^T
-                    #                  = (W_original @ U) @ U^T
-                    #                  ≈ W_original (U는 orthonormal이므로)
+                    #   W_reconstructed = basis_coeff @ Vh
+                    #                  = (W_original @ Vh.T) @ Vh
+                    #                  ≈ W_original (Vh는 orthonormal이므로)
                     W_original = target_module.weight.data.clone()
                     
                     # dtype 맞추기
-                    U_dtype = U.to(dtype=W_original.dtype, device=W_original.device)
+                    VT_forward_dtype = VT_forward.to(dtype=W_original.dtype, device=W_original.device)
                     
-                    # basis_coeff = W @ U (투영)
-                    basis_coeff_init = W_original @ U_dtype
+                    # basis_coeff = W @ Vh.T (투영)
+                    basis_coeff_init = W_original @ VT_forward_dtype.t()
                     
                     basis_coeff = torch.nn.Parameter(basis_coeff_init.clone())
                     target_module.basis_coeff = basis_coeff
                     
-                    # ✅ WaRP layer의 basis_coeff만 requires_grad=True로 설정
+                    # WaRP layer의 basis_coeff만 requires_grad=True로 설정
                     target_module.basis_coeff.requires_grad_(True)
                     
-                    # ✅ 원본 weight는 requires_grad=False (이미 Step 0에서 처리됨)
+                    # 원본 weight는 requires_grad=False (이미 Step 0에서 처리됨)
                     target_module.weight.requires_grad_(False)
                     if target_module.bias is not None:
                         target_module.bias.requires_grad_(False)
                     
-                    # U_matrix도 저장 (forward에서 사용) - requires_grad=False
-                    target_module.U_matrix = U_dtype
+                    # VT_forward도 저장 (forward에서 사용) - requires_grad=False
+                    target_module.VT_forward = VT_forward_dtype
                     
-                    self.logger.debug(f"[Phase2] Layer {layer_idx} ({layer_type}): basis_coeff created (shape: {basis_coeff.shape})")
+                    self.logger.info(f"Layer {layer_idx} ({layer_type}): basis_coeff created (shape: {basis_coeff.shape})")
                 
                 # basis_coeff를 optimizer에 추가
                 if hasattr(target_module, 'basis_coeff'):
-                    # ✅ requires_grad=True 확인 (중요!)
+                    # requires_grad=True 확인
                     if not target_module.basis_coeff.requires_grad:
                         target_module.basis_coeff.requires_grad_(True)
                     
                     basis_params.append(target_module.basis_coeff)
-                    self.logger.debug(f"[Phase2] Layer {layer_idx} ({layer_type}): basis_coeff added to optimizer")
+                    self.logger.debug(f"[Phase2] Layer {layer_idx} ({layer_type}): basis_coeff added to optimizer (Vh-based)")
                     self.logger.debug(f"         - basis_coeff.requires_grad={target_module.basis_coeff.requires_grad}")
                     self.logger.debug(f"         - weight.requires_grad={target_module.weight.requires_grad}")
                     self.logger.debug(f"         - bias.requires_grad={target_module.bias.requires_grad if target_module.bias is not None else 'N/A'}")
@@ -474,28 +442,27 @@ class Phase2ImportanceScorer:
             
             optimizer = torch.optim.AdamW(basis_params, lr=learning_rate, weight_decay=weight_decay)
             
-            self.logger.info(f"\n✓ Optimizer 생성 완료: AdamW")
+            self.logger.info(f"✓ Optimizer 생성 완료: AdamW")
             self.logger.info(f"  - Learning rate: {learning_rate}")
             self.logger.info(f"  - Weight decay: {weight_decay}")
-            self.logger.info(f"  - 업데이트할 파라미터: {len(basis_params)} basis_coeff tensors (총 {sum(p.numel() for p in basis_params):,}개 원소)")
+            self.logger.info(f"  - 업데이트할 파라미터: {len(basis_params)} basis_coeff tensors (총 {sum(p.numel() for p in basis_params):,}개 파라미터)")
             self.logger.info(f"  - 업데이트할 레이어: {layers_with_basis}")
             
-            # ✅ 검증: 현재 requires_grad 상태 확인
+            # 검증: 현재 requires_grad 상태 확인
             total_params = sum(p.numel() for p in self.model.parameters())
             trainable_params = sum(p.numel() for p in self.model.parameters() if p.requires_grad)
             frozen_params = total_params - trainable_params
             
-            self.logger.info(f"\n{'='*70}")
-            self.logger.info(f"📊 파라미터 상태 검증")
             self.logger.info(f"{'='*70}")
+            self.logger.info(f"파라미터 상태 검증")
             self.logger.info(f"  - 총 파라미터: {total_params:,}")
             self.logger.info(f"  - 업데이트 대상 (requires_grad=True): {trainable_params:,} ({100*trainable_params/total_params:.3f}%)")
             self.logger.info(f"  - 동결됨 (requires_grad=False): {frozen_params:,} ({100*frozen_params/total_params:.3f}%)")
-            self.logger.info(f"  ✅ WaRP layer의 basis_coeff만 업데이트됨")
-            self.logger.info(f"  ✅ 나머지 모든 weight는 동결됨")
-            self.logger.info(f"{'='*70}\n")
+            self.logger.info(f"  WaRP layer의 basis_coeff만 업데이트됨")
+            self.logger.info(f"  나머지 모든 weight는 동결됨")
+            self.logger.info(f"{'='*70}")
             
-            # ✅ Step 3: Forward 메서드 교체 - autograd 호환 (hook 대신 사용)
+            # Step 3: Forward 메서드 교체 - autograd 호환 (hook 대신 사용)
             # forward hook 대신 actual forward method를 교체하여 gradient graph가 끊기지 않도록 함
             self.original_forwards = {}
             
@@ -506,14 +473,14 @@ class Phase2ImportanceScorer:
                 # 원본 forward 저장 (tuple key로 저장)
                 self.original_forwards[(layer_idx, layer_type)] = target_module.forward
                 
-                # 새 forward 메서드 생성 (클로저로 basis_coeff와 U_matrix 캡처)
+                # 새 forward 메서드 생성 (클로저로 basis_coeff와 VT_forward 캡처)
                 def make_new_forward(module, orig_forward, layer_idx, layer_type):
                     def new_forward(x):
-                        # basis_coeff @ U^T @ x^T
-                        if hasattr(module, 'basis_coeff') and hasattr(module, 'U_matrix'):
-                            basis_coeff = module.basis_coeff  # (d_out, rank)
-                            U_matrix = module.U_matrix        # (d_in, rank)
-                            weight_reconstructed = basis_coeff @ U_matrix.T  # (d_out, d_in)
+                        # basis_coeff @ Vh
+                        if hasattr(module, 'basis_coeff') and hasattr(module, 'VT_forward'):
+                            basis_coeff = module.basis_coeff    # (d_out, rank)
+                            VT_forward = module.VT_forward      # (rank, d_out)
+                            weight_reconstructed = basis_coeff @ VT_forward  # (d_out, d_in)
                             # Linear forward: y = x @ W^T + bias
                             return torch.nn.functional.linear(x, weight_reconstructed, module.bias)
                         else:
@@ -523,17 +490,17 @@ class Phase2ImportanceScorer:
                 
                 target_module.forward = make_new_forward(target_module, self.original_forwards[(layer_idx, layer_type)], layer_idx, layer_type)
             
-            self.logger.info(f"✓ Forward 메서드 {len(layers_with_basis)}개 (layer, type) 조합에서 교체됨 (autograd 호환)")
+            self.logger.info(f"Forward 메서드 {len(layers_with_basis)}개 (layer, type) 조합에서 교체됨 (Vh-based autograd 호환)")
             
-            # ✅ Step 4: Importance 저장소 초기화 - Tuple keys for (layer_idx, layer_type)
+            # Step 4: Importance 저장소 초기화 - Tuple keys for (layer_idx, layer_type)
             importances = {key: [] for key in layers_with_basis}
             
-            self.logger.info("\n" + "="*70)
+            self.logger.info(f"{'='*70}")
             self.logger.info("Fine-tuning with Importance Tracking")
 
-            self.logger.info("="*70)
+            self.logger.info(f"{'='*70}")
             
-            # ✅ Step 5: 훈련 루프
+            # Step 5: 훈련 루프
             epochs = getattr(self.args, 'safety_epochs', 3)
             total_loss = 0.0
             total_batches = 0
@@ -569,7 +536,7 @@ class Phase2ImportanceScorer:
                     combined_ids = combined['input_ids'].to(self.model.device)
                     combined_attn = combined['attention_mask'].to(self.model.device)
                     
-                    # ✅ Forward pass: weight = basis_coeff @ U^T
+                    # Forward pass: weight = basis_coeff @ Vh
                     outputs = self.model(
                         input_ids=combined_ids,
                         attention_mask=combined_attn
@@ -587,14 +554,14 @@ class Phase2ImportanceScorer:
                     target_ids_flat = target_ids_shift[valid_mask]
                     
                     if len(target_ids_flat) > 0:
-                        # ✅ Loss 계산
+                        # Loss 계산
                         loss = nn.CrossEntropyLoss()(pred_logits_flat, target_ids_flat)
                         
-                        # ✅ Backward: basis_coeff.grad 계산
+                        # Backward: basis_coeff.grad 계산
                         optimizer.zero_grad()
                         loss.backward()
                         
-                        # ✅ Importance 수집: |basis_coeff.grad| - Multiple Layer Types
+                        # Importance 수집: |basis_coeff.grad| - Multiple Layer Types
                         batch_importance_collected = 0
                         for layer_idx, layer_type in layers_with_basis:
                             layer = self.model.model.layers[layer_idx]
@@ -611,7 +578,7 @@ class Phase2ImportanceScorer:
                             else:
                                 self.logger.debug(f"[Batch {batch_idx}] Layer {layer_idx} ({layer_type}): no basis_coeff!")
                         
-                        # ✅ Update: basis_coeff 업데이트
+                        # Update: basis_coeff 업데이트
                         optimizer.step()
                         
                         epoch_loss += loss.item()
@@ -624,24 +591,22 @@ class Phase2ImportanceScorer:
                     progress_bar.update(1)
                 
                 epoch_loss_avg = epoch_loss / max(epoch_batches, 1)
-                self.logger.info(f"\n[Epoch {epoch+1}/{epochs}] Average Loss: {epoch_loss_avg:.4f}")
+                self.logger.info(f"[Epoch {epoch+1}/{epochs}] Average Loss: {epoch_loss_avg:.4f}")
             
-            # ✅ 훈련 완료 후 forward 메서드는 복원하지 않음
+            # 훈련 완료 후 forward 메서드는 복원하지 않음
             # 이유: basis_coeff는 이미 파인튜닝됨 (훈련 중 업데이트됨)
-            #      forward를 복원할 필요 없음 (basis_coeff @ U^T를 계속 사용해야 함)
+            #      forward를 복원할 필요 없음 (basis_coeff @ Vh를 계속 사용해야 함)
             #      대신 save_finetuned_model()에서 weight.data에 직접 저장
-            self.logger.info(f"\n✅ 훈련 완료!")
+            self.logger.info(f"훈련 완료!")
             self.logger.info(f"   - basis_coeff: 훈련으로 업데이트됨")
-            self.logger.info(f"   - Forward 메서드: new_forward 유지 (basis_coeff @ U^T 사용)")
+            self.logger.info(f"   - Forward 메서드: new_forward 유지 (basis_coeff @ Vh 사용)")
             self.logger.info(f"   - 다음: importance 집계 및 마스크 생성")
             
-            # ✅ Step 6: Importance 평균 계산 (파인튜닝 중 수집한 gradient 기반)
-            self.logger.info("\n" + "="*70)
-            self.logger.info("📊 Importance Scores 계산 (기저 공간에서 수집한 gradient 기반)")
+            # Step 6: Importance 평균 계산 (파인튜닝 중 수집한 gradient 기반)
             self.logger.info("="*70)
+            self.logger.info("Importance Scores 계산 (기저 공간에서 수집한 gradient 기반)")
             self.logger.info("수식: importance_per_input = mean(|∂L/∂basis_coeff|) over batches")
             self.logger.info("의미: 안전 파인튜닝 중 각 기저 차원이 얼마나 중요했는가?")
-            self.logger.info("="*70)
             
             self.importances = {}
             for layer_idx, layer_type in layers_with_basis:
@@ -649,7 +614,7 @@ class Phase2ImportanceScorer:
                     # 모든 배치의 gradient를 스택
                     layer_importances = torch.stack(importances[(layer_idx, layer_type)], dim=0)  # (num_batches, d_out, rank)
                     
-                    self.logger.info(f"\n✓ Layer {layer_idx} ({layer_type}):")
+                    self.logger.info(f"✓ Layer {layer_idx} ({layer_type}):")
                     self.logger.info(f"  - 수집된 gradient 배치 수: {len(importances[(layer_idx, layer_type)])}")
                     self.logger.info(f"  - 각 배치 shape: (d_out, rank) = {layer_importances[0].shape}")
                     self.logger.info(f"  - 스택 후 shape: {layer_importances.shape}")
@@ -666,7 +631,7 @@ class Phase2ImportanceScorer:
                     self.importances[(layer_idx, layer_type)] = importance_per_input.float().cpu().numpy()
                     
                     # 상세 통계
-                    self.logger.info(f"  📈 통계:")
+                    self.logger.info(f"  📈 Importances score 통계:")
                     self.logger.info(f"     - Mean: {self.importances[(layer_idx, layer_type)].mean():.6f}")
                     self.logger.info(f"     - Std: {self.importances[(layer_idx, layer_type)].std():.6f}")
                     self.logger.info(f"     - Min: {self.importances[(layer_idx, layer_type)].min():.6f}")
@@ -681,26 +646,16 @@ class Phase2ImportanceScorer:
                     self.logger.error(f"✗ Layer {layer_idx} ({layer_type}): No gradients collected! importances[({layer_idx}, {layer_type})] = {importances.get((layer_idx, layer_type), [])}")
             
             avg_loss = total_loss / max(total_batches, 1)
-            self.logger.info(f"\n{'='*70}")
-            self.logger.info(f"✅ Phase 2 완료: Fine-tuning + Importance Scoring")
             self.logger.info(f"{'='*70}")
-            self.logger.info(f"📊 훈련 결과:")
+            self.logger.info(f"Phase 2 완료: Fine-tuning + Importance Scoring")
+            self.logger.info(f"{'='*70}")
+            self.logger.info(f"훈련 결과:")
             self.logger.info(f"   - Total loss (all epochs): {total_loss:.4f}")
             self.logger.info(f"   - Average loss per batch: {avg_loss:.4f}")
             self.logger.info(f"   - Total batches processed: {total_batches}")
             self.logger.info(f"   - Layers with importance scores: {len(self.importances)}")
             self.logger.info(f"   - Layers with basis: {len(layers_with_basis)}")
-            self.logger.info(f"\n🔑 WaRP 검증:")
-            self.logger.info(f"   ✓ Forward: 원본 가중치 공간 (W = basis_coeff @ U^T)")
-            self.logger.info(f"   ✓ Backward: 기저 공간 (∂L/∂basis_coeff)")
-            self.logger.info(f"   ✓ Importance: 파인튜닝 중 수집됨")
-            self.logger.info(f"   ✓ basis_coeff: 훈련으로 업데이트됨")
-            self.logger.info(f"\n📝 다음 단계:")
-            self.logger.info(f"   1. 마스크 생성 (상위 10% 기저 차원 선별)")
-            self.logger.info(f"   2. 안전 정렬 모델 저장")
-            self.logger.info(f"   3. Phase 3: GSM8K로 masked fine-tuning")
-            self.logger.info(f"{'='*70}\n")
-            
+      
             self.stats['total_loss'] = total_loss
             
         except Exception as e:
@@ -711,12 +666,12 @@ class Phase2ImportanceScorer:
         """
         안전하게 fine-tuning된 모델 저장
         
-        목표: basis_coeff @ U^T로 weight를 재구성하여 최종 모델 저장
+        목표: basis_coeff @ Vh로 weight를 재구성하여 최종 모델 저장
         
         중요: 훈련 중 업데이트된 basis_coeff를 사용!
         
         절차:
-        1. 업데이트된 basis_coeff @ U^T 계산 (훈련된 모델)
+        1. 업데이트된 basis_coeff @ Vh 계산 (훈련된 모델)
         2. weight.data에 재구성된 가중치 할당
         3. 모델을 HuggingFace 형식으로 저장
         
@@ -726,36 +681,35 @@ class Phase2ImportanceScorer:
         - Phase 3에서 이 모델을 로드하여 masked fine-tuning 수행
         """
         try:
-            self.logger.info(f"\n{'='*70}")
-            self.logger.info(f"💾 [Step 1] 최종 모델 재구성")
+            self.logger.info(f"[Step 1] 최종 모델 재구성")
             self.logger.info(f"{'='*70}")
             
             # 모델을 평가 모드로 설정 (dropout 등 비활성화)
             self.model.eval()
             
-            # ✅ Step 1: 각 레이어의 weight를 basis_coeff @ U^T로 재구성 - Multiple Layer Types
+            # Step 1: 각 레이어의 weight를 basis_coeff @ Vh로 재구성 - Multiple Layer Types
             target_indices = self._parse_target_layers(len(self.model.model.layers))
             layers_with_basis = [key for key in self.basis_data.keys() 
                                 if key[0] in target_indices]
             
             self.logger.info(f"재구성할 (layer, type) 조합 수: {len(layers_with_basis)}")
-            self.logger.info(f"수식: weight_final = basis_coeff_trained @ U^T")
-            self.logger.info(f"의미: 훈련된 기저 계수를 원본 가중치 공간으로 변환")
+            # 수식: weight_final = basis_coeff_trained @ Vh
+            # 의미: 훈련된 기저 계수를 원본 가중치 공간으로 변환
             
             for layer_idx, layer_type in layers_with_basis:
                 layer = self.model.model.layers[layer_idx]
                 target_module = self._get_target_module(layer, layer_type)
                 
-                if hasattr(target_module, 'basis_coeff') and hasattr(target_module, 'U_matrix'):
-                    self.logger.debug(f"\n  Layer {layer_idx} ({layer_type}) 처리 중...")
+                if hasattr(target_module, 'basis_coeff') and hasattr(target_module, 'VT_forward'):
+                    self.logger.debug(f"Layer {layer_idx} ({layer_type}) 처리 중...")
                     
                     # 훈련된 basis_coeff 추출 (detach 후 CPU로)
                     basis_coeff_trained = target_module.basis_coeff.detach().cpu()  # (d_out, rank)
                     basis_coeff_init = self.basis_coeffs.get((layer_idx, layer_type), None)  # 초기값
-                    U_matrix = target_module.U_matrix.detach().cpu()  # (d_in, rank) - CPU로
+                    VT_forward = target_module.VT_forward.detach().cpu()  # (rank, d_out) - CPU로
                     
                     self.logger.debug(f"    - basis_coeff shape: {basis_coeff_trained.shape} (훈련됨)")
-                    self.logger.debug(f"    - U_matrix shape: {U_matrix.shape} (고정)")
+                    self.logger.debug(f"    - VT_forward shape: {VT_forward.shape} (고정, Vh matrix)")
                     
                     # 훈련 전후 비교
                     if basis_coeff_init is not None:
@@ -774,29 +728,26 @@ class Phase2ImportanceScorer:
                         except Exception as e:
                             self.logger.warning(f"  ⚠ Layer {layer_idx} ({layer_type}) - 변화 비교 실패: {str(e)}")
                     
-                    # 가중치 재구성: basis_coeff @ U^T
-                    weight_reconstructed = basis_coeff_trained @ U_matrix.T  # (d_out, d_in)
+                    # 가중치 재구성: basis_coeff @ Vh
+                    weight_reconstructed = basis_coeff_trained @ VT_forward  # (d_out, d_in)
                     
-                    self.logger.debug(f"    - weight_reconstructed shape: {weight_reconstructed.shape}")
+                    self.logger.info(f"    - weight_reconstructed shape: {weight_reconstructed.shape}")
                     
                     # weight.data에 할당 (GPU로 옮김)
                     target_module.weight.data = weight_reconstructed.to(target_module.weight.device)
             
-            # ✅ Step 2: 모델을 transformers 형식으로 저장
+            # Step 2: 모델을 transformers 형식으로 저장
             model_save_dir = os.path.join(self.args.checkpoint_dir, 'phase2_finetuned_model')
             os.makedirs(model_save_dir, exist_ok=True)
             
-            self.logger.info(f"\n{'='*70}")
-            self.logger.info(f"💾 [Step 2] 안전 정렬 모델 저장")
+            self.logger.info(f"{'='*70}")
+            self.logger.info(f"[Step 2] 안전 정렬 모델 저장")
             self.logger.info(f"{'='*70}")
             
             self.model.save_pretrained(model_save_dir)
             self.tokenizer.save_pretrained(model_save_dir)
             
             self.logger.info(f"✓ 모델 저장 완료: {model_save_dir}")
-            self.logger.info(f"  - Format: HuggingFace (pytorch_model.bin + tokenizer)")
-            self.logger.info(f"  - 이 모델은 안전 데이터로 파인튜닝된 모델입니다")
-            self.logger.info(f"  - Phase 3에서 이 모델을 로드하여 masked fine-tuning 수행")
             
             return model_save_dir
             
@@ -815,7 +766,7 @@ class Phase2ImportanceScorer:
         - Phase 3에서 이를 로드하여 basis_coeff 사용 가능
         """
         try:
-            self.logger.info(f"\n{'='*70}")
+            self.logger.info(f"{'='*70}")
             self.logger.info(f"[Step 3] Saving Basis Coefficients (Multiple Layer Types)")
             self.logger.info(f"{'='*70}")
             
@@ -844,7 +795,7 @@ class Phase2ImportanceScorer:
                     self.logger.info(f"  ✓ Layer {layer_idx} ({layer_type}): {basis_coeff.shape} saved")
             
             self.logger.info(f"✓ Basis coefficients saved: basis_coefficients/(layer_type)/")
-            self.logger.info(f"{'='*70}\n")
+            self.logger.info(f"{'='*70}")
             
         except Exception as e:
             self.logger.error(f"Failed to save basis coefficients: {str(e)}", exc_info=True)
@@ -869,14 +820,14 @@ class Phase2ImportanceScorer:
             keep_ratio: 유지할 weight의 비율 (0.1 = 상위 10%)
         """
         try:
-            self.logger.info(f"\n{'='*70}")
-            self.logger.info(f"🎯 마스크 생성 (Element-wise, Multiple Layer Types)")
+            self.logger.info(f"{'='*70}")
+            self.logger.info(f"마스크 생성 (Element-wise, Multiple Layer Types)")
             self.logger.info(f"{'='*70}")
             self.logger.info(f"목표: 안전 파인튜닝 중 중요한 기저 차원 선별")
             self.logger.info(f"방식: Quantile 기반 상위 {int(keep_ratio*100)}% 선별")
             
             for (layer_idx, layer_type), importance in self.importances.items():
-                self.logger.info(f"\n  Layer {layer_idx} ({layer_type}):")
+                self.logger.info(f"Layer {layer_idx} ({layer_type}):")
                 
                 # 평탄화된 importance에서 quantile 기반 threshold 계산
                 importance_flat = importance.flatten()
@@ -894,12 +845,12 @@ class Phase2ImportanceScorer:
                 trainable_count = len(mask) - frozen_count
                 actual_ratio = frozen_count / len(mask)
                 
-                self.logger.info(f"    📊 마스크 통계:")
+                self.logger.info(f"    마스크 통계:")
                 self.logger.info(f"       - 동결 차원 (mask=1): {int(frozen_count)}/{len(mask)} ({actual_ratio*100:.1f}%)")
                 self.logger.info(f"       - 학습 가능 차원 (mask=0): {int(trainable_count)}/{len(mask)} ({(1-actual_ratio)*100:.1f}%)")
                 self.logger.info(f"       - Phase 3에서 {int(trainable_count)}개 차원만 업데이트됨")
             
-            self.logger.info(f"\n✓ 마스크 생성 완료")
+            self.logger.info(f"✓ 마스크 생성 완료")
             
         except Exception as e:
             self.logger.error(f"Failed to generate masks: {str(e)}", exc_info=True)
@@ -923,8 +874,8 @@ class Phase2ImportanceScorer:
         - 각 레이어별 동결/학습 가능 차원 수
         """
         try:
-            self.logger.info(f"\n{'='*70}")
-            self.logger.info(f"💾 마스크 저장 (Multiple Layer Types)")
+            self.logger.info(f"{'='*70}")
+            self.logger.info(f"마스크 저장 (Multiple Layer Types)")
             self.logger.info(f"{'='*70}")
             
             # 마스크 저장 - layer_type 서브디렉토리 구조
@@ -965,10 +916,10 @@ class Phase2ImportanceScorer:
             with open(metadata_path, 'w') as f:
                 json.dump(metadata, f, indent=4)
             
-            self.logger.info(f"\n✅ 마스크 저장 완료")
+            self.logger.info(f"마스크 저장 완료")
             self.logger.info(f"   - 저장 경로: masks/(layer_type)/")
             self.logger.info(f"   - 파일 수: {len(self.masks)} mask files + metadata.json")
-            self.logger.info(f"\n📊 마스크 통계:")
+            self.logger.info(f"마스크 통계:")
             self.logger.info(f"   - 총 동결 차원: {total_frozen}")
             self.logger.info(f"   - 총 학습 가능 차원: {total_trainable}")
             self.logger.info(f"   - 전체: {total_frozen + total_trainable}")
@@ -976,10 +927,10 @@ class Phase2ImportanceScorer:
                 frozen_ratio = 100 * total_frozen / (total_frozen + total_trainable)
                 self.logger.info(f"   - 동결 비율: {frozen_ratio:.1f}%")
             
-            self.logger.info(f"\n🔒 Phase 3 준비:")
+            self.logger.info(f"Phase 3 준비:")
             self.logger.info(f"   - {total_trainable:,}개 차원은 GSM8K로 학습 가능")
             self.logger.info(f"   - {total_frozen:,}개 차원은 안전성을 위해 동결")
-            self.logger.info(f"{'='*70}\n")
+            self.logger.info(f"{'='*70}")
             
         except Exception as e:
             self.logger.error(f"Failed to save masks: {str(e)}", exc_info=True)

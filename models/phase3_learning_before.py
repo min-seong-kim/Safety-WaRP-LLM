@@ -8,6 +8,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 import numpy as np
+from collections import OrderedDict
 import os
 import json
 from tqdm import tqdm
@@ -15,6 +16,141 @@ import logging
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
+
+# ============================================================
+# 📊 GSM8K 파인튜닝 검증 유틸리티
+# ============================================================
+class GSM8KValidationMetrics:
+    """GSM8K 파인튜닝 진행 상황을 추적하는 메트릭 클래스"""
+    
+    @staticmethod
+    def is_converging(losses: list, min_improvement_pct: float = 1.0) -> bool:
+        """손실이 수렴하는지 확인"""
+        if len(losses) < 2:
+            return False
+        initial = losses[0]
+        final = losses[-1]
+        improvement = (initial - final) / initial * 100
+        return improvement > min_improvement_pct
+    
+    @staticmethod
+    def is_stable(losses: list, max_cv: float = 20.0) -> bool:
+        """손실의 변동성이 안정적인지 확인 (변동계수 기반)"""
+        if len(losses) < 2:
+            return True
+        cv = np.std(losses) / np.mean(losses) * 100
+        return cv < max_cv
+    
+    @staticmethod
+    def has_gradient_flow(frozen_grad: float, trainable_grad: float) -> bool:
+        """그래디언트가 정상적으로 흐르는지 확인"""
+        # Frozen 방향의 그래디언트는 ~0 이고, Trainable 방향은 > 0 이어야 함
+        return frozen_grad < 1e-5 and trainable_grad > 1e-6
+
+
+# ============================================================
+# ✅ BasisLinear: torch.autograd.Function으로 gradient flow 구현
+# ============================================================
+class BasisLinear(torch.autograd.Function):
+    """
+    Weight를 basis_coeff @ U^T로 동적 재구성하면서 gradient를 정확하게 계산.
+    
+    Forward: y = (basis_coeff @ U^T) @ x^T + bias
+    Backward: 마스킹을 적용하여 frozen directions의 gradient = 0
+    
+    Args:
+        x: input (batch_size, in_features)
+        basis_coeff: learnable parameters (out_features, rank)
+        U: fixed basis matrix (in_features, rank)
+        bias: bias (out_features)
+        mask: binary mask (out_features,) - 1:frozen, 0:trainable
+    """
+    
+    @staticmethod
+    def forward(ctx, x, basis_coeff, U, bias, mask):
+        """
+        Forward pass: y = linear(x, weight, bias)
+        where weight = basis_coeff @ U^T
+        """
+        # 1. Weight 재구성 (autograd가 추적 가능한 연산)
+        weight = basis_coeff @ U.T  # (out_features, in_features)
+        
+        # 2. Linear forward
+        output = torch.nn.functional.linear(x, weight, bias)
+        
+        # 3. Backward를 위해 필요한 정보 저장
+        # ✅ mask는 텐서가 아니므로 ctx.save_for_backward에 포함하면 안 됨
+        ctx.save_for_backward(x, basis_coeff, U, bias, weight)
+        ctx.mask = mask  # mask는 non-tensor로 저장
+        
+        # Debug: mask 타입 확인
+        # print(f"[BasisLinear.forward] mask type: {type(mask)}, requires_grad: {getattr(mask, 'requires_grad', 'N/A')}")
+        
+        return output
+    
+    @staticmethod
+    def backward(ctx, grad_output):
+        """
+        Backward pass: 마스킹을 적용하여 frozen directions의 gradient 제거
+        
+        grad_output: gradient w.r.t. output 
+            - LLM 종류마다 배치 차원이 다를 수 있음
+            - 2D: (batch_size, out_features)
+            - 3D: (batch_size, seq_len, out_features) for LLM
+        Returns: (grad_x, grad_basis_coeff, grad_U, grad_bias, grad_mask)
+        """
+        x, basis_coeff, U, bias, weight = ctx.saved_tensors
+        mask = ctx.mask  # 고정된 mask 복원
+        
+        # 3D 배치 처리 (LLM의 경우 시퀀스 길이가 포함됨)
+        original_shape = grad_output.shape
+        if grad_output.dim() == 3:
+            # (batch, seq_len, out_features) → (batch*seq_len, out_features)
+            batch_size, seq_len, out_features = grad_output.shape
+            grad_output = grad_output.reshape(-1, out_features)
+            x = x.reshape(-1, x.shape[-1])  # x도 3D이므로 reshape
+        elif grad_output.dim() != 2:
+            raise RuntimeError(f"grad_output must be 2D or 3D, got {original_shape}")
+        
+        # 1. Linear backward: dL/dW
+        # y = x @ weight^T + bias
+        # grad_output: (batch_size, out_features)
+        # x: (batch_size, in_features)
+        # grad_weight = grad_output.T @ x  (out_features, in_features)
+        grad_weight = grad_output.T @ x
+        
+        # 2. Chain rule: dL/d(basis_coeff)
+        # W = basis_coeff @ U^T
+        # So: grad_basis_coeff = grad_weight @ U
+        grad_basis_coeff = grad_weight @ U  # (out_features, rank) = (4096, 14336)
+        
+        # ✅ 마스킹 적용: frozen directions (mask=1) → gradient = 0
+        # mask shape: (14336,) - 각 input dimension별 마스킹
+        # grad_basis_coeff shape: (4096, 14336) [out_features, rank/input_dim]
+        # 마스킹: 각 input dimension (rank)에 대해 모든 output에 동일하게 적용
+        mask_expanded = (1 - mask).unsqueeze(0).detach()  # (1, 14336) - trainable 방향만 1, detach 필수
+        grad_basis_coeff = grad_basis_coeff * mask_expanded  # (4096, 14336) * (1, 14336) ✓
+        
+        # 3. Gradient w.r.t. U
+        # ⚠️ U는 fixed basis이므로 requires_grad=False
+        # 따라서 None을 반환
+        grad_U = None
+        
+        # 4. Gradient w.r.t. input
+        grad_x = grad_output @ weight  # (batch_size, in_features)
+        
+        # 복원: 3D 입력이었으면 원래 shape로 돌림
+        if len(original_shape) == 3:
+            grad_x = grad_x.reshape(batch_size, seq_len, -1)
+        
+        # 5. Gradient w.r.t. bias
+        grad_bias = grad_output.sum(dim=0)  # (out_features,)
+        
+        # ✅ CRITICAL: backward는 forward의 inputs와 같은 개수의 gradient를 반환해야 함
+        # forward inputs: (x, basis_coeff, U, bias, mask)
+        # U와 mask는 모두 non-trainable이므로 None을 반환
+        
+        return grad_x, grad_basis_coeff, grad_U, grad_bias, None
 
 
 class Phase3IncrementalLearner:
@@ -64,7 +200,7 @@ class Phase3IncrementalLearner:
         self.hook_handles = []
     
     def load_basis(self):
-        """Phase 1에서 저장된 basis 로드 (모든 layer_type 동시 로드)"""
+        """Phase 1에서 저장된 basis 로드"""
         try:
             self.logger.info(f"Loading basis from {self.basis_dir}...")
             
@@ -76,49 +212,30 @@ class Phase3IncrementalLearner:
             self.logger.info(f"✓ Metadata loaded:")
             self.logger.info(f"  - Target layers: {basis_metadata.get('target_layers')}")
             
-            # 모든 layer_type 파싱
-            layer_types_str = self.args.layer_type
-            layer_types = [lt.strip() for lt in layer_types_str.split(',')]
-            self.layer_types = layer_types
-            self.logger.info(f"  - Processing layer types: {layer_types}")
-            
-            # layer_type별 subdirectory에서 basis 파일 로드
+            # basis 파일 로드
             import glob
-            total_loaded = 0
+            svd_files = sorted(glob.glob(os.path.join(self.basis_dir, 'layer_*_svd.pt')))
             
-            for layer_type in layer_types:
-                layer_type_dir = os.path.join(self.basis_dir, layer_type)
+            for svd_path in svd_files:
+                filename = os.path.basename(svd_path)
+                layer_idx = int(filename.split('_')[1])
                 
-                if not os.path.exists(layer_type_dir):
-                    self.logger.error(f"Layer type directory not found: {layer_type_dir}")
-                    available = [d for d in os.listdir(self.basis_dir) if os.path.isdir(os.path.join(self.basis_dir, d))]
-                    self.logger.error(f"Available layer types: {available}")
-                    raise FileNotFoundError(f"Layer type directory not found: {layer_type_dir}")
-                
-                svd_files = sorted(glob.glob(os.path.join(layer_type_dir, 'layer_*_svd.pt')))
-                
-                for svd_path in svd_files:
-                    filename = os.path.basename(svd_path)
-                    layer_idx = int(filename.split('_')[1])
-                    
-                    svd_data = torch.load(svd_path, map_location='cpu')
-                    key = (layer_idx, layer_type)
-                    self.basis_data[key] = {
-                        'U': svd_data['U'].to(self.args.device),
-                        'S': svd_data['S'].to(self.args.device),
-                        'Vh': svd_data['Vh'].to(self.args.device),
-                    }
-                    total_loaded += 1
+                svd_data = torch.load(svd_path, map_location='cpu')
+                self.basis_data[layer_idx] = {
+                    'U': svd_data['U'].to(self.args.device),
+                    'S': svd_data['S'].to(self.args.device),
+                    'Vh': svd_data['Vh'].to(self.args.device),
+                }
             
-            self.logger.info(f"✓ Basis loaded: {total_loaded} (layer, type) combinations")
-            self.logger.info(f"  - Keys: {sorted(self.basis_data.keys())}")
+            self.logger.info(f"✓ Basis loaded: {len(self.basis_data)} layers")
+            self.logger.info(f"  - Layer indices: {sorted(self.basis_data.keys())}")
             
         except Exception as e:
             self.logger.error(f"Failed to load basis: {str(e)}", exc_info=True)
             raise
     
     def load_masks(self):
-        """Phase 2에서 저장된 마스크 로드 (모든 layer_type 동시 로드)"""
+        """Phase 2에서 저장된 마스크 로드"""
         try:
             self.logger.info(f"Loading masks from {self.masks_dir}...")
             
@@ -130,44 +247,26 @@ class Phase3IncrementalLearner:
             self.logger.info(f"✓ Mask metadata loaded:")
             self.logger.info(f"  - Keep ratio: {masks_metadata.get('keep_ratio')}")
             
-            # 모든 layer_type 파싱
-            layer_types_str = self.args.layer_type
-            layer_types = [lt.strip() for lt in layer_types_str.split(',')]
-            
-            # layer_type별 subdirectory에서 마스크 파일 로드
+            # 마스크 파일 로드
             import glob
-            total_loaded = 0
+            mask_files = sorted(glob.glob(os.path.join(self.masks_dir, 'layer_*_mask.pt')))
             
-            for layer_type in layer_types:
-                layer_type_dir = os.path.join(self.masks_dir, layer_type)
+            for mask_path in mask_files:
+                filename = os.path.basename(mask_path)
+                layer_idx = int(filename.split('_')[1])
                 
-                if not os.path.exists(layer_type_dir):
-                    self.logger.error(f"Layer type directory not found: {layer_type_dir}")
-                    available = [d for d in os.listdir(self.masks_dir) if os.path.isdir(os.path.join(self.masks_dir, d))]
-                    self.logger.error(f"Available layer types: {available}")
-                    raise FileNotFoundError(f"Layer type directory not found: {layer_type_dir}")
-                
-                mask_files = sorted(glob.glob(os.path.join(layer_type_dir, 'layer_*_mask.pt')))
-                
-                for mask_path in mask_files:
-                    filename = os.path.basename(mask_path)
-                    layer_idx = int(filename.split('_')[1])
-                    
-                    mask = torch.load(mask_path, map_location='cpu')
-                    key = (layer_idx, layer_type)
-                    self.masks[key] = mask.to(self.args.device)
-                    total_loaded += 1
+                mask = torch.load(mask_path, map_location='cpu')
+                self.masks[layer_idx] = mask.to(self.args.device)
             
-            self.logger.info(f"✓ Masks loaded: {total_loaded} (layer, type) combinations")
-            self.logger.info(f"  - Keys: {sorted(self.masks.keys())}")
+            self.logger.info(f"✓ Masks loaded: {len(self.masks)} layers")
+            self.logger.info(f"  - Layer indices: {sorted(self.masks.keys())}")
             
             # 마스크 통계
-            for key in sorted(self.masks.keys()):
-                mask = self.masks[key]
+            for layer_idx in sorted(self.masks.keys()):
+                mask = self.masks[layer_idx]
                 num_important = (mask == 1).sum().item()
                 ratio = num_important / mask.numel()
-                layer_idx, layer_type = key
-                self.logger.info(f"  - Layer {layer_idx} ({layer_type}): {num_important}/{mask.numel()} important ({ratio*100:.2f}%)")
+                self.logger.info(f"  - Layer {layer_idx}: {num_important}/{mask.numel()} important ({ratio*100:.2f}%)")
             
         except Exception as e:
             self.logger.error(f"Failed to load masks: {str(e)}", exc_info=True)
@@ -175,7 +274,7 @@ class Phase3IncrementalLearner:
     
     def load_model(self):
         """
-        Phase 2의 Safety Fine-tuned 모델 로드
+        ⭐ Phase 2의 Safety Fine-tuned 모델 로드
         
         우선순위:
         1. Phase 2 safety fine-tuned 모델이 있으면 → 그것 로드 (권장)
@@ -192,6 +291,13 @@ class Phase3IncrementalLearner:
             }
             torch_dtype = dtype_map.get(self.args.dtype, torch.bfloat16)
             
+            # ✅ Step 1: Phase 2 safety fine-tuned 모델 경로 확인
+            # 구조 분석:
+            # masks_dir:          ./checkpoints/phase2_XXXX/checkpoints/masks/
+            # phase2_finetuned:   ./checkpoints/phase2_XXXX/checkpoints/phase2_finetuned_model/
+            #
+            # masks_dir의 dirname → ./checkpoints/phase2_XXXX/checkpoints/
+            # 거기에 phase2_finetuned_model 추가
             
             # masks_dir 정규화 (후행 slash 제거)
             masks_dir_normalized = self.masks_dir.rstrip('/')
@@ -223,31 +329,58 @@ class Phase3IncrementalLearner:
                                   "safetensors (single)" if os.path.exists(safetensors_single_path) else "pytorch_model.bin"
                     self.logger.debug(f"Found Phase 2 model at: {phase2_model_dir} (format: {model_format})")
             
-            # Step 2: 모델 로드
-            self.logger.info(f"{'='*70}")
-            self.logger.info(f"Loading {model_source} Model")
-            self.logger.info(f"{'='*70}")
-            self.logger.info(f"Model path: {model_to_load}")
-            self.logger.info(f"Source: Phase 2 safety fine-tuning (do-not-answer dataset)")
+            # ✅ Step 2: 모델 로드
+            if model_to_load is not None:
+                self.logger.info(f"\n{'='*70}")
+                self.logger.info(f"Loading {model_source} Model")
+                self.logger.info(f"{'='*70}")
+                self.logger.info(f"Model path: {model_to_load}")
+                self.logger.info(f"Source: Phase 2 safety fine-tuning (do-not-answer dataset)")
+                
+                self.model = AutoModelForCausalLM.from_pretrained(
+                    model_to_load,
+                    torch_dtype=torch_dtype,
+                    device_map=self.args.device,
+                    trust_remote_code=True
+                )
+                self.logger.info(f"✓ {model_source} model loaded successfully!")
+                self.logger.info(f"  This model has been fine-tuned on safety data (do-not-answer)")
+                self.logger.info(f"  and should refuse harmful requests better than the base model.")
+                
+                # 토크나이저도 Phase 2 모델에서 로드
+                self.tokenizer = AutoTokenizer.from_pretrained(
+                    model_to_load,
+                    trust_remote_code=True
+                )
+            else:
+                # Fallback: 원본 모델 로드 (Phase 2 모델이 없으면)
+                self.logger.warning(f"\n{'='*70}")
+                self.logger.warning(f"⚠️ Phase 2 Safety Fine-tuned Model Not Found!")
+                self.logger.warning(f"{'='*70}")
+                self.logger.warning(f"Expected path: {phase2_model_dir}")
+                self.logger.warning(f"Falling back to original model: {self.args.model_name}")
+                self.logger.warning(f"⚠️ WARNING: Phase 3 will train on original (unsafe) model!")
+                self.logger.warning(f"   This may result in a model that is not safety-aligned.")
+                self.logger.warning(f"{'='*70}\n")
+                
+                self.logger.info(f"Loading original model: {self.args.model_name}")
+                
+                self.model = AutoModelForCausalLM.from_pretrained(
+                    self.args.model_name,
+                    torch_dtype=torch_dtype,
+                    device_map=self.args.device,
+                    trust_remote_code=True
+                )
+                
+                self.logger.info(f"✓ Original model loaded (fallback)")
+                
+                # 토크나이저도 원본에서 로드
+                self.tokenizer = AutoTokenizer.from_pretrained(
+                    self.args.model_name,
+                    trust_remote_code=True
+                )
             
-            self.model = AutoModelForCausalLM.from_pretrained(
-                model_to_load,
-                torch_dtype=torch_dtype,
-                device_map=self.args.device,
-                trust_remote_code=True
-            )
-            self.logger.info(f"✓ {model_source} model loaded successfully!")
-            self.logger.info(f"  This model has been fine-tuned on safety data (do-not-answer)")
-            self.logger.info(f"  and should refuse harmful requests better than the base model.")
-            
-            # 토크나이저도 Phase 2 모델에서 로드
-            self.tokenizer = AutoTokenizer.from_pretrained(
-                model_to_load,
-                trust_remote_code=True
-            )
-        
-            
-            # Step 3: 토크나이저 설정
+            # ✅ Step 3: 토크나이저 설정
             if self.tokenizer.pad_token is None:
                 self.tokenizer.pad_token = self.tokenizer.eos_token
             
@@ -376,11 +509,14 @@ class Phase3IncrementalLearner:
     
     def register_mask_hooks(self):
         """
-        Custom forward 함수로 basis_coeff @ Vh를 사용하여 gradient 추적
+        ✅ Custom forward 함수로 BasisLinear.apply 사용
         
-        모든 layer_type을 동시에 처리
-        Hook 대신 module.forward를 교체하여 autograd 호환성 유지
+        Hook 대신 module.forward를 교체하여 autograd.Function으로 gradient 계산
         """
+        # New robust implementation: do NOT use custom autograd.Function.
+        # Instead register a Python-level custom forward that reconstructs weight
+        # from a learnable `basis_coeff` (so autograd tracks it), and keep the
+        # per-input (element-wise) mask to zero-out gradients after backward.
         try:
             self.original_forwards = {}
             self._basis_params = []  # list of parameters to optimize
@@ -389,64 +525,55 @@ class Phase3IncrementalLearner:
             for p in self.model.parameters():
                 p.requires_grad = False
 
-            # key = (layer_idx, layer_type)
-            for key in sorted(self.masks.keys()):
-                layer_idx, layer_type = key
+            for layer_idx in sorted(self.masks.keys()):
                 layer = self.model.model.layers[layer_idx]
-                target_module = self._get_target_module(layer, layer_type)
+                target_module = self._get_target_module(layer)
 
-                # load mask and Vh 
-                mask = self.masks[key]
+                # load mask and U
+                mask = self.masks[layer_idx]
                 if isinstance(mask, np.ndarray):
                     mask = torch.from_numpy(mask)
                 mask = mask.to(self.model.device).to(torch.bool)
 
-                # Phase 1에서 저장된 Vh 로드 (rank, d_in)
-                basis_info = self.basis_data[key]
-                Vh = basis_info['Vh'].to(self.model.device)  # (rank, d_in)
-                
+                U = self.basis_data[layer_idx]['U'].to(self.model.device)
                 W_original = target_module.weight.data.clone()
-                Vh = Vh.to(dtype=W_original.dtype, device=W_original.device)
+                U = U.to(dtype=W_original.dtype, device=W_original.device)
 
-                # basis_coeff 초기화: W_original @ Vh.T (V와 동일)
-                # Vh shape: (rank, d_in), Vh.T = (d_in, rank) = V
-                basis_coeff_init = W_original @ Vh.T  # (d_out, d_in) @ (d_in, rank) = (d_out, rank)
-                basis_coeff = nn.Parameter(basis_coeff_init.clone())
-                basis_coeff.requires_grad_(True)
-                
+                # Create basis_coeff as a Parameter so autograd computes grads w.r.t it
+                basis_coeff = (W_original @ U).clone().detach()
+                basis_coeff = nn.Parameter(basis_coeff)
                 # attach to module so we can access it later
                 target_module.register_parameter('basis_coeff', basis_coeff)
-                target_module.Vh_forward = Vh  # (rank, d_in) - Vh 그대로 저장
+                target_module.U_matrix = U
                 target_module._warp_mask = mask  # boolean mask on input dims
 
                 # Keep track for optimizer
                 self._basis_params.append(target_module.basis_coeff)
 
-                # Save original forward to restore later (tuple key)
-                self.original_forwards[key] = target_module.forward
+                # Save original forward to restore later
+                self.original_forwards[layer_idx] = target_module.forward
 
-                # Custom forward: compute weight = basis_coeff @ Vh and run linear
-                def make_custom_forward():
+                # Custom forward: compute weight = basis_coeff @ U.T and run linear
+                def make_custom_forward(basis_name='basis_coeff'):
                     def custom_forward(x):
                         module = getattr(custom_forward, '_module')
-                        basis_coeff = module.basis_coeff  # (d_out, rank)
-                        Vh_forward = module.Vh_forward    # (rank, d_in)
-                        weight = basis_coeff @ Vh_forward  # (d_out, d_in)
+                        basis = getattr(module, basis_name)
+                        U_local = module.U_matrix
+                        weight = basis @ U_local.T
                         return torch.nn.functional.linear(x, weight, module.bias)
                     return custom_forward
 
-                custom_fn = make_custom_forward()
+                custom_fn = make_custom_forward('basis_coeff')
                 setattr(custom_fn, '_module', target_module)
                 target_module.forward = custom_fn
 
                 # Logging
-                self.logger.info(f"✓ Layer {layer_idx} ({layer_type}): registered basis_coeff")
+                self.logger.info(f"✓ Layer {layer_idx}: registered basis_coeff")
                 self.logger.info(f"  - basis_coeff shape: {target_module.basis_coeff.shape}")
-                self.logger.info(f"  - Vh_forward shape: {Vh.shape}")
                 self.logger.info(f"  - mask shape: {mask.shape}")
                 self.logger.info(f"  - Frozen (True) count: {mask.sum().item()}/{mask.numel()} ({100*mask.sum().item()/mask.numel():.1f}%)")
 
-            self.logger.info(f"✓ {len(self.original_forwards)} (layer, type) combinations configured for masked fine-tuning")
+            self.logger.info(f"✅ {len(self.original_forwards)} layers configured for masked fine-tuning")
 
         except Exception as e:
             self.logger.error(f"Failed to register mask hooks: {str(e)}", exc_info=True)
@@ -455,20 +582,14 @@ class Phase3IncrementalLearner:
     def restore_original_forwards(self):
         """Forward 함수 복원"""
         try:
-            for key, original_forward in self.original_forwards.items():
-                layer_idx, layer_type = key
+            for layer_idx, original_forward in self.original_forwards.items():
                 layer = self.model.model.layers[layer_idx]
-                target_module = self._get_target_module(layer, layer_type)
+                target_module = self._get_target_module(layer)
                 target_module.forward = original_forward
                 # remove attached parameter if exists
                 if hasattr(target_module, 'basis_coeff'):
                     try:
                         delattr(target_module, 'basis_coeff')
-                    except Exception:
-                        pass
-                if hasattr(target_module, 'Vh_forward'):
-                    try:
-                        delattr(target_module, 'Vh_forward')
                     except Exception:
                         pass
                 if hasattr(target_module, '_warp_mask'):
@@ -480,41 +601,32 @@ class Phase3IncrementalLearner:
         except Exception as e:
             self.logger.error(f"Failed to restore forwards: {str(e)}", exc_info=True)
     
-    def _get_target_module(self, layer, layer_type=None):
+    def _get_target_module(self, layer):
         """
         주어진 layer에서 layer_type에 맞는 모듈 반환
         
         Args:
             layer: transformer layer 객체
-            layer_type: 선택할 layer type ('ffn_down', 'ffn_up', 'attn_q', 'attn_k', 'attn_v')
             
         Returns:
             target_module: 선택된 projection 모듈
         """
-        # layer_type 파라미터 미지정 시 args에서 읽기 (호환성)
-        if layer_type is None:
-            if ',' in self.args.layer_type:
-                # 여러 layer_type이 있으면 첫 번째 사용 (fallback, 정상적으로는 layer_type 명시 필요)
-                layer_type = self.args.layer_type.split(',')[0].strip()
-            else:
-                layer_type = self.args.layer_type
-        
-        if layer_type == 'ffn_down':
+        if self.args.layer_type == 'ffn_down':
             return layer.mlp.down_proj
-        elif layer_type == 'ffn_up':
+        elif self.args.layer_type == 'ffn_up':
             return layer.mlp.up_proj
-        elif layer_type == 'attn_q':
+        elif self.args.layer_type == 'attn_q':
             return layer.self_attn.q_proj
-        elif layer_type == 'attn_k':
+        elif self.args.layer_type == 'attn_k':
             return layer.self_attn.k_proj
-        elif layer_type == 'attn_v':
+        elif self.args.layer_type == 'attn_v':
             return layer.self_attn.v_proj
         else:
-            raise ValueError(f"Unknown layer type: {layer_type}")
+            raise ValueError(f"Unknown layer type: {self.args.layer_type}")
     
     def _reconstruct_and_save_final_model(self):
         """
-        최종 모델 저장 전: basis_coeff @ Vh를 계산하여 원본 weight로 복원
+        ✅ 최종 모델 저장 전: basis_coeff @ U^T를 계산하여 원본 weight로 복원
         
         학습된 basis_coeff를 사용해 최종 가중치를 재구성하고,
         이를 모델의 weight로 설정한 후 저장.
@@ -523,21 +635,20 @@ class Phase3IncrementalLearner:
         try:
             self.logger.info("  Reconstructing weights from learned basis_coeff...")
                                      
-            for key in sorted(self.masks.keys()):
-                layer_idx, layer_type = key
+            for layer_idx in sorted(self.masks.keys()):
                 layer = self.model.model.layers[layer_idx]
-                target_module = self._get_target_module(layer, layer_type)
+                target_module = self._get_target_module(layer)
                 
                 if not hasattr(target_module, 'basis_coeff'):
-                    self.logger.warning(f"  Layer {layer_idx} ({layer_type}): basis_coeff not found, skipping")
+                    self.logger.warning(f"  Layer {layer_idx}: basis_coeff not found, skipping")
                     continue
                 
-                # basis_coeff와 Vh 로드
+                # basis_coeff와 U 로드
                 basis_coeff = target_module.basis_coeff.data  # (out_features, rank)
-                Vh = target_module.Vh_forward  # (rank, in_features)
+                U = target_module.U_matrix  # (in_features, rank)
                 
-                # 최종 가중치 재구성: W = basis_coeff @ Vh
-                final_weight = basis_coeff @ Vh  # (out_features, rank) @ (rank, in_features) = (out_features, in_features)
+                # 최종 가중치 재구성: W = basis_coeff @ U^T
+                final_weight = basis_coeff @ U.T  # (out_features, in_features)
                 
                 # 모델의 weight 업데이트
                 target_module.weight.data = final_weight
@@ -629,16 +740,16 @@ class Phase3IncrementalLearner:
             )
             loss = outputs.loss
             
-            # Gradient accumulation: loss를 accumulation_steps로 나누기
+            # ✅ Gradient accumulation: loss를 accumulation_steps로 나누기
             scaled_loss = loss / self.gradient_accumulation_steps
             
-            # GSM8K 파인튜닝 검증: 손실 값 기록 (스케일링되지 않은 원본 loss 기록)
+            # ✅ GSM8K 파인튜닝 검증: 손실 값 기록 (스케일링되지 않은 원본 loss 기록)
             loss_improvements.append(loss.item())
             
             # Backward pass
             scaled_loss.backward()
             
-            # Gradient accumulation 스텝인지 확인
+            # ✅ Gradient accumulation 스텝인지 확인
             should_step = ((batch_idx + 1) % self.gradient_accumulation_steps == 0) or (batch_idx == len(self.train_loader) - 1)
             
             # After backward, apply element-wise mask to basis_coeff.grad to freeze important inputs
@@ -648,10 +759,9 @@ class Phase3IncrementalLearner:
             batch_param_norm = 0.0
             layer_logs = []
 
-            for key in sorted(self.masks.keys()):
-                layer_idx, layer_type = key
+            for layer_idx in sorted(self.masks.keys()):
                 layer = self.model.model.layers[layer_idx]
-                target_module = self._get_target_module(layer, layer_type)
+                target_module = self._get_target_module(layer)
 
                 if not hasattr(target_module, 'basis_coeff'):
                     continue
@@ -676,7 +786,7 @@ class Phase3IncrementalLearner:
                 else:
                     frozen_norm_before = 0.0
 
-                # 마스킹 적용: WaRP의 핵심 - frozen direction의 gradient를 0으로 설정
+                # ✅ 마스킹 적용: WaRP의 핵심 - frozen direction의 gradient를 0으로 설정
                 if frozen_idx.any():
                     basis_param.grad[:, frozen_idx] = 0.0
 
@@ -715,9 +825,9 @@ class Phase3IncrementalLearner:
                     'num_trainable': trainable_idx.sum().item(),
                 })
             
-            # Gradient accumulation: 스텝에서만 업데이트
+            # ✅ Gradient accumulation: 스텝에서만 업데이트
             if should_step:
-                # Gradient clipping (max_grad_norm=0.3, finetune_gsm8k.py와 동일)
+                # ✅ Gradient clipping (max_grad_norm=0.3, finetune_gsm8k.py와 동일)
                 total_norm = torch.nn.utils.clip_grad_norm_(self.model.parameters(), 0.3)
                 
                 # Update
@@ -746,7 +856,7 @@ class Phase3IncrementalLearner:
                 'is_update_step': should_step,
             })
             
-            # GSM8K 파인튜닝 검증: 손실 개선도 계산
+            # ✅ GSM8K 파인튜닝 검증: 손실 개선도 계산
             if len(loss_improvements) > 1:
                 loss_delta = loss_improvements[-2] - loss_improvements[-1]
             else:
@@ -766,7 +876,7 @@ class Phase3IncrementalLearner:
             if (batch_idx + 1) % log_interval == 0:
                 current_lr = optimizer.param_groups[0]['lr']
                 
-                # GSM8K 파인튜닝 검증 정보
+                # ✅ GSM8K 파인튜닝 검증 정보
                 avg_loss_recent = np.mean(loss_improvements[-log_interval:]) if len(loss_improvements) >= log_interval else np.mean(loss_improvements)
                 loss_trend = "↓" if loss_delta < 0 else ("→" if abs(loss_delta) < 1e-5 else "↑")
                 
@@ -803,7 +913,7 @@ class Phase3IncrementalLearner:
         avg_masked_before = total_masked_grad_norm / max(len(batch_logs), 1)
         avg_param_norm = total_param_norm / max(len(batch_logs), 1)
         
-        # GSM8K 파인튜닝 검증: 손실 수렴 분석
+        # ✅ GSM8K 파인튜닝 검증: 손실 수렴 분석
         loss_array = np.array(loss_improvements)
         loss_first_half = np.mean(loss_array[:len(loss_array)//2]) if len(loss_array) > 0 else float('inf')
         loss_second_half = np.mean(loss_array[len(loss_array)//2:]) if len(loss_array) > 0 else float('inf')
@@ -875,43 +985,42 @@ class Phase3IncrementalLearner:
         전체 훈련 루프 (상세 로깅 포함)
         """
         try:
-            self.logger.info("="*70)
+            self.logger.info("\n" + "="*70)
             self.logger.info("PHASE 3: INCREMENTAL LEARNING WITH MASKED GRADIENT UPDATES")
-            self.logger.info("="*70)
+            self.logger.info("="*70 + "\n")
             
             # 1. 데이터 및 모델 로드
             self.logger.info("[Step 1] Loading basis and masks...")
             self.load_basis()
             self.load_masks()
             
-            self.logger.info("[Step 2] Loading model...")
+            self.logger.info("\n[Step 2] Loading model...")
             self.load_model()
             
-            self.logger.info("[Step 3] Loading utility data...")
+            self.logger.info("\n[Step 3] Loading utility data...")
             start_time = datetime.now()
             self.load_utility_data()
             load_time = (datetime.now() - start_time).total_seconds()
             self.logger.info(f"✓ Data loading completed in {load_time:.2f}s")
             
             # 2. 마스킹 hook 등록
-            self.logger.info("[Step 4] Registering mask hooks...")
+            self.logger.info("\n[Step 4] Registering mask hooks...")
             self.register_mask_hooks()
             
             # 마스킹 검증
-            self.logger.info("[Step 4.5] Validating mask configuration...")
+            self.logger.info("\n[Step 4.5] Validating mask configuration...")
             total_frozen = 0
             total_trainable = 0
-            for key in sorted(self.masks.keys()):
-                layer_idx, layer_type = key
+            for layer_idx in sorted(self.masks.keys()):
                 layer = self.model.model.layers[layer_idx]
-                target_module = self._get_target_module(layer, layer_type)
+                target_module = self._get_target_module(layer)
                 mask = target_module._warp_mask
                 num_frozen = (mask == 1).sum().item()
                 num_trainable = (mask == 0).sum().item()
                 total_frozen += num_frozen
                 total_trainable += num_trainable
                 self.logger.info(
-                    f"  Layer {layer_idx} ({layer_type}): {num_frozen}/{mask.numel()} frozen "
+                    f"  Layer {layer_idx}: {num_frozen}/{mask.numel()} frozen "
                     f"({100*num_frozen/mask.numel():.1f}%) | "
                     f"{num_trainable} trainable"
                 )
@@ -920,10 +1029,10 @@ class Phase3IncrementalLearner:
             # 3. Optimizer 설정
             self.logger.info("\n[Step 5] Setting up optimizer and scheduler (SFTTrainer style)...")
             
-            # gradient accumulation 설정 (effective batch: 4 * 16 = 64)
+            # ✅ gradient accumulation 설정 (effective batch: 4 * 16 = 64)
             self.gradient_accumulation_steps = 16
             
-            # gradient checkpointing 활성화 (메모리 절감: ~50%)
+            # ✅ gradient checkpointing 활성화 (메모리 절감: ~50%)
             if hasattr(self.model.config, 'gradient_checkpointing'):
                 self.model.gradient_checkpointing_enable()
                 self.logger.info(f"✓ Gradient checkpointing enabled")
@@ -934,7 +1043,7 @@ class Phase3IncrementalLearner:
                 weight_decay=self.args.weight_decay
             )
             
-            # Learning rate scheduler: Cosine annealing with warmup (SFTTrainer 방식)
+            # ✅ Learning rate scheduler: Cosine annealing with warmup (SFTTrainer 방식)
             total_steps = len(self.train_loader) * self.args.epochs
             warmup_steps = int(total_steps * 0.05)  # 5% warmup (finetune_gsm8k.py와 동일)
             
@@ -964,12 +1073,12 @@ class Phase3IncrementalLearner:
             self.logger.info(f"  - Gradient checkpointing: Enabled")
             
             # 4. 훈련
-            self.logger.info("[Step 6] Starting training...")
+            self.logger.info("\n[Step 6] Starting training...")
             self.logger.info(f"  - Total epochs: {self.args.epochs}")
             self.logger.info(f"  - Batches per epoch: {len(self.train_loader)}")
             self.logger.info(f"  - Batch size: {self.args.batch_size}")
             self.logger.info(f"  - Total samples: {len(self.train_loader) * self.args.batch_size * self.args.epochs}")
-            self.logger.info(f"{'='*70}")
+            self.logger.info(f"\n{'='*70}\n")
             
             best_loss = float('inf')
             training_start = datetime.now()
@@ -1010,15 +1119,14 @@ class Phase3IncrementalLearner:
             
             # 5. 정리 (마스킹 통계는 restore 전에 수집)
             total_training_time = (datetime.now() - training_start).total_seconds()
-            self.logger.info("[Step 7] Finalizing...")
+            self.logger.info("\n[Step 7] Finalizing...")
             
-            # 마스킹 통계를 restore 전에 수집
+            # ✅ 마스킹 통계를 restore 전에 수집
             total_frozen = 0
             total_trainable = 0
-            for key in sorted(self.masks.keys()):
-                layer_idx, layer_type = key
+            for layer_idx in sorted(self.masks.keys()):
                 layer = self.model.model.layers[layer_idx]
-                target_module = self._get_target_module(layer, layer_type)
+                target_module = self._get_target_module(layer)
                 if hasattr(target_module, '_warp_mask'):
                     mask = target_module._warp_mask
                     num_frozen = (mask == 1).sum().item()
@@ -1026,13 +1134,13 @@ class Phase3IncrementalLearner:
                     total_frozen += num_frozen
                     total_trainable += num_trainable
             
-            # CRITICAL: restore 전에 최종 가중치 재구성 및 저장
-            self.logger.info("[Step 7.5] Reconstructing final weights from basis_coeff...")
+            # ✅ CRITICAL: restore 전에 최종 가중치 재구성 및 저장
+            self.logger.info("\n[Step 7.5] Reconstructing final weights from basis_coeff...")
             self._reconstruct_and_save_final_model()
             
             self.restore_original_forwards()
             
-            self.logger.info("="*70)
+            self.logger.info("\n" + "="*70)
             self.logger.info("PHASE 3 TRAINING FINAL SUMMARY - SFT 스타일 GSM8K 파인튜닝 결과")
             self.logger.info("="*70)
             
@@ -1064,7 +1172,7 @@ class Phase3IncrementalLearner:
                 convergence_improvement_pct = (convergence_improvement / first_third) * 100 if first_third > 0 else 0
                 self.logger.info(f"    • 전반부 vs 후반부 수렴: {convergence_improvement:.4f} ({convergence_improvement_pct:.2f}%)")
             
-            self.logger.info(f"  [SFT 스타일 훈련 구성]")
+            self.logger.info(f"\n  [SFT 스타일 훈련 구성]")
             self.logger.info(f"    • Per-device batch size: {self.args.batch_size}")
             self.logger.info(f"    • Gradient accumulation steps: {self.gradient_accumulation_steps}")
             self.logger.info(f"    • Effective batch size: {self.args.batch_size * self.gradient_accumulation_steps}")
@@ -1073,13 +1181,13 @@ class Phase3IncrementalLearner:
             self.logger.info(f"    • Max grad norm: 0.3")
             self.logger.info(f"    • Optimizer: AdamW with weight decay {self.args.weight_decay}")
             
-            self.logger.info(f"  [훈련 통계]")
+            self.logger.info(f"\n  [훈련 통계]")
             self.logger.info(f"    • 총 훈련 시간: {total_training_time:.2f}s ({total_training_time/60:.2f} min)")
             self.logger.info(f"    • 총 에포크: {self.args.epochs}")
             self.logger.info(f"    • 에포크당 평균 시간: {total_training_time/max(self.args.epochs, 1):.2f}s")
             self.logger.info(f"    • 체크포인트 디렉토리: {self.args.checkpoint_dir}")
             
-            self.logger.info(f"  [보호된 안전 메커니즘 (WaRP)]")
+            self.logger.info(f"\n  [보호된 안전 메커니즘 (WaRP)]")
             self.logger.info(f"    • 총 Frozen 차원: {total_frozen:,}")
             self.logger.info(f"    • 총 Trainable 차원: {total_trainable:,}")
             if total_frozen + total_trainable > 0:
@@ -1137,16 +1245,15 @@ class Phase3IncrementalLearner:
         # (avoids requiring a custom loader at evaluation time).
         orig_weights = {}
         try:
-            for key in sorted(self.masks.keys()):
-                layer_idx, layer_type = key
+            for layer_idx in sorted(self.masks.keys()):
                 layer = self.model.model.layers[layer_idx]
-                target_module = self._get_target_module(layer, layer_type)
+                target_module = self._get_target_module(layer)
 
                 if not hasattr(target_module, 'basis_coeff') or not hasattr(target_module, 'U_matrix'):
                     continue
 
                 # preserve original weight
-                orig_weights[key] = target_module.weight.data.clone()
+                orig_weights[layer_idx] = target_module.weight.data.clone()
 
                 # reconstruct final weight = basis_coeff @ U.T
                 basis = target_module.basis_coeff.data
@@ -1176,8 +1283,7 @@ class Phase3IncrementalLearner:
 
         finally:
             # restore original weights to continue training unaffected
-            for key, orig_w in orig_weights.items():
-                layer_idx, layer_type = key
+            for layer_idx, orig_w in orig_weights.items():
                 layer = self.model.model.layers[layer_idx]
-                target_module = self._get_target_module(layer, layer_type)
+                target_module = self._get_target_module(layer)
                 target_module.weight.data.copy_(orig_w)
