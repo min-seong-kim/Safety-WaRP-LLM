@@ -157,6 +157,9 @@ class Phase1BasiBuilder:
             self.logger.info(f"  - Sample layer structure:")
             self.logger.info(f"    - MLPdown_proj: {sample_layer.mlp.down_proj}")
             self.logger.info(f"    - MLPup_proj: {sample_layer.mlp.up_proj}")
+            self.logger.info(f"    - Self-Attention q_proj: {sample_layer.self_attn.q_proj}")
+            self.logger.info(f"    - Self-Attention k_proj: {sample_layer.self_attn.k_proj}")
+            self.logger.info(f"    - Self-Attention v_proj: {sample_layer.self_attn.v_proj}")
             
             # 토크나이저 로드
             self.tokenizer = AutoTokenizer.from_pretrained(
@@ -218,16 +221,17 @@ class Phase1BasiBuilder:
         - 훅 등록된 레이어 수
         - 각 레이어의 모듈 정보
         """
-        def get_hook(layer_idx):
-            """특정 레이어를 위한 훅 함수 생성"""
+        def get_hook(layer_idx, layer_type):
+            """특정 레이어와 layer_type을 위한 훅 함수 생성"""
             def hook(module, input, output):
                 # input[0]: (batch_size, seq_len, hidden_dim)
                 activation = input[0].detach()
                 # 이게 얕은 복사로 이후에 Activation 값들을 저장 가능 
-                if layer_idx not in self.activations:
-                    self.activations[layer_idx] = []
+                key = (layer_idx, layer_type)
+                if key not in self.activations:
+                    self.activations[key] = []
                 
-                self.activations[layer_idx].append(activation)
+                self.activations[key].append(activation)
             
             return hook
         
@@ -236,30 +240,37 @@ class Phase1BasiBuilder:
             num_layers = len(self.model.model.layers)
             layer_indices = self._parse_target_layers(num_layers)
             
-            self.logger.info(f"Registering hooks for layer type: {self.args.layer_type}")
+            # Phase 1에서 사용할 layer_type 파싱
+            # args.layer_type은 쉼표로 구분된 문자열 (예: 'ffn_down,ffn_up,attn_q,attn_k,attn_v')
+            layer_types_str = self.args.layer_type
+            layer_types = [lt.strip() for lt in layer_types_str.split(',')]
+            
+            self.logger.info(f"Registering hooks for layer types: {layer_types}")
             self.logger.info(f"Target layer indices: {layer_indices}")
             
-            # 각 레이어에 훅 등록
+            # 각 레이어와 layer_type 조합에 훅 등록
             for layer_idx in layer_indices:
                 layer = self.model.model.layers[layer_idx]
-                # AutoModelForCausalLM -> 각 transformer -> layer 접근
-                if self.args.layer_type == 'ffn_down':
-                    target_module = layer.mlp.down_proj
-                elif self.args.layer_type == 'ffn_up':
-                    target_module = layer.mlp.up_proj
-                elif self.args.layer_type == 'attn_q':
-                    target_module = layer.self_attn.q_proj
-                elif self.args.layer_type == 'attn_k':
-                    target_module = layer.self_attn.k_proj
-                elif self.args.layer_type == 'attn_v':
-                    target_module = layer.self_attn.v_proj
-                else:
-                    raise ValueError(f"Unknown layer type: {self.args.layer_type}")
                 
-                hook_handle = target_module.register_forward_hook(get_hook(layer_idx))
-                self.hooks.append(hook_handle)
+                for layer_type in layer_types:
+                    # AutoModelForCausalLM -> 각 transformer -> layer 접근
+                    if layer_type == 'ffn_down':
+                        target_module = layer.mlp.down_proj
+                    elif layer_type == 'ffn_up':
+                        target_module = layer.mlp.up_proj
+                    elif layer_type == 'attn_q':
+                        target_module = layer.self_attn.q_proj
+                    elif layer_type == 'attn_k':
+                        target_module = layer.self_attn.k_proj
+                    elif layer_type == 'attn_v':
+                        target_module = layer.self_attn.v_proj
+                    else:
+                        raise ValueError(f"Unknown layer type: {layer_type}")
+                    
+                    hook_handle = target_module.register_forward_hook(get_hook(layer_idx, layer_type))
+                    self.hooks.append(hook_handle)
             
-            self.logger.info(f"✓ {len(self.hooks)} hooks registered")
+            self.logger.info(f"✓ {len(self.hooks)} hooks registered for {len(layer_types)} layer types × {len(layer_indices)} layers")
             
         except Exception as e:
             self.logger.error(f"Failed to register hooks: {str(e)}", exc_info=True)
@@ -356,15 +367,15 @@ class Phase1BasiBuilder:
         try:
             self.logger.info("Computing SVD decomposition (with attention mask filtering)...")
             
-            # tqdm 진행바 추가
-            layer_indices = sorted(self.activations.keys())
-            pbar = tqdm(layer_indices, desc="SVD Decomposition", disable=False)
+            # tqdm 진행바 추가 (disable=True로 설정하여 broken pipe 오류 방지)
+            activation_keys = sorted(self.activations.keys())  # (layer_idx, layer_type) 튜플들
+            pbar = tqdm(activation_keys, desc="SVD Decomposition", disable=True)
             
-            for layer_idx in pbar:
-                pbar.set_description(f"SVD Decomposition [Layer {layer_idx}/{len(layer_indices)-1}]")
+            for layer_idx, layer_type in pbar:
+                pbar.set_description(f"SVD Decomposition [Layer {layer_idx} {layer_type}/{len(activation_keys)-1}]")
                 
                 # 활성화를 (num_tokens, hidden_dim)으로 평탄화
-                act_list = self.activations[layer_idx]
+                act_list = self.activations[(layer_idx, layer_type)]
                 
                 # 핵심: attention mask를 사용하여 유효한 활성화만 추출
                 valid_activations = []
@@ -387,7 +398,7 @@ class Phase1BasiBuilder:
                 # 유효한 활성화들만 결합
                 activations_flat = torch.cat(valid_activations, dim=0)  # (total_valid_tokens, hidden_dim)
                 
-                self.logger.info(f"Layer {layer_idx}:")
+                self.logger.info(f"Layer {layer_idx} ({layer_type}):")
                 self.logger.info(f"  - Activation shape (after masking): {activations_flat.shape}")
                 self.logger.info(f"  - Activation dtype: {activations_flat.dtype}")
                 self.logger.info(f"  - Activation device: {activations_flat.device}")
@@ -396,13 +407,14 @@ class Phase1BasiBuilder:
                 # bfloat16에서 SVD가 지원되지 않으므로 float32로 변환
                 activations_float32 = activations_flat.float()
                 
-                # 정규화 (mean centering)
+                # 정규화 (mean centering) 
+                # 공분산 구하기 위해 평균 제거 
                 activations_centered = activations_float32 - activations_float32.mean(dim=0, keepdim=True)
                 
                 # 공분산: (hidden_dim, hidden_dim)
                 # unbiased estimator: 분모를 (N-1)로 설정
                 cov_matrix = (activations_centered.T @ activations_centered) / max(activations_centered.shape[0] - 1, 1)
-                self.covariance_matrices[layer_idx] = cov_matrix
+                self.covariance_matrices[(layer_idx, layer_type)] = cov_matrix
                 
                 self.logger.info(f"  - Covariance shape: {cov_matrix.shape}")
                 self.logger.info(f"  - Covariance trace: {cov_matrix.trace():.4f}")
@@ -411,7 +423,7 @@ class Phase1BasiBuilder:
                 # SVD 분해: U, S, V^T (float32에서 실행)
                 U, S, Vh = torch.linalg.svd(cov_matrix, full_matrices=False)
                 
-                self.svd_results[layer_idx] = {
+                self.svd_results[(layer_idx, layer_type)] = {
                     'U': U,
                     'S': S,
                     'Vh': Vh,
@@ -445,9 +457,13 @@ class Phase1BasiBuilder:
         
         파일 구조:
         - basis/
-          - layer_0_svd.pt (U, S, Vh)
-          - layer_1_svd.pt
-          - ...
+          - ffn_down/
+            - layer_0_svd.pt (U, S, Vh)
+            - layer_1_svd.pt
+            - ...
+          - ffn_up/
+            - layer_0_svd.pt
+            - ...
           - metadata.json (통계, 설정)
         
         Log:
@@ -460,9 +476,16 @@ class Phase1BasiBuilder:
             
             self.logger.info(f"Saving basis to {basis_dir}...")
             
-            # SVD 결과 저장
-            for layer_idx, svd_data in self.svd_results.items():
-                save_path = os.path.join(basis_dir, f'layer_{layer_idx:02d}_svd.pt')
+            # Layer type별로 디렉토리 생성 및 저장
+            layer_types_processed = set()
+            for (layer_idx, layer_type), svd_data in self.svd_results.items():
+                # Layer type별 디렉토리 생성
+                layer_type_dir = os.path.join(basis_dir, layer_type)
+                os.makedirs(layer_type_dir, exist_ok=True)
+                layer_types_processed.add(layer_type)
+                
+                # SVD 결과 저장
+                save_path = os.path.join(layer_type_dir, f'layer_{layer_idx:02d}_svd.pt')
                 
                 torch.save({
                     'U': svd_data['U'].cpu(),
@@ -471,12 +494,12 @@ class Phase1BasiBuilder:
                 }, save_path)
                 
                 file_size_mb = os.path.getsize(save_path) / (1024 * 1024)
-                self.logger.debug(f"  - Layer {layer_idx}: {save_path} ({file_size_mb:.2f} MB)")
+                self.logger.debug(f"  - Layer {layer_idx} ({layer_type}): {save_path} ({file_size_mb:.2f} MB)")
             
             # 메타데이터 저장
             metadata = {
                 'model_name': self.args.model_name,
-                'layer_type': self.args.layer_type,
+                'layer_types': sorted(list(layer_types_processed)),
                 'target_layers': self.args.target_layers,
                 'num_layers': len(self.svd_results),
                 'safety_samples': self.args.safety_samples,
@@ -484,7 +507,7 @@ class Phase1BasiBuilder:
                 'total_tokens': self.stats['total_tokens'],
                 'total_samples': self.stats['total_samples'],
                 'dtype': self.args.dtype,
-                'notes': 'Activations filtered using attention_mask (padding tokens excluded)',
+                'notes': 'Activations filtered using attention_mask (padding tokens excluded). Multiple layer_types processed.',
             }
             
             metadata_path = os.path.join(basis_dir, 'metadata.json')
@@ -493,7 +516,8 @@ class Phase1BasiBuilder:
             
             self.logger.info(f"✓ Basis saved successfully")
             self.logger.info(f"  - Directory: {basis_dir}")
-            self.logger.info(f"  - Files: {len(self.svd_results)} SVD files + metadata.json")
+            self.logger.info(f"  - Layer types: {sorted(list(layer_types_processed))}")
+            self.logger.info(f"  - Total files: {len(self.svd_results)} SVD files + metadata.json")
             self.logger.info(f"  - Metadata: {metadata_path}")
             
             return basis_dir

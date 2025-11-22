@@ -142,7 +142,7 @@ experiments/
 *.csv
 *.json
 *.jsonl
-data/*
+
 !data/README.md
 
 # Cache

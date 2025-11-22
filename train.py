@@ -68,18 +68,17 @@ def parse_args():
     parser.add_argument('--target_layers', type=str, default='all',
                         help='타겟 레이어 범위. 옵션: all, early (0-10), middle (11-21), late (22+), last, 또는 범위 (예: 31, 0-5, 30-31)')
     parser.add_argument('--layer_type', type=str, default='ffn_down',
-                        choices=['ffn_down', 'ffn_up', 'attn_q', 'attn_k', 'attn_v'],
-                        help='''타겟 레이어 타입. 각 phase에서 모든 target_layers에 동일하게 적용됨.
-                        - ffn_down: MLP down projection (기본값)
-                        - ffn_up: MLP up projection
-                        - attn_q: Self-attention Q projection
-                        - attn_k: Self-attention K projection
-                        - attn_v: Self-attention V projection
+                        help='''처리할 layer types (쉼표로 구분 가능).
+                        - Phase 1: 여러 타입 동시 처리 가능 --layer_type ffn_down,ffn_up
+                        - Phase 2, 3: 단일 타입만 지원 --layer_type ffn_down
+                        
+                        지원 타입: ffn_down, ffn_up, attn_q, attn_k, attn_v
                         
                         예제:
-                          Phase 1: python train.py --phase 1 --layer-type ffn_up --target-layers all
-                          Phase 1: python train.py --phase 1 --layer-type attn_q --target-layers last
-                          Phase 1: python train.py --phase 1 --layer-type attn_v --target-layers 0-5,31''')
+                          Phase 1: python train.py --phase 1 --layer_type ffn_down,ffn_up --target-layers all
+                          Phase 1: python train.py --phase 1 --layer_type ffn_down,ffn_up,attn_q --target-layers 30-31
+                          Phase 2: python train.py --phase 2 --layer_type ffn_down
+                          Phase 3: python train.py --phase 3 --layer_type ffn_up''')
 
     
     # Phase 2 설정
@@ -273,7 +272,7 @@ def run_phase1(args, logger):
     # Step 3: 활성화 수집 (hook 등록)
     logger.info("\n[Step 3] Registering forward hooks...")
     builder.register_activation_hooks()
-    logger.info(f"✓ Hooks registered for layer type: {args.layer_type}")
+    logger.info(f"✓ Hooks registered for layer types: {args.layer_type}")
     
     # Step 4-5: 활성화 수집 및 공분산 계산
     logger.info("\n[Step 4-5] Collecting activations and computing covariance...")
@@ -318,7 +317,7 @@ def run_phase2(args, logger):
     # 필수 인자 확인
     if args.basis_dir is None:
         logger.error("Phase 2 requires --basis_dir argument")
-        logger.error("Usage: python train.py --phase 2 --basis_dir /path/to/basis")
+        logger.error("Usage: python train.py --phase 2 --basis_dir /path/to/basis --layer_type ffn_down")
         raise ValueError("Missing --basis_dir argument")
     
     if not os.path.exists(args.basis_dir):
@@ -327,33 +326,37 @@ def run_phase2(args, logger):
     
     from models.phase2_importance import Phase2ImportanceScorer
     
+    # Phase 2는 여러 layer_type을 동시에 처리 가능
+    logger.info(f"Phase 2: Processing layer_type={args.layer_type}")
+    logger.info("(여러 layer_type은 쉼표로 구분: ffn_down,ffn_up)")
+    
     # Step 1: 모델 로드
     logger.info("\n[Step 1] Loading model...")
     scorer = Phase2ImportanceScorer(args, logger, args.basis_dir)
     scorer.load_model()
     logger.info(f"✓ Model loaded: {args.model_name}")
 
-    # Step 2: Basis 로드
+    # Step 2: Basis 로드 (여러 layer_type 동시 로드 가능)
     logger.info("\n[Step 2] Loading basis from Phase 1...")
     scorer.load_basis()
-    logger.info(f"✓ Basis loaded: {len(scorer.basis_data)} layers")
+    logger.info(f"✓ Basis loaded: {len(scorer.basis_data)} (layer, type) combinations")
 
     # Step 3: 안전 데이터 로드
     logger.info("\n[Step 3] Loading safety data (do-not-answer)...")
     scorer.load_safety_data()
     logger.info(f"✓ Safety data loaded: batch_size={args.batch_size}")
 
-    # Step 4: 가중치 재매개변수화
+    # Step 4: 가중치 재매개변수화 (모든 layer_type 동시 처리)
     logger.info("\n[Step 4] Reparameterizing weights to basis space...")
     scorer.reparameterize_weights()
-    logger.info(f"✓ Weights reparameterized")
+    logger.info(f"✓ Weights reparameterized for all layer types")
 
-    # Step 5: Importance 계산
+    # Step 5: Importance 계산 (모든 layer_type 동시 처리)
     logger.info("\n[Step 5] Computing importance scores...")
     scorer.compute_importance()
-    logger.info(f"✓ Importance scores computed for {len(scorer.importances)} layers")
+    logger.info(f"✓ Importance scores computed for {len(scorer.importances)} (layer, type) combinations")
 
-    # Step 6: 마스크 생성
+    # Step 6: 마스크 생성 (모든 layer_type)
     logger.info("\n[Step 6] Generating importance masks...")
     scorer.generate_masks(keep_ratio=args.keep_ratio)
     logger.info(f"✓ Masks generated with keep_ratio={args.keep_ratio}")
@@ -407,6 +410,21 @@ def run_phase3(args, logger):
             logger.error("--masks_dir is required for Phase 3")
             raise ValueError("--masks_dir is required for Phase 3")
         
+        # Phase 3는 한 번에 한 가지 layer_type만 처리
+        layer_types = [lt.strip() for lt in args.layer_type.split(',')]
+        
+        if len(layer_types) > 1:
+            logger.warning(f"Phase 3는 한 번에 한 가지 layer_type만 처리 가능합니다.")
+            logger.warning(f"주어진 layer_types: {layer_types}")
+            logger.warning(f"첫 번째 layer_type '{layer_types[0]}'만 처리합니다.")
+            layer_type_to_process = layer_types[0]
+        else:
+            layer_type_to_process = layer_types[0]
+        
+        # args.layer_type을 단일 값으로 설정
+        args.layer_type = layer_type_to_process
+        logger.info(f"Processing layer_type: {layer_type_to_process}")
+        
         # Phase 3 실행
         learner = Phase3IncrementalLearner(
             args=args,
@@ -414,6 +432,7 @@ def run_phase3(args, logger):
             basis_dir=args.basis_dir,
             masks_dir=args.masks_dir
         )
+
         
         learner.train()
         
