@@ -209,7 +209,7 @@ class Phase2ImportanceScorer:
     
     def load_safety_data(self):
         """
-        안전 데이터 로드 (do-not-answer)
+        안전 데이터 로드
         
         Log:
         - 데이터셋 로드 상태
@@ -239,16 +239,8 @@ class Phase2ImportanceScorer:
         """
         모델 가중치를 basis 공간으로 재매개변수화
         
-        핵심 개념:
-        ================================================================================
-        | Space       | Variable        | Shape        | Requires_grad | 역할         |
-        |-------------+------------------+----------+----------+----------+----------+|
-        | Weight      | W_original      | (d_out,  | False    | 분석용 reference  |
-        | Basis       | basis_coeff     | (d_out,  | True     | 학습 가능 파라미터 |
-        | Basis       | U_matrix        | (d_in,   | False    | 고정된 basis      |
-        |             |                 |          |          |                 |
-        | 관계식: W_reconstructed = basis_coeff @ U^T                
-        ================================================================================
+
+        관계식: W_reconstructed = basis_coeff @ U^T                
         
         단계:
         1. 원본 W 저장 (고정)

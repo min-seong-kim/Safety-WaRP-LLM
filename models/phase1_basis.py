@@ -20,9 +20,9 @@ class Phase1BasiBuilder:
     Phase 1: Basis Construction Builder
     
     절차:
-    1. 모델 로드 (LLaMA 3 8B instruction)
-    2. 안전 데이터 로드 (do-not-answer)
-    3. Forward hook을 통해 각 FFN down_proj의 입력값 수집
+    1. 모델 로드 
+    2. 안전 데이터 로드 
+    3. Forward hook을 통해 각 layer의 입력값 수집
     4. 수집된 활성화로부터 공분산 행렬 계산
     5. SVD를 통해 직교 기저(orthonormal basis) 계산
     6. Basis 저장
@@ -63,13 +63,8 @@ class Phase1BasiBuilder:
         타겟 레이어 범위를 파싱하는 헬퍼 함수
         
         지원 형식:
-        - 'all': 모든 레이어 (0-31)
-        - 'early': 초반 레이어 (0-10)
-        - 'middle': 중간 레이어 (11-21)
-        - 'late': 후반 레이어 (22-31)
-        - 'last': 마지막 레이어 (31)
+        - 'all': 모든 레이어 
         - '31': 특정 레이어 (31번)
-        - '0-5': 범위 (0-5)
         - '30-31': 범위 (30-31)
         
         Returns:
@@ -80,14 +75,6 @@ class Phase1BasiBuilder:
         # 사전정의 범위
         if target == 'all':
             return list(range(num_layers))
-        elif target == 'early':
-            return list(range(0, min(11, num_layers)))
-        elif target == 'middle':
-            return list(range(11, min(22, num_layers)))
-        elif target == 'late':
-            return list(range(22, num_layers))
-        elif target == 'last':
-            return [num_layers - 1]
         
         # 범위 파싱: "0-5" 또는 "30-31" 형식
         if '-' in target:

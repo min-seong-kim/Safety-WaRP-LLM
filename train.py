@@ -38,7 +38,7 @@ def parse_args():
                         help='실행할 phase (1: Basis, 2: Importance, 3: Learning)')
     
     # 모델 설정
-    parser.add_argument('--model_name', type=str, default='meta-llama/Llama-3.1-8B-Instruct',
+    parser.add_argument('--model_name', type=str, default='meta-llama/Llama-3.2-3B-Instruct',
                         help='사용할 LLM 모델 이름')
     parser.add_argument('--model_dir', type=str, default=None,
                         help='저장된 모델 체크포인트 경로')

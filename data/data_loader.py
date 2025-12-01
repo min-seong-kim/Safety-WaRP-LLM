@@ -16,18 +16,18 @@ logger = logging.getLogger(__name__)
 
 class SafetyDataset(Dataset):
     """
-    Do-Not-Answer dataset for safety alignment
-    Contains harmful prompts and safe responses
+    Circuit Breakers dataset for safety alignment
+    Contains harmful prompts and safe responses from Llama3
     """
     
     def __init__(self, dataset, max_samples=None):
         """
         Args:
-            dataset: HuggingFace dataset object
+            dataset: List of dictionaries with 'prompt' and 'llama3_output' fields
             max_samples: Maximum number of samples to use (None = all)
         """
         if max_samples:
-            self.data = dataset.select(range(min(max_samples, len(dataset))))
+            self.data = dataset[:min(max_samples, len(dataset))]
         else:
             self.data = dataset
     
@@ -36,12 +36,12 @@ class SafetyDataset(Dataset):
     
     def __getitem__(self, idx):
         item = self.data[idx]
-        # do-not-answer dataset uses 'question' field for harmful prompts
-        # and has various model responses (we'll use GPT4 response as safe response)
+        # Circuit Breakers dataset uses 'prompt' for harmful prompts
+        # and 'llama3_output' for safe responses (refusals)
         return {
-            'harmful_prompt': item['question'],
-            'safe_response': item.get('GPT4_response', ''),  # Safe refusal response
-            'id': item.get('id', idx)
+            'harmful_prompt': item['prompt'],
+            'safe_response': item.get('llama3_output', ''),  # Safe refusal response from Llama3
+            'id': idx
         }
 
 
@@ -78,10 +78,11 @@ def create_safety_dataloader(
     max_samples=None,
     tokenizer=None,
     num_workers=0,
-    shuffle=False
+    shuffle=False,
+    data_path='/home/hail/kms/Safety-WaRP-LLM/data/circuit_breakers_train.json'
 ):
     """
-    Create DataLoader for safety data (do-not-answer)
+    Create DataLoader for safety data (Circuit Breakers dataset)
     
     Args:
         batch_size: Batch size
@@ -89,15 +90,20 @@ def create_safety_dataloader(
         tokenizer: Tokenizer object (for reference, not used in collate)
         num_workers: Number of workers for DataLoader
         shuffle: Whether to shuffle data
+        data_path: Path to circuit_breakers_train.json file
     
     Returns:
         DataLoader: PyTorch DataLoader for safety data
     """
     try:
-        logger.info("Loading do-not-answer dataset...")
+        import json
         
-        # Load do-not-answer dataset from LibrAI (trust_remote_code 제거)
-        dataset = load_dataset('LibrAI/do-not-answer', split='train')
+        logger.info(f"Loading Circuit Breakers dataset from {data_path}...")
+        
+        # Load circuit_breakers_train.json
+        with open(data_path, 'r') as f:
+            dataset = json.load(f)
+        
         logger.info(f"✓ Dataset loaded: {len(dataset)} samples")
         
         # Create SafetyDataset wrapper
