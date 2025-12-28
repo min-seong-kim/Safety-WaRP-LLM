@@ -44,10 +44,18 @@ def parse_args():
                         help='저장된 모델 체크포인트 경로')
     
     # 데이터 설정
-    parser.add_argument('--safety_samples', type=int, default=100,
-                        help='안전 데이터 샘플 수 (do-not-answer)')
     parser.add_argument('--batch_size', type=int, default=4,
                         help='배치 크기')
+    
+    # Phase 1 설정 (harmful_prompts_200.txt 사용)
+    parser.add_argument('--harmful_prompts_path', type=str, default='./data/harmful_prompts_200.txt',
+                        help='Phase 1에서 사용할 harmful prompts 파일 경로')
+    
+    # Phase 2 설정 (circuit_breakers_train.json 사용)
+    parser.add_argument('--circuit_breakers_path', type=str, default='./data/circuit_breakers_train.json',
+                        help='Phase 2에서 사용할 circuit_breakers 파일 경로')
+    parser.add_argument('--circuit_breakers_samples', type=int, default=100,
+                        help='Phase 2에서 사용할 circuit_breakers 샘플 수')
     
     # 레이어 설정
     parser.add_argument('--target_layers', type=str, default='all',
@@ -135,12 +143,17 @@ def log_config(logger, args):
     logger.info(f"Device: {args.device}")
     logger.info(f"Dtype: {args.dtype}")
     logger.info(f"Batch Size: {args.batch_size}")
-    logger.info(f"Safety Samples: {args.safety_samples}")
     logger.info(f"Target Layers: {args.target_layers}")
     logger.info(f"Layer Type: {args.layer_type}")
     
+    # Phase 1 설정
+    if args.phase >= 1:
+        logger.info(f"Harmful Prompts Path: {args.harmful_prompts_path}")
+    
     # Phase 2 설정
     if args.phase >= 2:
+        logger.info(f"Circuit Breakers Path: {args.circuit_breakers_path}")
+        logger.info(f"Circuit Breakers Samples: {args.circuit_breakers_samples}")
         logger.info(f"Keep Ratio: {args.keep_ratio}")
     
     # Phase 3 설정
@@ -240,7 +253,7 @@ def run_phase1(args, logger):
     logger.info(f"✓ Model loaded: {args.model_name}")
     
     # Step 2: 안전 데이터 로드
-    logger.info("[Step 2] Loading safety data (do-not-answer)...")
+    logger.info("[Step 2] Loading safety data")
     builder.load_safety_data()
     logger.info(f"✓ Safety data loaded: batch_size={args.batch_size}")
     
@@ -268,7 +281,8 @@ def run_phase1(args, logger):
     logger.info("\n" + "-" * 60)
     logger.info("Phase 1 Summary:")
     logger.info(f"  - Total layers processed: {len(builder.activations)}")
-    logger.info(f"  - Safety samples processed: {args.safety_samples}")
+    logger.info(f"  - Harmful prompts path: {args.harmful_prompts_path}")
+    logger.info(f"  - Total samples: {builder.stats['total_samples']}")
     logger.info(f"  - Output directory: {args.exp_dir}")
 
 
@@ -316,7 +330,7 @@ def run_phase2(args, logger):
     logger.info(f"✓ Basis loaded: {len(scorer.basis_data)} (layer, type) combinations")
 
     # Step 3: 안전 데이터 로드
-    logger.info("[Step 3] Loading safety data (do-not-answer)...")
+    logger.info("[Step 3] Loading safety data")
     scorer.load_safety_data()
     logger.info(f"✓ Safety data loaded: batch_size={args.batch_size}")
 
@@ -358,7 +372,8 @@ def run_phase2(args, logger):
     logger.info(f"  3. Importance masks: {masks_path}")
     logger.info("Phase 2 Statistics:")
     logger.info(f"  - Total layers processed: {len(scorer.masks)}")
-    logger.info(f"  - Safety samples processed: {args.safety_samples}")
+    logger.info(f"  - Circuit breakers path: {args.circuit_breakers_path}")
+    logger.info(f"  - Samples used: {args.circuit_breakers_samples}")
     logger.info(f"  - Keep ratio: {args.keep_ratio}")
     logger.info(f"  - Average loss: {scorer.stats['total_loss'] / len(scorer.dataloader):.4f}")
     logger.info(f"  - Output directory: {args.exp_dir}")

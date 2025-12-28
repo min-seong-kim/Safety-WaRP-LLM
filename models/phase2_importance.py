@@ -209,22 +209,93 @@ class Phase2ImportanceScorer:
     
     def load_safety_data(self):
         """
-        안전 데이터 로드
+        안전 데이터 로드 (circuit_breakers_train.json)
         
         Log:
         - 데이터셋 로드 상태
         - 배치 정보
         """
-        from data.data_loader import create_safety_dataloader
+        import json
         
         try:
-            self.logger.info(f"Loading safety data with max_samples={self.args.safety_samples}")
+            circuit_breakers_path = self.args.circuit_breakers_path
+            self.logger.info(f"Loading circuit_breakers data from {circuit_breakers_path}...")
             
-            self.dataloader = create_safety_dataloader(
+            with open(circuit_breakers_path, 'r', encoding='utf-8') as f:
+                circuit_breakers_data = json.load(f)
+            
+            # 샘플 수 제한
+            if self.args.circuit_breakers_samples > 0:
+                circuit_breakers_data = circuit_breakers_data[:self.args.circuit_breakers_samples]
+            
+            self.logger.info(f"✓ Loaded {len(circuit_breakers_data)} circuit_breakers samples")
+            
+            # 데이터셋 클래스
+            class CircuitBreakersDataset(torch.utils.data.Dataset):
+                def __init__(self, data, tokenizer, max_length=512):
+                    self.data = data
+                    self.tokenizer = tokenizer
+                    self.max_length = max_length
+                
+                def __len__(self):
+                    return len(self.data)
+                
+                def __getitem__(self, idx):
+                    sample = self.data[idx]
+                    # prompt + llama3_output 결합 (안전한 거부 응답)
+                    text = f"{sample['prompt']} {sample['llama3_output']}"
+                    
+                    encoding = self.tokenizer(
+                        text,
+                        truncation=True,
+                        max_length=self.max_length,
+                        return_tensors='pt'
+                    )
+                    
+                    return {
+                        'input_ids': encoding['input_ids'].squeeze(),
+                        'attention_mask': encoding['attention_mask'].squeeze(),
+                    }
+            
+            dataset = CircuitBreakersDataset(circuit_breakers_data, self.tokenizer, max_length=512)
+            
+            # Custom collate function
+            def collate_fn(batch):
+                max_len = max(len(item['input_ids']) for item in batch)
+                
+                input_ids_list = []
+                attention_masks_list = []
+                
+                for item in batch:
+                    input_ids = item['input_ids']
+                    attn_mask = item['attention_mask']
+                    
+                    pad_len = max_len - len(input_ids)
+                    if pad_len > 0:
+                        input_ids = torch.nn.functional.pad(
+                            input_ids.unsqueeze(0),
+                            (0, pad_len),
+                            value=self.tokenizer.pad_token_id
+                        ).squeeze(0)
+                        attn_mask = torch.nn.functional.pad(
+                            attn_mask.unsqueeze(0),
+                            (0, pad_len),
+                            value=0
+                        ).squeeze(0)
+                    
+                    input_ids_list.append(input_ids)
+                    attention_masks_list.append(attn_mask)
+                
+                return {
+                    'input_ids': torch.stack(input_ids_list),
+                    'attention_mask': torch.stack(attention_masks_list),
+                }
+            
+            self.dataloader = torch.utils.data.DataLoader(
+                dataset,
                 batch_size=self.args.batch_size,
-                max_samples=self.args.safety_samples,
-                tokenizer=self.tokenizer,
-                num_workers=0
+                shuffle=True,
+                collate_fn=collate_fn
             )
             
             self.logger.info(f"✓ Dataloader created")
@@ -377,8 +448,12 @@ class Phase2ImportanceScorer:
                 layer = self.model.model.layers[layer_idx]
                 target_module = self._get_target_module(layer, layer_type)
                 
+                self.logger.info(f"[DEBUG] Processing Layer {layer_idx} ({layer_type})")
+                self.logger.info(f"  - hasattr(target_module, 'basis_coeff'): {hasattr(target_module, 'basis_coeff')}")
+                
                 # basis_coeff 생성 또는 재사용
                 if not hasattr(target_module, 'basis_coeff'):
+                    self.logger.info(f"  → Creating new basis_coeff for Layer {layer_idx} ({layer_type})")
                     basis_info = self.basis_data[(layer_idx, layer_type)]
                     VT_forward = basis_info['Vh']  # (rank, d_out)
                     
@@ -418,10 +493,10 @@ class Phase2ImportanceScorer:
                         target_module.basis_coeff.requires_grad_(True)
                     
                     basis_params.append(target_module.basis_coeff)
-                    self.logger.debug(f"[Phase2] Layer {layer_idx} ({layer_type}): basis_coeff added to optimizer (Vh-based)")
-                    self.logger.debug(f"         - basis_coeff.requires_grad={target_module.basis_coeff.requires_grad}")
-                    self.logger.debug(f"         - weight.requires_grad={target_module.weight.requires_grad}")
-                    self.logger.debug(f"         - bias.requires_grad={target_module.bias.requires_grad if target_module.bias is not None else 'N/A'}")
+                    self.logger.info(f"[Phase2] Layer {layer_idx} ({layer_type}): basis_coeff added to optimizer (Vh-based)")
+                    self.logger.info(f"         - basis_coeff.requires_grad={target_module.basis_coeff.requires_grad}")
+                    self.logger.info(f"         - weight.requires_grad={target_module.weight.requires_grad}")
+                    self.logger.info(f"         - bias.requires_grad={target_module.bias.requires_grad if target_module.bias is not None else 'N/A'}")
             
             if len(basis_params) == 0:
                 self.logger.error("No basis_coeff parameters found! Skipping importance computation.")
@@ -484,15 +559,17 @@ class Phase2ImportanceScorer:
             
             self.logger.info(f"Forward 메서드 {len(layers_with_basis)}개 (layer, type) 조합에서 교체됨 (Vh-based autograd 호환)")
             
-            # Step 4: Importance 저장소 초기화 - Tuple keys for (layer_idx, layer_type)
-            importances = {key: [] for key in layers_with_basis}
+            # Step 4: Importance 저장소 초기화 (Online Averaging - 메모리 최적화)
+            # 각 배치의 gradient를 저장하지 않고, 실시간으로 평균 계산
+            importance_sum = {key: None for key in layers_with_basis}  # 누적 합계
+            importance_count = {key: 0 for key in layers_with_basis}   # 배치 개수
             
             self.logger.info(f"{'='*70}")
-            self.logger.info("Fine-tuning with Importance Tracking")
-
+            self.logger.info("Fine-tuning with Online Importance Averaging (Memory-Efficient)")
+            self.logger.info("메모리 최적화: Gradient를 저장하지 않고 실시간 평균 계산")
             self.logger.info(f"{'='*70}")
             
-            # Step 5: 훈련 루프
+            # Step 5: 훈련 루프 (동시에 importance 계산)
             epochs = getattr(self.args, 'safety_epochs', 3)
             total_loss = 0.0
             total_batches = 0
@@ -508,37 +585,21 @@ class Phase2ImportanceScorer:
                 )
                 
                 for batch_idx, batch in enumerate(progress_bar):
-                    harmful_prompts = batch['harmful_prompt']
-                    safety_responses = batch['safe_response']
-                    
-                    # 결합된 입력-목표 시퀀스 (Teacher Forcing)
-                    combined_texts = [
-                        f"{q}\n{a}" 
-                        for q, a in zip(harmful_prompts, safety_responses)
-                    ]
-                    
-                    # 토큰화
-                    combined = self.tokenizer(
-                        combined_texts,
-                        return_tensors='pt',
-                        padding=True,
-                        truncation=True,
-                        max_length=512
-                    )
-                    combined_ids = combined['input_ids'].to(self.model.device)
-                    combined_attn = combined['attention_mask'].to(self.model.device)
+                    # CircuitBreakersDataset에서 이미 tokenize된 input_ids와 attention_mask 사용
+                    input_ids = batch['input_ids'].to(self.model.device)
+                    attention_mask = batch['attention_mask'].to(self.model.device)
                     
                     # Forward pass: weight = basis_coeff @ Vh
                     outputs = self.model(
-                        input_ids=combined_ids,
-                        attention_mask=combined_attn
+                        input_ids=input_ids,
+                        attention_mask=attention_mask
                     )
                     logits = outputs.logits  # (batch, seq_len, vocab_size)
                     
                     # Teacher forcing: shift targets
                     pred_logits = logits[:, :-1, :].contiguous()  # (batch, seq_len-1, vocab_size)
-                    target_ids_shift = combined_ids[:, 1:].contiguous()
-                    attention_mask_shift = combined_attn[:, 1:].contiguous()
+                    target_ids_shift = input_ids[:, 1:].contiguous()
+                    attention_mask_shift = attention_mask[:, 1:].contiguous()
                     
                     # 유효한 토큰만
                     valid_mask = (attention_mask_shift == 1) & (target_ids_shift != self.tokenizer.pad_token_id)
@@ -553,8 +614,7 @@ class Phase2ImportanceScorer:
                         optimizer.zero_grad()
                         loss.backward()
                         
-                        # Importance 수집: |basis_coeff.grad| - Multiple Layer Types
-                        batch_importance_collected = 0
+                        # Online Importance Averaging: 배치 단위로 실시간 평균 계산 (메모리 최적화)
                         for layer_idx, layer_type in layers_with_basis:
                             layer = self.model.model.layers[layer_idx]
                             target_module = self._get_target_module(layer, layer_type)
@@ -562,9 +622,18 @@ class Phase2ImportanceScorer:
                             if hasattr(target_module, 'basis_coeff'):
                                 if target_module.basis_coeff.grad is not None:
                                     # Gradient 절댓값 (element-wise)
-                                    grad_abs = torch.abs(target_module.basis_coeff.grad)  # (d_out, rank)
-                                    importances[(layer_idx, layer_type)].append(grad_abs.detach().cpu())
-                                    batch_importance_collected += 1
+                                    grad_abs = torch.abs(target_module.basis_coeff.grad).float().cpu()  # (d_out, rank)
+                                    
+                                    # Online 평균 계산: new_mean = (old_mean * count + grad) / (count + 1)
+                                    key = (layer_idx, layer_type)
+                                    if importance_sum[key] is None:
+                                        # 첫 번째 배치
+                                        importance_sum[key] = grad_abs.clone()
+                                    else:
+                                        # 이후 배치들: 온라인 누적
+                                        importance_sum[key] += grad_abs
+                                    
+                                    importance_count[key] += 1
                                 else:
                                     self.logger.debug(f"[Batch {batch_idx}] Layer {layer_idx} ({layer_type}): gradient is None!")
                             else:
@@ -592,54 +661,47 @@ class Phase2ImportanceScorer:
             self.logger.info(f"훈련 완료!")
             self.logger.info(f"   - basis_coeff: 훈련으로 업데이트됨")
             self.logger.info(f"   - Forward 메서드: new_forward 유지 (basis_coeff @ Vh 사용)")
-            self.logger.info(f"   - 다음: importance 집계 및 마스크 생성")
+            self.logger.info(f"   - 다음: Online 평균에서 최종 importance 계산 및 마스크 생성")
             
-            # Step 6: Importance 평균 계산 (파인튜닝 중 수집한 gradient 기반)
+            # Step 6: Online 평균에서 최종 importance 계산
             self.logger.info("="*70)
-            self.logger.info("Importance Scores 계산 (기저 공간에서 수집한 gradient 기반)")
-            self.logger.info("수식: importance_per_input = mean(|∂L/∂basis_coeff|) over batches")
+            self.logger.info("Importance Scores 계산 (Online Averaging 결과)")
+            self.logger.info("수식: importance = accumulated_sum / batch_count")
             self.logger.info("의미: 안전 파인튜닝 중 각 기저 차원이 얼마나 중요했는가?")
             
             self.importances = {}
             for layer_idx, layer_type in layers_with_basis:
-                if len(importances[(layer_idx, layer_type)]) > 0:
-                    # 모든 배치의 gradient를 스택
-                    layer_importances = torch.stack(importances[(layer_idx, layer_type)], dim=0)  # (num_batches, d_out, rank)
+                key = (layer_idx, layer_type)
+                if importance_count[key] > 0:
+                    # Online 평균 계산
+                    importance_mean = importance_sum[key] / importance_count[key]  # (d_out, rank)
                     
                     self.logger.info(f"✓ Layer {layer_idx} ({layer_type}):")
-                    self.logger.info(f"  - 수집된 gradient 배치 수: {len(importances[(layer_idx, layer_type)])}")
-                    self.logger.info(f"  - 각 배치 shape: (d_out, rank) = {layer_importances[0].shape}")
-                    self.logger.info(f"  - 스택 후 shape: {layer_importances.shape}")
+                    self.logger.info(f"  - 누적한 배치 수: {importance_count[key]}")
+                    self.logger.info(f"  - Importance shape: {importance_mean.shape}")
                     
-                    # 배치 축 평균 (각 (out, in) 위치에서 배치들의 gradient 평균)
-                    importance_mean = layer_importances.mean(dim=0)  # (d_out, rank)
-                    self.logger.info(f"  - Batch 평균 shape: {importance_mean.shape}")
-                    
-                    # Input 차원별로 sum
-                    # 각 input 차원이 모든 output에 미치는 누적 영향도 계산
-                    importance_per_input = importance_mean.sum(dim=0)  # (rank,)
-                    self.logger.info(f"  - Output 축 합산 → input-wise importance: {importance_per_input.shape}")
-                    
-                    self.importances[(layer_idx, layer_type)] = importance_per_input.float().cpu().numpy()
+                    # 2D 형태 유지 (generate_masks에서 flatten하여 처리)
+                    self.importances[key] = importance_mean.float().numpy()
                     
                     # 상세 통계
-                    self.logger.info(f"  📈 Importances score 통계:")
-                    self.logger.info(f"     - Mean: {self.importances[(layer_idx, layer_type)].mean():.6f}")
-                    self.logger.info(f"     - Std: {self.importances[(layer_idx, layer_type)].std():.6f}")
-                    self.logger.info(f"     - Min: {self.importances[(layer_idx, layer_type)].min():.6f}")
-                    self.logger.info(f"     - Max: {self.importances[(layer_idx, layer_type)].max():.6f}")
-                    self.logger.info(f"     - Median: {np.median(self.importances[(layer_idx, layer_type)]):.6f}")
+                    self.logger.info(f"  📈 Importances score 통계 (2D: d_out × rank):")
+                    self.logger.info(f"     - Shape: {self.importances[key].shape}")
+                    self.logger.info(f"     - Mean: {self.importances[key].mean():.6f}")
+                    self.logger.info(f"     - Std: {self.importances[key].std():.6f}")
+                    self.logger.info(f"     - Min: {self.importances[key].min():.6f}")
+                    self.logger.info(f"     - Max: {self.importances[key].max():.6f}")
+                    self.logger.info(f"     - Median: {np.median(self.importances[key]):.6f}")
                     
                     # 상위 10% 값 확인
-                    top_10_pct = np.percentile(self.importances[(layer_idx, layer_type)], 90)
+                    top_10_pct = np.percentile(self.importances[key], 90)
                     self.logger.info(f"     - 90 percentile (상위 10% 기준): {top_10_pct:.6f}")
                     
                 else:
-                    self.logger.error(f"✗ Layer {layer_idx} ({layer_type}): No gradients collected! importances[({layer_idx}, {layer_type})] = {importances.get((layer_idx, layer_type), [])}")
+                    self.logger.error(f"✗ Layer {layer_idx} ({layer_type}): No gradients collected! count = {importance_count[key]}")
             
             avg_loss = total_loss / max(total_batches, 1)
             self.logger.info(f"{'='*70}")
-            self.logger.info(f"Phase 2 완료: Fine-tuning + Importance Scoring")
+            self.logger.info(f"Phase 2 완료: Fine-tuning + Online Importance Averaging")
             self.logger.info(f"{'='*70}")
             self.logger.info(f"훈련 결과:")
             self.logger.info(f"   - Total loss (all epochs): {total_loss:.4f}")
@@ -647,6 +709,7 @@ class Phase2ImportanceScorer:
             self.logger.info(f"   - Total batches processed: {total_batches}")
             self.logger.info(f"   - Layers with importance scores: {len(self.importances)}")
             self.logger.info(f"   - Layers with basis: {len(layers_with_basis)}")
+            self.logger.info(f"   - 메모리 효율성: Gradient 저장 대신 Online Averaging 사용")
       
             self.stats['total_loss'] = total_loss
             
@@ -874,12 +937,26 @@ class Phase2ImportanceScorer:
             total_frozen = 0
             total_trainable = 0
             
+            # Shape 메타데이터 저장용
+            mask_shapes = {}
+            
             for (layer_idx, layer_type), mask in self.masks.items():
                 masks_dir = os.path.join(self.args.checkpoint_dir, 'masks', layer_type)
                 os.makedirs(masks_dir, exist_ok=True)
                 
                 save_path = os.path.join(masks_dir, f'layer_{layer_idx:02d}_mask.pt')
-                torch.save(torch.from_numpy(mask).float(), save_path)
+                
+                # importance의 2D shape 정보를 저장
+                importance_2d = self.importances[(layer_idx, layer_type)]  # (d_out, rank)
+                mask_shape = importance_2d.shape  # (d_out, rank)
+                
+                # mask와 shape을 함께 저장
+                torch.save({
+                    'mask': torch.from_numpy(mask).float(),
+                    'shape': mask_shape,  # (d_out, rank)
+                }, save_path)
+                
+                mask_shapes[(layer_idx, layer_type)] = mask_shape
                 
                 frozen_count = int(mask.sum())
                 trainable_count = len(mask) - frozen_count
@@ -887,7 +964,7 @@ class Phase2ImportanceScorer:
                 total_frozen += frozen_count
                 total_trainable += trainable_count
                 
-                self.logger.debug(f"  ✓ Layer {layer_idx} ({layer_type}): {frozen_count} frozen, {trainable_count} trainable")
+                self.logger.debug(f"  ✓ Layer {layer_idx} ({layer_type}): shape {mask_shape}, {frozen_count} frozen, {trainable_count} trainable")
             
             # 메타데이터 저장
             metadata_dir = os.path.join(self.args.checkpoint_dir, 'masks')
@@ -897,7 +974,8 @@ class Phase2ImportanceScorer:
                 'model_name': self.args.model_name,
                 'layer_types': self.args.layer_type if isinstance(self.args.layer_type, list) else self.args.layer_type.split(','),
                 'num_masks': len(self.masks),
-                'safety_samples': self.args.safety_samples,
+                'circuit_breakers_path': self.args.circuit_breakers_path,
+                'circuit_breakers_samples': self.args.circuit_breakers_samples,
                 'keep_ratio': self.args.keep_ratio if hasattr(self.args, 'keep_ratio') else 0.1,
                 'total_loss': self.stats['total_loss'],
                 'total_frozen_dims': int(total_frozen),

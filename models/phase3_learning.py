@@ -138,6 +138,30 @@ class Phase3IncrementalLearner:
             import glob
             total_loaded = 0
             
+            # Phase 2에서 저장한 basis_coeff shape 정보를 로드
+            # masks_dir: ./checkpoints/phase2_XXX/checkpoints/masks/
+            # basis_coeff: ./checkpoints/phase2_XXX/checkpoints/basis_coefficients/
+            coefficients_dir = os.path.join(os.path.dirname(os.path.dirname(self.masks_dir)), 'basis_coefficients')
+            basis_coeff_shapes = {}
+            
+            self.logger.info(f"Looking for basis_coeff shapes in: {coefficients_dir}")
+            
+            for layer_type in layer_types:
+                coeff_dir = os.path.join(coefficients_dir, layer_type)
+                self.logger.debug(f"  Checking layer_type '{layer_type}': {coeff_dir}")
+                
+                if os.path.exists(coeff_dir):
+                    coeff_files = sorted(glob.glob(os.path.join(coeff_dir, 'layer_*_basis_coeff.pt')))
+                    self.logger.debug(f"    Found {len(coeff_files)} files")
+                    for coeff_path in coeff_files:
+                        filename = os.path.basename(coeff_path)
+                        layer_idx = int(filename.split('_')[1])
+                        coeff_data = torch.load(coeff_path, map_location='cpu')
+                        basis_coeff_shapes[(layer_idx, layer_type)] = coeff_data['shape']
+                        self.logger.debug(f"      Loaded shape for layer {layer_idx}: {coeff_data['shape']}")
+            
+            self.logger.info(f"✓ Loaded basis_coeff shapes: {len(basis_coeff_shapes)} entries")
+            
             for layer_type in layer_types:
                 layer_type_dir = os.path.join(self.masks_dir, layer_type)
                 
@@ -153,9 +177,33 @@ class Phase3IncrementalLearner:
                     filename = os.path.basename(mask_path)
                     layer_idx = int(filename.split('_')[1])
                     
-                    mask = torch.load(mask_path, map_location='cpu')
+                    # mask와 shape이 함께 저장되어 있을 수 있음
+                    mask_data = torch.load(mask_path, map_location='cpu')
                     key = (layer_idx, layer_type)
-                    self.masks[key] = mask.to(self.args.device)
+                    
+                    if isinstance(mask_data, dict) and 'mask' in mask_data:
+                        # 새로운 형식: {'mask': mask_1d, 'shape': (d_out, rank)}
+                        mask_1d = mask_data['mask']
+                        mask_shape = mask_data['shape']
+                        
+                        # 1D 마스크를 2D (d_out, rank)로 reshape
+                        mask_2d = mask_1d.reshape(mask_shape)
+                        self.masks[key] = mask_2d.to(self.args.device)
+                        
+                        self.logger.debug(f"  ✓ Layer {layer_idx} ({layer_type}): reshaped mask from {mask_1d.shape} to {mask_2d.shape}")
+                    else:
+                        # 이전 형식: 1D 마스크만 저장 (backward compatibility)
+                        # basis_coeff shape에서 (d_out, rank) 추론
+                        if key in basis_coeff_shapes:
+                            mask_shape = basis_coeff_shapes[key]
+                            mask_2d = mask_data.reshape(mask_shape)
+                            self.masks[key] = mask_2d.to(self.args.device)
+                            
+                            self.logger.debug(f"  ✓ Layer {layer_idx} ({layer_type}): reshaped mask from {mask_data.shape} to {mask_2d.shape} using basis_coeff shape")
+                        else:
+                            self.logger.error(f"basis_coeff shape not found for key {key}")
+                            raise KeyError(f"basis_coeff shape not found for key {key}")
+                    
                     total_loaded += 1
             
             self.logger.info(f"✓ Masks loaded: {total_loaded} (layer, type) combinations")
@@ -228,7 +276,7 @@ class Phase3IncrementalLearner:
             self.logger.info(f"Loading {model_source} Model")
             self.logger.info(f"{'='*70}")
             self.logger.info(f"Model path: {model_to_load}")
-            self.logger.info(f"Source: Phase 2 safety fine-tuning (do-not-answer dataset)")
+            self.logger.info(f"Source: Phase 2 safety fine-tuning")
             
             self.model = AutoModelForCausalLM.from_pretrained(
                 model_to_load,
@@ -237,7 +285,7 @@ class Phase3IncrementalLearner:
                 trust_remote_code=True
             )
             self.logger.info(f"✓ {model_source} model loaded successfully!")
-            self.logger.info(f"  This model has been fine-tuned on safety data (do-not-answer)")
+            self.logger.info(f"  This model has been fine-tuned on safety data")
             self.logger.info(f"  and should refuse harmful requests better than the base model.")
             
             # 토크나이저도 Phase 2 모델에서 로드
@@ -374,7 +422,7 @@ class Phase3IncrementalLearner:
             self.logger.error(f"Failed to load utility data: {str(e)}", exc_info=True)
             raise
     
-    def register_mask_hooks(self):
+    def register_masked_basis_coeffs(self):
         """
         Custom forward 함수로 basis_coeff @ Vh를 사용하여 gradient 추적
         
@@ -621,12 +669,13 @@ class Phase3IncrementalLearner:
             if torch.cuda.is_available():
                 torch.cuda.reset_peak_memory_stats()
             
-            # Forward pass: CLM으로 학습
-            outputs = self.model(
-                input_ids=input_ids,
-                attention_mask=attention_mask,
-                labels=input_ids
-            )
+            # Forward pass: CLM으로 학습 (BF16에서 자동으로 실행)
+            with torch.autocast(device_type='cuda', dtype=torch.bfloat16):
+                outputs = self.model(
+                    input_ids=input_ids,
+                    attention_mask=attention_mask,
+                    labels=input_ids
+                )
             loss = outputs.loss
             
             # Gradient accumulation: loss를 accumulation_steps로 나누기
@@ -660,36 +709,37 @@ class Phase3IncrementalLearner:
                 if basis_param.grad is None:
                     continue
 
-                # mask: boolean on input dimension (d_in,)
+                # mask: boolean on (d_out, rank) - 2D mask matching basis_coeff shape
                 mask = target_module._warp_mask
-                frozen_idx = mask
-                trainable_idx = ~mask
+                frozen_mask = mask  # (d_out, rank) boolean tensor
+                trainable_mask = ~mask
 
-                # basis_param.grad shape: (d_out, d_in)
+                # basis_param.grad shape: (d_out, rank)
                 pre_norm = basis_param.grad.norm().item() if basis_param.grad.numel() > 0 else 0.0
                 batch_masked_before += pre_norm
 
                 # 마스킹 전 frozen/trainable 분석
-                if frozen_idx.any():
-                    frozen_grad_before = basis_param.grad[:, frozen_idx]
+                if frozen_mask.any():
+                    frozen_grad_before = basis_param.grad[frozen_mask]
                     frozen_norm_before = torch.norm(frozen_grad_before).item() if frozen_grad_before.numel() > 0 else 0.0
                 else:
                     frozen_norm_before = 0.0
 
                 # 마스킹 적용: WaRP의 핵심 - frozen direction의 gradient를 0으로 설정
-                if frozen_idx.any():
-                    basis_param.grad[:, frozen_idx] = 0.0
+                # Element-wise masking: frozen_mask가 True인 곳을 0으로 설정
+                if frozen_mask.any():
+                    basis_param.grad[frozen_mask] = 0.0
 
                 post_norm = basis_param.grad.norm().item() if basis_param.grad.numel() > 0 else 0.0
 
                 # statistics for logging
                 frozen_grad_norm = 0.0
                 trainable_grad_norm = 0.0
-                if frozen_idx.any():
-                    frozen_grad = basis_param.grad[:, frozen_idx]
+                if frozen_mask.any():
+                    frozen_grad = basis_param.grad[frozen_mask]
                     frozen_grad_norm = torch.norm(frozen_grad).item() if frozen_grad.numel() > 0 else 0.0
-                if trainable_idx.any():
-                    trainable_grad = basis_param.grad[:, trainable_idx]
+                if trainable_mask.any():
+                    trainable_grad = basis_param.grad[trainable_mask]
                     trainable_grad_norm = torch.norm(trainable_grad).item() if trainable_grad.numel() > 0 else 0.0
 
                 # 파라미터 norm
@@ -711,8 +761,8 @@ class Phase3IncrementalLearner:
                     'frozen_grad_after': frozen_grad_norm,
                     'trainable_grad': trainable_grad_norm,
                     'param_norm': param_norm,
-                    'num_frozen': frozen_idx.sum().item(),
-                    'num_trainable': trainable_idx.sum().item(),
+                    'num_frozen': frozen_mask.sum().item(),
+                    'num_trainable': trainable_mask.sum().item(),
                 })
             
             # Gradient accumulation: 스텝에서만 업데이트
@@ -893,9 +943,17 @@ class Phase3IncrementalLearner:
             load_time = (datetime.now() - start_time).total_seconds()
             self.logger.info(f"✓ Data loading completed in {load_time:.2f}s")
             
-            # 2. 마스킹 hook 등록
+            # 2. BF16 활성화 (혼합 정밀도 훈련, Safety-Neuron과 동일)
+            self.logger.info("[Step 3.5] Enabling BF16 precision...")
+            if torch.cuda.is_available() and torch.cuda.is_bf16_supported():
+                self.model = self.model.to(torch.bfloat16)
+                self.logger.info(f"✓ BF16 enabled (Memory: ~50% reduction)")
+            else:
+                self.logger.warning(f"⚠️  BF16 not available, using default precision")
+            
+            # 3. 마스킹 hook 등록
             self.logger.info("[Step 4] Registering mask hooks...")
-            self.register_mask_hooks()
+            self.register_masked_basis_coeffs()
             
             # 마스킹 검증
             self.logger.info("[Step 4.5] Validating mask configuration...")
@@ -957,17 +1015,21 @@ class Phase3IncrementalLearner:
             self.logger.info(f"  - Batch size: {self.args.batch_size}")
             self.logger.info(f"  - Gradient accumulation steps: {self.gradient_accumulation_steps}")
             self.logger.info(f"  - Effective batch size: {self.args.batch_size * self.gradient_accumulation_steps}")
-            self.logger.info(f"  - Scheduler: Cosine decay with 5% warmup")
+            self.logger.info(f"  - Scheduler: Cosine decay with 5% linear warmup")
             self.logger.info(f"  - Total training steps: {total_steps}")
-            self.logger.info(f"  - Warmup steps: {warmup_steps}")
+            self.logger.info(f"  - Warmup steps: {warmup_steps} (5% of {total_steps})")
             self.logger.info(f"  - Max grad norm: 0.3")
-            self.logger.info(f"  - Gradient checkpointing: Enabled")
+            self.logger.info(f"  - Gradient checkpointing: Enabled (matches SFTTrainer)")
+            self.logger.info(f"  - BF16 precision: Enabled (matches SFTTrainer)")
             
             # 4. 훈련
             self.logger.info("[Step 6] Starting training...")
             self.logger.info(f"  - Total epochs: {self.args.epochs}")
             self.logger.info(f"  - Batches per epoch: {len(self.train_loader)}")
             self.logger.info(f"  - Batch size: {self.args.batch_size}")
+            self.logger.info(f"  - Model dtype: {next(self.model.parameters()).dtype}")
+            self.logger.info(f"  - Gradient checkpointing: Enabled")
+            self.logger.info(f"  - BF16 mixed precision: Enabled")
             self.logger.info(f"  - Total samples: {len(self.train_loader) * self.args.batch_size * self.args.epochs}")
             self.logger.info(f"{'='*70}")
             

@@ -6,8 +6,8 @@ Phase 3 완료 후 만들어진 모델을 HuggingFace Hub에 업로드하는 스
 
 Usage:
     python upload_to_huggingface.py \
-        --model_path ./checkpoints/phase3_20251109_190831/checkpoints/checkpoints/phase3_best.pt \
-        --hf_model_id kmseong/WaRP-Safety-Llama3_8B_Instruct \
+        --model_path ./checkpoints/phase3_20251201_232353/checkpoints/checkpoints/phase3_best.pt \
+        --hf_model_id kmseong/WaRP-Safety-Llama3.2_3B_Instruct_last \
         --hf_token your_huggingface_token
 """
 
@@ -40,7 +40,7 @@ def upload_model_to_huggingface(
     
     Args:
         model_path: 저장된 모델 경로 (.pt 파일)
-        hf_model_id: HuggingFace 모델 ID (e.g., "kmseong/WaRP-Safety-Llama3_8B_Instruct")
+        hf_model_id: HuggingFace 모델 ID (e.g., "kmseong/WaRP-Safety-Llama3_3B_Instruct")
         hf_token: HuggingFace API 토큰 (None이면 환경변수에서 읽음)
         private: 비공개 모델 여부
         commit_message: 커밋 메시지
@@ -146,7 +146,7 @@ def upload_model_to_huggingface(
         
         try:
             # 기본 모델에서 필요한 파일들 다운로드
-            base_model = "meta-llama/Llama-3.1-8B-Instruct"
+            base_model = "meta-llama/Llama-3.2-3B-Instruct"
             
             config = AutoModelForCausalLM.from_pretrained(
                 base_model,
@@ -266,7 +266,7 @@ This model is fine-tuned for improved safety. Users should evaluate model output
         # 메타데이터 파일 생성
         metadata = {
             "model_id": hf_model_id,
-            "base_model": "meta-llama/Llama-3.1-8B-Instruct",
+            "base_model": "meta-llama/Llama-3.2-3B-Instruct",
             "training_method": "Safety-First WaRP",
             "upload_date": datetime.now().isoformat(),
             "model_size_gb": model_size_gb,

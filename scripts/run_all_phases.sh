@@ -10,16 +10,16 @@ echo "Safety-WaRP-LLM: Complete Training Pipeline"
 echo "========================================================================"
 
 # 설정
-MODEL_NAME="meta-llama/Llama-3.1-8B-Instruct"
-SAFETY_SAMPLES=500
+MODEL_NAME="meta-llama/Llama-3.2-3B-Instruct"
 UTILITY_SAMPLES=0
-BATCH_SIZE=4
+BATCH_SIZE=2
 DTYPE="bfloat16"
 DEVICE="cuda"
 EPOCHS=3
 LEARNING_RATE=1e-5
 KEEP_RATIO=0.1
-TARGET_LAYERS=31
+TARGET_LAYERS=27
+LAYER_TYPE="attn_q,attn_k,attn_v,ffn_down,ffn_up"
 
 # 기본 디렉토리
 BASE_OUTPUT_DIR="./checkpoints"
@@ -36,13 +36,14 @@ echo "========================================================================"
 python train.py \
     --phase 1 \
     --model_name $MODEL_NAME \
-    --safety_samples $SAFETY_SAMPLES \
     --batch_size $BATCH_SIZE \
     --target_layers $TARGET_LAYERS \
+    --layer_type "$LAYER_TYPE" \
     --dtype $DTYPE \
     --device $DEVICE \
     --output_dir $BASE_OUTPUT_DIR \
-    --debug 2>&1 | tee phase1.log
+    --harmful_prompts_path ./data/harmful_prompts_200.txt \
+    --debug 2>&1 | tee phase1.log 
 
 # Phase 1 출력 경로 추출 (최신 phase1 디렉토리 찾기)
 PHASE1_OUTPUT_DIR=$(find $BASE_OUTPUT_DIR -maxdepth 1 -name "phase1_*" -type d -printf '%T@ %p\n' | sort -rn | head -1 | cut -d' ' -f2-)
@@ -65,10 +66,13 @@ echo "========================================================================"
 python train.py \
     --phase 2 \
     --basis_dir $PHASE1_BASIS_DIR \
-    --safety_samples $SAFETY_SAMPLES \
     --batch_size $BATCH_SIZE \
+    --epochs $EPOCHS \
+    --layer_type "$LAYER_TYPE" \
     --keep_ratio $KEEP_RATIO \
     --output_dir $BASE_OUTPUT_DIR \
+    --circuit_breakers_path ./data/circuit_breakers_train.json \
+    --circuit_breakers_samples 200 \
     --debug 2>&1 | tee phase2.log
 
 # Phase 2 출력 경로 추출 (최신 phase2 디렉토리 찾기)
@@ -93,6 +97,7 @@ python train.py \
     --phase 3 \
     --basis_dir $PHASE1_BASIS_DIR \
     --masks_dir $PHASE2_MASKS_DIR \
+    --layer_type "$LAYER_TYPE" \
     --utility_samples $UTILITY_SAMPLES \
     --batch_size $BATCH_SIZE \
     --epochs $EPOCHS \

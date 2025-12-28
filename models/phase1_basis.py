@@ -166,38 +166,104 @@ class Phase1BasiBuilder:
     
     def load_safety_data(self):
         """
-        안전 데이터 로드 (do-not-answer)
+        안전 데이터 로드 (harmful_prompts_200.txt)
         
         Log:
         - 데이터셋 로드 상태
         - 필터링 결과
         - 최종 샘플 수
         """
-        from data.data_loader import create_safety_dataloader
-        
         try:
-            self.logger.info(f"Loading safety data with max_samples={self.args.safety_samples}")
-            
-            self.dataloader = create_safety_dataloader(
-                batch_size=self.args.batch_size,
-                max_samples=self.args.safety_samples,
-                tokenizer=self.tokenizer,
-                num_workers=0
-            )
-            
-            self.logger.info(f"✓ Dataloader created")
-            self.logger.info(f"  - Batch size: {self.args.batch_size}")
-            self.logger.info(f"  - Total batches: {len(self.dataloader)}")
-            
-            # 샘플 출력
-            sample_batch = next(iter(self.dataloader))
-            self.logger.info(f"  - Sample batch keys: {sample_batch.keys()}")
-            if 'harmful_prompt' in sample_batch:
-                self.logger.info(f"  - Sample prompt: {sample_batch['harmful_prompt'][0][:100]}...")
+            self._load_harmful_prompts()
             
         except Exception as e:
             self.logger.error(f"Failed to load safety data: {str(e)}", exc_info=True)
             raise
+    
+    def _load_harmful_prompts(self):
+        """
+        harmful_prompts_200.txt 로드 (Phase 1용)
+        """
+        harmful_prompts_path = self.args.harmful_prompts_path
+        self.logger.info(f"Loading harmful prompts from {harmful_prompts_path}...")
+        
+        # 텍스트 파일 로드
+        with open(harmful_prompts_path, 'r', encoding='utf-8') as f:
+            prompts = [line.strip() for line in f if line.strip()]
+        
+        self.logger.info(f"✓ Loaded {len(prompts)} harmful prompts")
+        
+        # 데이터셋 클래스
+        class HarmfulPromptsDataset(torch.utils.data.Dataset):
+            def __init__(self, prompts, tokenizer, max_length=512):
+                self.prompts = prompts
+                self.tokenizer = tokenizer
+                self.max_length = max_length
+            
+            def __len__(self):
+                return len(self.prompts)
+            
+            def __getitem__(self, idx):
+                prompt = self.prompts[idx]
+                
+                encoding = self.tokenizer(
+                    prompt,
+                    truncation=True,
+                    max_length=self.max_length,
+                    return_tensors='pt'
+                )
+                
+                return {
+                    'input_ids': encoding['input_ids'].squeeze(),
+                    'attention_mask': encoding['attention_mask'].squeeze(),
+                }
+        
+        dataset = HarmfulPromptsDataset(prompts, self.tokenizer, max_length=512)
+        
+        # Custom collate function
+        def collate_fn(batch):
+            max_len = max(len(item['input_ids']) for item in batch)
+            
+            input_ids_list = []
+            attention_masks_list = []
+            
+            for item in batch:
+                input_ids = item['input_ids']
+                attn_mask = item['attention_mask']
+                
+                pad_len = max_len - len(input_ids)
+                if pad_len > 0:
+                    input_ids = torch.nn.functional.pad(
+                        input_ids.unsqueeze(0),
+                        (0, pad_len),
+                        value=self.tokenizer.pad_token_id
+                    ).squeeze(0)
+                    attn_mask = torch.nn.functional.pad(
+                        attn_mask.unsqueeze(0),
+                        (0, pad_len),
+                        value=0
+                    ).squeeze(0)
+                
+                input_ids_list.append(input_ids)
+                attention_masks_list.append(attn_mask)
+            
+            return {
+                'input_ids': torch.stack(input_ids_list),
+                'attention_mask': torch.stack(attention_masks_list),
+            }
+        
+        self.dataloader = torch.utils.data.DataLoader(
+            dataset,
+            batch_size=self.args.batch_size,
+            shuffle=True,
+            collate_fn=collate_fn
+        )
+        
+        self.logger.info(f"✓ Dataloader created")
+        self.logger.info(f"  - Batch size: {self.args.batch_size}")
+        self.logger.info(f"  - Total batches: {len(self.dataloader)}")
+        self.logger.info(f"  - Sample prompt: {prompts[0][:100]}...")
+    
     
     def register_activation_hooks(self):
         """
@@ -285,31 +351,23 @@ class Phase1BasiBuilder:
                 )
                 
                 for batch_idx, batch in enumerate(progress_bar):
-                    # harmful_prompt를 입력으로 사용
-                    prompts = batch['harmful_prompt']
-                    
-                    # 토큰화
-                    inputs = self.tokenizer(
-                        prompts,
-                        return_tensors='pt',
-                        padding=True,
-                        truncation=True,
-                        max_length=512
-                    )
+                    # collate_fn에서 이미 tokenize되고 padding된 데이터 사용
+                    input_ids = batch['input_ids']
+                    attention_mask = batch['attention_mask']
                     
                     # attention_mask 저장 (패딩 마스킹용, 이후 activation의 공분산 구할때 padding 제거에 사용)
-                    attention_mask = inputs['attention_mask']  # (batch, seq_len)
                     self.attention_masks.append(attention_mask)
                     
                     # GPU로 이동
-                    inputs = {k: v.to(self.model.device) for k, v in inputs.items()}
+                    input_ids = input_ids.to(self.model.device)
+                    attention_mask = attention_mask.to(self.model.device)
                     
                     # 모델 실행 (활성화는 훅에서 수집됨)
-                    _ = self.model(**inputs)
+                    _ = self.model(input_ids=input_ids, attention_mask=attention_mask)
                     
                     # 통계 업데이트
-                    batch_size = len(prompts)
-                    seq_len = inputs['input_ids'].shape[1]
+                    batch_size = input_ids.shape[0]
+                    seq_len = input_ids.shape[1]
                     valid_tokens = attention_mask.sum().item()  # 유효 토큰 수
                     self.stats['total_samples'] += batch_size
                     self.stats['total_tokens'] += valid_tokens
@@ -489,12 +547,12 @@ class Phase1BasiBuilder:
                 'layer_types': sorted(list(layer_types_processed)),
                 'target_layers': self.args.target_layers,
                 'num_layers': len(self.svd_results),
-                'safety_samples': self.args.safety_samples,
+                'harmful_prompts_path': self.args.harmful_prompts_path,
                 'batch_size': self.args.batch_size,
                 'total_tokens': self.stats['total_tokens'],
                 'total_samples': self.stats['total_samples'],
                 'dtype': self.args.dtype,
-                'notes': 'Activations filtered using attention_mask (padding tokens excluded). Multiple layer_types processed.',
+                'notes': 'Phase 1: Activations filtered using attention_mask (padding tokens excluded). Multiple layer_types processed.',
             }
             
             metadata_path = os.path.join(basis_dir, 'metadata.json')
