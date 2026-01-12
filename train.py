@@ -47,9 +47,14 @@ def parse_args():
     parser.add_argument('--batch_size', type=int, default=4,
                         help='배치 크기')
     
-    # Phase 1 설정 (harmful_prompts_200.txt 사용)
+    # Phase 1 설정 (harmful_prompts_200.txt 또는 do-not-answer 사용)
+    parser.add_argument('--safety_dataset', type=str, default='harmful_prompts',
+                        choices=['harmful_prompts', 'do-not-answer'],
+                        help='Phase 1에서 사용할 안전 데이터셋 (harmful_prompts 또는 do-not-answer)')
     parser.add_argument('--harmful_prompts_path', type=str, default='./data/harmful_prompts_200.txt',
-                        help='Phase 1에서 사용할 harmful prompts 파일 경로')
+                        help='--safety_dataset harmful_prompts일 때 사용할 파일 경로')
+    parser.add_argument('--dna_samples', type=int, default=200,
+                        help='--safety_dataset do-not-answer일 때 사용할 샘플 수')
     
     # Phase 2 설정 (circuit_breakers_train.json 사용)
     parser.add_argument('--circuit_breakers_path', type=str, default='./data/circuit_breakers_train.json',
@@ -69,6 +74,24 @@ def parse_args():
                         help='Phase 1에서 저장된 basis 디렉토리 경로')
     parser.add_argument('--keep_ratio', type=float, default=0.1,
                         help='유지할 중요 계수의 비율 (Phase 2)')
+    
+    # Phase 2 추가 Fine-tuning 하이퍼파라미터
+    parser.add_argument('--safety_lr', type=float, default=1e-5,
+                        help='Phase 2 안전 데이터 학습률')
+    parser.add_argument('--safety_epochs', type=int, default=3,
+                        help='Phase 2 훈련 에포크 수')
+    parser.add_argument('--safety_weight_decay', type=float, default=0.01,
+                        help='Phase 2 weight decay')
+    parser.add_argument('--max_length', type=int, default=512,
+                        help='Phase 2 입력 최대 길이')
+    parser.add_argument('--warmup_ratio', type=float, default=0.05,
+                        help='Learning rate scheduler warmup ratio (Phase 2, 0.0-1.0)')
+    parser.add_argument('--gradient_accumulation_steps', type=int, default=1,
+                        help='Gradient accumulation steps (Phase 2)')
+    parser.add_argument('--max_grad_norm', type=float, default=0.3,
+                        help='Max gradient norm for clipping (Phase 2, 0=disabled)')
+    parser.add_argument('--gradient_checkpointing', action='store_true',
+                        help='Enable gradient checkpointing for memory efficiency (Phase 2)')
     
     # Phase 3 설정
     parser.add_argument('--masks_dir', type=str, default=None,
@@ -106,7 +129,7 @@ def parse_args():
     # HuggingFace Hub 설정 (Phase 3)
     parser.add_argument('--push_to_hub', action='store_true',
                         help='Phase 3 완료 후 HuggingFace Hub에 업로드')
-    parser.add_argument('--hub_model_id', type=str, default='kmseong/WaRP-Safety-Llama3_8B_Instruct',
+    parser.add_argument('--hub_model_id', type=str, default='kmseong/WaRP-Safety-Llama3_3B_Instruct',
                         help='HuggingFace Hub 모델 ID (format: username/model_name)')
     parser.add_argument('--hf_token', type=str, default=None,
                         help='HuggingFace API 토큰 (None이면 환경변수 HUGGINGFACE_TOKEN 사용)')

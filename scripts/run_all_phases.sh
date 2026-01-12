@@ -17,8 +17,8 @@ DTYPE="bfloat16"
 DEVICE="cuda"
 EPOCHS=3
 LEARNING_RATE=1e-5
-KEEP_RATIO=0.1
-TARGET_LAYERS=27
+KEEP_RATIO=0.01
+TARGET_LAYERS="all"
 LAYER_TYPE="attn_q,attn_k,attn_v,ffn_down,ffn_up"
 
 # 기본 디렉토리

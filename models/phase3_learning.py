@@ -148,7 +148,7 @@ class Phase3IncrementalLearner:
             
             for layer_type in layer_types:
                 coeff_dir = os.path.join(coefficients_dir, layer_type)
-                self.logger.debug(f"  Checking layer_type '{layer_type}': {coeff_dir}")
+                self.logger.info(f"  Checking layer_type '{layer_type}': {coeff_dir}")
                 
                 if os.path.exists(coeff_dir):
                     coeff_files = sorted(glob.glob(os.path.join(coeff_dir, 'layer_*_basis_coeff.pt')))
@@ -190,7 +190,7 @@ class Phase3IncrementalLearner:
                         mask_2d = mask_1d.reshape(mask_shape)
                         self.masks[key] = mask_2d.to(self.args.device)
                         
-                        self.logger.debug(f"  ✓ Layer {layer_idx} ({layer_type}): reshaped mask from {mask_1d.shape} to {mask_2d.shape}")
+                        self.logger.info(f"  ✓ Layer {layer_idx} ({layer_type}): reshaped mask from {mask_1d.shape} to {mask_2d.shape}")
                     else:
                         # 이전 형식: 1D 마스크만 저장 (backward compatibility)
                         # basis_coeff shape에서 (d_out, rank) 추론
@@ -199,7 +199,7 @@ class Phase3IncrementalLearner:
                             mask_2d = mask_data.reshape(mask_shape)
                             self.masks[key] = mask_2d.to(self.args.device)
                             
-                            self.logger.debug(f"  ✓ Layer {layer_idx} ({layer_type}): reshaped mask from {mask_data.shape} to {mask_2d.shape} using basis_coeff shape")
+                            self.logger.info(f"  ✓ Layer {layer_idx} ({layer_type}): reshaped mask from {mask_data.shape} to {mask_2d.shape} using basis_coeff shape")
                         else:
                             self.logger.error(f"basis_coeff shape not found for key {key}")
                             raise KeyError(f"basis_coeff shape not found for key {key}")
@@ -342,7 +342,7 @@ class Phase3IncrementalLearner:
             
             # 데이터로더 생성
             class GSM8KDataset(torch.utils.data.Dataset):
-                def __init__(self, dataset, tokenizer, max_length=512):
+                def __init__(self, dataset, tokenizer, max_length=256):
                     self.dataset = dataset
                     self.tokenizer = tokenizer
                     self.max_length = max_length
@@ -371,7 +371,7 @@ class Phase3IncrementalLearner:
                         'attention_mask': encoding['attention_mask'].squeeze(),
                     }
             
-            gsm8k_dataset = GSM8KDataset(dataset, self.tokenizer, max_length=512)
+            gsm8k_dataset = GSM8KDataset(dataset, self.tokenizer, max_length=256)
             
             # Custom collate function for variable length sequences
             def collate_fn_gsm8k(batch):
@@ -643,6 +643,11 @@ class Phase3IncrementalLearner:
         total_tokens = 0  # 총 토큰 수
         num_batches = 0
         
+        # ✅ Track parameter changes to verify training is actually updating weights
+        initial_param_values = {}
+        for i, param in enumerate(self._basis_params[:3]):  # Track first 3 params
+            initial_param_values[i] = param.data.clone()
+        
         # 배치별 상세 로깅을 위한 저장소
         batch_logs = []
         
@@ -768,7 +773,8 @@ class Phase3IncrementalLearner:
             # Gradient accumulation: 스텝에서만 업데이트
             if should_step:
                 # Gradient clipping (max_grad_norm=0.3, finetune_gsm8k.py와 동일)
-                total_norm = torch.nn.utils.clip_grad_norm_(self.model.parameters(), 0.3)
+                # ✅ CRITICAL FIX: Clip gradients of basis_coeff parameters only
+                total_norm = torch.nn.utils.clip_grad_norm_(self._basis_params, 0.3)
                 
                 # Update
                 optimizer.step()
@@ -870,7 +876,7 @@ class Phase3IncrementalLearner:
         loss_improvement_ratio = (loss_max - loss_min) / loss_max * 100 if loss_max > 0 else 0
         
         # 에포크 완료 로그
-        self.logger.info(f"\n{'='*70}")
+        self.logger.info(f"{'='*70}")
         self.logger.info(f"Epoch {epoch+1} Summary - GSM8K 파인튜닝 (SFT 스타일 훈련)")
         self.logger.info(f"{'='*70}")
         self.logger.info(f"  [손실 함수]")
@@ -897,6 +903,24 @@ class Phase3IncrementalLearner:
         
         self.logger.info(f"  [파라미터 업데이트]")
         self.logger.info(f"    • 파라미터 norm: {avg_param_norm:.4f}")
+        
+        # ✅ Verify parameters actually changed during training
+        self.logger.info(f"  [파라미터 변경 검증]")
+        param_changes = []
+        for i, param in enumerate(self._basis_params[:3]):
+            if i in initial_param_values:
+                initial = initial_param_values[i]
+                current = param.data
+                diff = (current - initial).abs().max().item()
+                mean_diff = (current - initial).abs().mean().item()
+                param_changes.append(diff)
+                self.logger.info(f"    • Param {i}: max_change={diff:.6f}, mean_change={mean_diff:.6f}")
+        
+        if param_changes and max(param_changes) < 1e-8:
+            self.logger.error(f"    ❌ CRITICAL: Parameters did NOT change! (max change: {max(param_changes):.2e})")
+            self.logger.error(f"    This indicates optimizer is not updating weights!")
+        elif param_changes:
+            self.logger.info(f"    ✅ Parameters updated successfully (max change: {max(param_changes):.6f})")
         
         self.logger.info(f"  [학습 건강도]")
         # 판정 조건: (1) 그래디언트 정상 흐름, (2) 손실이 감소하거나 안정적, (3) Trainable 그래디언트 존재
@@ -976,7 +1000,7 @@ class Phase3IncrementalLearner:
             self.logger.info(f"✓ Total dimensions: {total_frozen} frozen, {total_trainable} trainable")
             
             # 3. Optimizer 설정
-            self.logger.info("\n[Step 5] Setting up optimizer and scheduler (SFTTrainer style)...")
+            self.logger.info("[Step 5] Setting up optimizer and scheduler (SFTTrainer style)...")
             
             # gradient accumulation 설정 (effective batch: 4 * 16 = 64)
             self.gradient_accumulation_steps = 16
@@ -986,8 +1010,14 @@ class Phase3IncrementalLearner:
                 self.model.gradient_checkpointing_enable()
                 self.logger.info(f"✓ Gradient checkpointing enabled")
             
+            # ✅ CRITICAL FIX: Use self._basis_params instead of self.model.parameters()
+            # All model parameters are frozen, only basis_coeff should be optimized
+            self.logger.info(f"✓ Optimizer will update {len(self._basis_params)} basis_coeff parameters")
+            for i, param in enumerate(self._basis_params[:3]):
+                self.logger.info(f"  - Param {i}: shape={param.shape}, requires_grad={param.requires_grad}")
+            
             optimizer = optim.AdamW(
-                self.model.parameters(),
+                self._basis_params,  # ✅ Use collected basis_coeff parameters
                 lr=self.args.learning_rate,
                 weight_decay=self.args.weight_decay
             )
@@ -1031,6 +1061,22 @@ class Phase3IncrementalLearner:
             self.logger.info(f"  - Gradient checkpointing: Enabled")
             self.logger.info(f"  - BF16 mixed precision: Enabled")
             self.logger.info(f"  - Total samples: {len(self.train_loader) * self.args.batch_size * self.args.epochs}")
+            
+            # ✅ Validation: Check that optimizer actually has parameters
+            self.logger.info(f"\n[VALIDATION] Optimizer parameter check:")
+            self.logger.info(f"  - Number of parameter groups: {len(optimizer.param_groups)}")
+            self.logger.info(f"  - Number of parameters in group 0: {len(optimizer.param_groups[0]['params'])}")
+            if len(optimizer.param_groups[0]['params']) == 0:
+                self.logger.error(f"  ❌ CRITICAL: Optimizer has NO parameters to optimize!")
+                self.logger.error(f"  This means training will NOT update any weights!")
+                raise RuntimeError("Optimizer has no parameters - training will fail")
+            else:
+                total_params = sum(p.numel() for p in optimizer.param_groups[0]['params'])
+                self.logger.info(f"  ✅ Optimizer has {len(optimizer.param_groups[0]['params'])} parameters ({total_params:,} total elements)")
+                # Sample first parameter
+                first_param = optimizer.param_groups[0]['params'][0]
+                self.logger.info(f"  - First param shape: {first_param.shape}, requires_grad: {first_param.requires_grad}")
+            
             self.logger.info(f"{'='*70}")
             
             best_loss = float('inf')
