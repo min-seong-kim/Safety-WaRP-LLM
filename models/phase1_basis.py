@@ -67,8 +67,16 @@ class Phase1BasiBuilder:
         # ⚠️ 메모리 최적화: self.svd_results를 제거 (메모리에 저장 안 함)
         # 대신 각 layer별로 계산 후 즉시 디스크에 저장함
         
-        # Checkpoint 디렉토리
-        self.checkpoint_dir = None
+        # Checkpoint 디렉토리 설정
+        from datetime import datetime
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        checkpoint_base = os.path.join(
+            getattr(args, 'output_dir', './checkpoints'),
+            f'phase1_{timestamp}'
+        )
+        os.makedirs(checkpoint_base, exist_ok=True)
+        self.checkpoint_dir = os.path.join(checkpoint_base, 'basis')
+        os.makedirs(self.checkpoint_dir, exist_ok=True)
         
         # Hook 핸들 저장소
         self.hooks = []
@@ -593,32 +601,40 @@ class Phase1BasiBuilder:
                 self.logger.info(f"  - Activation dtype: {activations_flat.dtype}")
                 self.logger.info(f"  - Activation device: {activations_flat.device}")
                 
-                # 공분산 행렬 계산
+                # ✅ 디버깅: Activation 통계 확인
+                act_min = activations_flat.min().item()
+                act_max = activations_flat.max().item()
+                act_mean = activations_flat.float().mean().item()
+                act_std = activations_flat.float().std().item()
+                self.logger.info(f"  - Activation stats: min={act_min:.6f}, max={act_max:.6f}, mean={act_mean:.6f}, std={act_std:.6f}")
+                
+                # ✅ 원본 FSCIL-WaRP 방식: Φ @ Φ^T 계산 (공분산 아님!)
                 # bfloat16에서 SVD가 지원되지 않으므로 float32로 변환
                 activations_float32 = activations_flat.float()
                 
-                # 정규화 (mean centering) 
-                # 공분산 구하기 위해 평균 제거 
-                activations_centered = activations_float32 - activations_float32.mean(dim=0, keepdim=True)
+                # ✅ 핵심 차이: Centering 제거! 
+                # 원본 WaRP: Φ @ Φ^T (활성화의 외적)
+                # 잘못된 구현: (Φ - μ)^T @ (Φ - μ) / (N-1) (공분산)
                 
-                # 공분산: (hidden_dim, hidden_dim)
-                # unbiased estimator: 분모를 (N-1)로 설정
-                cov_matrix = (activations_centered.T @ activations_centered) / max(activations_centered.shape[0] - 1, 1)
-                self.covariance_matrices[(layer_idx, layer_type)] = cov_matrix
+                # Gram matrix: Φ^T @ Φ (hidden_dim, hidden_dim)
+                # 원본 WaRP에서는 input.t() @ input 사용
+                gram_matrix = activations_float32.t() @ activations_float32
+                self.covariance_matrices[(layer_idx, layer_type)] = gram_matrix  # 변수명 유지 (호환성)
                 
-                self.logger.info(f"  - Covariance shape: {cov_matrix.shape}")
-                self.logger.info(f"  - Covariance trace: {cov_matrix.trace():.4f}")
-                self.logger.info(f"  - Covariance dtype: {cov_matrix.dtype}")
+                self.logger.info(f"  - Gram matrix (Φ^T @ Φ) shape: {gram_matrix.shape}")
+                self.logger.info(f"  - Gram matrix trace: {gram_matrix.trace():.4f}")
+                self.logger.info(f"  - Gram matrix dtype: {gram_matrix.dtype}")
                 
-                # SVD 분해: U, S, V^T (float32에서 실행)
-                U, S, Vh = torch.linalg.svd(cov_matrix, full_matrices=False)
+                # SVD 분해: Φ^T @ Φ = U @ S @ U^T
+                # ✅ 원본 WaRP: 이 U가 UT_forward로 사용됨
+                U, S, UT = torch.linalg.svd(gram_matrix, full_matrices=False)
                 
                 # 메모리 최적화: 즉시 저장하고 메모리에서 삭제
+                # ✅ U 저장 (Vh 대신!)
                 svd_result = {
-                    'U': U.cpu(),  # GPU → CPU 이동 후 저장
+                    'U': U.cpu(),  # ✅ 이것이 UT_forward로 사용됨
                     'S': S.cpu(),
-                    'Vh': Vh.cpu(),
-                    'cov': cov_matrix.cpu()
+                    'UT': UT.cpu(),  # U^T (참고용)
                 }
                 
                 # Layer별로 즉시 저장 (메모리 효율적)
@@ -628,7 +644,13 @@ class Phase1BasiBuilder:
                 # 통계
                 total_var = S.sum().item()
                 top_k_var = S[:min(10, len(S))].sum().item()
-                var_ratio = top_k_var / total_var * 100
+                
+                # ✅ Zero division 방지
+                if total_var > 1e-10:
+                    var_ratio = top_k_var / total_var * 100
+                else:
+                    var_ratio = 0.0
+                    self.logger.warning(f"  ⚠️  Total variance near zero ({total_var:.2e}), may indicate numerical issues")
                 
                 self.logger.info(f"  - SVD singular values (top-10):")
                 for i, s in enumerate(S[:10]):
@@ -637,7 +659,7 @@ class Phase1BasiBuilder:
                 self.logger.info(f"  - ✓ Saved to disk (memory freed)")
                 
                 # 메모리 정리 (매우 중요!)
-                del activations_flat, activations_float32, activations_centered, cov_matrix, U, S, Vh, svd_result, valid_activations
+                del activations_flat, activations_float32, gram_matrix, U, S, UT, svd_result, valid_activations
                 torch.cuda.empty_cache() if torch.cuda.is_available() else None
             
             self.logger.info(f"✓ SVD computation and incremental saving completed")
@@ -664,11 +686,6 @@ class Phase1BasiBuilder:
             layer_type: 레이어 타입 (attn_q, attn_k, etc)
             svd_result: {'U': U, 'S': S, 'Vh': Vh, 'cov': cov_matrix}
         """
-        # Checkpoint 디렉토리 결정
-        if self.checkpoint_dir is None:
-            basis_dir = os.path.join(self.args.checkpoint_dir, 'basis')
-            self.checkpoint_dir = basis_dir
-        
         # Layer type별 디렉토리 생성
         layer_type_dir = os.path.join(self.checkpoint_dir, layer_type)
         os.makedirs(layer_type_dir, exist_ok=True)
@@ -679,7 +696,7 @@ class Phase1BasiBuilder:
         torch.save({
             'U': svd_result['U'].cpu() if torch.is_tensor(svd_result['U']) else svd_result['U'],
             'S': svd_result['S'].cpu() if torch.is_tensor(svd_result['S']) else svd_result['S'],
-            'Vh': svd_result['Vh'].cpu() if torch.is_tensor(svd_result['Vh']) else svd_result['Vh'],
+            'UT': svd_result.get('UT', None),  # UT 저장 (있는 경우)
         }, save_path)
         
         file_size_mb = os.path.getsize(save_path) / (1024 * 1024)
