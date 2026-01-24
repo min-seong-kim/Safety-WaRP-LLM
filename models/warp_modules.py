@@ -44,8 +44,8 @@ class WaRPModule(nn.Module):
         weight: 원본 가중치 (고정, 참조용)
         bias: 원본 bias
         basis_coeff: 새로운 기저에서의 계수 (학습 가능한 Parameter)
-        UT_forward: U matrix (입력 공간의 정규직교 기저)
-        UT_backward: V^T matrix (출력 공간 - 현재는 Identity)
+        UT_forward: V matrix (right singular vectors, Phase 1에서 설정됨)
+        UT_backward: Identity matrix (출력 공간 변환, 현재는 사용 안 함)
         coeff_mask: 이진 마스크 (1=동결, 0=학습 가능)
         forward_covariance: 활성화 공분산 (SVD 계산용)
         flag: WaRP 모드 활성화 여부
@@ -75,8 +75,8 @@ class WaRPModule(nn.Module):
         self.register_buffer("forward_covariance", None)
         self.register_buffer("basis_coefficients", torch.zeros(self.weight.shape, dtype=weight_dtype, device=weight_device))
         self.register_buffer("coeff_mask", torch.zeros(self.weight.shape, dtype=weight_dtype, device=weight_device))
-        self.register_buffer("UT_forward", torch.eye(self.weight.shape[1], dtype=weight_dtype, device=weight_device))  # U
-        self.register_buffer("UT_backward", torch.eye(self.weight.shape[0], dtype=weight_dtype, device=weight_device))  # V^T (Identity)
+        self.register_buffer("UT_forward", torch.eye(self.weight.shape[1], dtype=weight_dtype, device=weight_device))  # V (Phase 1에서 덮어씌워짐)
+        self.register_buffer("UT_backward", torch.eye(self.weight.shape[0], dtype=weight_dtype, device=weight_device))  # Identity (출력 변환 없음)
         
         # WaRP 모드 플래그
         self.flag = True  # True: WaRP 모드, False: 정상 모드
@@ -145,12 +145,12 @@ class LinearWaRP(WaRPModule):
             output = F.linear(input, self.weight, self.bias)
         else:
             # Phase 2/3: WaRP 모드
-            # W = V @ (basis_coeff * mask).detach() + basis_coeff * (1-mask) @ U
-            weight = self.UT_backward @ (
-                self.basis_coeff * self.coeff_mask
-            ).clone().detach() + self.basis_coeff * (
-                1 - self.coeff_mask
-            ) @ self.UT_forward
+            # W = (basis_coeff * mask).detach() @ V^T + basis_coeff * (1-mask) @ V^T
+            # ✅ 수정: UT_forward.t() 추가 (V → V^T로 변환)
+            weight = self.UT_backward.t() @ (
+                (self.basis_coeff * self.coeff_mask).clone().detach() + 
+                self.basis_coeff * (1 - self.coeff_mask)
+            ) @ self.UT_forward.t()
             
             # ✅ Device 맞춤 (input과 같은 device로)
             weight = weight.to(input.device)
@@ -252,7 +252,8 @@ def restore_weight(model):
     
     원본 WaRP의 restore_weight()와 동일
     
-    W = V @ basis_coeff @ U
+    W = basis_coeff @ V^T
+    (V는 정규직교 → V^(-1) = V^T)
     """
     import logging
     logger = logging.getLogger(__name__)
@@ -267,9 +268,10 @@ def restore_weight(model):
             UT_forward = module.UT_forward
             UT_backward = module.UT_backward
             
-            # W = V^T @ basis_coeff @ U
-            # (UT_backward는 Identity이므로 생략 가능하지만 일관성을 위해 유지)
-            weight_restored = UT_backward.t() @ module.basis_coeff.data @ UT_forward
+            # W = basis_coeff @ V^T
+            # ✅ UT_forward.t() 추가: V → V^T로 변환
+            # (UT_backward.t() = I이므로 생략 가능하지만 일관성 유지)
+            weight_restored = UT_backward.t() @ module.basis_coeff.data @ UT_forward.t()
             
             # 원본 weight 업데이트
             module.weight.data = weight_restored.data

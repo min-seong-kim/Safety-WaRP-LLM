@@ -17,8 +17,6 @@ python train_fixed.py \
     --base_weight_decay 0.01 \
     --batch_size 2 \
     --gradient_accumulation_steps 4 \
-    --layer_type ffn_down,ffn_up,attn_q,attn_k,attn_v \
-    --target_layers "26-27" \
     --output_dir ./checkpoints \
     --log_dir ./logs \
     --device cuda \

@@ -223,15 +223,22 @@ class Phase3IncrementalLearner:
             dataset = load_dataset('openai/gsm8k', 'main', split='train')
             
             # 샘플 수 제한
-            max_samples = getattr(self.args, 'gsm8k_samples', 1000)
-            if max_samples > 0 and len(dataset) > max_samples:
-                dataset = dataset.select(range(max_samples))
-            
-            self.logger.info(f"✓ Loaded {len(dataset)} GSM8K samples")
+            # gsm8k_samples=0 → 전체 사용
+            # gsm8k_samples>0 → 해당 개수만 사용
+            # default=0 → 전체 사용
+            max_samples = getattr(self.args, 'gsm8k_samples', 0)
+            if max_samples > 0:
+                if len(dataset) > max_samples:
+                    dataset = dataset.select(range(max_samples))
+                    self.logger.info(f"✓ Limited to {max_samples} samples (out of {len(dataset)} total)")
+                else:
+                    self.logger.info(f"✓ Using all {len(dataset)} samples (max_samples={max_samples} >= dataset size)")
+            else:
+                self.logger.info(f"✓ Using all {len(dataset)} samples (gsm8k_samples=0 or not specified)")
             
             # 데이터셋 클래스
             class GSM8KDataset(torch.utils.data.Dataset):
-                def __init__(self, data, tokenizer, max_length=512):
+                def __init__(self, data, tokenizer, max_length=256):
                     self.data = data
                     self.tokenizer = tokenizer
                     self.max_length = max_length
@@ -342,11 +349,12 @@ class Phase3IncrementalLearner:
                     # 원본 가중치
                     W_original = target_module.weight.data.clone()
                     
-                    # Basis
-                    U_matrix = self.basis_data[key]['U']
+                    # Basis (U에는 V = UT.t()가 저장되어 있음)
+                    # 원본 WaRP: basis_coeff = W @ UT_forward.t() = W @ V
+                    U_matrix = self.basis_data[key]['U']  # 실제로는 V (= UT.t())
                     U_matrix = U_matrix.to(dtype=W_original.dtype, device=W_original.device)
                     
-                    # basis_coeff 초기화
+                    # basis_coeff 초기화: W @ V (원본 WaRP 방식)
                     basis_coeff_init = W_original @ U_matrix
                     
                     # ✅ WaRP 모듈 설정

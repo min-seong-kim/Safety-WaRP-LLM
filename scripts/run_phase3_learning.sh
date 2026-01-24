@@ -33,7 +33,7 @@ python train_fixed.py \
     --phase0_model_dir "$PHASE0_MODEL" \
     --basis_dir "$BASIS_DIR" \
     --masks_dir "$MASKS_DIR" \
-    --gsm8k_samples 1000 \
+    --gsm8k_samples 0 \
     --epochs 3 \
     --utility_lr 1e-5 \
     --batch_size 2 \

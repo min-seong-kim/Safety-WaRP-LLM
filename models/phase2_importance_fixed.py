@@ -180,7 +180,7 @@ class Phase2ImportanceScorer:
             
             # 데이터셋
             class CircuitBreakersDataset(torch.utils.data.Dataset):
-                def __init__(self, data, tokenizer, max_length=512):
+                def __init__(self, data, tokenizer, max_length=256):
                     self.data = data
                     self.tokenizer = tokenizer
                     self.max_length = max_length
@@ -308,11 +308,12 @@ class Phase2ImportanceScorer:
                     # 원본 가중치
                     W_original = target_module.weight.data.clone()
                     
-                    # Basis 행렬 (U)
-                    U_matrix = self.basis_data[key]['U']
+                    # Basis 행렬 (U에는 V = UT.t()가 저장되어 있음)
+                    # 원본 WaRP: basis_coeff = W @ UT_forward.t() = W @ V
+                    U_matrix = self.basis_data[key]['U']  # 실제로는 V (= UT.t())
                     U_matrix = U_matrix.to(dtype=W_original.dtype, device=W_original.device)
                     
-                    # basis_coeff 초기화: W @ U
+                    # basis_coeff 초기화: W @ V (원본 WaRP 방식)
                     basis_coeff_init = W_original @ U_matrix
                     
                     # WaRP 모듈에 설정

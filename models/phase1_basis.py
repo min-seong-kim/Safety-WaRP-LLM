@@ -231,7 +231,7 @@ class Phase1BasiBuilder:
         
         # 데이터셋 클래스
         class HarmfulPromptsDataset(torch.utils.data.Dataset):
-            def __init__(self, prompts, tokenizer, max_length=512):
+            def __init__(self, prompts, tokenizer, max_length=256):
                 self.prompts = prompts
                 self.tokenizer = tokenizer
                 self.max_length = max_length
@@ -254,7 +254,7 @@ class Phase1BasiBuilder:
                     'attention_mask': encoding['attention_mask'].squeeze(),
                 }
         
-        dataset = HarmfulPromptsDataset(prompts, self.tokenizer, max_length=512)
+        dataset = HarmfulPromptsDataset(prompts, self.tokenizer, max_length=256)
         
         # Custom collate function
         def collate_fn(batch):
@@ -327,7 +327,7 @@ class Phase1BasiBuilder:
             
             # 데이터셋 클래스
             class DoNotAnswerDataset(torch.utils.data.Dataset):
-                def __init__(self, dataset, tokenizer, max_length=512):
+                def __init__(self, dataset, tokenizer, max_length=256):
                     self.dataset = dataset
                     self.tokenizer = tokenizer
                     self.max_length = max_length
@@ -353,7 +353,7 @@ class Phase1BasiBuilder:
                         'attention_mask': encoding['attention_mask'].squeeze(),
                     }
             
-            dataset_wrapper = DoNotAnswerDataset(dataset, self.tokenizer, max_length=512)
+            dataset_wrapper = DoNotAnswerDataset(dataset, self.tokenizer, max_length=256)
             
             # Custom collate function
             def collate_fn(batch):
@@ -527,7 +527,7 @@ class Phase1BasiBuilder:
                 self.logger.info(f"    - ... and {len(self.activations) - 3} more layers")
             
             # 메모리 최적화: GPU에 있는 활성화를 CPU로 이동
-            self.logger.info(f"\n[Memory Optimization] Moving activations from GPU to CPU...")
+            self.logger.info(f"[Memory Optimization] Moving activations from GPU to CPU...")
             for key in list(self.activations.keys()):
                 self.activations[key] = [act.cpu() for act in self.activations[key]]
             
@@ -629,12 +629,21 @@ class Phase1BasiBuilder:
                 # ✅ 원본 WaRP: 이 U가 UT_forward로 사용됨
                 U, S, UT = torch.linalg.svd(gram_matrix, full_matrices=False)
                 
+                # ✅ Gram matrix는 symmetric → U = V 검증
+                diff = (U - UT.t()).abs().max().item()
+                self.logger.info(f"  - Symmetry check: max|U - V^T| = {diff:.2e}")
+                if diff < 1e-5:
+                    self.logger.info(f"    ✓ Confirmed: U ≈ V^T (Gram matrix is symmetric)")
+                else:
+                    self.logger.warning(f"    ⚠️  U ≠ V^T (unexpected for symmetric matrix)")
+                
                 # 메모리 최적화: 즉시 저장하고 메모리에서 삭제
-                # ✅ U 저장 (Vh 대신!)
+                # ✅ 원본 WaRP 방식: V = UT.t() 저장
+                V = UT.t()  # Right singular vectors (원본 WaRP의 UT_forward.t())
                 svd_result = {
-                    'U': U.cpu(),  # ✅ 이것이 UT_forward로 사용됨
+                    'U': V.cpu(),  # ✅ V를 U로 저장 (UT.t() = V, 원본 WaRP의 UT_forward.t())
                     'S': S.cpu(),
-                    'UT': UT.cpu(),  # U^T (참고용)
+                    'UT': UT.cpu(),  # 참고용으로 UT도 저장
                 }
                 
                 # Layer별로 즉시 저장 (메모리 효율적)
