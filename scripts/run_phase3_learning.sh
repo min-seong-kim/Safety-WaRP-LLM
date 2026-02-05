@@ -8,9 +8,9 @@ echo "Phase 3: Incremental Learning (Fixed)"
 echo "========================================="
 
 # 이전 Phase 결과 경로
-PHASE0_MODEL="./checkpoints/phase0_20260118_173314/final_model"
-BASIS_DIR="./checkpoints/phase1_20260118_182158/basis"
-MASKS_DIR="./checkpoints/phase2_20260119_105831/checkpoints/masks"
+PHASE0_MODEL="./checkpoints/phase0_lora_20260127_135824/final_merged_model"
+BASIS_DIR="./checkpoints/phase1_20260127_234020/basis"
+MASKS_DIR="./checkpoints/phase2_20260128_024610/checkpoints/masks"
 
 if [ ! -d "$PHASE0_MODEL" ]; then
     echo "ERROR: Phase 0 모델을 찾을 수 없습니다: $PHASE0_MODEL"
@@ -35,11 +35,11 @@ python train_fixed.py \
     --masks_dir "$MASKS_DIR" \
     --gsm8k_samples 0 \
     --epochs 3 \
-    --utility_lr 1e-5 \
+    --utility_lr 2e-5 \
     --batch_size 2 \
     --gradient_accumulation_steps 4 \
-    --layer_type ffn_down,ffn_up,attn_q,attn_k,attn_v \
-    --target_layers "26-27" \
+    --layer_type attn_q,attn_k,attn_v,ffn_down,ffn_up \
+    --target_layers all \
     --output_dir ./checkpoints \
     --log_dir ./logs \
     --device cuda \

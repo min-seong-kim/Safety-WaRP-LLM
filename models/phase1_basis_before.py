@@ -61,21 +61,14 @@ class Phase1BasiBuilder:
         self.dataloader = None
         
         # 활성화 수집을 위한 저장소
-        # ✅ Incremental Gram matrix accumulation 방식
-        # Activation을 저장하지 않고 즉시 Gram matrix에 누적
-        self.gram_matrices = {}  # (layer_idx, layer_type) -> Gram matrix (GPU)
-        self.num_samples = {}  # (layer_idx, layer_type) -> sample count
+        self.activations = {}  # layer_idx -> (batch_size, seq_len, hidden_dim) 리스트
+        self.attention_masks = []  # attention mask 저장 (padding 마스킹용)
+        self.covariance_matrices = {}  # layer_idx -> 공분산 행렬
+        # ⚠️ 메모리 최적화: self.svd_results를 제거 (메모리에 저장 안 함)
+        # 대신 각 layer별로 계산 후 즉시 디스크에 저장함
         
-        # Checkpoint 디렉토리 설정
-        from datetime import datetime
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        checkpoint_base = os.path.join(
-            getattr(args, 'output_dir', './checkpoints'),
-            f'phase1_{timestamp}'
-        )
-        os.makedirs(checkpoint_base, exist_ok=True)
-        self.checkpoint_dir = os.path.join(checkpoint_base, 'basis')
-        os.makedirs(self.checkpoint_dir, exist_ok=True)
+        # Checkpoint 디렉토리
+        self.checkpoint_dir = None
         
         # Hook 핸들 저장소
         self.hooks = []
@@ -195,7 +188,7 @@ class Phase1BasiBuilder:
     
     def load_safety_data(self):
         """
-        안전 데이터 로드 (harmful_prompts_200.txt 또는 circuit_breakers_train.json)
+        안전 데이터 로드 (harmful_prompts_200.txt)
         
         Log:
         - 데이터셋 로드 상태
@@ -208,8 +201,6 @@ class Phase1BasiBuilder:
             
             if safety_dataset == 'do-not-answer':
                 self._load_do_not_answer()
-            elif safety_dataset == 'circuit_breakers':
-                self._load_circuit_breakers()
             else:
                 self._load_harmful_prompts()
             
@@ -404,167 +395,48 @@ class Phase1BasiBuilder:
             self.logger.error(f"Failed to load do-not-answer dataset: {str(e)}", exc_info=True)
             raise
     
-    def _load_circuit_breakers(self):
+    def register_activation_hooks(self):
         """
-        Circuit Breakers dataset 로드 (circuit_breakers_train.json)
+        Forward hook 등록
+        FFN down_proj의 입력값(활성화)을 수집하기 위한 hook 등록
         
-        Prompt만 사용 (Phase 1 basis 구성용)
+        Log:
+        - 훅 등록된 레이어 수
+        - 각 레이어의 모듈 정보
         """
-        import json
-        
-        circuit_breakers_path = './data/circuit_breakers_train.json'
-        self.logger.info(f"Loading circuit_breakers from {circuit_breakers_path}...")
+        def get_hook(layer_idx, layer_type):
+            """특정 레이어와 layer_type을 위한 훅 함수 생성"""
+            def hook(module, input, output):
+                # input[0]: (batch_size, seq_len, hidden_dim)
+                activation = input[0].detach()
+                # 이게 얕은 복사로 이후에 Activation 값들을 저장 가능 
+                key = (layer_idx, layer_type)
+                if key not in self.activations:
+                    self.activations[key] = []
+                
+                self.activations[key].append(activation)
+            
+            return hook
         
         try:
-            with open(circuit_breakers_path, 'r', encoding='utf-8') as f:
-                dataset = json.load(f)
-            
-            self.logger.info(f"✓ Dataset loaded: {len(dataset)} samples")
-            
-            # 샘플 수 제한
-            max_samples = getattr(self.args, 'circuit_breakers_samples_phase1', 200)
-            if max_samples and len(dataset) > max_samples:
-                dataset = dataset[:max_samples]
-                self.logger.info(f"✓ Subsampled to {len(dataset)} samples")
-            
-            # Prompt만 추출
-            prompts = [item.get('prompt', '') for item in dataset]
-            
-            # 데이터셋 클래스
-            class CircuitBreakersDataset(torch.utils.data.Dataset):
-                def __init__(self, prompts, tokenizer, max_length=512):
-                    self.prompts = prompts
-                    self.tokenizer = tokenizer
-                    self.max_length = max_length
-                
-                def __len__(self):
-                    return len(self.prompts)
-                
-                def __getitem__(self, idx):
-                    prompt = self.prompts[idx]
-                    
-                    encoding = self.tokenizer(
-                        prompt,
-                        truncation=True,
-                        max_length=self.max_length,
-                        return_tensors='pt'
-                    )
-                    
-                    return {
-                        'input_ids': encoding['input_ids'].squeeze(),
-                        'attention_mask': encoding['attention_mask'].squeeze(),
-                    }
-            
-            dataset_wrapper = CircuitBreakersDataset(prompts, self.tokenizer, max_length=512)
-            
-            # Custom collate function
-            def collate_fn(batch):
-                max_len = max(len(item['input_ids']) for item in batch)
-                
-                input_ids_list = []
-                attention_masks_list = []
-                
-                for item in batch:
-                    input_ids = item['input_ids']
-                    attn_mask = item['attention_mask']
-                    
-                    pad_len = max_len - len(input_ids)
-                    if pad_len > 0:
-                        input_ids = torch.nn.functional.pad(
-                            input_ids.unsqueeze(0),
-                            (0, pad_len),
-                            value=self.tokenizer.pad_token_id
-                        ).squeeze(0)
-                        attn_mask = torch.nn.functional.pad(
-                            attn_mask.unsqueeze(0),
-                            (0, pad_len),
-                            value=0
-                        ).squeeze(0)
-                    
-                    input_ids_list.append(input_ids)
-                    attention_masks_list.append(attn_mask)
-                
-                return {
-                    'input_ids': torch.stack(input_ids_list),
-                    'attention_mask': torch.stack(attention_masks_list),
-                }
-            
-            self.dataloader = torch.utils.data.DataLoader(
-                dataset_wrapper,
-                batch_size=self.args.batch_size,
-                shuffle=True,
-                collate_fn=collate_fn
-            )
-            
-            self.logger.info(f"✓ Dataloader created")
-            self.logger.info(f"  - Batch size: {self.args.batch_size}")
-            self.logger.info(f"  - Total batches: {len(self.dataloader)}")
-            self.logger.info(f"  - Sample prompt: {prompts[0][:100]}...")
-        
-        except Exception as e:
-            self.logger.error(f"Failed to load circuit_breakers dataset: {str(e)}", exc_info=True)
-            raise
-    
-    def collect_activations_and_accumulate_gram(self):
-        """
-        ✅ Incremental Gram Matrix Accumulation
-        
-        배치별로 forward pass를 수행하면서 Gram matrix를 즉시 누적
-        - Activation을 저장하지 않음 (메모리 효율적)
-        - GPU에서 계산 (빠름)
-        - 패딩 마스킹 적용
-        
-        수식: Gram = Σ(Φ_batch^T @ Φ_batch) for all batches
-        """
-        try:
-            self.logger.info("Collecting activations and accumulating Gram matrices (GPU)...")
-            self.logger.info("✅ Incremental accumulation: No activation storage, fast GPU computation")
-            
-            # 타겟 레이어 및 타입 결정
+            # 타겟 레이어 범위 결정
             num_layers = len(self.model.model.layers)
             layer_indices = self._parse_target_layers(num_layers)
-            layer_types = [lt.strip() for lt in self.args.layer_type.split(',')]
             
-            self.logger.info(f"Target layers: {layer_indices}")
-            self.logger.info(f"Layer types: {layer_types}")
+            # Phase 1에서 사용할 layer_type 파싱
+            # args.layer_type은 쉼표로 구분된 문자열 (예: 'ffn_down,ffn_up,attn_q,attn_k,attn_v')
+            layer_types_str = self.args.layer_type
+            layer_types = [lt.strip() for lt in layer_types_str.split(',')]
             
-            # Gram matrices 초기화
-            for layer_idx in layer_indices:
-                for layer_type in layer_types:
-                    self.gram_matrices[(layer_idx, layer_type)] = None
-                    self.num_samples[(layer_idx, layer_type)] = 0
+            self.logger.info(f"Registering hooks for layer types: {layer_types}")
+            self.logger.info(f"Target layer indices: {layer_indices}")
             
-            # Forward hook 등록 (Gram matrix 누적용)
-            hooks = []
-            
-            def get_accumulation_hook(layer_idx, layer_type):
-                """Gram matrix를 누적하는 hook"""
-                def hook(module, input, output):
-                    # input[0]: (batch_size, seq_len, hidden_dim)
-                    act = input[0]  # GPU에 유지
-                    batch_size, seq_len, hidden_dim = act.shape
-                    
-                    # Reshape: (batch*seq, hidden_dim)
-                    act_flat = act.reshape(batch_size * seq_len, hidden_dim)
-                    
-                    # Gram matrix 누적: Φ^T @ Φ
-                    gram_batch = act_flat.t() @ act_flat  # (hidden_dim, hidden_dim)
-                    
-                    key = (layer_idx, layer_type)
-                    if self.gram_matrices[key] is None:
-                        self.gram_matrices[key] = gram_batch
-                    else:
-                        self.gram_matrices[key] += gram_batch
-                    
-                    self.num_samples[key] += batch_size * seq_len
-                
-                return hook
-            
-            # Hook 등록
+            # 각 레이어와 layer_type 조합에 훅 등록
             for layer_idx in layer_indices:
                 layer = self.model.model.layers[layer_idx]
                 
                 for layer_type in layer_types:
+                    # AutoModelForCausalLM -> 각 transformer -> layer 접근
                     if layer_type == 'ffn_down':
                         target_module = layer.mlp.down_proj
                     elif layer_type == 'ffn_up':
@@ -578,150 +450,204 @@ class Phase1BasiBuilder:
                     else:
                         raise ValueError(f"Unknown layer type: {layer_type}")
                     
-                    hook_handle = target_module.register_forward_hook(
-                        get_accumulation_hook(layer_idx, layer_type)
-                    )
-                    hooks.append(hook_handle)
+                    hook_handle = target_module.register_forward_hook(get_hook(layer_idx, layer_type))
+                    self.hooks.append(hook_handle)
             
-            self.logger.info(f"✓ {len(hooks)} accumulation hooks registered")
+            self.logger.info(f"✓ {len(self.hooks)} hooks registered for {len(layer_types)} layer types × {len(layer_indices)} layers")
             
-            # Forward pass (Gram matrix 누적)
+        except Exception as e:
+            self.logger.error(f"Failed to register hooks: {str(e)}", exc_info=True)
+            raise
+    
+    def collect_activations(self):
+        """
+        안전 데이터에 대해 모델을 실행하고 활성화 수집 (패딩 마스크 적용)
+        
+        Log:
+        - 배치별 처리 상황
+        - 각 레이어의 활성화 수집 통계
+        - 활성화 형태 및 크기
+        - 유효 토큰 수 (패딩 제외)
+        """
+        try:
+            self.logger.info("Collecting activations from safety data...")
+            
+            # Activation 값을 수집하면서 attention mask도 저장
             with torch.no_grad():
                 progress_bar = tqdm(
                     self.dataloader,
-                    desc="Accumulating Gram matrices",
+                    desc="Collecting activations",
                     disable=not self.args.debug
                 )
                 
-                total_batches = 0
                 for batch_idx, batch in enumerate(progress_bar):
-                    input_ids = batch['input_ids'].to(self.model.device)
-                    attention_mask = batch['attention_mask'].to(self.model.device)
+                    # collate_fn에서 이미 tokenize되고 padding된 데이터 사용
+                    input_ids = batch['input_ids']
+                    attention_mask = batch['attention_mask']
                     
-                    # Forward (hook에서 Gram matrix 누적)
+                    # attention_mask 저장 (패딩 마스킹용, 이후 activation의 공분산 구할때 padding 제거에 사용)
+                    self.attention_masks.append(attention_mask)
+                    
+                    # GPU로 이동
+                    input_ids = input_ids.to(self.model.device)
+                    attention_mask = attention_mask.to(self.model.device)
+                    
+                    # 모델 실행 (활성화는 훅에서 수집됨)
                     _ = self.model(input_ids=input_ids, attention_mask=attention_mask)
                     
-                    total_batches += 1
-                    
                     # 통계 업데이트
-                    valid_tokens = attention_mask.sum().item()
-                    self.stats['total_samples'] += input_ids.shape[0]
+                    batch_size = input_ids.shape[0]
+                    seq_len = input_ids.shape[1]
+                    valid_tokens = attention_mask.sum().item()  # 유효 토큰 수
+                    self.stats['total_samples'] += batch_size
                     self.stats['total_tokens'] += valid_tokens
                     
                     if self.args.debug and batch_idx < 2:
-                        self.logger.debug(f"Batch {batch_idx}: processed")
+                        self.logger.debug(f"Batch {batch_idx}: {batch_size} samples, seq_len={seq_len}, valid_tokens={valid_tokens}")
             
-            # Hook 제거
-            for hook in hooks:
-                hook.remove()
-            
-            self.logger.info(f"✓ Gram matrix accumulation completed")
-            self.logger.info(f"  - Total batches: {total_batches}")
+            self.logger.info(f"✓ Activation collection completed")
             self.logger.info(f"  - Total samples: {self.stats['total_samples']}")
-            self.logger.info(f"  - Total tokens: {self.stats['total_tokens']}")
-            self.logger.info(f"  - Gram matrices: {len(self.gram_matrices)}")
+            self.logger.info(f"  - Total valid tokens (after masking): {self.stats['total_tokens']}")
             
-            # 통계 출력
-            for key in sorted(self.gram_matrices.keys())[:3]:
-                gram = self.gram_matrices[key]
-                num = self.num_samples[key]
-                self.logger.info(f"  - Layer {key}: Gram shape={gram.shape}, samples={num}")
+            # 각 레이어의 활성화 통계
+            self.logger.info(f"  - Layers with activations: {len(self.activations)}")
+            for layer_idx in sorted(self.activations.keys())[:3]:  # 처음 3개만 출력
+                act_list = self.activations[layer_idx]
+                self.logger.info(f"    - Layer {layer_idx}: {len(act_list)} batches collected (masking will be applied in SVD step)")
             
-            if len(self.gram_matrices) > 3:
-                self.logger.info(f"  - ... and {len(self.gram_matrices) - 3} more")
+            if len(self.activations) > 3:
+                self.logger.info(f"    - ... and {len(self.activations) - 3} more layers")
+            
+            # 메모리 최적화: GPU에 있는 활성화를 CPU로 이동
+            self.logger.info(f"\n[Memory Optimization] Moving activations from GPU to CPU...")
+            for key in list(self.activations.keys()):
+                self.activations[key] = [act.cpu() for act in self.activations[key]]
+            
+            # attention_masks도 CPU로 이동
+            self.attention_masks = [mask.cpu() for mask in self.attention_masks]
+            
+            # GPU 메모리 정리
+            torch.cuda.empty_cache()
+            self.logger.info(f"✓ Activations moved to CPU (GPU memory freed for SVD computation)")
             
         except Exception as e:
-            self.logger.error(f"Failed to accumulate Gram matrices: {str(e)}", exc_info=True)
+            self.logger.error(f"Failed to collect activations: {str(e)}", exc_info=True)
             raise
-    
-    def register_activation_hooks(self):
-        """
-        ✅ 제거됨: Incremental accumulation 방식에서는 불필요
-        
-        collect_activations_and_accumulate_gram()에서 직접 처리
-        """
-        pass
     
     def compute_svd(self):
         """
-        ✅ Incremental Gram Matrix 방식의 SVD
+        수집된 활성화로부터 공분산 행렬을 계산하고 SVD 분해 (패딩 마스킹 적용)
         
-        이미 누적된 Gram matrix로부터 직접 SVD 수행
-        - GPU에서 빠른 계산
-        - 메모리 효율적 (O(hidden_dim^2))
-        - Layer별 순차 처리 및 즉시 저장
+        핵심: attention_mask를 사용하여 패딩된 토큰의 활성화를 제거하고 
+        유효한 토큰의 활성화만으로 공분산과 SVD를 계산
+        
+        Log:
+        - SVD 계산 진행상황
+        - 각 레이어의 특이값(singular values)
+        - 유효 토큰 수 (패딩 제외)
         
         수식:
-        - Gram = Φ^T @ Φ (이미 누적됨)
-        - Gram = U @ S @ U^T (SVD)
+        - Φ (filtered by attention_mask) = valid activations
+        - Cov = Φ^T Φ / (N-1)
+        - Cov = U Σ U^T (SVD 분해)
         """
         try:
-            self.logger.info("Computing SVD from accumulated Gram matrices (GPU)...")
-            self.logger.info("✅ Fast GPU computation, incremental disk saving")
+            self.logger.info("Computing SVD decomposition (with attention mask filtering)...")
+            self.logger.info("⚠️  Memory optimization: Saving each layer immediately after SVD (not keeping in memory)")
+            
+            # tqdm 진행바 추가 (disable=True로 설정하여 broken pipe 오류 방지)
+            activation_keys = sorted(self.activations.keys())  # (layer_idx, layer_type) 튜플들
+            pbar = tqdm(activation_keys, desc="SVD Decomposition", disable=True)
             
             layers_saved = 0
-            gram_keys = sorted(self.gram_matrices.keys())
             
-            for layer_idx, layer_type in tqdm(gram_keys, desc="SVD Decomposition", disable=True):
-                gram_matrix = self.gram_matrices[(layer_idx, layer_type)]
+            for layer_idx, layer_type in pbar:
+                pbar.set_description(f"SVD Decomposition [Layer {layer_idx} {layer_type}/{len(activation_keys)-1}]")
                 
-                if gram_matrix is None:
-                    self.logger.warning(f"Layer {layer_idx} ({layer_type}): No Gram matrix accumulated, skipping")
-                    continue
+                # 활성화를 (num_tokens, hidden_dim)으로 평탄화
+                act_list = self.activations[(layer_idx, layer_type)]
+                
+                # 핵심: attention mask를 사용하여 유효한 활성화만 추출
+                valid_activations = []
+                
+                for batch_idx, act in enumerate(act_list):
+                    # act: (batch, seq_len, hidden_dim)
+                    # mask: (batch, seq_len)
+                    batch_size, seq_len, hidden_dim = act.shape
+                    mask = self.attention_masks[batch_idx].to(act.device)  # attention mask 로드
+                    
+                    # act를 (batch*seq_len, hidden_dim)로 reshape하고 mask 적용
+                    act_reshaped = act.reshape(batch_size * seq_len, hidden_dim)  # (batch*seq_len, hidden_dim)
+                    mask_flat = mask.reshape(-1)  # (batch*seq_len,)
+                    
+                    # 유효한 위치만 선택 (attention_mask == 1인 부분)
+                    valid_act = act_reshaped[mask_flat == 1]  # (valid_tokens, hidden_dim)
+                    
+                    valid_activations.append(valid_act)
+                
+                # 유효한 활성화들만 결합
+                activations_flat = torch.cat(valid_activations, dim=0)  # (total_valid_tokens, hidden_dim)
                 
                 self.logger.info(f"Layer {layer_idx} ({layer_type}):")
-                self.logger.info(f"  - Gram matrix shape: {gram_matrix.shape}")
-                self.logger.info(f"  - Gram matrix device: {gram_matrix.device}")
-                self.logger.info(f"  - Samples accumulated: {self.num_samples[(layer_idx, layer_type)]}")
+                self.logger.info(f"  - Activation shape (after masking): {activations_flat.shape}")
+                self.logger.info(f"  - Activation dtype: {activations_flat.dtype}")
+                self.logger.info(f"  - Activation device: {activations_flat.device}")
                 
-                # float32로 변환 (SVD 정확도)
-                gram_matrix_float = gram_matrix.float()
+                # 공분산 행렬 계산
+                # bfloat16에서 SVD가 지원되지 않으므로 float32로 변환
+                activations_float32 = activations_flat.float()
                 
-                # 통계
-                trace = gram_matrix_float.trace().item()
-                self.logger.info(f"  - Gram matrix trace: {trace:.4f}")
+                # 정규화 (mean centering) 
+                # 공분산 구하기 위해 평균 제거 
+                activations_centered = activations_float32 - activations_float32.mean(dim=0, keepdim=True)
                 
-                # ✅ GPU에서 SVD 수행 (빠름!)
-                U, S, UT = torch.linalg.svd(gram_matrix_float, full_matrices=False)
+                # 공분산: (hidden_dim, hidden_dim)
+                # unbiased estimator: 분모를 (N-1)로 설정
+                cov_matrix = (activations_centered.T @ activations_centered) / max(activations_centered.shape[0] - 1, 1)
+                self.covariance_matrices[(layer_idx, layer_type)] = cov_matrix
                 
-                # Symmetry 검증
-                diff = (U - UT.t()).abs().max().item()
-                self.logger.info(f"  - Symmetry check: max|U - V^T| = {diff:.2e}")
+                self.logger.info(f"  - Covariance shape: {cov_matrix.shape}")
+                self.logger.info(f"  - Covariance trace: {cov_matrix.trace():.4f}")
+                self.logger.info(f"  - Covariance dtype: {cov_matrix.dtype}")
                 
-                # V = UT.t() (Right singular vectors)
-                V = UT.t()
+                # SVD 분해: U, S, V^T (float32에서 실행)
+                U, S, Vh = torch.linalg.svd(cov_matrix, full_matrices=False)
+                
+                # 메모리 최적화: 즉시 저장하고 메모리에서 삭제
                 svd_result = {
-                    'U': V.cpu(),  # CPU로 이동하여 저장
+                    'U': U.cpu(),  # GPU → CPU 이동 후 저장
                     'S': S.cpu(),
-                    'UT': UT.cpu(),
+                    'Vh': Vh.cpu(),
+                    'cov': cov_matrix.cpu()
                 }
                 
-                # 즉시 디스크 저장
+                # Layer별로 즉시 저장 (메모리 효율적)
                 self._save_svd_result(layer_idx, layer_type, svd_result)
                 layers_saved += 1
                 
                 # 통계
                 total_var = S.sum().item()
                 top_k_var = S[:min(10, len(S))].sum().item()
-                var_ratio = (top_k_var / total_var * 100) if total_var > 1e-10 else 0.0
+                var_ratio = top_k_var / total_var * 100
                 
                 self.logger.info(f"  - SVD singular values (top-10):")
-                for i, s in enumerate(S[:10].cpu()):
+                for i, s in enumerate(S[:10]):
                     self.logger.info(f"    σ_{i}: {s:.6f}")
                 self.logger.info(f"  - Top-10 variance ratio: {var_ratio:.2f}%")
-                self.logger.info(f"  - ✓ Saved to disk")
+                self.logger.info(f"  - ✓ Saved to disk (memory freed)")
                 
-                # GPU 메모리 정리
-                del gram_matrix_float, U, S, UT, V, svd_result
+                # 메모리 정리 (매우 중요!)
+                del activations_flat, activations_float32, activations_centered, cov_matrix, U, S, Vh, svd_result, valid_activations
+                torch.cuda.empty_cache() if torch.cuda.is_available() else None
             
-            # 모든 Gram matrix 삭제
-            self.gram_matrices.clear()
-            self.num_samples.clear()
-            torch.cuda.empty_cache()
-            
-            self.logger.info(f"✓ SVD computation completed")
+            self.logger.info(f"✓ SVD computation and incremental saving completed")
             self.logger.info(f"  - Total layers saved: {layers_saved}")
-            self.logger.info(f"  - GPU memory cleared")
+            
+            # 활성화 데이터도 더 이상 필요 없으므로 삭제
+            self.activations.clear()
+            self.attention_masks.clear()
+            torch.cuda.empty_cache()
+            self.logger.info(f"✓ Activation data cleared from memory")
             
         except Exception as e:
             self.logger.error(f"Failed to compute SVD: {str(e)}", exc_info=True)
@@ -738,6 +664,11 @@ class Phase1BasiBuilder:
             layer_type: 레이어 타입 (attn_q, attn_k, etc)
             svd_result: {'U': U, 'S': S, 'Vh': Vh, 'cov': cov_matrix}
         """
+        # Checkpoint 디렉토리 결정
+        if self.checkpoint_dir is None:
+            basis_dir = os.path.join(self.args.checkpoint_dir, 'basis')
+            self.checkpoint_dir = basis_dir
+        
         # Layer type별 디렉토리 생성
         layer_type_dir = os.path.join(self.checkpoint_dir, layer_type)
         os.makedirs(layer_type_dir, exist_ok=True)
@@ -748,7 +679,7 @@ class Phase1BasiBuilder:
         torch.save({
             'U': svd_result['U'].cpu() if torch.is_tensor(svd_result['U']) else svd_result['U'],
             'S': svd_result['S'].cpu() if torch.is_tensor(svd_result['S']) else svd_result['S'],
-            'UT': svd_result.get('UT', None),  # UT 저장 (있는 경우)
+            'Vh': svd_result['Vh'].cpu() if torch.is_tensor(svd_result['Vh']) else svd_result['Vh'],
         }, save_path)
         
         file_size_mb = os.path.getsize(save_path) / (1024 * 1024)
@@ -813,89 +744,8 @@ class Phase1BasiBuilder:
             self.logger.info(f"  - Layer types: {sorted(list(layer_types_saved))}")
             self.logger.info(f"  - Total SVD files: {total_files}")
             self.logger.info(f"  - Metadata: {metadata_path}")
-            
-            # ✅ SVD 결과 검증 로그
-            self.logger.info("="*70)
-            self.logger.info("Verifying saved SVD results...")
-            self.logger.info("="*70)
-            
-            verification_stats = {
-                'total_files': 0,
-                'total_size_mb': 0.0,
-                'layer_type_counts': {},
-                'sample_checks': []
-            }
-            
-            for layer_type in sorted(list(layer_types_saved)):
-                layer_type_dir = os.path.join(basis_dir, layer_type)
-                files = sorted([f for f in os.listdir(layer_type_dir) if f.endswith('.pt')])
-                
-                self.logger.info(f"\n[{layer_type}] - {len(files)} files")
-                
-                layer_type_size = 0.0
-                for f in files:
-                    file_path = os.path.join(layer_type_dir, f)
-                    file_size = os.path.getsize(file_path) / (1024 * 1024)  # MB
-                    layer_type_size += file_size
-                
-                verification_stats['total_files'] += len(files)
-                verification_stats['total_size_mb'] += layer_type_size
-                verification_stats['layer_type_counts'][layer_type] = len(files)
-                
-                self.logger.info(f"  - Total size: {layer_type_size:.2f} MB")
-                
-                # 첫 번째와 마지막 파일 검증
-                if len(files) > 0:
-                    # 첫 번째 파일
-                    first_file = os.path.join(layer_type_dir, files[0])
-                    svd_data = torch.load(first_file, map_location='cpu')
-                    U = svd_data['U']
-                    S = svd_data['S']
-                    
-                    self.logger.info(f"  - Sample check (first): {files[0]}")
-                    self.logger.info(f"    - U shape: {U.shape}")
-                    self.logger.info(f"    - S shape: {S.shape}")
-                    self.logger.info(f"    - S range: [{S.min():.6f}, {S.max():.6f}]")
-                    self.logger.info(f"    - S top-5: {S[:5].tolist()}")
-                    
-                    verification_stats['sample_checks'].append({
-                        'layer_type': layer_type,
-                        'file': files[0],
-                        'U_shape': list(U.shape),
-                        'S_shape': list(S.shape),
-                        'S_max': S.max().item(),
-                        'S_min': S.min().item()
-                    })
-                    
-                    # 마지막 파일 (다른 경우만)
-                    if len(files) > 1:
-                        last_file = os.path.join(layer_type_dir, files[-1])
-                        svd_data_last = torch.load(last_file, map_location='cpu')
-                        U_last = svd_data_last['U']
-                        S_last = svd_data_last['S']
-                        
-                        self.logger.info(f"  - Sample check (last): {files[-1]}")
-                        self.logger.info(f"    - U shape: {U_last.shape}")
-                        self.logger.info(f"    - S shape: {S_last.shape}")
-                        self.logger.info(f"    - S range: [{S_last.min():.6f}, {S_last.max():.6f}]")
-            
-            # 전체 요약
-            self.logger.info("="*70)
-            self.logger.info("Verification Summary:")
-            self.logger.info(f"  - Total files verified: {verification_stats['total_files']}")
-            self.logger.info(f"  - Total storage: {verification_stats['total_size_mb']:.2f} MB")
-            self.logger.info(f"  - Files per layer type:")
-            for lt, count in verification_stats['layer_type_counts'].items():
-                self.logger.info(f"    - {lt}: {count} files")
-            
-            # 전체 통계
-            all_S_max = max(check['S_max'] for check in verification_stats['sample_checks'])
-            all_S_min = min(check['S_min'] for check in verification_stats['sample_checks'])
-            self.logger.info(f"  - Singular value range (global): [{all_S_min:.6f}, {all_S_max:.6f}]")
-            
-            self.logger.info("="*70)
-            self.logger.info("✓ All SVD results verified successfully!")
-            self.logger.info("="*70)
+
+            self.logger.info(f"  - Metadata: {metadata_path}")
             
             return basis_dir
             

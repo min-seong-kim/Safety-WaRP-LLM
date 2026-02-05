@@ -183,10 +183,11 @@ class Phase3IncrementalLearner:
                 trust_remote_code=True
             )
             
-            # ✅ Gradient checkpointing 활성화 (메모리 절약)
-            if hasattr(self.model, 'gradient_checkpointing_enable'):
-                self.model.gradient_checkpointing_enable()
-                self.logger.info("✓ Gradient checkpointing enabled")
+            # ❌ Gradient checkpointing 비활성화 (WaRP + freeze 문제)
+            # WaRP 모듈에서 일부만 학습할 때 gradient checkpointing이 충돌함
+            # if hasattr(self.model, 'gradient_checkpointing_enable'):
+            #     self.model.gradient_checkpointing_enable()
+            #     self.logger.info("✓ Gradient checkpointing enabled")
             
             self.logger.info(f"✓ Model loaded")
             
@@ -213,8 +214,8 @@ class Phase3IncrementalLearner:
             raise
     
     def load_utility_data(self):
-        """GSM8K 데이터 로드"""
-        from datasets import load_dataset
+        """GSM8K 데이터 로드 및 HuggingFace Dataset 형식으로 변환"""
+        from datasets import load_dataset, Dataset
         
         try:
             self.logger.info("Loading GSM8K dataset...")
@@ -223,9 +224,6 @@ class Phase3IncrementalLearner:
             dataset = load_dataset('openai/gsm8k', 'main', split='train')
             
             # 샘플 수 제한
-            # gsm8k_samples=0 → 전체 사용
-            # gsm8k_samples>0 → 해당 개수만 사용
-            # default=0 → 전체 사용
             max_samples = getattr(self.args, 'gsm8k_samples', 0)
             if max_samples > 0:
                 if len(dataset) > max_samples:
@@ -236,75 +234,27 @@ class Phase3IncrementalLearner:
             else:
                 self.logger.info(f"✓ Using all {len(dataset)} samples (gsm8k_samples=0 or not specified)")
             
-            # 데이터셋 클래스
-            class GSM8KDataset(torch.utils.data.Dataset):
-                def __init__(self, data, tokenizer, max_length=256):
-                    self.data = data
-                    self.tokenizer = tokenizer
-                    self.max_length = max_length
-                
-                def __len__(self):
-                    return len(self.data)
-                
-                def __getitem__(self, idx):
-                    item = self.data[idx]
-                    question = item['question']
-                    answer = item['answer']
-                    text = f"Question: {question}\nAnswer: {answer}"
-                    
-                    encoding = self.tokenizer(
-                        text,
-                        max_length=self.max_length,
-                        truncation=True,
-                        padding=False,
-                        return_tensors='pt'
-                    )
-                    
-                    return {
-                        'input_ids': encoding['input_ids'].squeeze(0),
-                        'attention_mask': encoding['attention_mask'].squeeze(0),
-                    }
+            # SFTTrainer용 데이터셋 변환 (토큰화)
+            tokenized_data = []
             
-            dataset_wrapper = GSM8KDataset(dataset, self.tokenizer)
-            
-            # Collate function
-            def collate_fn(batch):
-                max_len = max(len(item['input_ids']) for item in batch)
+            for item in dataset:
+                question = item['question']
+                answer = item['answer']
+                text = f"Question: {question}\nAnswer: {answer}"
                 
-                input_ids_list = []
-                attention_masks_list = []
-                
-                for item in batch:
-                    input_ids = item['input_ids']
-                    attention_mask = item['attention_mask']
-                    
-                    padding_length = max_len - len(input_ids)
-                    if padding_length > 0:
-                        input_ids = torch.cat([
-                            input_ids,
-                            torch.full((padding_length,), self.tokenizer.pad_token_id)
-                        ])
-                        attention_mask = torch.cat([
-                            attention_mask,
-                            torch.zeros(padding_length)
-                        ])
-                    
-                    input_ids_list.append(input_ids)
-                    attention_masks_list.append(attention_mask)
-                
-                return {
-                    'input_ids': torch.stack(input_ids_list),
-                    'attention_mask': torch.stack(attention_masks_list),
-                }
+                # Tokenize
+                tokenized = self.tokenizer(
+                    text,
+                    max_length=512,
+                    truncation=True,
+                    padding=False,  # DataCollator에서 처리
+                )
+                tokenized_data.append(tokenized)
             
-            self.train_loader = DataLoader(
-                dataset_wrapper,
-                batch_size=self.args.batch_size,
-                shuffle=True,
-                collate_fn=collate_fn
-            )
+            # HuggingFace Dataset으로 변환
+            self.dataset = Dataset.from_list(tokenized_data)
             
-            self.logger.info(f"✓ DataLoader created ({len(self.train_loader)} batches)")
+            self.logger.info(f"✓ Dataset created ({len(self.dataset)} samples)")
             
         except Exception as e:
             self.logger.error(f"Failed to load GSM8K data: {str(e)}", exc_info=True)
@@ -404,53 +354,52 @@ class Phase3IncrementalLearner:
     
     def train(self):
         """
-        GSM8K로 Incremental Learning
+        GSM8K로 Incremental Learning (SFTTrainer 사용)
         
-        ✅ 원본 WaRP:
-        - model.train() 모드
-        - optimizer.step()으로 업데이트
-        - 하지만 WaRP 모듈의 forward에서 마스크 적용
+        ✅ Phase 0와 동일한 방식:
+        - SFTTrainer 사용
+        - 안정적인 학습 루프
+        - 자동 gradient accumulation
+        
+        ✅ WaRP 특화:
+        - basis_coeff만 학습 가능
+        - WaRP 모듈의 forward에서 마스크 적용
         - mask=1 부분은 detach()로 gradient 차단
         """
         try:
+            from trl import SFTTrainer, SFTConfig
+            from transformers import DataCollatorForLanguageModeling
+            
             self.logger.info("="*70)
-            self.logger.info("Phase 3: Incremental Learning with GSM8K")
+            self.logger.info("Phase 3: Incremental Learning with GSM8K (SFTTrainer)")
             self.logger.info("="*70)
             
             # 훈련 설정
-            epochs = getattr(self.args, 'epochs', 20)
-            learning_rate = getattr(self.args, 'utility_lr', 1e-5)
+            epochs = getattr(self.args, 'epochs', 3)
+            learning_rate = getattr(self.args, 'utility_lr', 2e-5)
+            weight_decay = getattr(self.args, 'base_weight_decay', 0.01)
+            batch_size = self.args.batch_size
+            gradient_accumulation_steps = getattr(self.args, 'gradient_accumulation_steps', 4)
             
-            # ✅ basis_coeff만 optimizer에 추가
-            basis_params = []
-            for module in self.model.modules():
-                if isinstance(module, WaRPModule):
-                    basis_params.append(module.basis_coeff)
+            # ✅ basis_coeff만 학습 가능하게 설정
+            trainable_params = 0
+            total_params = 0
             
-            # ✅ 8-bit Optimizer (메모리 절약)
-            try:
-                import bitsandbytes as bnb
-                optimizer = bnb.optim.AdamW8bit(
-                    basis_params,
-                    lr=learning_rate
-                )
-                self.logger.info("✓ Using 8-bit AdamW optimizer")
-            except ImportError:
-                self.logger.warning("bitsandbytes not available, using standard AdamW")
-                optimizer = torch.optim.AdamW(basis_params, lr=learning_rate)
+            for name, param in self.model.named_parameters():
+                total_params += param.numel()
+                
+                # basis_coeff만 학습 가능
+                if 'basis_coeff' in name:
+                    param.requires_grad = True
+                    trainable_params += param.numel()
+                else:
+                    param.requires_grad = False
             
-            # ✅ Gradient accumulation 설정
-            gradient_accumulation_steps = getattr(self.args, 'gradient_accumulation_steps', 8)
-            
-            self.logger.info(f"Training configuration:")
-            self.logger.info(f"  - Epochs: {epochs}")
-            self.logger.info(f"  - Learning rate: {learning_rate}")
-            self.logger.info(f"  - Trainable params: {sum(p.numel() for p in basis_params):,}")
-            self.logger.info(f"  - Gradient accumulation steps: {gradient_accumulation_steps}")
-            self.logger.info(f"  - Effective batch size: {self.args.batch_size * gradient_accumulation_steps}")
-            
-            # ✅ model.train() 모드
-            self.model.train()
+            self.logger.info(f"Parameter freeze status:")
+            self.logger.info(f"  - Total params: {total_params:,}")
+            self.logger.info(f"  - Trainable params: {trainable_params:,}")
+            self.logger.info(f"  - Frozen params: {total_params - trainable_params:,}")
+            self.logger.info(f"  - Trainable ratio: {trainable_params / total_params * 100:.2f}%")
             
             # Checkpoint 디렉토리
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -460,99 +409,129 @@ class Phase3IncrementalLearner:
             )
             os.makedirs(checkpoint_dir, exist_ok=True)
             
-            # 훈련 루프
-            for epoch in range(epochs):
-                epoch_loss = 0.0
-                accumulation_counter = 0
-                
-                progress_bar = tqdm(
-                    self.train_loader,
-                    desc=f"Epoch {epoch+1}/{epochs}",
-                    total=len(self.train_loader)
-                )
-                
-                for batch_idx, batch in enumerate(progress_bar):
-                    input_ids = batch['input_ids'].to(self.model.device)
-                    attention_mask = batch['attention_mask'].to(self.model.device)
-                    
-                    # Forward (WaRP 모듈이 자동으로 마스킹 적용)
-                    outputs = self.model(
-                        input_ids=input_ids,
-                        attention_mask=attention_mask
-                    )
-                    logits = outputs.logits
-                    
-                    # Loss
-                    pred_logits = logits[:, :-1, :].contiguous()
-                    target_ids = input_ids[:, 1:].contiguous()
-                    attention_mask_shift = attention_mask[:, 1:].contiguous()
-                    
-                    valid_mask = (attention_mask_shift == 1) & (
-                        target_ids != self.tokenizer.pad_token_id
-                    )
-                    pred_logits_flat = pred_logits[valid_mask]
-                    target_ids_flat = target_ids[valid_mask]
-                    
-                    if len(target_ids_flat) > 0:
-                        loss = nn.CrossEntropyLoss()(pred_logits_flat, target_ids_flat)
-                        
-                        # ✅ Gradient accumulation을 위한 loss scaling
-                        loss = loss / gradient_accumulation_steps
-                        
-                        # Backward
-                        loss.backward()
-                        
-                        accumulation_counter += 1
-                        
-                        # ✅ Gradient accumulation: N step마다만 optimizer.step()
-                        if accumulation_counter % gradient_accumulation_steps == 0:
-                            # Gradient clipping
-                            torch.nn.utils.clip_grad_norm_(basis_params, 1.0)
-                            
-                            # ✅ Optimizer step (mask=0 부분만 업데이트됨)
-                            optimizer.step()
-                            optimizer.zero_grad()
-                        
-                        epoch_loss += loss.item()
-                        
-                        progress_bar.set_postfix({'loss': f'{loss.item():.4f}'})
-                
-                # 에포크 통계
-                avg_loss = epoch_loss / len(self.train_loader)
-                
-                self.logger.info(f"Epoch {epoch+1}/{epochs}:")
-                self.logger.info(f"  - Average loss: {avg_loss:.4f}")
-                
-                # Best 모델 저장
-                if avg_loss < self.stats['best_loss']:
-                    self.stats['best_loss'] = avg_loss
-                    self.stats['best_epoch'] = epoch + 1
-                    
-                    # ✅ 가중치 복원 후 저장
-                    restore_weight(self.model)
-                    
-                    best_model_path = os.path.join(checkpoint_dir, 'best_model')
-                    self.model.save_pretrained(best_model_path)
-                    self.tokenizer.save_pretrained(best_model_path)
-                    
-                    self.logger.info(f"  ✓ Best model saved (epoch {epoch+1})")
+            self.logger.info(f"Training configuration:")
+            self.logger.info(f"  - Epochs: {epochs}")
+            self.logger.info(f"  - Learning rate: {learning_rate}")
+            self.logger.info(f"  - Weight decay: {weight_decay}")
+            self.logger.info(f"  - Batch size: {batch_size}")
+            self.logger.info(f"  - Gradient accumulation steps: {gradient_accumulation_steps}")
+            self.logger.info(f"  - Effective batch size: {batch_size * gradient_accumulation_steps}")
+            self.logger.info(f"  - Checkpoint directory: {checkpoint_dir}")
+            self.logger.info("="*70)
             
-            # 최종 모델 저장
+            # SFTConfig 설정 (Phase 0과 동일)
+            training_args = SFTConfig(
+                # 출력 디렉토리
+                output_dir=checkpoint_dir,
+                
+                # 학습 하이퍼파라미터
+                num_train_epochs=epochs,
+                per_device_train_batch_size=batch_size,
+                gradient_accumulation_steps=gradient_accumulation_steps,
+                learning_rate=learning_rate,
+                weight_decay=weight_decay,
+                
+                # Optimizer & Scheduler
+                optim="adamw_8bit",
+                lr_scheduler_type="cosine",
+                warmup_ratio=0.0,
+                
+                # Gradient 설정
+                max_grad_norm=1.0,
+                gradient_checkpointing=False,  # ❌ WaRP와 충돌하므로 비활성화
+                
+                # 데이터 타입
+                bf16=True if self.args.dtype == 'bfloat16' else False,
+                fp16=True if self.args.dtype == 'float16' else False,
+                
+                # 로깅 및 저장
+                logging_steps=10,
+                save_strategy="no",  # 중간 체크포인트 저장 안 함
+                
+                # 기타
+                remove_unused_columns=False,
+                report_to="none",
+                seed=getattr(self.args, 'seed', 42),
+            )
+            
+            # Data collator
+            data_collator = DataCollatorForLanguageModeling(
+                tokenizer=self.tokenizer,
+                mlm=False,
+            )
+            
+            # ✅ model.train() 모드
+            self.model.train()
+            
+            # SFTTrainer 초기화
+            trainer = SFTTrainer(
+                model=self.model,
+                args=training_args,
+                train_dataset=self.dataset,
+                data_collator=data_collator,
+            )
+            
+            self.logger.info("✓ SFTTrainer initialized")
+            self.logger.info("Starting training...")
+            self.logger.info("  WaRP forward will automatically apply masking:")
+            self.logger.info("    W = V @ (basis_coeff * mask).detach() + basis_coeff * (1-mask) @ U")
+            self.logger.info("    mask=1: gradient 차단 (frozen)")
+            self.logger.info("    mask=0: gradient 흐름 (trainable)")
+            
+            # 훈련 시작
+            trainer.train()
+            
+            self.logger.info("✓ Training completed")
+            
+            # 가중치 복원 및 저장
             restore_weight(self.model)
             
+            # 최종 모델 저장
             final_model_path = os.path.join(checkpoint_dir, 'final_model')
-            self.model.save_pretrained(final_model_path)
+            trainer.save_model(final_model_path)
             self.tokenizer.save_pretrained(final_model_path)
+            
+            # Best 모델 저장
+            best_model_path = os.path.join(checkpoint_dir, 'best_model')
+            trainer.save_model(best_model_path)
+            self.tokenizer.save_pretrained(best_model_path)
             
             self.logger.info("="*70)
             self.logger.info("Phase 3 Completed")
-            self.logger.info(f"  - Best epoch: {self.stats['best_epoch']}")
-            self.logger.info(f"  - Best loss: {self.stats['best_loss']:.4f}")
             self.logger.info(f"  - Final model: {final_model_path}")
+            self.logger.info(f"  - Best model: {best_model_path}")
             self.logger.info("="*70)
+            
+            # 메타데이터 저장
+            metadata = {
+                'phase': 3,
+                'trainer': 'SFTTrainer',
+                'basis_dir': self.basis_dir,
+                'masks_dir': self.masks_dir,
+                'phase0_model': self.phase0_model_dir,
+                'epochs': epochs,
+                'learning_rate': learning_rate,
+                'weight_decay': weight_decay,
+                'batch_size': batch_size,
+                'gradient_accumulation_steps': gradient_accumulation_steps,
+                'effective_batch_size': batch_size * gradient_accumulation_steps,
+                'total_samples': len(self.dataset),
+                'trainable_params': trainable_params,
+                'total_params': total_params,
+                'timestamp': timestamp,
+            }
+            
+            metadata_path = os.path.join(checkpoint_dir, 'metadata.json')
+            with open(metadata_path, 'w') as f:
+                json.dump(metadata, f, indent=2)
+            
+            self.logger.info(f"✓ Metadata saved to: {metadata_path}")
             
             return final_model_path
             
+        except ImportError:
+            self.logger.error("TRL library not found! Install with: pip install trl")
+            raise
         except Exception as e:
             self.logger.error(f"Training failed: {str(e)}", exc_info=True)
             raise

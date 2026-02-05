@@ -1,0 +1,76 @@
+======================================================================
+Mask Importance Statistics
+======================================================================
+
+Overall Statistics:
+  - Mean:   12.72%
+  - Median: 7.68%
+  - Std:    14.46%
+  - Min:    0.20%
+  - Max:    70.36%
+
+Statistics by Layer Type:
+----------------------------------------------------------------------
+
+attn_k:
+  - Mean:   2.80%
+  - Median: 2.67%
+  - Std:    1.08%
+  - Min:    0.66% (Layer 0)
+  - Max:    5.99% (Layer 14)
+
+attn_q:
+  - Mean:   2.29%
+  - Median: 2.37%
+  - Std:    0.95%
+  - Min:    0.20% (Layer 0)
+  - Max:    4.21% (Layer 14)
+
+attn_v:
+  - Mean:   38.24%
+  - Median: 38.75%
+  - Std:    11.22%
+  - Min:    15.08% (Layer 26)
+  - Max:    70.36% (Layer 14)
+
+ffn_down:
+  - Mean:   12.86%
+  - Median: 11.38%
+  - Std:    5.08%
+  - Min:    7.41% (Layer 1)
+  - Max:    35.00% (Layer 27)
+
+ffn_up:
+  - Mean:   7.40%
+  - Median: 7.71%
+  - Std:    2.34%
+  - Min:    4.02% (Layer 0)
+  - Max:    11.89% (Layer 14)
+
+======================================================================
+Top 10 Most Important (Highest Frozen Ratio):
+----------------------------------------------------------------------
+ 1. Layer 14 attn_v    : 70.36%
+ 2. Layer 15 attn_v    : 58.06%
+ 3. Layer 12 attn_v    : 51.22%
+ 4. Layer  3 attn_v    : 50.97%
+ 5. Layer  4 attn_v    : 45.69%
+ 6. Layer 19 attn_v    : 45.44%
+ 7. Layer 16 attn_v    : 44.68%
+ 8. Layer 13 attn_v    : 43.45%
+ 9. Layer 17 attn_v    : 41.96%
+10. Layer  2 attn_v    : 41.19%
+
+======================================================================
+Top 10 Least Important (Lowest Frozen Ratio):
+----------------------------------------------------------------------
+ 1. Layer  0 attn_q    :  0.20%
+ 2. Layer  0 attn_k    :  0.66%
+ 3. Layer  1 attn_q    :  0.90%
+ 4. Layer 26 attn_q    :  1.12%
+ 5. Layer 21 attn_q    :  1.17%
+ 6. Layer 24 attn_q    :  1.24%
+ 7. Layer 23 attn_q    :  1.28%
+ 8. Layer 22 attn_q    :  1.33%
+ 9. Layer 23 attn_k    :  1.39%
+10. Layer 21 attn_k    :  1.48%

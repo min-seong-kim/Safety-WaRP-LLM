@@ -1,18 +1,17 @@
 """
-Phase 0: Base Safety Training
+Phase 0: Base Safety Training (LoRA version)
 
-원본 FSCIL-WaRP의 base_train()과 동일한 역할
-안전 데이터로 모델을 실제로 학습시켜 "안전 지식"을 모델에 각인
+LoRA (Low-Rank Adaptation)를 사용한 효율적인 safety fine-tuning
+- 전체 모델 대신 low-rank matrices만 학습
+- 메모리 효율적이고 더 빠른 학습 가능
+- 더 높은 learning rate 사용 가능
 
-목표: 
-- 안전 데이터(circuit_breakers)로 모델을 충분히 학습
-- 학습된 가중치를 저장하여 이후 Phase에서 보호할 "base class 지식" 확립
-
-절차:
-1. 모델 로드
-2. 안전 데이터 로드 (circuit_breakers)
-3. 200 에포크 학습 (원본 WaRP와 유사)
-4. 학습된 모델 저장
+LoRA 하이퍼파라미터:
+- rank (r): 16 (낮을수록 효율적, 높을수록 표현력 강함)
+- alpha: 32 (일반적으로 rank의 2배)
+- dropout: 0.05 (overfitting 방지)
+- target_modules: q_proj, v_proj, k_proj, o_proj, gate_proj, up_proj, down_proj
+- learning_rate: 2e-4 (일반 fine-tuning의 1e-5보다 높음)
 """
 
 import os
@@ -27,14 +26,15 @@ from datetime import datetime
 logger = logging.getLogger(__name__)
 
 
-class Phase0BaseTrainer:
+class Phase0LoRATrainer:
     """
-    Phase 0: Base Safety Training
+    Phase 0: Base Safety Training with LoRA
     
-    원본 WaRP의 base_train()과 동일한 개념
-    - 안전 데이터로 모델을 충분히 학습
-    - optimizer.step()으로 파라미터 실제 업데이트
-    - 학습된 가중치가 이후 Phase에서 보호될 "base class 지식"
+    LoRA 장점:
+    - 학습 파라미터 수 대폭 감소 (~0.1-1% of full model)
+    - 메모리 효율적 (더 큰 batch size 가능)
+    - 빠른 학습 속도
+    - 높은 learning rate 사용 가능
     """
     
     def __init__(self, args, logger):
@@ -57,8 +57,9 @@ class Phase0BaseTrainer:
         }
     
     def load_model(self):
-        """모델 및 토크나이저 로드"""
+        """모델 및 토크나이저 로드 + LoRA 적용"""
         from transformers import AutoModelForCausalLM, AutoTokenizer
+        from peft import LoraConfig, get_peft_model, TaskType
         
         try:
             self.logger.info(f"Loading model: {self.args.model_name}")
@@ -71,25 +72,74 @@ class Phase0BaseTrainer:
             }
             torch_dtype = dtype_map.get(self.args.dtype, torch.bfloat16)
             
-            # 모델 로드
-            self.model = AutoModelForCausalLM.from_pretrained(
+            # 기본 모델 로드
+            base_model = AutoModelForCausalLM.from_pretrained(
                 self.args.model_name,
                 torch_dtype=torch_dtype,
                 device_map=self.args.device,
                 trust_remote_code=True
             )
             
+            self.logger.info(f"✓ Base model loaded")
+            
+            # 모델 정보
+            total_params = sum(p.numel() for p in base_model.parameters())
+            self.logger.info(f"  - Total parameters: {total_params:,}")
+            
+            # ✅ LoRA 설정
+            lora_r = getattr(self.args, 'lora_r', 16)
+            lora_alpha = getattr(self.args, 'lora_alpha', 32)
+            lora_dropout = getattr(self.args, 'lora_dropout', 0.05)
+            
+            # LLaMA 3.2 모델의 target modules
+            target_modules = [
+                "q_proj",    # Attention query
+                "k_proj",    # Attention key
+                "v_proj",    # Attention value
+                "o_proj",    # Attention output
+                "gate_proj", # MLP gate
+                "up_proj",   # MLP up
+                "down_proj", # MLP down
+            ]
+            
+            lora_config = LoraConfig(
+                r=lora_r,                          # LoRA rank
+                lora_alpha=lora_alpha,             # LoRA alpha (scaling)
+                target_modules=target_modules,     # 적용할 모듈
+                lora_dropout=lora_dropout,         # Dropout
+                bias="none",                       # Bias 학습 안 함
+                task_type=TaskType.CAUSAL_LM,      # Causal LM task
+            )
+            
+            # LoRA 모델 생성
+            self.model = get_peft_model(base_model, lora_config)
+            
+            # ✅ 훈련 모드 활성화 (중요!)
+            self.model.train()
+            
             # ✅ Gradient checkpointing 활성화 (메모리 절약)
+            # 주의: gradient_checkpointing_enable()을 train() 이후에 호출
+            if hasattr(self.model, 'enable_input_require_grads'):
+                self.model.enable_input_require_grads()
+                self.logger.info("✓ Input gradients enabled")
+            
             if hasattr(self.model, 'gradient_checkpointing_enable'):
                 self.model.gradient_checkpointing_enable()
                 self.logger.info("✓ Gradient checkpointing enabled")
             
-            self.logger.info(f"✓ Model loaded successfully")
+            # LoRA 파라미터 정보
+            self.model.print_trainable_parameters()
+            trainable_params = sum(p.numel() for p in self.model.parameters() if p.requires_grad)
+            all_params = sum(p.numel() for p in self.model.parameters())
+            trainable_percent = 100 * trainable_params / all_params
             
-            # 모델 정보
-            total_params = sum(p.numel() for p in self.model.parameters())
-            self.logger.info(f"  - Total parameters: {total_params:,}")
-            self.logger.info(f"  - Model dtype: {self.model.dtype}")
+            self.logger.info(f"✓ LoRA model created")
+            self.logger.info(f"  - LoRA rank (r): {lora_r}")
+            self.logger.info(f"  - LoRA alpha: {lora_alpha}")
+            self.logger.info(f"  - LoRA dropout: {lora_dropout}")
+            self.logger.info(f"  - Target modules: {target_modules}")
+            self.logger.info(f"  - Trainable params: {trainable_params:,} ({trainable_percent:.2f}%)")
+            self.logger.info(f"  - All params: {all_params:,}")
             
             # 토크나이저 로드
             self.tokenizer = AutoTokenizer.from_pretrained(
@@ -108,8 +158,6 @@ class Phase0BaseTrainer:
     def load_safety_data(self):
         """
         안전 데이터 로드 (circuit_breakers_train.json)
-        
-        원본 WaRP의 base class 데이터에 해당
         """
         try:
             circuit_breakers_path = self.args.circuit_breakers_path
@@ -210,56 +258,50 @@ class Phase0BaseTrainer:
     
     def train(self):
         """
-        Base safety training
+        LoRA를 사용한 safety training
         
-        원본 FSCIL-WaRP의 base_train()과 동일:
-        - model.train() 모드
-        - optimizer.step()으로 파라미터 업데이트
-        - 여러 에포크 반복
+        LoRA 특징:
+        - 높은 learning rate 사용 (2e-4)
+        - 빠른 수렴
+        - 메모리 효율적
         """
         try:
             self.logger.info("="*70)
-            self.logger.info("Phase 0: Base Safety Training")
+            self.logger.info("Phase 0: Base Safety Training with LoRA")
             self.logger.info("="*70)
-            self.logger.info("원본 FSCIL-WaRP의 base_train()과 동일")
-            self.logger.info("목표: 안전 데이터로 모델을 충분히 학습하여 'base class 지식' 확립")
+            self.logger.info("LoRA: Low-Rank Adaptation for Efficient Fine-tuning")
             self.logger.info("="*70)
             
             # 훈련 설정
-            epochs = getattr(self.args, 'base_epochs', 100)
-            learning_rate = getattr(self.args, 'base_lr', 1e-5)
-            weight_decay = getattr(self.args, 'base_weight_decay', 0.01)
+            epochs = getattr(self.args, 'base_epochs', 5)
+            learning_rate = getattr(self.args, 'lora_lr', 2e-4)  # LoRA는 더 높은 LR
+            weight_decay = getattr(self.args, 'lora_weight_decay', 0.01)
             
-            # ✅ 8-bit Optimizer (메모리 절약)
-            # AdamW state를 fp32 대신 8bit로 저장 (~75% 메모리 절약)
-            try:
-                import bitsandbytes as bnb
-                optimizer = bnb.optim.AdamW8bit(
-                    self.model.parameters(),
-                    lr=learning_rate,
-                    weight_decay=weight_decay
-                )
-                self.logger.info("✓ Using 8-bit AdamW optimizer")
-            except ImportError:
-                self.logger.warning("bitsandbytes not available, using standard AdamW")
-                optimizer = torch.optim.AdamW(
-                    self.model.parameters(),
-                    lr=learning_rate,
-                    weight_decay=weight_decay
-                )
+            # Optimizer (LoRA 파라미터만 학습) - AdamW 8bit
+            import bitsandbytes as bnb
+            optimizer = bnb.optim.AdamW8bit(
+                filter(lambda p: p.requires_grad, self.model.parameters()),
+                lr=learning_rate,
+                weight_decay=weight_decay
+            )
             
-            # Scheduler (optional)
-            scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
-                optimizer, 
-                T_max=epochs
+            # Scheduler - Cosine (warmup 없음)
+            total_steps = len(self.train_loader) * epochs
+            
+            from transformers import get_cosine_schedule_with_warmup
+            scheduler = get_cosine_schedule_with_warmup(
+                optimizer,
+                num_warmup_steps=0,  # No warmup
+                num_training_steps=total_steps
             )
             
             self.logger.info(f"Training configuration:")
             self.logger.info(f"  - Epochs: {epochs}")
-            self.logger.info(f"  - Learning rate: {learning_rate}")
+            self.logger.info(f"  - Learning rate: {learning_rate} (LoRA 최적화)")
             self.logger.info(f"  - Weight decay: {weight_decay}")
-            self.logger.info(f"  - Optimizer: AdamW")
-            self.logger.info(f"  - Scheduler: CosineAnnealingLR")
+            self.logger.info(f"  - Optimizer: AdamW 8-bit (LoRA params only)")
+            self.logger.info(f"  - Scheduler: Cosine (no warmup)")
+            self.logger.info(f"  - Total steps: {total_steps}")
             
             # 모델을 훈련 모드로
             self.model.train()
@@ -268,19 +310,24 @@ class Phase0BaseTrainer:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             self.checkpoint_dir = os.path.join(
                 self.args.output_dir, 
-                f'phase0_{timestamp}'
+                f'phase0_lora_{timestamp}'
             )
             os.makedirs(self.checkpoint_dir, exist_ok=True)
             
             self.logger.info(f"  - Checkpoint directory: {self.checkpoint_dir}")
             
-            # ✅ Gradient accumulation 설정
+            # Gradient accumulation 설정
             gradient_accumulation_steps = getattr(self.args, 'gradient_accumulation_steps', 4)
             self.logger.info(f"  - Gradient accumulation steps: {gradient_accumulation_steps}")
             self.logger.info(f"  - Effective batch size: {self.args.batch_size * gradient_accumulation_steps}")
             self.logger.info("="*70)
             
+            # ✅ 훈련 모드 재확인
+            self.model.train()
+            
             # 훈련 루프
+            global_step = 0
+            
             for epoch in range(epochs):
                 epoch_loss = 0.0
                 epoch_tokens = 0
@@ -320,7 +367,7 @@ class Phase0BaseTrainer:
                         # Loss 계산
                         loss = nn.CrossEntropyLoss()(pred_logits_flat, target_ids_flat)
                         
-                        # ✅ Gradient accumulation을 위한 loss scaling
+                        # Gradient accumulation을 위한 loss scaling
                         loss = loss / gradient_accumulation_steps
                         
                         # Backward
@@ -328,14 +375,19 @@ class Phase0BaseTrainer:
                         
                         accumulation_counter += 1
                         
-                        # ✅ Gradient accumulation: N step마다만 optimizer.step()
+                        # Gradient accumulation: N step마다만 optimizer.step()
                         if accumulation_counter % gradient_accumulation_steps == 0:
                             # Gradient clipping
-                            torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
+                            torch.nn.utils.clip_grad_norm_(
+                                filter(lambda p: p.requires_grad, self.model.parameters()), 
+                                1.0
+                            )
                             
-                            # Optimizer step (파라미터 업데이트!)
+                            # Optimizer step
                             optimizer.step()
+                            scheduler.step()
                             optimizer.zero_grad()
+                            global_step += 1
                         
                         # 통계
                         epoch_loss += loss.item()
@@ -344,11 +396,9 @@ class Phase0BaseTrainer:
                         # Progress bar 업데이트
                         progress_bar.set_postfix({
                             'loss': f'{loss.item():.4f}',
-                            'avg_loss': f'{epoch_loss / (batch_idx + 1):.4f}'
+                            'avg_loss': f'{epoch_loss / (batch_idx + 1):.4f}',
+                            'lr': f'{scheduler.get_last_lr()[0]:.2e}'
                         })
-                
-                # Scheduler step
-                scheduler.step()
                 
                 # 에포크 통계
                 avg_loss = epoch_loss / len(self.train_loader)
@@ -365,42 +415,51 @@ class Phase0BaseTrainer:
                     
                     best_model_path = os.path.join(
                         self.checkpoint_dir, 
-                        'best_model'
+                        'best_lora_model'
                     )
+                    # LoRA 어댑터만 저장
                     self.model.save_pretrained(best_model_path)
                     self.tokenizer.save_pretrained(best_model_path)
                     
-                    self.logger.info(f"  ✓ Best model saved (epoch {epoch+1}, loss {avg_loss:.4f})")
-                
-                # 정기 체크포인트 (매 20 에포크)
-                if (epoch + 1) % 20 == 0:
-                    checkpoint_path = os.path.join(
-                        self.checkpoint_dir,
-                        f'checkpoint_epoch_{epoch+1}'
-                    )
-                    self.model.save_pretrained(checkpoint_path)
-                    self.tokenizer.save_pretrained(checkpoint_path)
-                    self.logger.info(f"  ✓ Checkpoint saved: epoch {epoch+1}")
+                    self.logger.info(f"  ✓ Best LoRA model saved (epoch {epoch+1}, loss {avg_loss:.4f})")
             
-            # 최종 모델 저장
-            final_model_path = os.path.join(
+            # 최종 LoRA 모델 저장
+            final_lora_path = os.path.join(
                 self.checkpoint_dir,
-                'final_model'
+                'final_lora_model'
             )
-            self.model.save_pretrained(final_model_path)
-            self.tokenizer.save_pretrained(final_model_path)
+            self.model.save_pretrained(final_lora_path)
+            self.tokenizer.save_pretrained(final_lora_path)
+            
+            # ✅ Merged model 저장 (LoRA + base model)
+            self.logger.info("Merging LoRA weights with base model...")
+            merged_model = self.model.merge_and_unload()
+            
+            final_merged_path = os.path.join(
+                self.checkpoint_dir,
+                'final_merged_model'
+            )
+            merged_model.save_pretrained(final_merged_path)
+            self.tokenizer.save_pretrained(final_merged_path)
             
             self.logger.info("="*70)
-            self.logger.info("Phase 0: Base Safety Training Completed")
+            self.logger.info("Phase 0: LoRA Training Completed")
             self.logger.info(f"  - Best epoch: {self.stats['best_epoch']}")
             self.logger.info(f"  - Best loss: {self.stats['best_loss']:.4f}")
-            self.logger.info(f"  - Final model saved to: {final_model_path}")
+            self.logger.info(f"  - LoRA adapters saved to: {final_lora_path}")
+            self.logger.info(f"  - Merged model saved to: {final_merged_path}")
+            self.logger.info("="*70)
+            self.logger.info("Note: Use 'final_merged_model' for Phase 1-3")
             self.logger.info("="*70)
             
             # 메타데이터 저장
             metadata = {
                 'phase': 0,
+                'method': 'LoRA',
                 'model_name': self.args.model_name,
+                'lora_r': getattr(self.args, 'lora_r', 16),
+                'lora_alpha': getattr(self.args, 'lora_alpha', 32),
+                'lora_dropout': getattr(self.args, 'lora_dropout', 0.05),
                 'epochs': epochs,
                 'best_epoch': self.stats['best_epoch'],
                 'best_loss': self.stats['best_loss'],
@@ -415,7 +474,7 @@ class Phase0BaseTrainer:
             
             self.logger.info(f"✓ Metadata saved to: {metadata_path}")
             
-            return final_model_path
+            return final_merged_path
             
         except Exception as e:
             self.logger.error(f"Training failed: {str(e)}", exc_info=True)

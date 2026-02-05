@@ -59,13 +59,15 @@ def parse_args():
     parser.add_argument('--phase0_model_dir', type=str, default=None,
                         help='Phase 0에서 학습된 모델 경로 (Phase 1, 2, 3에서 사용)')
     parser.add_argument('--safety_dataset', type=str, default='harmful_prompts',
-                        choices=['harmful_prompts', 'do-not-answer'],
+                        choices=['harmful_prompts', 'do-not-answer', 'circuit_breakers'],
                         help='Basis 구성용 안전 데이터셋 (Phase 1)')
     parser.add_argument('--harmful_prompts_path', type=str, 
                         default='./data/harmful_prompts_200.txt',
                         help='Harmful prompts 파일 경로')
     parser.add_argument('--dna_samples', type=int, default=200,
                         help='Do-not-answer 샘플 수')
+    parser.add_argument('--circuit_breakers_samples_phase1', type=int, default=200,
+                        help='Circuit breakers 샘플 수 (Phase 1 basis 구성용)')
     
     # Phase 2 설정
     parser.add_argument('--basis_dir', type=str, default=None,
@@ -109,6 +111,10 @@ def parse_args():
     parser.add_argument('--debug', action='store_true',
                         help='디버그 모드')
     
+    # Phase 0 구현 방법 선택
+    parser.add_argument('--use_sft', action='store_true',
+                        help='Phase 0에서 TRL SFTTrainer 사용 (기본: manual loop)')
+    
     return parser.parse_args()
 
 
@@ -117,14 +123,25 @@ def run_phase0(args, logger):
     Phase 0: Base Safety Training
     
     원본 FSCIL-WaRP의 base_train()과 동일
+    
+    두 가지 구현 방법:
+    1. Manual loop (기본): phase0_base_training.py
+    2. TRL SFTTrainer: phase0_base_SFTtraining.py (--use_sft)
     """
     logger.info("="*70)
     logger.info("Starting Phase 0: Base Safety Training")
+    if args.use_sft:
+        logger.info("Implementation: TRL SFTTrainer")
+    else:
+        logger.info("Implementation: Manual training loop")
     logger.info("="*70)
     
-    from models.phase0_base_training import Phase0BaseTrainer
-    
-    trainer = Phase0BaseTrainer(args, logger)
+    if args.use_sft:
+        from models.phase0_base_SFTtraining import Phase0SFTTrainer
+        trainer = Phase0SFTTrainer(args, logger)
+    else:
+        from models.phase0_base_training import Phase0BaseTrainer
+        trainer = Phase0BaseTrainer(args, logger)
     
     # 모델 로드
     trainer.load_model()
@@ -171,27 +188,13 @@ def run_phase1(args, logger):
     # 안전 데이터 로드 (harmful_prompts 또는 do-not-answer)
     builder.load_safety_data()
     
-    # WaRP 모듈로 변환
-    from models.warp_modules import switch_to_warp_module
-    layer_types = [lt.strip() for lt in args.layer_type.split(',')]
-    builder.model = switch_to_warp_module(
-        builder.model,
-        layer_types,
-        args.target_layers
-    )
+    # ✅ Phase 1에서는 WaRP module 불필요!
+    # 단순히 activation만 수집하면 되므로 원본 모델 그대로 사용
     
-    # ✅ Phase 1에서는 정상 모드로 동작 (원본 weight 사용)
-    for module in builder.model.modules():
-        if hasattr(module, 'flag'):
-            module.flag = False
+    # ✅ Incremental Gram matrix accumulation (hook 등록 + 누적)
+    builder.collect_activations_and_accumulate_gram()
     
-    # 활성화 수집용 hook 등록
-    builder.register_activation_hooks()
-    
-    # 활성화 수집
-    builder.collect_activations()
-    
-    # SVD 계산 (✅ 수정된 방식)
+    # SVD 계산 (✅ 누적된 Gram matrix에서 직접 계산)
     builder.compute_svd()
     
     # Basis 저장

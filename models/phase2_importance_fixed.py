@@ -180,7 +180,7 @@ class Phase2ImportanceScorer:
             
             # 데이터셋
             class CircuitBreakersDataset(torch.utils.data.Dataset):
-                def __init__(self, data, tokenizer, max_length=256):
+                def __init__(self, data, tokenizer, max_length=512):
                     self.data = data
                     self.tokenizer = tokenizer
                     self.max_length = max_length

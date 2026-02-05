@@ -8,7 +8,7 @@ echo "Phase 1: Basis Construction"
 echo "========================================="
 
 # Phase 0에서 학습된 모델 경로
-PHASE0_MODEL="./checkpoints/phase0_20260118_173314/final_model"
+PHASE0_MODEL="./checkpoints/phase0_lora_20260127_135824/final_merged_model"
 
 if [ ! -d "$PHASE0_MODEL" ]; then
     echo "ERROR: Phase 0 모델을 찾을 수 없습니다: $PHASE0_MODEL"
@@ -19,11 +19,11 @@ fi
 python train_fixed.py \
     --phase 1 \
     --phase0_model_dir "$PHASE0_MODEL" \
-    --safety_dataset harmful_prompts \
-    --harmful_prompts_path ./data/harmful_prompts_200.txt \
+    --safety_dataset circuit_breakers \
+    --circuit_breakers_samples_phase1 4994 \
     --batch_size 2 \
-    --layer_type ffn_down,ffn_up,attn_q,attn_k,attn_v \
-    --target_layers "26-27" \
+    --layer_type attn_q,attn_k,attn_v,ffn_down,ffn_up \
+    --target_layers all \
     --output_dir ./checkpoints \
     --log_dir ./logs \
     --device cuda \

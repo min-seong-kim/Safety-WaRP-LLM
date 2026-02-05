@@ -144,13 +144,18 @@ class LinearWaRP(WaRPModule):
             # ✅ pre_forward() 제거: activation은 hook에서 수집
             output = F.linear(input, self.weight, self.bias)
         else:
-            # Phase 2/3: WaRP 모드
-            # W = (basis_coeff * mask).detach() @ V^T + basis_coeff * (1-mask) @ V^T
-            # ✅ 수정: UT_forward.t() 추가 (V → V^T로 변환)
-            weight = self.UT_backward.t() @ (
-                (self.basis_coeff * self.coeff_mask).clone().detach() + 
-                self.basis_coeff * (1 - self.coeff_mask)
-            ) @ self.UT_forward.t()
+            # Phase 2/3: WaRP 모드 (원본 WaRP 방식)
+            # ✅ 핵심: 두 개의 독립적인 텀으로 분리
+            # Term 1: V^T @ (frozen_part) - gradient 차단
+            # Term 2: (trainable_part) @ V^T - gradient 흐름
+            
+            # UT_backward = Identity이므로 생략 가능
+            frozen_part = (self.basis_coeff * self.coeff_mask).clone().detach()
+            trainable_part = self.basis_coeff * (1 - self.coeff_mask)
+            
+            # W = frozen @ V^T + trainable @ V^T
+            #   = (frozen + trainable) @ V^T  (분배법칙)
+            weight = (frozen_part + trainable_part) @ self.UT_forward.t()
             
             # ✅ Device 맞춤 (input과 같은 device로)
             weight = weight.to(input.device)
