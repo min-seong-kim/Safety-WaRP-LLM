@@ -8,8 +8,8 @@ echo "Phase 2: Importance Scoring (Fixed)"
 echo "========================================="
 
 # Phase 0, 1 결과 경로
-PHASE0_MODEL="./checkpoints/phase0_lora_20260127_135824/final_merged_model"
-BASIS_DIR="./checkpoints/phase1_20260127_234020/basis"
+PHASE0_MODEL="./checkpoints/phase0_20260213_230047"
+BASIS_DIR="./checkpoints/phase1_20260214_221035/basis"
 
 if [ ! -d "$PHASE0_MODEL" ]; then
     echo "ERROR: Phase 0 모델을 찾을 수 없습니다: $PHASE0_MODEL"
@@ -21,14 +21,15 @@ if [ ! -d "$BASIS_DIR" ]; then
     echo "먼저 scripts/run_phase1_basis.sh를 실행하세요."
     exit 1
 fi
-
-python train_fixed.py \
+# 각 WaRP layer 별로 keep ratio 적용할 거면 --perlayer 옵션 추가
+python train.py \
     --phase 2 \
     --phase0_model_dir "$PHASE0_MODEL" \
     --basis_dir "$BASIS_DIR" \
     --circuit_breakers_path ./data/circuit_breakers_train.json \
     --circuit_breakers_samples 4994 \
     --keep_ratio 0.1 \
+    --perlayer \
     --batch_size 2 \
     --layer_type attn_q,attn_k,attn_v,ffn_down,ffn_up \
     --target_layers all \

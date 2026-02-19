@@ -27,6 +27,8 @@ import logging
 from tqdm import tqdm
 from datetime import datetime
 import numpy as np
+from dataclasses import dataclass
+from typing import Dict, List
 
 from .warp_modules import WaRPModule, restore_weight
 
@@ -214,7 +216,7 @@ class Phase3IncrementalLearner:
             raise
     
     def load_utility_data(self):
-        """GSM8K 데이터 로드 및 HuggingFace Dataset 형식으로 변환"""
+        """GSM8K 데이터 로드 및 SFT 방식으로 변환 (prompt/labels 분리)"""
         from datasets import load_dataset, Dataset
         
         try:
@@ -234,25 +236,61 @@ class Phase3IncrementalLearner:
             else:
                 self.logger.info(f"✓ Using all {len(dataset)} samples (gsm8k_samples=0 or not specified)")
             
-            # SFTTrainer용 데이터셋 변환 (토큰화)
-            tokenized_data = []
-            
-            for item in dataset:
-                question = item['question']
-                answer = item['answer']
-                text = f"Question: {question}\nAnswer: {answer}"
-                
-                # Tokenize
-                tokenized = self.tokenizer(
-                    text,
-                    max_length=512,
-                    truncation=True,
-                    padding=False,  # DataCollator에서 처리
+            max_length = getattr(self.args, 'max_length', 512)
+            # Always disable multiprocessing here to avoid CUDA fork issues.
+            num_proc = None
+
+            def build_chat_prompt(question: str) -> str:
+                system_msg = (
+                    "You are a helpful assistant that solves math problems step by step. "
+                    "Always show your reasoning and provide the final numerical answer after ####."
                 )
-                tokenized_data.append(tokenized)
-            
-            # HuggingFace Dataset으로 변환
-            self.dataset = Dataset.from_list(tokenized_data)
+                user_msg = f"Solve this problem step by step:\n\n{question.strip()}"
+                return f"{system_msg}\n\nUser: {user_msg}\n\nAssistant:"
+
+            def tokenize_sft_example(prompt_text: str, answer_text: str) -> Dict[str, List[int]]:
+                prompt_ids = self.tokenizer(
+                    prompt_text,
+                    add_special_tokens=False,
+                    truncation=True,
+                    max_length=max_length,
+                )["input_ids"]
+
+                remain = max(1, max_length - len(prompt_ids))
+                answer_ids = self.tokenizer(
+                    answer_text,
+                    add_special_tokens=False,
+                    truncation=True,
+                    max_length=remain,
+                )["input_ids"]
+
+                if self.tokenizer.eos_token_id is not None and (
+                    len(answer_ids) == 0 or answer_ids[-1] != self.tokenizer.eos_token_id
+                ):
+                    if len(prompt_ids) + len(answer_ids) < max_length:
+                        answer_ids = answer_ids + [self.tokenizer.eos_token_id]
+
+                input_ids = (prompt_ids + answer_ids)[:max_length]
+                attention_mask = [1] * len(input_ids)
+                labels = ([-100] * len(prompt_ids) + answer_ids)[:max_length]
+
+                return {
+                    "input_ids": input_ids,
+                    "attention_mask": attention_mask,
+                    "labels": labels,
+                }
+
+            def preprocess(ex):
+                prompt = build_chat_prompt(ex["question"])
+                answer = ex["answer"]
+                return tokenize_sft_example(prompt, answer)
+
+            self.dataset = dataset.map(
+                preprocess,
+                remove_columns=dataset.column_names,
+                num_proc=num_proc,
+                desc="Tokenizing train",
+            )
             
             self.logger.info(f"✓ Dataset created ({len(self.dataset)} samples)")
             
@@ -354,7 +392,7 @@ class Phase3IncrementalLearner:
     
     def train(self):
         """
-        GSM8K로 Incremental Learning (SFTTrainer 사용)
+        GSM8K로 Incremental Learning (Trainer 사용, SFT 방식)
         
         ✅ Phase 0와 동일한 방식:
         - SFTTrainer 사용
@@ -367,16 +405,15 @@ class Phase3IncrementalLearner:
         - mask=1 부분은 detach()로 gradient 차단
         """
         try:
-            from trl import SFTTrainer, SFTConfig
-            from transformers import DataCollatorForLanguageModeling
+            from transformers import Trainer, TrainingArguments
             
             self.logger.info("="*70)
-            self.logger.info("Phase 3: Incremental Learning with GSM8K (SFTTrainer)")
+            self.logger.info("Phase 3: Incremental Learning with GSM8K (Trainer/SFT)")
             self.logger.info("="*70)
             
             # 훈련 설정
             epochs = getattr(self.args, 'epochs', 3)
-            learning_rate = getattr(self.args, 'utility_lr', 2e-5)
+            learning_rate = getattr(self.args, 'utility_lr', 1e-5)
             weight_decay = getattr(self.args, 'base_weight_decay', 0.01)
             batch_size = self.args.batch_size
             gradient_accumulation_steps = getattr(self.args, 'gradient_accumulation_steps', 4)
@@ -413,65 +450,81 @@ class Phase3IncrementalLearner:
             self.logger.info(f"  - Epochs: {epochs}")
             self.logger.info(f"  - Learning rate: {learning_rate}")
             self.logger.info(f"  - Weight decay: {weight_decay}")
+            self.logger.info(f"  - Warmup ratio: 0.1")
             self.logger.info(f"  - Batch size: {batch_size}")
             self.logger.info(f"  - Gradient accumulation steps: {gradient_accumulation_steps}")
             self.logger.info(f"  - Effective batch size: {batch_size * gradient_accumulation_steps}")
+            self.logger.info(f"  - Max gradient norm: 1.0")
+            self.logger.info(f"  - Optimizer: adamw_bnb_8bit")
+            self.logger.info(f"  - LR scheduler: cosine")
             self.logger.info(f"  - Checkpoint directory: {checkpoint_dir}")
             self.logger.info("="*70)
             
-            # SFTConfig 설정 (Phase 0과 동일)
-            training_args = SFTConfig(
-                # 출력 디렉토리
+            warmup_ratio = getattr(self.args, 'warmup_ratio', 0.1)
+            lr_scheduler_type = getattr(self.args, 'lr_scheduler_type', 'cosine')
+            max_grad_norm = getattr(self.args, 'max_grad_norm', 1.0)
+            logging_steps = getattr(self.args, 'logging_steps', 10)
+
+            training_args = TrainingArguments(
                 output_dir=checkpoint_dir,
-                
-                # 학습 하이퍼파라미터
                 num_train_epochs=epochs,
                 per_device_train_batch_size=batch_size,
                 gradient_accumulation_steps=gradient_accumulation_steps,
                 learning_rate=learning_rate,
                 weight_decay=weight_decay,
-                
-                # Optimizer & Scheduler
-                optim="adamw_8bit",
-                lr_scheduler_type="cosine",
-                warmup_ratio=0.0,
-                
-                # Gradient 설정
-                max_grad_norm=1.0,
-                gradient_checkpointing=False,  # ❌ WaRP와 충돌하므로 비활성화
-                
-                # 데이터 타입
+                warmup_ratio=warmup_ratio,
+                lr_scheduler_type=lr_scheduler_type,
+                max_grad_norm=max_grad_norm,
+                logging_steps=logging_steps,
+                save_strategy="no",
+                eval_strategy="no",
                 bf16=True if self.args.dtype == 'bfloat16' else False,
                 fp16=True if self.args.dtype == 'float16' else False,
-                
-                # 로깅 및 저장
-                logging_steps=10,
-                save_strategy="no",  # 중간 체크포인트 저장 안 함
-                
-                # 기타
-                remove_unused_columns=False,
                 report_to="none",
-                seed=getattr(self.args, 'seed', 42),
+                remove_unused_columns=False,
+                optim="adamw_bnb_8bit",
+                gradient_checkpointing=False,
             )
-            
-            # Data collator
-            data_collator = DataCollatorForLanguageModeling(
-                tokenizer=self.tokenizer,
-                mlm=False,
-            )
+
+            @dataclass
+            class DataCollatorForCausalLMWithPadding:
+                tokenizer: object
+
+                def __call__(self, features: List[Dict[str, List[int]]]) -> Dict[str, torch.Tensor]:
+                    max_len = max(len(f["input_ids"]) for f in features)
+                    pad_id = self.tokenizer.pad_token_id
+                    if pad_id is None:
+                        pad_id = self.tokenizer.eos_token_id
+
+                    input_ids, attention_mask, labels = [], [], []
+                    for f in features:
+                        l = len(f["input_ids"])
+                        pad_len = max_len - l
+                        input_ids.append(f["input_ids"] + [pad_id] * pad_len)
+                        attention_mask.append(f["attention_mask"] + [0] * pad_len)
+                        labels.append(f["labels"] + [-100] * pad_len)
+
+                    return {
+                        "input_ids": torch.tensor(input_ids, dtype=torch.long),
+                        "attention_mask": torch.tensor(attention_mask, dtype=torch.long),
+                        "labels": torch.tensor(labels, dtype=torch.long),
+                    }
+
+            data_collator = DataCollatorForCausalLMWithPadding(self.tokenizer)
             
             # ✅ model.train() 모드
             self.model.train()
             
-            # SFTTrainer 초기화
-            trainer = SFTTrainer(
+            # Trainer 초기화
+            trainer = Trainer(
                 model=self.model,
                 args=training_args,
                 train_dataset=self.dataset,
                 data_collator=data_collator,
+                tokenizer=self.tokenizer,
             )
             
-            self.logger.info("✓ SFTTrainer initialized")
+            self.logger.info("✓ Trainer initialized")
             self.logger.info("Starting training...")
             self.logger.info("  WaRP forward will automatically apply masking:")
             self.logger.info("    W = V @ (basis_coeff * mask).detach() + basis_coeff * (1-mask) @ U")
@@ -491,27 +544,25 @@ class Phase3IncrementalLearner:
             trainer.save_model(final_model_path)
             self.tokenizer.save_pretrained(final_model_path)
             
-            # Best 모델 저장
-            best_model_path = os.path.join(checkpoint_dir, 'best_model')
-            trainer.save_model(best_model_path)
-            self.tokenizer.save_pretrained(best_model_path)
-            
             self.logger.info("="*70)
             self.logger.info("Phase 3 Completed")
             self.logger.info(f"  - Final model: {final_model_path}")
-            self.logger.info(f"  - Best model: {best_model_path}")
             self.logger.info("="*70)
             
             # 메타데이터 저장
             metadata = {
                 'phase': 3,
-                'trainer': 'SFTTrainer',
+                'trainer': 'Trainer',
                 'basis_dir': self.basis_dir,
                 'masks_dir': self.masks_dir,
                 'phase0_model': self.phase0_model_dir,
                 'epochs': epochs,
                 'learning_rate': learning_rate,
                 'weight_decay': weight_decay,
+                'warmup_ratio': 0.1,
+                'optimizer': 'adamw_bnb_8bit',
+                'lr_scheduler': 'cosine',
+                'max_grad_norm': 1.0,
                 'batch_size': batch_size,
                 'gradient_accumulation_steps': gradient_accumulation_steps,
                 'effective_batch_size': batch_size * gradient_accumulation_steps,

@@ -7,10 +7,11 @@ Phase 0: Base Safety Training
 - 이후 Phase 1/2/3의 기반 모델
 
 사용법:
-    python upload_phase0_to_hf.py \
-        --model_path ./checkpoints/phase0_lora_20260127_135824/final_merged_model \
-        --repo_name kmseong/safety-warp-llama-3.2-3b-phase0-lora-hp \
-        --token your_hf_token
+python upload_phase0_to_hf.py \
+    --model_path ./checkpoints/phase0_20260213_230047 \
+    --repo_name kmseong/safety-warp-llama-3.2-3b-phase0_20260213_230047 \
+    --token 
+
 """
 
 import argparse

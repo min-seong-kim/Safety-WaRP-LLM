@@ -7,13 +7,14 @@ echo "========================================="
 echo "Phase 0: Base Safety Training"
 echo "========================================="
 
-python train_fixed.py \
+python train.py \
     --phase 0 \
-    --model_name meta-llama/Llama-3.2-3B-Instruct \
+    --use_ssft \
+    --model_name meta-llama/Llama-3.2-3B \
     --circuit_breakers_path ./data/circuit_breakers_train.json \
     --circuit_breakers_samples 4994 \
-    --base_epochs 3 \
-    --base_lr 2e-5 \
+    --base_epochs 5 \
+    --base_lr 1e-5 \
     --base_weight_decay 0.01 \
     --batch_size 2 \
     --gradient_accumulation_steps 4 \
@@ -22,7 +23,6 @@ python train_fixed.py \
     --device cuda \
     --dtype bfloat16 \
     --seed 42 \
-    --use_sft
 
 echo ""
 echo "========================================="

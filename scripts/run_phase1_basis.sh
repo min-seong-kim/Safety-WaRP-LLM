@@ -8,7 +8,7 @@ echo "Phase 1: Basis Construction"
 echo "========================================="
 
 # Phase 0에서 학습된 모델 경로
-PHASE0_MODEL="./checkpoints/phase0_lora_20260127_135824/final_merged_model"
+PHASE0_MODEL="./checkpoints/phase0_20260213_230047"
 
 if [ ! -d "$PHASE0_MODEL" ]; then
     echo "ERROR: Phase 0 모델을 찾을 수 없습니다: $PHASE0_MODEL"
@@ -16,7 +16,7 @@ if [ ! -d "$PHASE0_MODEL" ]; then
     exit 1
 fi
 
-python train_fixed.py \
+python train.py \
     --phase 1 \
     --phase0_model_dir "$PHASE0_MODEL" \
     --safety_dataset circuit_breakers \
