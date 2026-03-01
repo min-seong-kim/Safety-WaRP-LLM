@@ -33,7 +33,7 @@ def parse_args():
                         help='실행할 phase (0: Base Training, 1: Basis, 2: Importance, 3: Learning)')
     
     # 모델 설정
-    parser.add_argument('--model_name', type=str, default='meta-llama/Llama-3.2-3B-Instruct',
+    parser.add_argument('--model_name', type=str, default='meta-llama/Llama-3.2-3B',
                         help='사용할 LLM 모델')
     
     # 데이터 설정
@@ -301,7 +301,7 @@ def run_phase3(args, logger):
         logger.error("Phase 3 requires --masks_dir")
         raise ValueError("Missing --masks_dir")
     
-    from models.phase3_learning_fixed import Phase3IncrementalLearner
+    from models.phase3_extra_learning import Phase3IncrementalLearner
     
     learner = Phase3IncrementalLearner(
         args, logger, args.basis_dir, args.masks_dir, args.phase0_model_dir

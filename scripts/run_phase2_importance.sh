@@ -8,12 +8,16 @@ echo "Phase 2: Importance Scoring (Fixed)"
 echo "========================================="
 
 # Phase 0, 1 결과 경로
-PHASE0_MODEL="./checkpoints/phase0_20260213_230047"
-BASIS_DIR="./checkpoints/phase1_20260214_221035/basis"
+# PHASE0_MODEL="./checkpoints/phase0_20260213_230047"  # 로컬 디렉토리 예시
+PHASE0_MODEL="kmseong/Llama-3.2-3B-only-RSN-Tuned_20260225_231517"
+BASIS_DIR="./checkpoints/phase1_20260227_152940/basis"
 
-if [ ! -d "$PHASE0_MODEL" ]; then
-    echo "ERROR: Phase 0 모델을 찾을 수 없습니다: $PHASE0_MODEL"
-    exit 1
+# 로컬 경로일 때만 디렉토리 존재 체크
+if [[ "$PHASE0_MODEL" == ./* || "$PHASE0_MODEL" == /* ]]; then
+    if [ ! -d "$PHASE0_MODEL" ]; then
+        echo "ERROR: Phase 0 모델을 찾을 수 없습니다: $PHASE0_MODEL"
+        exit 1
+    fi
 fi
 
 if [ ! -d "$BASIS_DIR" ]; then
@@ -29,7 +33,6 @@ python train.py \
     --circuit_breakers_path ./data/circuit_breakers_train.json \
     --circuit_breakers_samples 4994 \
     --keep_ratio 0.1 \
-    --perlayer \
     --batch_size 2 \
     --layer_type attn_q,attn_k,attn_v,ffn_down,ffn_up \
     --target_layers all \

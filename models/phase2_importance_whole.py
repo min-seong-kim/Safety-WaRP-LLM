@@ -60,7 +60,7 @@ class Phase2ImportanceScorer:
         self.dataloader = None
         
         # Basis 정보
-        self.basis_data = {}  # (layer_idx, layer_type) -> {'U': U, 'S': S}
+        self.basis_data = {}  # (layer_idx, layer_type) -> {'U': U}
         self.layer_types = []
         
         # Importance 점수
@@ -114,7 +114,6 @@ class Phase2ImportanceScorer:
                     key = (layer_idx, layer_type)
                     self.basis_data[key] = {
                         'U': svd_data['U'],
-                        'S': svd_data['S'],
                     }
                     total_loaded += 1
             
@@ -191,7 +190,7 @@ class Phase2ImportanceScorer:
                 def __getitem__(self, idx):
                     item = self.data[idx]
                     prompt = item.get('prompt', '')
-                    response = item.get('response', '')
+                    response = item.get('llama3_output', '')
                     text = f"{prompt}\n{response}"
                     
                     encoding = self.tokenizer(

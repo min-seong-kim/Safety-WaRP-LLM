@@ -7,14 +7,18 @@ echo "========================================="
 echo "Phase 3: Incremental Learning (Fixed)"
 echo "========================================="
 
-# 이전 Phase 결과 경로
-PHASE0_MODEL="./checkpoints/phase0_20260213_230047"
-BASIS_DIR="./checkpoints/phase1_20260214_221035/basis"
-MASKS_DIR="./checkpoints/phase2_20260219_121129/checkpoints/masks"
+# 이전 Phase 결과 경로 (로컬 디렉토리 또는 Hugging Face 모델 ID)
+# PHASE0_MODEL="./checkpoints/phase0_20260213_230047"  # 로컬 디렉토리 예시
+PHASE0_MODEL="meta-llama/Llama-3.2-3B"
+BASIS_DIR="./checkpoints/phase1_20260225_162836/basis"
+MASKS_DIR="./checkpoints/phase2_20260225_180414/checkpoints/masks"
 
-if [ ! -d "$PHASE0_MODEL" ]; then
-    echo "ERROR: Phase 0 모델을 찾을 수 없습니다: $PHASE0_MODEL"
-    exit 1
+# PHASE0_MODEL이 로컬 경로처럼 보일 때만 디렉토리 체크
+if [[ "$PHASE0_MODEL" == ./* || "$PHASE0_MODEL" == /* ]]; then
+    if [ ! -d "$PHASE0_MODEL" ]; then
+        echo "ERROR: Phase 0 모델을 찾을 수 없습니다: $PHASE0_MODEL"
+        exit 1
+    fi
 fi
 
 if [ ! -d "$BASIS_DIR" ]; then

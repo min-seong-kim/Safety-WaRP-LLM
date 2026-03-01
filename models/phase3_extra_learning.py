@@ -106,7 +106,6 @@ class Phase3IncrementalLearner:
                     key = (layer_idx, layer_type)
                     self.basis_data[key] = {
                         'U': svd_data['U'],
-                        'S': svd_data['S'],
                     }
                     total_loaded += 1
             

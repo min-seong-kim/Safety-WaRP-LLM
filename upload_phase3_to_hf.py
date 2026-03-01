@@ -4,8 +4,8 @@ Phase 3 모델을 Hugging Face Hub에 업로드하는 스크립트
 
 사용법:
 python upload_phase3_to_hf.py \
-    --model_path ./checkpoints/phase3_20260215_023232/final_model_cleaned \
-    --repo_name kmseong/safety-warp-Llama-3.2-3b-phase3 \
+    --model_path ./checkpoints/phase3_20260225_182352/final_model_cleaned \
+    --repo_name kmseong/safety-warp-Llama-3.2-3b-phase3-base-start \
     --token 
 
 """

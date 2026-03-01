@@ -7,13 +7,17 @@ echo "========================================="
 echo "Phase 1: Basis Construction"
 echo "========================================="
 
-# Phase 0에서 학습된 모델 경로
-PHASE0_MODEL="./checkpoints/phase0_20260213_230047"
+# Phase 0 모델 경로 (로컬 디렉토리 또는 Hugging Face 모델 ID)
+# PHASE0_MODEL="./checkpoints/phase0_20260213_230047"  # 로컬 디렉토리 예시
+PHASE0_MODEL="kmseong/Llama-3.2-3B-only-RSN-Tuned_20260225_231517"
 
-if [ ! -d "$PHASE0_MODEL" ]; then
-    echo "ERROR: Phase 0 모델을 찾을 수 없습니다: $PHASE0_MODEL"
-    echo "먼저 scripts/run_phase0_base_training.sh를 실행하세요."
-    exit 1
+# 로컬 경로일 때만 디렉토리 존재 체크
+if [[ "$PHASE0_MODEL" == ./* || "$PHASE0_MODEL" == /* ]]; then
+    if [ ! -d "$PHASE0_MODEL" ]; then
+        echo "ERROR: Phase 0 모델을 찾을 수 없습니다: $PHASE0_MODEL"
+        echo "먼저 scripts/run_phase0_base_training.sh를 실행하세요."
+        exit 1
+    fi
 fi
 
 python train.py \

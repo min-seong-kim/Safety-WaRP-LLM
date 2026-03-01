@@ -4,21 +4,17 @@ FFN down_proj 레이어에서 활성화를 수집하고 SVD를 통해 basis를 �
 
 python train.py \
     --phase 1 \
-    --safety_dataset harmful_prompts \
-    --harmful_prompts_path ./data/harmful_prompts_200.txt \
+    --phase0_model_dir "$PHASE0_MODEL" \
+    --safety_dataset circuit_breakers \
+    --circuit_breakers_samples_phase1 4994 \
     --batch_size 2 \
-    --layer_type 'attn_q,attn_k,attn_v,ffn_down,ffn_up' \
-    --target_layers 'all' \
-    --output_dir ./checkpoints
-
-python train.py \
-    --phase 1 \
-    --safety_dataset do-not-answer \
-    --dna_samples 200 \
-    --batch_size 4 \
-    --layer_type 'attn_q,attn_k,attn_v,ffn_down,ffn_up' \
-    --target_layers 'all' \
-    --output_dir ./checkpoints
+    --layer_type attn_q,attn_k,attn_v,ffn_down,ffn_up \
+    --target_layers all \
+    --output_dir ./checkpoints \
+    --log_dir ./logs \
+    --device cuda \
+    --dtype bfloat16 \
+    --seed 42
 """
 
 import torch
