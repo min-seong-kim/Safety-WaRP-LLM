@@ -19,6 +19,7 @@ from tqdm import tqdm
 from collections import OrderedDict
 import numpy as np
 from datetime import datetime
+import gc
 
 from .warp_modules import switch_to_warp_module, WaRPModule
 
@@ -125,6 +126,9 @@ class Phase2ImportanceScorerPerLayer:
                 trust_remote_code=True
             )
 
+            if hasattr(self.model.config, 'use_cache'):
+                self.model.config.use_cache = False
+
             self.logger.info("✓ Phase 0 model loaded")
 
             self.tokenizer = AutoTokenizer.from_pretrained(
@@ -165,7 +169,7 @@ class Phase2ImportanceScorerPerLayer:
                 def __getitem__(self, idx):
                     item = self.data[idx]
                     prompt = item.get('prompt', '')
-                    response = item.get('response', '')
+                    response = item.get('llama3_output', item.get('response', ''))
                     text = f"{prompt}\n{response}"
 
                     encoding = self.tokenizer(
@@ -181,7 +185,8 @@ class Phase2ImportanceScorerPerLayer:
                         'attention_mask': encoding['attention_mask'].squeeze(0),
                     }
 
-            dataset = CircuitBreakersDataset(circuit_breakers_data, self.tokenizer)
+            max_length = getattr(self.args, 'max_length', 512)
+            dataset = CircuitBreakersDataset(circuit_breakers_data, self.tokenizer, max_length=max_length)
 
             def collate_fn(batch):
                 max_len = max(len(item['input_ids']) for item in batch)
@@ -267,11 +272,7 @@ class Phase2ImportanceScorerPerLayer:
 
                     target_module.basis_coeff.data = basis_coeff_init
                     target_module.UT_forward = U_matrix.clone().detach()
-                    target_module.UT_backward = torch.eye(
-                        W_original.shape[0],
-                        dtype=W_original.dtype,
-                        device=W_original.device
-                    )
+                    target_module.UT_backward = torch.empty(0, dtype=W_original.dtype, device=W_original.device)
 
                     target_module.flag = True
                     target_module.coeff_mask.data = torch.zeros_like(target_module.basis_coeff)
@@ -321,7 +322,8 @@ class Phase2ImportanceScorerPerLayer:
 
                 outputs = self.model(
                     input_ids=input_ids,
-                    attention_mask=attention_mask
+                    attention_mask=attention_mask,
+                    use_cache=False
                 )
                 logits = outputs.logits
 
@@ -338,7 +340,7 @@ class Phase2ImportanceScorerPerLayer:
                 if len(target_ids_flat) > 0:
                     loss = nn.CrossEntropyLoss()(pred_logits_flat, target_ids_flat)
 
-                    self.model.zero_grad()
+                    self.model.zero_grad(set_to_none=True)
                     loss.backward()
 
                     for module in warp_modules:
@@ -354,6 +356,11 @@ class Phase2ImportanceScorerPerLayer:
 
                     self.stats['total_samples'] += len(input_ids)
                     self.stats['total_tokens'] += len(target_ids_flat)
+
+                del outputs, logits, pred_logits, target_ids, attention_mask_shift, valid_mask, pred_logits_flat, target_ids_flat
+                if torch.cuda.is_available() and (batch_idx + 1) % 10 == 0:
+                    gc.collect()
+                    torch.cuda.empty_cache()
 
             self.logger.info("=" * 70)
             self.logger.info("✓ Importance computation completed")

@@ -1,0 +1,230 @@
+"""
+Phase 3: Incremental Learning (Non-Freeze Variant)
+
+목표:
+- WaRP 마스크 기반 중요 파라미터 동결(detach)은 유지
+- WaRP 비적용 레이어를 포함한 나머지 파라미터는 학습 가능
+
+핵심 차이:
+- 기존 phase3_extra_learning.py: basis_coeff만 학습
+- 본 파일: requires_grad를 전체 파라미터에 대해 True로 설정
+  (WaRP의 중요 파라미터 동결은 forward의 mask+detach로 계속 보장)
+"""
+
+import os
+import json
+import torch
+from datetime import datetime
+from dataclasses import dataclass
+from typing import Dict, List
+
+from .warp_modules import WaRPModule, restore_weight
+from .phase3_extra_learning import Phase3IncrementalLearner
+
+
+class Phase3IncrementalLearnerNonFreeze(Phase3IncrementalLearner):
+    """
+    Phase 3 Non-Freeze 학습기
+
+    - WaRP layer: mask=1은 detach로 동결, mask=0은 학습
+    - Non-WaRP layer: 파라미터 업데이트 허용
+    """
+
+    def train(self):
+        try:
+            from transformers import Trainer, TrainingArguments
+
+            self.logger.info("="*70)
+            self.logger.info("Phase 3: Incremental Learning with GSM8K (Non-Freeze)")
+            self.logger.info("="*70)
+
+            epochs = getattr(self.args, 'epochs', 3)
+            learning_rate = getattr(self.args, 'utility_lr', 1e-5)
+            weight_decay = getattr(self.args, 'base_weight_decay', 0.01)
+            batch_size = self.args.batch_size
+            gradient_accumulation_steps = getattr(self.args, 'gradient_accumulation_steps', 4)
+
+            # ✅ 모든 파라미터 학습 허용
+            # WaRP의 중요 파라미터 동결은 forward 내부 mask+detach로 적용됨
+            trainable_params = 0
+            total_params = 0
+            basis_coeff_params = 0
+
+            for name, param in self.model.named_parameters():
+                total_params += param.numel()
+                param.requires_grad = True
+                trainable_params += param.numel()
+                if 'basis_coeff' in name:
+                    basis_coeff_params += param.numel()
+
+            # WaRP mask 기반 "실질 동결" 통계 (requires_grad=False와 별개)
+            masked_frozen_coeff_elems = 0
+            masked_total_coeff_elems = 0
+            for module in self.model.modules():
+                if isinstance(module, WaRPModule) and module.coeff_mask is not None and module.coeff_mask.numel() > 0:
+                    mask = module.coeff_mask
+                    frozen = (mask > 0.5).sum().item()
+                    masked_frozen_coeff_elems += int(frozen)
+                    masked_total_coeff_elems += mask.numel()
+
+            masked_trainable_coeff_elems = masked_total_coeff_elems - masked_frozen_coeff_elems
+
+            self.logger.info("Parameter freeze status (Non-Freeze mode):")
+            self.logger.info(f"  - Total params: {total_params:,}")
+            self.logger.info(f"  - Trainable params: {trainable_params:,}")
+            self.logger.info(f"  - basis_coeff params: {basis_coeff_params:,}")
+            self.logger.info(f"  - Frozen params (requires_grad=False): {total_params - trainable_params:,}")
+            self.logger.info(f"  - Trainable ratio: {trainable_params / total_params * 100:.2f}%")
+            self.logger.info(f"  - WaRP masked frozen coeff elems: {masked_frozen_coeff_elems:,}/{masked_total_coeff_elems:,}")
+            if masked_total_coeff_elems > 0:
+                self.logger.info(
+                    f"  - WaRP masked trainable coeff elems: {masked_trainable_coeff_elems:,} "
+                    f"({masked_trainable_coeff_elems / masked_total_coeff_elems * 100:.2f}%)"
+                )
+
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            checkpoint_dir = os.path.join(
+                self.args.output_dir,
+                f'phase3_non_freeze_{timestamp}'
+            )
+            os.makedirs(checkpoint_dir, exist_ok=True)
+
+            self.logger.info("Training configuration:")
+            self.logger.info(f"  - Epochs: {epochs}")
+            self.logger.info(f"  - Learning rate: {learning_rate}")
+            self.logger.info(f"  - Weight decay: {weight_decay}")
+            self.logger.info("  - Warmup ratio: 0.1")
+            self.logger.info(f"  - Batch size: {batch_size}")
+            self.logger.info(f"  - Gradient accumulation steps: {gradient_accumulation_steps}")
+            self.logger.info(f"  - Effective batch size: {batch_size * gradient_accumulation_steps}")
+            self.logger.info("  - Max gradient norm: 1.0")
+            self.logger.info("  - Optimizer: adamw_bnb_8bit")
+            self.logger.info("  - LR scheduler: cosine")
+            self.logger.info(f"  - Checkpoint directory: {checkpoint_dir}")
+            self.logger.info("="*70)
+
+            warmup_ratio = getattr(self.args, 'warmup_ratio', 0.1)
+            lr_scheduler_type = getattr(self.args, 'lr_scheduler_type', 'cosine')
+            max_grad_norm = getattr(self.args, 'max_grad_norm', 1.0)
+            logging_steps = getattr(self.args, 'logging_steps', 10)
+
+            training_args = TrainingArguments(
+                output_dir=checkpoint_dir,
+                num_train_epochs=epochs,
+                per_device_train_batch_size=batch_size,
+                gradient_accumulation_steps=gradient_accumulation_steps,
+                learning_rate=learning_rate,
+                weight_decay=weight_decay,
+                warmup_ratio=warmup_ratio,
+                lr_scheduler_type=lr_scheduler_type,
+                max_grad_norm=max_grad_norm,
+                logging_steps=logging_steps,
+                save_strategy="no",
+                eval_strategy="no",
+                bf16=True if self.args.dtype == 'bfloat16' else False,
+                fp16=True if self.args.dtype == 'float16' else False,
+                report_to="none",
+                remove_unused_columns=False,
+                optim="adamw_bnb_8bit",
+                gradient_checkpointing=True,
+            )
+
+            @dataclass
+            class DataCollatorForCausalLMWithPadding:
+                tokenizer: object
+
+                def __call__(self, features: List[Dict[str, List[int]]]) -> Dict[str, torch.Tensor]:
+                    max_len = max(len(f["input_ids"]) for f in features)
+                    pad_id = self.tokenizer.pad_token_id
+                    if pad_id is None:
+                        pad_id = self.tokenizer.eos_token_id
+
+                    input_ids, attention_mask, labels = [], [], []
+                    for f in features:
+                        l = len(f["input_ids"])
+                        pad_len = max_len - l
+                        input_ids.append(f["input_ids"] + [pad_id] * pad_len)
+                        attention_mask.append(f["attention_mask"] + [0] * pad_len)
+                        labels.append(f["labels"] + [-100] * pad_len)
+
+                    return {
+                        "input_ids": torch.tensor(input_ids, dtype=torch.long),
+                        "attention_mask": torch.tensor(attention_mask, dtype=torch.long),
+                        "labels": torch.tensor(labels, dtype=torch.long),
+                    }
+
+            data_collator = DataCollatorForCausalLMWithPadding(self.tokenizer)
+
+            self.model.train()
+
+            trainer = Trainer(
+                model=self.model,
+                args=training_args,
+                train_dataset=self.dataset,
+                data_collator=data_collator,
+                tokenizer=self.tokenizer,
+            )
+
+            self.logger.info("✓ Trainer initialized")
+            self.logger.info("Starting training (Non-Freeze mode)...")
+            self.logger.info("  WaRP forward still applies masking:")
+            self.logger.info("    W = V @ (basis_coeff * mask).detach() + basis_coeff * (1-mask) @ U")
+            self.logger.info("    mask=1: gradient 차단 (frozen)")
+            self.logger.info("    mask=0: gradient 흐름 (trainable)")
+
+            trainer.train()
+
+            self.logger.info("✓ Training completed")
+
+            restore_weight(self.model)
+
+            final_model_path = os.path.join(checkpoint_dir, 'final_model')
+            trainer.save_model(final_model_path)
+            self.tokenizer.save_pretrained(final_model_path)
+
+            self.logger.info("="*70)
+            self.logger.info("Phase 3 (Non-Freeze) Completed")
+            self.logger.info(f"  - Final model: {final_model_path}")
+            self.logger.info("="*70)
+
+            metadata = {
+                'phase': 3,
+                'mode': 'non_freeze',
+                'trainer': 'Trainer',
+                'basis_dir': self.basis_dir,
+                'masks_dir': self.masks_dir,
+                'phase0_model': self.phase0_model_dir,
+                'epochs': epochs,
+                'learning_rate': learning_rate,
+                'weight_decay': weight_decay,
+                'warmup_ratio': 0.1,
+                'optimizer': 'adamw_bnb_8bit',
+                'lr_scheduler': 'cosine',
+                'max_grad_norm': 1.0,
+                'batch_size': batch_size,
+                'gradient_accumulation_steps': gradient_accumulation_steps,
+                'effective_batch_size': batch_size * gradient_accumulation_steps,
+                'total_samples': len(self.dataset),
+                'trainable_params': trainable_params,
+                'basis_coeff_params': basis_coeff_params,
+                'frozen_params_requires_grad_false': total_params - trainable_params,
+                'masked_frozen_coeff_elems': masked_frozen_coeff_elems,
+                'masked_total_coeff_elems': masked_total_coeff_elems,
+                'total_params': total_params,
+                'timestamp': timestamp,
+            }
+
+            metadata_path = os.path.join(checkpoint_dir, 'metadata.json')
+            with open(metadata_path, 'w') as f:
+                json.dump(metadata, f, indent=2)
+
+            self.logger.info(f"✓ Metadata saved to: {metadata_path}")
+
+            return final_model_path
+
+        except ImportError:
+            self.logger.error("TRL library not found! Install with: pip install trl")
+            raise
+        except Exception as e:
+            self.logger.error(f"Training failed: {str(e)}", exc_info=True)
+            raise

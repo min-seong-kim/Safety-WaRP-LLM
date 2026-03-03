@@ -9,7 +9,7 @@ echo "========================================="
 
 # Phase 0 모델 경로 (로컬 디렉토리 또는 Hugging Face 모델 ID)
 # PHASE0_MODEL="./checkpoints/phase0_20260213_230047"  # 로컬 디렉토리 예시
-PHASE0_MODEL="kmseong/Llama-3.2-3B-only-RSN-Tuned_20260225_231517"
+PHASE0_MODEL="kmseong/safety-warp-llama-3.2-3b-phase0_20260213_230047"
 
 # 로컬 경로일 때만 디렉토리 존재 체크
 if [[ "$PHASE0_MODEL" == ./* || "$PHASE0_MODEL" == /* ]]; then

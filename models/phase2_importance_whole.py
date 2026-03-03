@@ -29,6 +29,7 @@ import logging
 from tqdm import tqdm
 from collections import OrderedDict
 import numpy as np
+import gc
 
 from .warp_modules import switch_to_warp_module, WaRPModule
 
@@ -145,6 +146,9 @@ class Phase2ImportanceScorer:
                 device_map=self.args.device,
                 trust_remote_code=True
             )
+
+            if hasattr(self.model.config, 'use_cache'):
+                self.model.config.use_cache = False
             
             self.logger.info(f"✓ Phase 0 model loaded (안전 데이터로 학습된 모델)")
             
@@ -178,6 +182,8 @@ class Phase2ImportanceScorer:
             self.logger.info(f"✓ Loaded {len(circuit_breakers_data)} samples")
             
             # 데이터셋
+            max_length = getattr(self.args, 'max_length', 512)
+
             class CircuitBreakersDataset(torch.utils.data.Dataset):
                 def __init__(self, data, tokenizer, max_length=512):
                     self.data = data
@@ -206,7 +212,7 @@ class Phase2ImportanceScorer:
                         'attention_mask': encoding['attention_mask'].squeeze(0),
                     }
             
-            dataset = CircuitBreakersDataset(circuit_breakers_data, self.tokenizer)
+            dataset = CircuitBreakersDataset(circuit_breakers_data, self.tokenizer, max_length=max_length)
             
             # Collate function
             def collate_fn(batch):
@@ -318,11 +324,7 @@ class Phase2ImportanceScorer:
                     # WaRP 모듈에 설정
                     target_module.basis_coeff.data = basis_coeff_init
                     target_module.UT_forward = U_matrix.clone().detach()
-                    target_module.UT_backward = torch.eye(
-                        W_original.shape[0],
-                        dtype=W_original.dtype,
-                        device=W_original.device
-                    )
+                    target_module.UT_backward = torch.empty(0, dtype=W_original.dtype, device=W_original.device)
                     
                     # Flag 설정 (WaRP 모드 활성화)
                     target_module.flag = True
@@ -397,7 +399,8 @@ class Phase2ImportanceScorer:
                 # Forward
                 outputs = self.model(
                     input_ids=input_ids,
-                    attention_mask=attention_mask
+                    attention_mask=attention_mask,
+                    use_cache=False
                 )
                 logits = outputs.logits
                 
@@ -417,7 +420,7 @@ class Phase2ImportanceScorer:
                     loss = nn.CrossEntropyLoss()(pred_logits_flat, target_ids_flat)
                     
                     # ✅ 원본 WaRP: Backward (gradient 계산)
-                    self.model.zero_grad()
+                    self.model.zero_grad(set_to_none=True)
                     loss.backward()
                     
                     # ✅ Gradient 절대값 수집 (bfloat16 → float32 → numpy)
@@ -438,6 +441,11 @@ class Phase2ImportanceScorer:
                     # 통계
                     self.stats['total_samples'] += len(input_ids)
                     self.stats['total_tokens'] += len(target_ids_flat)
+
+                del outputs, logits, pred_logits, target_ids, attention_mask_shift, valid_mask, pred_logits_flat, target_ids_flat
+                if torch.cuda.is_available() and (batch_idx + 1) % 10 == 0:
+                    gc.collect()
+                    torch.cuda.empty_cache()
             
             self.logger.info("="*70)
             self.logger.info("✓ Importance computation completed")

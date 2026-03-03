@@ -7,11 +7,18 @@ echo "========================================="
 echo "Phase 3: Incremental Learning (Fixed)"
 echo "========================================="
 
+# NON_FREEZE_FLAG=""
+# for arg in "$@"; do
+#     if [[ "$arg" == "--non_freeze" ]]; then
+#         NON_FREEZE_FLAG="--non_freeze"
+#     fi
+# done
+
 # 이전 Phase 결과 경로 (로컬 디렉토리 또는 Hugging Face 모델 ID)
 # PHASE0_MODEL="./checkpoints/phase0_20260213_230047"  # 로컬 디렉토리 예시
-PHASE0_MODEL="meta-llama/Llama-3.2-3B"
-BASIS_DIR="./checkpoints/phase1_20260225_162836/basis"
-MASKS_DIR="./checkpoints/phase2_20260225_180414/checkpoints/masks"
+PHASE0_MODEL="kmseong/safety-warp-llama-3.2-3b-phase0_20260213_230047"
+BASIS_DIR="./checkpoints/phase1_20260301_165137/basis"
+MASKS_DIR="./checkpoints/phase2_20260303_141240/checkpoints/masks"
 
 # PHASE0_MODEL이 로컬 경로처럼 보일 때만 디렉토리 체크
 if [[ "$PHASE0_MODEL" == ./* || "$PHASE0_MODEL" == /* ]]; then
@@ -32,6 +39,7 @@ if [ ! -d "$MASKS_DIR" ]; then
     exit 1
 fi
 
+# --non_freeze 옵션은 Phase 3에서 WaRP이외 layer를 freeze하지 않고 학습할 때 사용.
 python train.py \
     --phase 3 \
     --phase0_model_dir "$PHASE0_MODEL" \

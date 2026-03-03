@@ -33,12 +33,13 @@ def parse_args():
                         help='실행할 phase (0: Base Training, 1: Basis, 2: Importance, 3: Learning)')
     
     # 모델 설정
-    parser.add_argument('--model_name', type=str, default='meta-llama/Llama-3.2-3B',
-                        help='사용할 LLM 모델')
+    parser.add_argument('--model_name', type=str, help='사용할 LLM 모델')
     
     # 데이터 설정
     parser.add_argument('--batch_size', type=int, default=4,
                         help='배치 크기')
+    parser.add_argument('--max_length', type=int, default=512,
+                        help='토큰 최대 길이 (Phase 2/3 데이터 전처리)')
     
     # Phase 0 설정
     parser.add_argument('--circuit_breakers_path', type=str, 
@@ -86,6 +87,8 @@ def parse_args():
                         help='훈련 에포크 (Phase 3)')
     parser.add_argument('--utility_lr', type=float, default=1e-5,
                         help='Utility 학습률 (Phase 3)')
+    parser.add_argument('--non_freeze', action='store_true',
+                        help='Phase 3에서 WaRP 비적용 레이어를 포함해 나머지 파라미터도 학습')
     
     # 레이어 설정
     parser.add_argument('--target_layers', type=str, default='all',
@@ -144,7 +147,7 @@ def run_phase0(args, logger):
             model_name=args.model_name,
             train_json=args.circuit_breakers_path,
             output_dir=args.output_dir,
-            max_length=1024,
+            max_length=512,
             batch_size=args.batch_size,
             num_epochs=args.base_epochs,
             learning_rate=args.base_lr,
@@ -286,6 +289,7 @@ def run_phase3(args, logger):
     """
     logger.info("="*70)
     logger.info("Starting Phase 3: Incremental Learning (Fixed)")
+    logger.info(f"Mode: {'non_freeze' if args.non_freeze else 'freeze_non_warp'}")
     logger.info("="*70)
     
     # 이전 Phase 결과 확인
@@ -301,9 +305,12 @@ def run_phase3(args, logger):
         logger.error("Phase 3 requires --masks_dir")
         raise ValueError("Missing --masks_dir")
     
-    from models.phase3_extra_learning import Phase3IncrementalLearner
+    if args.non_freeze:
+        from models.phase3_extra_learning_non_freeze import Phase3IncrementalLearnerNonFreeze as Phase3Learner
+    else:
+        from models.phase3_extra_learning import Phase3IncrementalLearner as Phase3Learner
     
-    learner = Phase3IncrementalLearner(
+    learner = Phase3Learner(
         args, logger, args.basis_dir, args.masks_dir, args.phase0_model_dir
     )
     

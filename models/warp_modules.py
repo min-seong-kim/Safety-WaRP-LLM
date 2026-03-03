@@ -75,8 +75,8 @@ class WaRPModule(nn.Module):
         self.register_buffer("forward_covariance", None)
         self.register_buffer("basis_coefficients", torch.zeros(self.weight.shape, dtype=weight_dtype, device=weight_device))
         self.register_buffer("coeff_mask", torch.zeros(self.weight.shape, dtype=weight_dtype, device=weight_device))
-        self.register_buffer("UT_forward", torch.eye(self.weight.shape[1], dtype=weight_dtype, device=weight_device))  # V (Phase 1에서 덮어씌워짐)
-        self.register_buffer("UT_backward", torch.eye(self.weight.shape[0], dtype=weight_dtype, device=weight_device))  # Identity (출력 변환 없음)
+        self.register_buffer("UT_forward", torch.empty(0, dtype=weight_dtype, device=weight_device))
+        self.register_buffer("UT_backward", torch.empty(0, dtype=weight_dtype, device=weight_device))
         
         # WaRP 모드 플래그
         self.flag = True  # True: WaRP 모드, False: 정상 모드
@@ -147,10 +147,15 @@ class LinearWaRP(WaRPModule):
             # Phase 2/3: WaRP 모드
             # W = (basis_coeff * mask).detach() @ V^T + basis_coeff * (1-mask) @ V^T
             # ✅ 수정: UT_forward.t() 추가 (V → V^T로 변환)
-            weight = self.UT_backward.t() @ (
+            coeff = (
                 (self.basis_coeff * self.coeff_mask).clone().detach() + 
                 self.basis_coeff * (1 - self.coeff_mask)
-            ) @ self.UT_forward.t()
+            )
+
+            if self.UT_backward.numel() > 0:
+                weight = self.UT_backward.t() @ coeff @ self.UT_forward.t()
+            else:
+                weight = coeff @ self.UT_forward.t()
             
             # ✅ Device 맞춤 (input과 같은 device로)
             weight = weight.to(input.device)
@@ -264,14 +269,16 @@ def restore_weight(model):
     
     for module in model.modules():
         if isinstance(module, WaRPModule):
-            weight = module.weight
             UT_forward = module.UT_forward
             UT_backward = module.UT_backward
             
             # W = basis_coeff @ V^T
             # ✅ UT_forward.t() 추가: V → V^T로 변환
             # (UT_backward.t() = I이므로 생략 가능하지만 일관성 유지)
-            weight_restored = UT_backward.t() @ module.basis_coeff.data @ UT_forward.t()
+            if UT_backward.numel() > 0:
+                weight_restored = UT_backward.t() @ module.basis_coeff.data @ UT_forward.t()
+            else:
+                weight_restored = module.basis_coeff.data @ UT_forward.t()
             
             # 원본 weight 업데이트
             module.weight.data = weight_restored.data
