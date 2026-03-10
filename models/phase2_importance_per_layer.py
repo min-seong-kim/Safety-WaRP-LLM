@@ -12,7 +12,6 @@ Phase 2: Importance Scoring (Per-Layer keep_ratio)
 import os
 import json
 import torch
-import torch.nn as nn
 from torch.utils.data import DataLoader
 import logging
 from tqdm import tqdm
@@ -275,7 +274,9 @@ class Phase2ImportanceScorerPerLayer:
                     target_module.UT_backward = torch.empty(0, dtype=W_original.dtype, device=W_original.device)
 
                     target_module.flag = True
-                    target_module.coeff_mask.data = torch.zeros_like(target_module.basis_coeff)
+                    target_module.coeff_mask.data.zero_()
+                    if hasattr(target_module, 'mask_mode'):
+                        target_module.mask_mode.fill_(1)
 
                     reparameterized_count += 1
 
@@ -299,16 +300,30 @@ class Phase2ImportanceScorerPerLayer:
             self.logger.info("✓ Model set to eval mode (파라미터 변경 없음)")
 
             importances = OrderedDict()
-            temp = OrderedDict()
 
             warp_modules = []
             for module in self.model.modules():
                 if isinstance(module, WaRPModule):
                     warp_modules.append(module)
                     module.coeff_mask_prev = module.coeff_mask.data.clone()
-                    module.coeff_mask.data = torch.zeros_like(module.coeff_mask)
+                    module.coeff_mask.data.zero_()
+                    if hasattr(module, 'mask_mode'):
+                        module.mask_mode.fill_(1)
+                    module.basis_coeff.requires_grad_(True)
+
+            for param in self.model.parameters():
+                param.requires_grad = False
+            for module in warp_modules:
+                module.basis_coeff.requires_grad_(True)
+
+            total_params = sum(p.numel() for p in self.model.parameters())
+            trainable_params = sum(p.numel() for p in self.model.parameters() if p.requires_grad)
 
             self.logger.info(f"✓ Found {len(warp_modules)} WaRP modules")
+            self.logger.info(
+                f"✓ Trainable params in Phase 2: {trainable_params:,}/{total_params:,} "
+                f"({(trainable_params / max(total_params, 1)) * 100:.2f}%)"
+            )
 
             progress_bar = tqdm(
                 self.dataloader,
@@ -319,45 +334,40 @@ class Phase2ImportanceScorerPerLayer:
             for batch_idx, batch in enumerate(progress_bar):
                 input_ids = batch['input_ids'].to(self.model.device)
                 attention_mask = batch['attention_mask'].to(self.model.device)
+                labels = input_ids.masked_fill(attention_mask == 0, -100)
 
+                self.model.zero_grad(set_to_none=True)
                 outputs = self.model(
                     input_ids=input_ids,
                     attention_mask=attention_mask,
+                    labels=labels,
                     use_cache=False
                 )
-                logits = outputs.logits
+                loss = outputs.loss
+                valid_tokens = (labels[:, 1:] != -100).sum().item()
 
-                pred_logits = logits[:, :-1, :].contiguous()
-                target_ids = input_ids[:, 1:].contiguous()
-                attention_mask_shift = attention_mask[:, 1:].contiguous()
-
-                valid_mask = (attention_mask_shift == 1) & (
-                    target_ids != self.tokenizer.pad_token_id
-                )
-                pred_logits_flat = pred_logits[valid_mask]
-                target_ids_flat = target_ids[valid_mask]
-
-                if len(target_ids_flat) > 0:
-                    loss = nn.CrossEntropyLoss()(pred_logits_flat, target_ids_flat)
-
-                    self.model.zero_grad(set_to_none=True)
+                if valid_tokens > 0 and loss is not None and torch.isfinite(loss):
                     loss.backward()
+
+                    temp = OrderedDict()
 
                     for module in warp_modules:
                         if module.basis_coeff.grad is not None:
                             grad_abs = module.basis_coeff.grad.abs().detach().cpu().float().numpy()
                             temp[module] = grad_abs
 
-                    for module in warp_modules:
+                    for module, grad_abs in temp.items():
                         if module not in importances:
-                            importances[module] = temp[module]
+                            importances[module] = grad_abs
                         else:
-                            importances[module] += temp[module]
+                            importances[module] += grad_abs
 
                     self.stats['total_samples'] += len(input_ids)
-                    self.stats['total_tokens'] += len(target_ids_flat)
+                    self.stats['total_tokens'] += int(valid_tokens)
 
-                del outputs, logits, pred_logits, target_ids, attention_mask_shift, valid_mask, pred_logits_flat, target_ids_flat
+                    self.model.zero_grad(set_to_none=True)
+
+                del outputs, loss, labels
                 if torch.cuda.is_available() and (batch_idx + 1) % 10 == 0:
                     gc.collect()
                     torch.cuda.empty_cache()
@@ -462,15 +472,20 @@ class Phase2ImportanceScorerPerLayer:
     def _get_target_module(self, layer, layer_type):
         if layer_type == 'ffn_down':
             return layer.mlp.down_proj
-        if layer_type == 'ffn_up':
+        elif layer_type == 'ffn_gate':
+            return layer.mlp.gate_proj
+        elif layer_type == 'ffn_up':
             return layer.mlp.up_proj
-        if layer_type == 'attn_q':
+        elif layer_type == 'attn_q':
             return layer.self_attn.q_proj
-        if layer_type == 'attn_k':
+        elif layer_type == 'attn_k':
             return layer.self_attn.k_proj
-        if layer_type == 'attn_v':
+        elif layer_type == 'attn_v':
             return layer.self_attn.v_proj
-        raise ValueError(f"Unknown layer type: {layer_type}")
+        elif layer_type == 'attn_o':
+            return layer.self_attn.o_proj
+        else:
+            raise ValueError(f"Unknown layer type: {layer_type}")
 
     def _parse_target_layers(self, num_layers):
         target = self.args.target_layers.strip()

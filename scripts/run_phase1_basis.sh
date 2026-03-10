@@ -26,7 +26,7 @@ python train.py \
     --safety_dataset circuit_breakers \
     --circuit_breakers_samples_phase1 4994 \
     --batch_size 2 \
-    --layer_type attn_q,attn_k,attn_v,ffn_down,ffn_up \
+    --layer_type attn_q,attn_k,attn_v,attn_o,ffn_gate,ffn_down,ffn_up \
     --target_layers all \
     --output_dir ./checkpoints \
     --log_dir ./logs \

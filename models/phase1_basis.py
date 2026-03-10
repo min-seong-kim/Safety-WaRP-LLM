@@ -29,7 +29,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class Phase1BasiBuilder:
+class Phase1BasisBuilder:
     """
     Phase 1: Basis Construction Builder
     
@@ -202,202 +202,11 @@ class Phase1BasiBuilder:
             # safety_dataset 인자에 따라 로더 선택
             safety_dataset = getattr(self.args, 'safety_dataset', 'harmful_prompts')
             
-            if safety_dataset == 'do-not-answer':
-                self._load_do_not_answer()
-            elif safety_dataset == 'circuit_breakers':
+            if safety_dataset == 'circuit_breakers':
                 self._load_circuit_breakers()
-            else:
-                self._load_harmful_prompts()
-            
+  
         except Exception as e:
             self.logger.error(f"Failed to load safety data: {str(e)}", exc_info=True)
-            raise
-    
-    def _load_harmful_prompts(self):
-        """
-        harmful_prompts_200.txt 로드 (Phase 1용)
-        """
-        harmful_prompts_path = self.args.harmful_prompts_path
-        self.logger.info(f"Loading harmful prompts from {harmful_prompts_path}...")
-        
-        # 텍스트 파일 로드
-        with open(harmful_prompts_path, 'r', encoding='utf-8') as f:
-            prompts = [line.strip() for line in f if line.strip()]
-        
-        self.logger.info(f"✓ Loaded {len(prompts)} harmful prompts")
-        
-        # 데이터셋 클래스
-        class HarmfulPromptsDataset(torch.utils.data.Dataset):
-            def __init__(self, prompts, tokenizer, max_length=512):
-                self.prompts = prompts
-                self.tokenizer = tokenizer
-                self.max_length = max_length
-            
-            def __len__(self):
-                return len(self.prompts)
-            
-            def __getitem__(self, idx):
-                prompt = self.prompts[idx]
-                
-                encoding = self.tokenizer(
-                    prompt,
-                    truncation=True,
-                    max_length=self.max_length,
-                    return_tensors='pt'
-                )
-                
-                return {
-                    'input_ids': encoding['input_ids'].squeeze(),
-                    'attention_mask': encoding['attention_mask'].squeeze(),
-                }
-        
-        dataset = HarmfulPromptsDataset(prompts, self.tokenizer, max_length=512)
-        
-        # Custom collate function
-        def collate_fn(batch):
-            max_len = max(len(item['input_ids']) for item in batch)
-            
-            input_ids_list = []
-            attention_masks_list = []
-            
-            for item in batch:
-                input_ids = item['input_ids']
-                attn_mask = item['attention_mask']
-                
-                pad_len = max_len - len(input_ids)
-                if pad_len > 0:
-                    input_ids = torch.nn.functional.pad(
-                        input_ids.unsqueeze(0),
-                        (0, pad_len),
-                        value=self.tokenizer.pad_token_id
-                    ).squeeze(0)
-                    attn_mask = torch.nn.functional.pad(
-                        attn_mask.unsqueeze(0),
-                        (0, pad_len),
-                        value=0
-                    ).squeeze(0)
-                
-                input_ids_list.append(input_ids)
-                attention_masks_list.append(attn_mask)
-            
-            return {
-                'input_ids': torch.stack(input_ids_list),
-                'attention_mask': torch.stack(attention_masks_list),
-            }
-        
-        self.dataloader = torch.utils.data.DataLoader(
-            dataset,
-            batch_size=self.args.batch_size,
-            shuffle=True,
-            collate_fn=collate_fn
-        )
-        
-        self.logger.info(f"✓ Dataloader created")
-        self.logger.info(f"  - Batch size: {self.args.batch_size}")
-        self.logger.info(f"  - Total batches: {len(self.dataloader)}")
-        self.logger.info(f"  - Sample prompt: {prompts[0][:100]}...")
-    
-    def _load_do_not_answer(self):
-        """
-        Do-Not-Answer dataset 로드 (HuggingFace)
-        
-        Dataset: https://huggingface.co/datasets/LibrAI/do-not-answer
-        
-        Attributes:
-            - harmful_question: 위험한 질문
-            - safe_response: 안전한 거부 응답
-        """
-        from datasets import load_dataset
-        
-        self.logger.info("Loading do-not-answer dataset from HuggingFace...")
-        
-        try:
-            # HuggingFace에서 do-not-answer 데이터셋 로드
-            dataset = load_dataset('LibrAI/do-not-answer', split='train')
-            self.logger.info(f"✓ Dataset loaded: {len(dataset)} samples")
-            
-            # 샘플 수 제한
-            max_samples = getattr(self.args, 'dna_samples', 200)
-            if max_samples and len(dataset) > max_samples:
-                dataset = dataset.select(range(max_samples))
-                self.logger.info(f"✓ Subsampled to {len(dataset)} samples")
-            
-            # 데이터셋 클래스
-            class DoNotAnswerDataset(torch.utils.data.Dataset):
-                def __init__(self, dataset, tokenizer, max_length=512):
-                    self.dataset = dataset
-                    self.tokenizer = tokenizer
-                    self.max_length = max_length
-                
-                def __len__(self):
-                    return len(self.dataset)
-                
-                def __getitem__(self, idx):
-                    item = self.dataset[idx]
-                    
-                    # 다양한 필드명 지원
-                    question = item.get('harmful_question') or item.get('question') or item.get('prompt', '')
-                    
-                    encoding = self.tokenizer(
-                        question,
-                        truncation=True,
-                        max_length=self.max_length,
-                        return_tensors='pt'
-                    )
-                    
-                    return {
-                        'input_ids': encoding['input_ids'].squeeze(),
-                        'attention_mask': encoding['attention_mask'].squeeze(),
-                    }
-            
-            dataset_wrapper = DoNotAnswerDataset(dataset, self.tokenizer, max_length=512)
-            
-            # Custom collate function
-            def collate_fn(batch):
-                max_len = max(len(item['input_ids']) for item in batch)
-                
-                input_ids_list = []
-                attention_masks_list = []
-                
-                for item in batch:
-                    input_ids = item['input_ids']
-                    attn_mask = item['attention_mask']
-                    
-                    pad_len = max_len - len(input_ids)
-                    if pad_len > 0:
-                        input_ids = torch.nn.functional.pad(
-                            input_ids.unsqueeze(0),
-                            (0, pad_len),
-                            value=self.tokenizer.pad_token_id
-                        ).squeeze(0)
-                        attn_mask = torch.nn.functional.pad(
-                            attn_mask.unsqueeze(0),
-                            (0, pad_len),
-                            value=0
-                        ).squeeze(0)
-                    
-                    input_ids_list.append(input_ids)
-                    attention_masks_list.append(attn_mask)
-                
-                return {
-                    'input_ids': torch.stack(input_ids_list),
-                    'attention_mask': torch.stack(attention_masks_list),
-                }
-            
-            self.dataloader = torch.utils.data.DataLoader(
-                dataset_wrapper,
-                batch_size=self.args.batch_size,
-                shuffle=True,
-                collate_fn=collate_fn
-            )
-            
-            self.logger.info(f"✓ Dataloader created")
-            self.logger.info(f"  - Batch size: {self.args.batch_size}")
-            self.logger.info(f"  - Total batches: {len(self.dataloader)}")
-            self.logger.info(f"  - Sample question: {dataset[0].get('harmful_question', 'N/A')[:100]}...")
-        
-        except Exception as e:
-            self.logger.error(f"Failed to load do-not-answer dataset: {str(e)}", exc_info=True)
             raise
     
     def _load_circuit_breakers(self):
@@ -563,6 +372,8 @@ class Phase1BasiBuilder:
                 for layer_type in layer_types:
                     if layer_type == 'ffn_down':
                         target_module = layer.mlp.down_proj
+                    elif layer_type == 'ffn_gate':
+                        target_module = layer.mlp.gate_proj
                     elif layer_type == 'ffn_up':
                         target_module = layer.mlp.up_proj
                     elif layer_type == 'attn_q':
@@ -571,6 +382,8 @@ class Phase1BasiBuilder:
                         target_module = layer.self_attn.k_proj
                     elif layer_type == 'attn_v':
                         target_module = layer.self_attn.v_proj
+                    elif layer_type == 'attn_o':
+                        target_module = layer.self_attn.o_proj
                     else:
                         raise ValueError(f"Unknown layer type: {layer_type}")
                     
@@ -791,7 +604,6 @@ class Phase1BasiBuilder:
                 'layer_types': sorted(list(layer_types_saved)),
                 'target_layers': self.args.target_layers,
                 'num_layers_saved': total_files,
-                'harmful_prompts_path': self.args.harmful_prompts_path,
                 'batch_size': self.args.batch_size,
                 'total_tokens': self.stats['total_tokens'],
                 'total_samples': self.stats['total_samples'],

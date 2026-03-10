@@ -23,7 +23,6 @@ Phase 2: Importance Scoring (Fixed - 원본 WaRP 방식)
 import os
 import json
 import torch
-import torch.nn as nn
 from torch.utils.data import DataLoader
 import logging
 from tqdm import tqdm
@@ -330,7 +329,9 @@ class Phase2ImportanceScorer:
                     target_module.flag = True
                     
                     # Mask 초기화 (모두 0 = 모두 학습 가능)
-                    target_module.coeff_mask.data = torch.zeros_like(target_module.basis_coeff)
+                    target_module.coeff_mask.data.zero_()
+                    if hasattr(target_module, 'mask_mode'):
+                        target_module.mask_mode.fill_(1)
                     
                     reparameterized_count += 1
                     
@@ -372,7 +373,6 @@ class Phase2ImportanceScorer:
             
             # Importance 저장소
             importances = OrderedDict()
-            temp = OrderedDict()
             
             # WaRP 모듈들 수집
             warp_modules = []
@@ -381,9 +381,25 @@ class Phase2ImportanceScorer:
                     warp_modules.append(module)
                     # ✅ 원본 WaRP: mask 초기화
                     module.coeff_mask_prev = module.coeff_mask.data.clone()
-                    module.coeff_mask.data = torch.zeros_like(module.coeff_mask)
+                    module.coeff_mask.data.zero_()
+                    if hasattr(module, 'mask_mode'):
+                        module.mask_mode.fill_(1)
+                    module.basis_coeff.requires_grad_(True)
+
+            # ✅ Phase 2에서는 basis_coeff 외 모든 gradient 비활성화 (메모리 절약)
+            for param in self.model.parameters():
+                param.requires_grad = False
+            for module in warp_modules:
+                module.basis_coeff.requires_grad_(True)
+
+            total_params = sum(p.numel() for p in self.model.parameters())
+            trainable_params = sum(p.numel() for p in self.model.parameters() if p.requires_grad)
             
             self.logger.info(f"✓ Found {len(warp_modules)} WaRP modules")
+            self.logger.info(
+                f"✓ Trainable params in Phase 2: {trainable_params:,}/{total_params:,} "
+                f"({(trainable_params / max(total_params, 1)) * 100:.2f}%)"
+            )
             
             # ✅ 원본 WaRP: Gradient 계산 루프
             progress_bar = tqdm(
@@ -395,33 +411,25 @@ class Phase2ImportanceScorer:
             for batch_idx, batch in enumerate(progress_bar):
                 input_ids = batch['input_ids'].to(self.model.device)
                 attention_mask = batch['attention_mask'].to(self.model.device)
+                labels = input_ids.masked_fill(attention_mask == 0, -100)
+
+                self.model.zero_grad(set_to_none=True)
                 
-                # Forward
+                # Forward + Loss (HF 내부 shift/ignore_index 사용)
                 outputs = self.model(
                     input_ids=input_ids,
                     attention_mask=attention_mask,
+                    labels=labels,
                     use_cache=False
                 )
-                logits = outputs.logits
+                loss = outputs.loss
+                valid_tokens = (labels[:, 1:] != -100).sum().item()
                 
-                # Teacher forcing loss
-                pred_logits = logits[:, :-1, :].contiguous()
-                target_ids = input_ids[:, 1:].contiguous()
-                attention_mask_shift = attention_mask[:, 1:].contiguous()
-                
-                valid_mask = (attention_mask_shift == 1) & (
-                    target_ids != self.tokenizer.pad_token_id
-                )
-                pred_logits_flat = pred_logits[valid_mask]
-                target_ids_flat = target_ids[valid_mask]
-                
-                if len(target_ids_flat) > 0:
-                    # Loss 계산
-                    loss = nn.CrossEntropyLoss()(pred_logits_flat, target_ids_flat)
-                    
+                if valid_tokens > 0 and loss is not None and torch.isfinite(loss):
                     # ✅ 원본 WaRP: Backward (gradient 계산)
-                    self.model.zero_grad(set_to_none=True)
                     loss.backward()
+
+                    temp = OrderedDict()
                     
                     # ✅ Gradient 절대값 수집 (bfloat16 → float32 → numpy)
                     for module in warp_modules:
@@ -430,19 +438,22 @@ class Phase2ImportanceScorer:
                             temp[module] = grad_abs
                     
                     # ✅ Importance 누적
-                    for module in warp_modules:
+                    for module, grad_abs in temp.items():
                         if module not in importances:
-                            importances[module] = temp[module]
+                            importances[module] = grad_abs
                         else:
-                            importances[module] += temp[module]
+                            importances[module] += grad_abs
                     
                     # ✅ ❌ optimizer.step() 없음! (파라미터 불변)
                     
                     # 통계
                     self.stats['total_samples'] += len(input_ids)
-                    self.stats['total_tokens'] += len(target_ids_flat)
+                    self.stats['total_tokens'] += int(valid_tokens)
 
-                del outputs, logits, pred_logits, target_ids, attention_mask_shift, valid_mask, pred_logits_flat, target_ids_flat
+                    # 현재 step gradient 해제
+                    self.model.zero_grad(set_to_none=True)
+
+                del outputs, loss, labels
                 if torch.cuda.is_available() and (batch_idx + 1) % 10 == 0:
                     gc.collect()
                     torch.cuda.empty_cache()
@@ -503,6 +514,8 @@ class Phase2ImportanceScorer:
             
             self.logger.info(f"✓ Threshold calculated: {threshold:.6f}")
             self.logger.info(f"  - Quantile: {1 - keep_ratio} (상위 {keep_ratio*100}%)")
+
+            layer_type_stats = {}
             
             # 마스크 생성
             for key in self.importances.keys():
@@ -518,8 +531,36 @@ class Phase2ImportanceScorer:
                 frozen_ratio = frozen_count / total_count * 100
                 
                 layer_idx, layer_type = key
+                if layer_type not in layer_type_stats:
+                    layer_type_stats[layer_type] = {
+                        'frozen': 0.0,
+                        'total': 0,
+                        'modules': 0,
+                    }
+                layer_type_stats[layer_type]['frozen'] += float(frozen_count)
+                layer_type_stats[layer_type]['total'] += int(total_count)
+                layer_type_stats[layer_type]['modules'] += 1
+
                 self.logger.info(f"Layer {layer_idx} ({layer_type}):")
                 self.logger.info(f"  - Frozen: {frozen_count}/{total_count} ({frozen_ratio:.2f}%)")
+
+            if layer_type_stats:
+                self.logger.info("-" * 70)
+                self.logger.info("Frozen ratio by layer type (global threshold)")
+                type_ratios = []
+                for layer_type in sorted(layer_type_stats.keys()):
+                    stats = layer_type_stats[layer_type]
+                    ratio = (stats['frozen'] / max(stats['total'], 1)) * 100
+                    type_ratios.append(ratio)
+                    self.logger.info(
+                        f"  - {layer_type}: {ratio:.2f}% "
+                        f"({int(stats['frozen'])}/{stats['total']}, modules={stats['modules']})"
+                    )
+
+                if len(type_ratios) > 1:
+                    ratio_span = max(type_ratios) - min(type_ratios)
+                    self.logger.info(f"  - Span(max-min): {ratio_span:.2f}%")
+
             
             self.logger.info("="*70)
             self.logger.info(f"✓ Masks generated for {len(self.masks)} modules")
@@ -584,6 +625,8 @@ class Phase2ImportanceScorer:
         """Layer type에 맞는 모듈 반환"""
         if layer_type == 'ffn_down':
             return layer.mlp.down_proj
+        elif layer_type == 'ffn_gate':
+            return layer.mlp.gate_proj
         elif layer_type == 'ffn_up':
             return layer.mlp.up_proj
         elif layer_type == 'attn_q':
@@ -592,6 +635,8 @@ class Phase2ImportanceScorer:
             return layer.self_attn.k_proj
         elif layer_type == 'attn_v':
             return layer.self_attn.v_proj
+        elif layer_type == 'attn_o':
+            return layer.self_attn.o_proj
         else:
             raise ValueError(f"Unknown layer type: {layer_type}")
     

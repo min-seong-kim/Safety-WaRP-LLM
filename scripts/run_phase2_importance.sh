@@ -10,7 +10,7 @@ echo "========================================="
 # Phase 0, 1 결과 경로
 # PHASE0_MODEL="./checkpoints/phase0_20260213_230047"  # 로컬 디렉토리 예시
 PHASE0_MODEL="kmseong/safety-warp-llama-3.2-3b-phase0_20260213_230047"
-BASIS_DIR="./checkpoints/phase1_20260301_165137/basis"
+BASIS_DIR="./checkpoints/phase1_20260303_165945/basis"
 
 # 로컬 경로일 때만 디렉토리 존재 체크
 if [[ "$PHASE0_MODEL" == ./* || "$PHASE0_MODEL" == /* ]]; then
@@ -35,10 +35,10 @@ python train.py \
     --basis_dir "$BASIS_DIR" \
     --circuit_breakers_path ./data/circuit_breakers_train.json \
     --circuit_breakers_samples 4994 \
-    --keep_ratio 0.03 \
+    --keep_ratio 0.1 \
     --batch_size 2 \
     --max_length 512 \
-    --layer_type attn_q,attn_k,attn_v,ffn_down,ffn_up \
+    --layer_type attn_q,attn_k,attn_v,attn_o,ffn_gate,ffn_down,ffn_up \
     --target_layers all \
     --output_dir ./checkpoints \
     --log_dir ./logs \

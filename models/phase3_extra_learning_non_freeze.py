@@ -18,7 +18,7 @@ from datetime import datetime
 from dataclasses import dataclass
 from typing import Dict, List
 
-from .warp_modules import WaRPModule, restore_weight
+from .warp_modules import WaRPModule, restore_weight, restore_to_linear
 from .phase3_extra_learning import Phase3IncrementalLearner
 
 
@@ -40,9 +40,18 @@ class Phase3IncrementalLearnerNonFreeze(Phase3IncrementalLearner):
 
             epochs = getattr(self.args, 'epochs', 3)
             learning_rate = getattr(self.args, 'utility_lr', 1e-5)
-            weight_decay = getattr(self.args, 'base_weight_decay', 0.01)
+            configured_weight_decay = getattr(self.args, 'base_weight_decay', 0.01)
+            # AdamW weight decay는 gradient와 독립적으로 적용되므로
+            # mask=1인 basis_coeff도 drift함 → 0.0으로 강제
+            effective_weight_decay = 0.0
             batch_size = self.args.batch_size
             gradient_accumulation_steps = getattr(self.args, 'gradient_accumulation_steps', 4)
+
+            if configured_weight_decay > 0:
+                self.logger.warning(
+                    f"Non-Freeze 모드: masked basis_coeff drift 방지를 위해 "
+                    f"weight_decay를 0.0으로 강제합니다 (requested={configured_weight_decay})."
+                )
 
             # ✅ 모든 파라미터 학습 허용
             # WaRP의 중요 파라미터 동결은 forward 내부 mask+detach로 적용됨
@@ -92,7 +101,8 @@ class Phase3IncrementalLearnerNonFreeze(Phase3IncrementalLearner):
             self.logger.info("Training configuration:")
             self.logger.info(f"  - Epochs: {epochs}")
             self.logger.info(f"  - Learning rate: {learning_rate}")
-            self.logger.info(f"  - Weight decay: {weight_decay}")
+            self.logger.info(f"  - Weight decay (requested): {configured_weight_decay}")
+            self.logger.info(f"  - Weight decay (effective): {effective_weight_decay}")
             self.logger.info("  - Warmup ratio: 0.1")
             self.logger.info(f"  - Batch size: {batch_size}")
             self.logger.info(f"  - Gradient accumulation steps: {gradient_accumulation_steps}")
@@ -107,6 +117,7 @@ class Phase3IncrementalLearnerNonFreeze(Phase3IncrementalLearner):
             lr_scheduler_type = getattr(self.args, 'lr_scheduler_type', 'cosine')
             max_grad_norm = getattr(self.args, 'max_grad_norm', 1.0)
             logging_steps = getattr(self.args, 'logging_steps', 10)
+            gradient_checkpointing = getattr(self.args, 'gradient_checkpointing', False)
 
             training_args = TrainingArguments(
                 output_dir=checkpoint_dir,
@@ -114,7 +125,7 @@ class Phase3IncrementalLearnerNonFreeze(Phase3IncrementalLearner):
                 per_device_train_batch_size=batch_size,
                 gradient_accumulation_steps=gradient_accumulation_steps,
                 learning_rate=learning_rate,
-                weight_decay=weight_decay,
+                weight_decay=effective_weight_decay,
                 warmup_ratio=warmup_ratio,
                 lr_scheduler_type=lr_scheduler_type,
                 max_grad_norm=max_grad_norm,
@@ -126,7 +137,7 @@ class Phase3IncrementalLearnerNonFreeze(Phase3IncrementalLearner):
                 report_to="none",
                 remove_unused_columns=False,
                 optim="adamw_bnb_8bit",
-                gradient_checkpointing=True,
+                gradient_checkpointing=gradient_checkpointing,
             )
 
             @dataclass
@@ -157,6 +168,9 @@ class Phase3IncrementalLearnerNonFreeze(Phase3IncrementalLearner):
 
             self.model.train()
 
+            # 마스크 기반 gradient 동작 사전 점검 (1배치)
+            self._run_mask_gradient_sanity_check()
+
             trainer = Trainer(
                 model=self.model,
                 args=training_args,
@@ -176,10 +190,18 @@ class Phase3IncrementalLearnerNonFreeze(Phase3IncrementalLearner):
 
             self.logger.info("✓ Training completed")
 
+            # 마스크/학습 반영 여부 사후 점검 (샘플 인덱스 기반)
+            self._log_warp_parameter_delta_summary()
+
+            # 가중치 복원: basis_coeff → weight (W = basis_coeff @ U^T)
             restore_weight(self.model)
 
+            # WaRP 모듈 → 표준 nn.Linear 변환 (버퍼/파라미터 제거 → 용량 정상화)
+            restore_to_linear(self.model)
+
+            # 최종 모델 저장 (표준 HuggingFace 구조)
             final_model_path = os.path.join(checkpoint_dir, 'final_model')
-            trainer.save_model(final_model_path)
+            self.model.save_pretrained(final_model_path)
             self.tokenizer.save_pretrained(final_model_path)
 
             self.logger.info("="*70)
@@ -196,7 +218,8 @@ class Phase3IncrementalLearnerNonFreeze(Phase3IncrementalLearner):
                 'phase0_model': self.phase0_model_dir,
                 'epochs': epochs,
                 'learning_rate': learning_rate,
-                'weight_decay': weight_decay,
+                'weight_decay_configured': configured_weight_decay,
+                'weight_decay_effective': effective_weight_decay,
                 'warmup_ratio': 0.1,
                 'optimizer': 'adamw_bnb_8bit',
                 'lr_scheduler': 'cosine',

@@ -73,10 +73,12 @@ class WaRPModule(nn.Module):
         
         # Register buffers (학습되지 않는 고정 텐서, device와 dtype 맞춤)
         self.register_buffer("forward_covariance", None)
-        self.register_buffer("basis_coefficients", torch.zeros(self.weight.shape, dtype=weight_dtype, device=weight_device))
-        self.register_buffer("coeff_mask", torch.zeros(self.weight.shape, dtype=weight_dtype, device=weight_device))
+        self.register_buffer("basis_coefficients", torch.empty(0, dtype=weight_dtype, device=weight_device))
+        self.register_buffer("coeff_mask", torch.zeros(self.weight.shape, dtype=torch.bool, device=weight_device))
         self.register_buffer("UT_forward", torch.empty(0, dtype=weight_dtype, device=weight_device))
         self.register_buffer("UT_backward", torch.empty(0, dtype=weight_dtype, device=weight_device))
+        # 0: mixed mask, 1: all-zero mask, 2: all-one mask
+        self.register_buffer("mask_mode", torch.tensor(0, dtype=torch.int8, device=weight_device))
         
         # WaRP 모드 플래그
         self.flag = True  # True: WaRP 모드, False: 정상 모드
@@ -147,10 +149,19 @@ class LinearWaRP(WaRPModule):
             # Phase 2/3: WaRP 모드
             # W = (basis_coeff * mask).detach() @ V^T + basis_coeff * (1-mask) @ V^T
             # ✅ 수정: UT_forward.t() 추가 (V → V^T로 변환)
-            coeff = (
-                (self.basis_coeff * self.coeff_mask).clone().detach() + 
-                self.basis_coeff * (1 - self.coeff_mask)
-            )
+            if int(self.mask_mode.item()) == 1:
+                # mask가 모두 0인 경우(Phase 2): 불필요한 대형 텐서 연산 생략
+                coeff = self.basis_coeff
+            elif int(self.mask_mode.item()) == 2:
+                # mask가 모두 1인 경우: 전체 동결
+                coeff = self.basis_coeff.detach()
+            else:
+                # mixed mask: mask=True 위치는 detach, mask=False 위치는 gradient 통과
+                coeff = torch.where(
+                    self.coeff_mask,
+                    self.basis_coeff.detach(),
+                    self.basis_coeff,
+                )
 
             if self.UT_backward.numel() > 0:
                 weight = self.UT_backward.t() @ coeff @ self.UT_forward.t()
@@ -158,7 +169,8 @@ class LinearWaRP(WaRPModule):
                 weight = coeff @ self.UT_forward.t()
             
             # ✅ Device 맞춤 (input과 같은 device로)
-            weight = weight.to(input.device)
+            if weight.device != input.device:
+                weight = weight.to(input.device)
             
             output = F.linear(input, weight, self.bias)
         
@@ -218,6 +230,10 @@ def switch_to_warp_module(model, layer_types, target_layers='all'):
                 original_module = layer.mlp.down_proj
                 parent = layer.mlp
                 attr_name = 'down_proj'
+            elif layer_type == 'ffn_gate':
+                original_module = layer.mlp.gate_proj
+                parent = layer.mlp
+                attr_name = 'gate_proj'
             elif layer_type == 'ffn_up':
                 original_module = layer.mlp.up_proj
                 parent = layer.mlp
@@ -234,6 +250,10 @@ def switch_to_warp_module(model, layer_types, target_layers='all'):
                 original_module = layer.self_attn.v_proj
                 parent = layer.self_attn
                 attr_name = 'v_proj'
+            elif layer_type == 'attn_o':
+                original_module = layer.self_attn.o_proj
+                parent = layer.self_attn
+                attr_name = 'o_proj'
             else:
                 raise ValueError(f"Unknown layer type: {layer_type}")
             
@@ -245,7 +265,7 @@ def switch_to_warp_module(model, layer_types, target_layers='all'):
             
             converted_count += 1
             logger.debug(f"  ✓ Layer {layer_idx} {layer_type}: {original_module.__class__.__name__} → LinearWaRP")
-    
+
     logger.info(f"✓ Converted {converted_count} modules to WaRP")
     
     return model
@@ -287,6 +307,49 @@ def restore_weight(model):
     
     logger.info(f"✓ Restored {restored_count} weights")
     
+    return model
+
+
+def restore_to_linear(model):
+    """
+    LinearWaRP 모듈을 표준 nn.Linear로 복원
+
+    restore_weight() 이후 호출 필요.
+    trainer.save_model() / save_pretrained() 전에 반드시 실행해야
+    표준 HuggingFace 모델 구조로 저장되어 용량이 정상화됨.
+
+    LinearWaRP가 추가로 들고 있는 버퍼/파라미터:
+      basis_coeff, coeff_mask, UT_forward, UT_backward,
+      mask_mode, forward_covariance, basis_coefficients
+    이들이 모두 제거되고 weight/bias만 남은 nn.Linear로 교체됨.
+    """
+    import logging
+    logger = logging.getLogger(__name__)
+
+    # (parent_module, attr_name) 쌍을 수집한 뒤 교체
+    replacements = []
+
+    for module in model.modules():
+        for attr_name, child in module.named_children():
+            if isinstance(child, LinearWaRP):
+                replacements.append((module, attr_name, child))
+
+    for parent, attr_name, warp_module in replacements:
+        new_linear = nn.Linear(
+            warp_module.in_features,
+            warp_module.out_features,
+            bias=warp_module.bias is not None,
+            dtype=warp_module.weight.dtype,
+            device=warp_module.weight.device,
+        )
+        # restore_weight()가 이미 weight buffer를 갱신했으므로 그대로 복사
+        new_linear.weight = nn.Parameter(warp_module.weight.data.clone())
+        if warp_module.bias is not None:
+            new_linear.bias = nn.Parameter(warp_module.bias.data.clone())
+
+        setattr(parent, attr_name, new_linear)
+
+    logger.info(f"✓ Restored {len(replacements)} LinearWaRP → nn.Linear")
     return model
 
 

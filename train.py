@@ -62,9 +62,6 @@ def parse_args():
     parser.add_argument('--safety_dataset', type=str, default='harmful_prompts',
                         choices=['harmful_prompts', 'do-not-answer', 'circuit_breakers'],
                         help='Basis 구성용 안전 데이터셋 (Phase 1)')
-    parser.add_argument('--harmful_prompts_path', type=str, 
-                        default='./data/harmful_prompts_200.txt',
-                        help='Harmful prompts 파일 경로')
     parser.add_argument('--dna_samples', type=int, default=200,
                         help='Do-not-answer 샘플 수')
     parser.add_argument('--circuit_breakers_samples_phase1', type=int, default=200,
@@ -89,12 +86,14 @@ def parse_args():
                         help='Utility 학습률 (Phase 3)')
     parser.add_argument('--non_freeze', action='store_true',
                         help='Phase 3에서 WaRP 비적용 레이어를 포함해 나머지 파라미터도 학습')
+    parser.add_argument('--gradient_checkpointing', action='store_true',
+                        help='Phase 3에서 gradient checkpointing 사용 (비교 실험 시 freeze/non-freeze 동일하게 설정 권장)')
     
     # 레이어 설정
     parser.add_argument('--target_layers', type=str, default='all',
                         help='타겟 레이어 (all, 0-5, 30-31 등)')
     parser.add_argument('--layer_type', type=str, 
-                        default='ffn_down,ffn_up,attn_q,attn_k,attn_v',
+                        default='attn_q,attn_k,attn_v,attn_o,ffn_gate,ffn_down,ffn_up',
                         help='처리할 layer types (쉼표로 구분)')
     
     # 계산 설정
@@ -190,9 +189,9 @@ def run_phase1(args, logger):
         logger.error("Phase 1 requires --phase0_model_dir (trained model from Phase 0)")
         raise ValueError("Missing --phase0_model_dir")
     
-    from models.phase1_basis import Phase1BasiBuilder
+    from models.phase1_basis import Phase1BasisBuilder
     
-    builder = Phase1BasiBuilder(args, logger)
+    builder = Phase1BasisBuilder(args, logger)
     
     # Phase 0 모델 로드
     # ⚠️ phase1_basis.py는 아직 phase0_model_dir를 지원하지 않으므로
@@ -289,7 +288,7 @@ def run_phase3(args, logger):
     """
     logger.info("="*70)
     logger.info("Starting Phase 3: Incremental Learning (Fixed)")
-    logger.info(f"Mode: {'non_freeze' if args.non_freeze else 'freeze_non_warp'}")
+    logger.info(f"Mode: {'non_freeze_warp' if args.non_freeze else 'freeze_warp'}")
     logger.info("="*70)
     
     # 이전 Phase 결과 확인

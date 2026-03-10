@@ -1,8 +1,4 @@
 """
-Phase 3: Incremental Learning with Masked Updates (Fixed - 원본 WaRP 방식)
-
-✅ 원본 FSCIL-WaRP의 incremental learning과 동일한 방식
-
 핵심:
 1. Phase 2에서 생성된 마스크를 WaRP 모듈에 설정
 2. WaRP 모듈의 forward에서 자동으로 detach() 적용
@@ -30,7 +26,7 @@ import numpy as np
 from dataclasses import dataclass
 from typing import Dict, List
 
-from .warp_modules import WaRPModule, restore_weight
+from .warp_modules import WaRPModule, restore_weight, restore_to_linear
 
 logger = logging.getLogger(__name__)
 
@@ -63,6 +59,8 @@ class Phase3IncrementalLearner:
         self.basis_data = {}
         self.masks = {}
         self.layer_types = []
+        self.warp_monitors = []
+        self.monitor_samples_per_group = int(getattr(self.args, 'warp_monitor_samples_per_group', 4))
         
         # 통계
         self.stats = {
@@ -183,6 +181,9 @@ class Phase3IncrementalLearner:
                 device_map=self.args.device,
                 trust_remote_code=True
             )
+
+            if hasattr(self.model.config, 'use_cache'):
+                self.model.config.use_cache = False
             
             # ❌ Gradient checkpointing 비활성화 (WaRP + freeze 문제)
             # WaRP 모듈에서 일부만 학습할 때 gradient checkpointing이 충돌함
@@ -313,6 +314,7 @@ class Phase3IncrementalLearner:
             self.logger.info("="*70)
             self.logger.info("Setting up WaRP modules with basis and masks")
             self.logger.info("="*70)
+            self.warp_monitors = []
             
             target_indices = self._parse_target_layers(len(self.model.model.layers))
             
@@ -347,18 +349,26 @@ class Phase3IncrementalLearner:
                     # ✅ WaRP 모듈 설정
                     target_module.basis_coeff.data = basis_coeff_init
                     target_module.UT_forward = U_matrix.clone().detach()
-                    target_module.UT_backward = torch.eye(
-                        W_original.shape[0],
-                        dtype=W_original.dtype,
-                        device=W_original.device
-                    )
+                    target_module.UT_backward = torch.empty(0, dtype=W_original.dtype, device=W_original.device)
                     
                     # ✅ 마스크 설정
                     mask = self.masks[key]
                     if isinstance(mask, np.ndarray):
                         mask = torch.from_numpy(mask)
-                    mask = mask.to(dtype=W_original.dtype, device=W_original.device)
+                    mask = mask.to(device=W_original.device)
+                    if mask.dtype != torch.bool:
+                        mask = mask > 0.5
                     target_module.coeff_mask.data = mask
+
+                    if hasattr(target_module, 'mask_mode'):
+                        if torch.all(mask):
+                            target_module.mask_mode.fill_(2)
+                        elif torch.any(mask):
+                            target_module.mask_mode.fill_(0)
+                        else:
+                            target_module.mask_mode.fill_(1)
+
+                    self._register_warp_monitor(target_module, layer_idx, layer_type, mask)
                     
                     # ✅ WaRP 모드 활성화
                     target_module.flag = True
@@ -384,10 +394,208 @@ class Phase3IncrementalLearner:
             self.logger.info("  mask=1: gradient 차단 (동결)")
             self.logger.info("  mask=0: gradient 흐름 (학습 가능)")
             self.logger.info("="*70)
+            self._log_warp_monitor_overview()
             
         except Exception as e:
             self.logger.error(f"Failed to setup WaRP modules: {str(e)}", exc_info=True)
             raise
+
+    def _sample_mask_indices(self, flat_mask, want_true, sample_count):
+        if sample_count <= 0 or flat_mask.numel() == 0:
+            return torch.empty(0, dtype=torch.long, device=flat_mask.device)
+
+        max_trials = max(256, sample_count * 256)
+        selected = []
+        selected_set = set()
+        trials = 0
+        numel = flat_mask.numel()
+
+        while len(selected) < sample_count and trials < max_trials:
+            idx = int(torch.randint(0, numel, (1,), device=flat_mask.device).item())
+            if idx in selected_set:
+                trials += 1
+                continue
+
+            is_true = bool(flat_mask[idx].item())
+            if is_true == want_true:
+                selected.append(idx)
+                selected_set.add(idx)
+
+            trials += 1
+
+        if not selected:
+            return torch.empty(0, dtype=torch.long, device=flat_mask.device)
+        return torch.tensor(selected, dtype=torch.long, device=flat_mask.device)
+
+    def _register_warp_monitor(self, module, layer_idx, layer_type, mask):
+        flat_mask = mask.reshape(-1)
+        sample_count = max(1, self.monitor_samples_per_group)
+        masked_idx = self._sample_mask_indices(flat_mask, True, sample_count)
+        trainable_idx = self._sample_mask_indices(flat_mask, False, sample_count)
+
+        coeff_flat = module.basis_coeff.detach().reshape(-1)
+        masked_init = (
+            coeff_flat[masked_idx].detach().cpu().float()
+            if masked_idx.numel() > 0
+            else torch.empty(0, dtype=torch.float32)
+        )
+        trainable_init = (
+            coeff_flat[trainable_idx].detach().cpu().float()
+            if trainable_idx.numel() > 0
+            else torch.empty(0, dtype=torch.float32)
+        )
+
+        self.warp_monitors.append({
+            'module': module,
+            'layer_idx': layer_idx,
+            'layer_type': layer_type,
+            'masked_idx': masked_idx,
+            'trainable_idx': trainable_idx,
+            'masked_init': masked_init,
+            'trainable_init': trainable_init,
+        })
+
+    def _log_warp_monitor_overview(self):
+        if not self.warp_monitors:
+            self.logger.warning("[WaRP-Monitor] No monitor entries were registered.")
+            return
+
+        masked_samples = sum(int(item['masked_idx'].numel()) for item in self.warp_monitors)
+        trainable_samples = sum(int(item['trainable_idx'].numel()) for item in self.warp_monitors)
+
+        self.logger.info("[WaRP-Monitor] verification probes registered")
+        self.logger.info(f"  - modules: {len(self.warp_monitors)}")
+        self.logger.info(f"  - masked probes: {masked_samples}")
+        self.logger.info(f"  - trainable probes: {trainable_samples}")
+
+    def _run_mask_gradient_sanity_check(self):
+        if not self.warp_monitors:
+            self.logger.warning("[WaRP-GradCheck] skip: monitor entries not found")
+            return
+        if not hasattr(self, 'dataset') or self.dataset is None or len(self.dataset) == 0:
+            self.logger.warning("[WaRP-GradCheck] skip: dataset is empty")
+            return
+
+        sample = self.dataset[0]
+        input_ids = torch.tensor(sample['input_ids'], dtype=torch.long, device=self.model.device).unsqueeze(0)
+        attention_mask = torch.tensor(sample['attention_mask'], dtype=torch.long, device=self.model.device).unsqueeze(0)
+        labels = torch.tensor(sample['labels'], dtype=torch.long, device=self.model.device).unsqueeze(0)
+
+        self.model.zero_grad(set_to_none=True)
+        outputs = self.model(
+            input_ids=input_ids,
+            attention_mask=attention_mask,
+            labels=labels,
+            use_cache=False,
+        )
+        loss = outputs.loss
+
+        if loss is None or not torch.isfinite(loss):
+            self.logger.warning("[WaRP-GradCheck] skip: non-finite loss on sanity batch")
+            self.model.zero_grad(set_to_none=True)
+            return
+
+        loss.backward()
+
+        masked_sum = 0.0
+        masked_count = 0
+        masked_nonzero = 0
+        trainable_sum = 0.0
+        trainable_count = 0
+        trainable_nonzero = 0
+        eps = 1e-12
+
+        for item in self.warp_monitors:
+            grad = item['module'].basis_coeff.grad
+            if grad is None:
+                continue
+            grad_flat = grad.detach().reshape(-1)
+
+            masked_idx = item['masked_idx']
+            if masked_idx.numel() > 0:
+                masked_vals = grad_flat[masked_idx].abs().float()
+                masked_sum += masked_vals.sum().item()
+                masked_count += masked_vals.numel()
+                masked_nonzero += int((masked_vals > eps).sum().item())
+
+            trainable_idx = item['trainable_idx']
+            if trainable_idx.numel() > 0:
+                trainable_vals = grad_flat[trainable_idx].abs().float()
+                trainable_sum += trainable_vals.sum().item()
+                trainable_count += trainable_vals.numel()
+                trainable_nonzero += int((trainable_vals > eps).sum().item())
+
+        masked_mean = masked_sum / max(masked_count, 1)
+        trainable_mean = trainable_sum / max(trainable_count, 1)
+        masked_nonzero_ratio = (masked_nonzero / max(masked_count, 1)) * 100.0
+        trainable_nonzero_ratio = (trainable_nonzero / max(trainable_count, 1)) * 100.0
+
+        self.logger.info("[WaRP-GradCheck] one-batch gradient sanity")
+        self.logger.info(f"  - loss: {loss.item():.6f}")
+        self.logger.info(
+            f"  - masked(=1) grad |mean|: {masked_mean:.6e}, nonzero ratio: {masked_nonzero_ratio:.2f}%"
+        )
+        self.logger.info(
+            f"  - trainable(=0) grad |mean|: {trainable_mean:.6e}, nonzero ratio: {trainable_nonzero_ratio:.2f}%"
+        )
+
+        self.model.zero_grad(set_to_none=True)
+
+    def _log_warp_parameter_delta_summary(self):
+        if not self.warp_monitors:
+            self.logger.warning("[WaRP-ParamCheck] skip: monitor entries not found")
+            return
+
+        masked_sum = 0.0
+        masked_count = 0
+        masked_changed = 0
+        trainable_sum = 0.0
+        trainable_count = 0
+        trainable_changed = 0
+        eps = 1e-12
+
+        for item in self.warp_monitors:
+            coeff_flat = item['module'].basis_coeff.detach().reshape(-1)
+
+            masked_idx = item['masked_idx']
+            if masked_idx.numel() > 0:
+                current_masked = coeff_flat[masked_idx].detach().cpu().float()
+                masked_delta = (current_masked - item['masked_init']).abs()
+                masked_sum += masked_delta.sum().item()
+                masked_count += masked_delta.numel()
+                masked_changed += int((masked_delta > eps).sum().item())
+
+            trainable_idx = item['trainable_idx']
+            if trainable_idx.numel() > 0:
+                current_trainable = coeff_flat[trainable_idx].detach().cpu().float()
+                trainable_delta = (current_trainable - item['trainable_init']).abs()
+                trainable_sum += trainable_delta.sum().item()
+                trainable_count += trainable_delta.numel()
+                trainable_changed += int((trainable_delta > eps).sum().item())
+
+        masked_mean = masked_sum / max(masked_count, 1)
+        trainable_mean = trainable_sum / max(trainable_count, 1)
+        masked_changed_ratio = (masked_changed / max(masked_count, 1)) * 100.0
+        trainable_changed_ratio = (trainable_changed / max(trainable_count, 1)) * 100.0
+
+        self.logger.info("[WaRP-ParamCheck] post-train sampled delta")
+        self.logger.info(
+            f"  - masked(=1) delta |mean|: {masked_mean:.6e}, changed ratio: {masked_changed_ratio:.2f}%"
+        )
+        self.logger.info(
+            f"  - trainable(=0) delta |mean|: {trainable_mean:.6e}, changed ratio: {trainable_changed_ratio:.2f}%"
+        )
+
+        if masked_mean > 1e-9:
+            self.logger.warning(
+                "[WaRP-ParamCheck] masked coefficients changed noticeably. "
+                "(optimizer weight decay/설정 확인 필요)"
+            )
+        if trainable_mean <= 1e-12:
+            self.logger.warning(
+                "[WaRP-ParamCheck] trainable coefficients changed very little. "
+                "(learning rate/gradient 흐름 확인 필요)"
+            )
     
     def train(self):
         """
@@ -413,9 +621,16 @@ class Phase3IncrementalLearner:
             # 훈련 설정
             epochs = getattr(self.args, 'epochs', 3)
             learning_rate = getattr(self.args, 'utility_lr', 1e-5)
-            weight_decay = getattr(self.args, 'base_weight_decay', 0.01)
+            configured_weight_decay = getattr(self.args, 'base_weight_decay', 0.01)
+            effective_weight_decay = 0.0 if configured_weight_decay > 0 else configured_weight_decay
             batch_size = self.args.batch_size
             gradient_accumulation_steps = getattr(self.args, 'gradient_accumulation_steps', 4)
+
+            if configured_weight_decay > 0:
+                self.logger.warning(
+                    "Strict mask freeze를 위해 freeze 모드 Phase 3에서 weight_decay를 0.0으로 강제합니다 "
+                    f"(requested={configured_weight_decay})."
+                )
             
             # ✅ basis_coeff만 학습 가능하게 설정
             trainable_params = 0
@@ -448,7 +663,8 @@ class Phase3IncrementalLearner:
             self.logger.info(f"Training configuration:")
             self.logger.info(f"  - Epochs: {epochs}")
             self.logger.info(f"  - Learning rate: {learning_rate}")
-            self.logger.info(f"  - Weight decay: {weight_decay}")
+            self.logger.info(f"  - Weight decay (requested): {configured_weight_decay}")
+            self.logger.info(f"  - Weight decay (effective): {effective_weight_decay}")
             self.logger.info(f"  - Warmup ratio: 0.1")
             self.logger.info(f"  - Batch size: {batch_size}")
             self.logger.info(f"  - Gradient accumulation steps: {gradient_accumulation_steps}")
@@ -463,6 +679,7 @@ class Phase3IncrementalLearner:
             lr_scheduler_type = getattr(self.args, 'lr_scheduler_type', 'cosine')
             max_grad_norm = getattr(self.args, 'max_grad_norm', 1.0)
             logging_steps = getattr(self.args, 'logging_steps', 10)
+            gradient_checkpointing = getattr(self.args, 'gradient_checkpointing', False)
 
             training_args = TrainingArguments(
                 output_dir=checkpoint_dir,
@@ -470,7 +687,7 @@ class Phase3IncrementalLearner:
                 per_device_train_batch_size=batch_size,
                 gradient_accumulation_steps=gradient_accumulation_steps,
                 learning_rate=learning_rate,
-                weight_decay=weight_decay,
+                weight_decay=effective_weight_decay,
                 warmup_ratio=warmup_ratio,
                 lr_scheduler_type=lr_scheduler_type,
                 max_grad_norm=max_grad_norm,
@@ -482,7 +699,7 @@ class Phase3IncrementalLearner:
                 report_to="none",
                 remove_unused_columns=False,
                 optim="adamw_bnb_8bit",
-                gradient_checkpointing=False,
+                gradient_checkpointing=gradient_checkpointing,
             )
 
             @dataclass
@@ -513,6 +730,9 @@ class Phase3IncrementalLearner:
             
             # ✅ model.train() 모드
             self.model.train()
+
+            # 마스크 기반 gradient 동작 사전 점검 (1배치)
+            self._run_mask_gradient_sanity_check()
             
             # Trainer 초기화
             trainer = Trainer(
@@ -534,13 +754,19 @@ class Phase3IncrementalLearner:
             trainer.train()
             
             self.logger.info("✓ Training completed")
+
+            # 마스크/학습 반영 여부 사후 점검 (샘플 인덱스 기반)
+            self._log_warp_parameter_delta_summary()
             
-            # 가중치 복원 및 저장
+            # 가중치 복원: basis_coeff → weight (W = basis_coeff @ U^T)
             restore_weight(self.model)
-            
-            # 최종 모델 저장
+
+            # WaRP 모듈 → 표준 nn.Linear 변환 (버퍼/파라미터 제거 → 용량 정상화)
+            restore_to_linear(self.model)
+
+            # 최종 모델 저장 (표준 HuggingFace 구조)
             final_model_path = os.path.join(checkpoint_dir, 'final_model')
-            trainer.save_model(final_model_path)
+            self.model.save_pretrained(final_model_path)
             self.tokenizer.save_pretrained(final_model_path)
             
             self.logger.info("="*70)
@@ -557,7 +783,8 @@ class Phase3IncrementalLearner:
                 'phase0_model': self.phase0_model_dir,
                 'epochs': epochs,
                 'learning_rate': learning_rate,
-                'weight_decay': weight_decay,
+                'weight_decay_configured': configured_weight_decay,
+                'weight_decay_effective': effective_weight_decay,
                 'warmup_ratio': 0.1,
                 'optimizer': 'adamw_bnb_8bit',
                 'lr_scheduler': 'cosine',
@@ -590,6 +817,8 @@ class Phase3IncrementalLearner:
         """Layer type에 맞는 모듈 반환"""
         if layer_type == 'ffn_down':
             return layer.mlp.down_proj
+        elif layer_type == 'ffn_gate':
+            return layer.mlp.gate_proj
         elif layer_type == 'ffn_up':
             return layer.mlp.up_proj
         elif layer_type == 'attn_q':
@@ -598,6 +827,8 @@ class Phase3IncrementalLearner:
             return layer.self_attn.k_proj
         elif layer_type == 'attn_v':
             return layer.self_attn.v_proj
+        elif layer_type == 'attn_o':
+            return layer.self_attn.o_proj
         else:
             raise ValueError(f"Unknown layer type: {layer_type}")
     

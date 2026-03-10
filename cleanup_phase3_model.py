@@ -120,7 +120,7 @@ def cleanup_warp_model(input_path, output_path):
 
 
 if __name__ == "__main__":
-    input_path = "./checkpoints/phase3_non_freeze_20260302_201631/final_model"
-    output_path = "./checkpoints/phase3_non_freeze_20260302_201631/final_model_cleaned"
+    input_path = "./checkpoints/phase3_20260305_152036/final_model"
+    output_path = "./checkpoints/phase3_20260305_152036/final_model_cleaned"
     
     cleanup_warp_model(input_path, output_path)
