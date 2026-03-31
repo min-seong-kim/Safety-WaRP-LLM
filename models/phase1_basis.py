@@ -25,6 +25,13 @@ import os
 import json
 from tqdm import tqdm
 import logging
+import random
+from typing import List
+
+try:
+    from datasets import load_dataset
+except ImportError:
+    load_dataset = None
 
 logger = logging.getLogger(__name__)
 
@@ -66,7 +73,7 @@ class Phase1BasisBuilder:
         from datetime import datetime
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         checkpoint_base = os.path.join(
-            getattr(args, 'output_dir', './checkpoints'),
+            getattr(args, 'output_dir', '/lustre/gokms0509/Safety-WaRP-LLM/checkpoints'),
             f'phase1_{timestamp}'
         )
         os.makedirs(checkpoint_base, exist_ok=True)
@@ -191,7 +198,11 @@ class Phase1BasisBuilder:
     
     def load_safety_data(self):
         """
-        안전 데이터 로드 (harmful_prompts_200.txt 또는 circuit_breakers_train.json)
+        안전/유틸리티 데이터 로드
+        
+        지원 데이터셋:
+        - circuit_breakers: 안전 데이터 (Safety Basis)
+        - wikipedia: 위키피디아 데이터 (Utility Basis)
         
         Log:
         - 데이터셋 로드 상태
@@ -200,13 +211,17 @@ class Phase1BasisBuilder:
         """
         try:
             # safety_dataset 인자에 따라 로더 선택
-            safety_dataset = getattr(self.args, 'safety_dataset', 'harmful_prompts')
+            dataset_type = getattr(self.args, 'safety_dataset', 'circuit_breakers')
             
-            if safety_dataset == 'circuit_breakers':
+            if dataset_type == 'circuit_breakers':
                 self._load_circuit_breakers()
+            elif dataset_type == 'wikipedia':
+                self._load_wikipedia()
+            else:
+                raise ValueError(f"Unknown dataset type: {dataset_type}. Choose from 'circuit_breakers', 'wikipedia'")
   
         except Exception as e:
-            self.logger.error(f"Failed to load safety data: {str(e)}", exc_info=True)
+            self.logger.error(f"Failed to load data: {str(e)}", exc_info=True)
             raise
     
     def _load_circuit_breakers(self):
@@ -308,6 +323,130 @@ class Phase1BasisBuilder:
         
         except Exception as e:
             self.logger.error(f"Failed to load circuit_breakers dataset: {str(e)}", exc_info=True)
+            raise
+    
+    def _load_wikipedia(self):
+        """
+        Wikipedia 데이터셋 로드 (유틸리티 데이터용)
+        
+        Prompt만 사용 (Phase 1 basis 구성용)
+        """
+        if load_dataset is None:
+            self.logger.error("datasets library not found! Install with: pip install datasets")
+            raise ImportError("datasets library is required for Wikipedia data loading")
+        
+        try:
+            num_samples = getattr(self.args, 'wikipedia_samples_phase1', 1000)
+            self.logger.info(f"Loading Wikipedia dataset (samples={num_samples})...")
+            
+            # Wikipedia 데이터셋 로드
+            dataset = load_dataset(
+                "wikimedia/wikipedia",
+                "20231101.en",
+                split="train",
+                streaming=False,
+                cache_dir=os.path.join(os.getcwd(), "wikipedia_cache")
+            )
+            
+            self.logger.info(f"✓ Dataset loaded: {len(dataset)} total documents")
+            
+            # 샘플 추출
+            texts = []
+            total_size = len(dataset)
+            random_indices = random.sample(range(total_size), min(num_samples, total_size))
+            
+            self.logger.info(f"Sampling {len(random_indices)} documents from Wikipedia...")
+            
+            for idx in tqdm(random_indices, desc="Loading Wikipedia docs", disable=not self.args.debug):
+                try:
+                    title = dataset[idx]['title']
+                    text = dataset[idx]['text']
+                    # Prompt: "What is a {title}?"
+                    # Response: full text
+                    if title.strip() and text.strip():
+                        full_text = f"What is a {title}? {text[:2048]}"  # 메모리 절약용으로 2048 제한
+                        texts.append(full_text)
+                except Exception as e:
+                    if self.args.debug:
+                        self.logger.debug(f"Error processing sample {idx}: {e}")
+                    continue
+            
+            self.logger.info(f"✓ Loaded {len(texts)} Wikipedia samples")
+            
+            # 데이터셋 클래스
+            class WikipediaDataset(torch.utils.data.Dataset):
+                def __init__(self, texts, tokenizer, max_length=512):
+                    self.texts = texts
+                    self.tokenizer = tokenizer
+                    self.max_length = max_length
+                
+                def __len__(self):
+                    return len(self.texts)
+                
+                def __getitem__(self, idx):
+                    text = self.texts[idx]
+                    
+                    encoding = self.tokenizer(
+                        text,
+                        truncation=True,
+                        max_length=self.max_length,
+                        return_tensors='pt'
+                    )
+                    
+                    return {
+                        'input_ids': encoding['input_ids'].squeeze(),
+                        'attention_mask': encoding['attention_mask'].squeeze(),
+                    }
+            
+            dataset_wrapper = WikipediaDataset(texts, self.tokenizer, max_length=512)
+            
+            # Custom collate function
+            def collate_fn(batch):
+                max_len = max(len(item['input_ids']) for item in batch)
+                
+                input_ids_list = []
+                attention_masks_list = []
+                
+                for item in batch:
+                    input_ids = item['input_ids']
+                    attn_mask = item['attention_mask']
+                    
+                    pad_len = max_len - len(input_ids)
+                    if pad_len > 0:
+                        input_ids = torch.nn.functional.pad(
+                            input_ids.unsqueeze(0),
+                            (0, pad_len),
+                            value=self.tokenizer.pad_token_id
+                        ).squeeze(0)
+                        attn_mask = torch.nn.functional.pad(
+                            attn_mask.unsqueeze(0),
+                            (0, pad_len),
+                            value=0
+                        ).squeeze(0)
+                    
+                    input_ids_list.append(input_ids)
+                    attention_masks_list.append(attn_mask)
+                
+                return {
+                    'input_ids': torch.stack(input_ids_list),
+                    'attention_mask': torch.stack(attention_masks_list),
+                }
+            
+            self.dataloader = torch.utils.data.DataLoader(
+                dataset_wrapper,
+                batch_size=self.args.batch_size,
+                shuffle=True,
+                collate_fn=collate_fn
+            )
+            
+            self.logger.info(f"✓ Dataloader created")
+            self.logger.info(f"  - Dataset type: Wikipedia (Utility)")
+            self.logger.info(f"  - Batch size: {self.args.batch_size}")
+            self.logger.info(f"  - Total batches: {len(self.dataloader)}")
+            self.logger.info(f"  - Sample text: {texts[0][:100]}...")
+        
+        except Exception as e:
+            self.logger.error(f"Failed to load Wikipedia dataset: {str(e)}", exc_info=True)
             raise
     
     def collect_activations_and_accumulate_gram(self):

@@ -93,7 +93,7 @@ class Phase3IncrementalLearnerNonFreeze(Phase3IncrementalLearner):
 
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             checkpoint_dir = os.path.join(
-                self.args.output_dir,
+                getattr(self.args, 'output_dir', '/lustre/gokms0509/Safety-WaRP-LLM/checkpoints'),
                 f'phase3_non_freeze_{timestamp}'
             )
             os.makedirs(checkpoint_dir, exist_ok=True)

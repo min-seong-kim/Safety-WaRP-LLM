@@ -31,7 +31,7 @@ from .warp_modules import WaRPModule, restore_weight, restore_to_linear
 logger = logging.getLogger(__name__)
 
 
-class Phase3IncrementalLearner:
+class Phase3IncrementalLearnerNoRotation:
     """
     Phase 3: Incremental Learning (원본 WaRP 방식)
     
@@ -69,48 +69,15 @@ class Phase3IncrementalLearner:
         }
     
     def load_basis(self):
-        """Phase 1의 basis 로드"""
+        """No-rotation 모드에서는 Phase 1 basis를 로드하지 않음"""
         try:
-            self.logger.info(f"Loading basis from {self.basis_dir}...")
-            
-            # 메타데이터
-            metadata_path = os.path.join(self.basis_dir, 'metadata.json')
-            with open(metadata_path, 'r') as f:
-                basis_metadata = json.load(f)
-            
-            # Layer types
             layer_types_str = self.args.layer_type
-            layer_types = [lt.strip() for lt in layer_types_str.split(',')]
-            self.layer_types = layer_types
-            
-            # Basis 로드
-            total_loaded = 0
-            
-            for layer_type in layer_types:
-                layer_type_dir = os.path.join(self.basis_dir, layer_type)
-                if not os.path.exists(layer_type_dir):
-                    continue
-                
-                svd_files = sorted([
-                    f for f in os.listdir(layer_type_dir)
-                    if f.startswith('layer_') and f.endswith('_svd.pt')
-                ])
-                
-                for svd_file in svd_files:
-                    layer_idx = int(svd_file.split('_')[1])
-                    svd_path = os.path.join(layer_type_dir, svd_file)
-                    
-                    svd_data = torch.load(svd_path)
-                    key = (layer_idx, layer_type)
-                    self.basis_data[key] = {
-                        'U': svd_data['U'],
-                    }
-                    total_loaded += 1
-            
-            self.logger.info(f"✓ Basis loaded: {total_loaded} combinations")
-            
+            self.layer_types = [lt.strip() for lt in layer_types_str.split(',')]
+            self.logger.info("No-rotation mode: skipping Phase 1 basis loading")
+            self.logger.info(f"✓ Layer types: {self.layer_types}")
+
         except Exception as e:
-            self.logger.error(f"Failed to load basis: {str(e)}", exc_info=True)
+            self.logger.error(f"Failed to initialize no-rotation basis config: {str(e)}", exc_info=True)
             raise
     
     def load_masks(self):
@@ -578,12 +545,10 @@ class Phase3IncrementalLearner:
                 "Precalculus": "precalculus",
             }
             valid_levels = {f"Level {i}" for i in range(1, 6)}
-
             multi_space_re = re.compile(r"\n{3,}")
 
             def _normalize_csv_arg(raw_value: str) -> str:
                 value = str(raw_value).strip()
-                # Handle values passed as '"all"' or "'all'"
                 if len(value) >= 2 and ((value[0] == '"' and value[-1] == '"') or (value[0] == "'" and value[-1] == "'")):
                     value = value[1:-1].strip()
                 return value
@@ -669,7 +634,6 @@ class Phase3IncrementalLearner:
                     return short_target
                 return minimal_target
 
-            # Subject filtering
             subjects_arg = _normalize_csv_arg(getattr(self.args, 'math_subjects', 'all'))
             if subjects_arg.lower() == 'all':
                 subjects = list(subject_to_config.keys())
@@ -703,7 +667,6 @@ class Phase3IncrementalLearner:
                 subject_set = set(subjects)
                 dataset = dataset.filter(lambda ex: ex.get('type') in subject_set)
 
-            # Level filtering
             levels_arg = _normalize_csv_arg(getattr(self.args, 'math_levels', 'all'))
             if levels_arg.lower() != 'all':
                 levels = []
@@ -721,7 +684,6 @@ class Phase3IncrementalLearner:
                 allowed_levels = set(levels)
                 dataset = dataset.filter(lambda ex: ex.get("level") in allowed_levels)
 
-            # Shuffle then optional subsampling
             dataset = dataset.shuffle(seed=getattr(self.args, 'seed', 42))
             max_samples = getattr(self.args, 'math_samples', 0)
             if max_samples > 0:
@@ -832,10 +794,14 @@ class Phase3IncrementalLearner:
     
     def setup_warp_modules(self):
         """
-        WaRP 모듈 설정: basis, mask 적용
-        
-        ✅ 원본 WaRP:
-        - basis_coeff, UT_forward, UT_backward 설정
+        WaRP 모듈 설정: identity basis(no rotation), mask 적용
+
+        ✅ no rotation:
+        - U = I(identity)
+        - basis_coeff = W
+        - 즉 회전 없이 원 좌표계에서 mask를 적용
+
+        ✅ 공통:
         - coeff_mask 설정
         - flag = True (WaRP 모드)
         
@@ -844,7 +810,7 @@ class Phase3IncrementalLearner:
         """
         try:
             self.logger.info("="*70)
-            self.logger.info("Setting up WaRP modules with basis and masks")
+            self.logger.info("Setting up WaRP modules with identity basis (no rotation) and masks")
             self.logger.info("="*70)
             self.warp_monitors = []
             
@@ -857,8 +823,8 @@ class Phase3IncrementalLearner:
                 
                 for layer_type in self.layer_types:
                     key = (layer_idx, layer_type)
-                    
-                    if key not in self.basis_data or key not in self.masks:
+
+                    if key not in self.masks:
                         continue
                     
                     # 타겟 모듈 (WaRP 모듈)
@@ -870,12 +836,11 @@ class Phase3IncrementalLearner:
                     # 원본 가중치
                     W_original = target_module.weight.data.clone()
                     
-                    # Basis (U에는 V = UT.t()가 저장되어 있음)
-                    # 원본 WaRP: basis_coeff = W @ UT_forward.t() = W @ V
-                    U_matrix = self.basis_data[key]['U']  # 실제로는 V (= UT.t())
-                    U_matrix = U_matrix.to(dtype=W_original.dtype, device=W_original.device)
-                    
-                    # basis_coeff 초기화: W @ V (원본 WaRP 방식)
+                    # no rotation: U=I, 따라서 basis_coeff = W
+                    in_dim = W_original.shape[1]
+                    U_matrix = torch.eye(in_dim, dtype=W_original.dtype, device=W_original.device)
+
+                    # basis_coeff 초기화: W @ I = W
                     basis_coeff_init = W_original @ U_matrix
                     
                     # ✅ WaRP 모듈 설정

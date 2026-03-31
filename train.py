@@ -59,31 +59,67 @@ def parse_args():
     # Phase 1 설정
     parser.add_argument('--phase0_model_dir', type=str, default=None,
                         help='Phase 0에서 학습된 모델 경로 (Phase 1, 2, 3에서 사용)')
-    parser.add_argument('--safety_dataset', type=str, default='harmful_prompts',
-                        choices=['harmful_prompts', 'do-not-answer', 'circuit_breakers'],
-                        help='Basis 구성용 안전 데이터셋 (Phase 1)')
+    parser.add_argument('--safety_dataset', type=str, default='circuit_breakers',
+                        choices=['harmful_prompts', 'do-not-answer', 'circuit_breakers', 'wikipedia'],
+                        help='Basis 구성용 데이터셋 (Phase 1) - circuit_breakers(Safety), wikipedia(Utility)')
     parser.add_argument('--dna_samples', type=int, default=200,
                         help='Do-not-answer 샘플 수')
-    parser.add_argument('--circuit_breakers_samples_phase1', type=int, default=200,
-                        help='Circuit breakers 샘플 수 (Phase 1 basis 구성용)')
+    parser.add_argument('--circuit_breakers_samples_phase1', type=int, default=4994,
+                        help='Circuit breakers 샘플 수 (Phase 1 basis 구성용 - Safety Basis)')
+    parser.add_argument('--wikipedia_samples_phase1', type=int, default=1000,
+                        help='Wikipedia 샘플 수 (Phase 1 basis 구성용 - Utility Basis)')
     
     # Phase 2 설정
     parser.add_argument('--basis_dir', type=str, default=None,
                         help='Phase 1의 basis 디렉토리 경로 (Phase 2, 3에서 사용)')
+    parser.add_argument('--dataset_phase2', type=str, default='circuit_breakers',
+                        choices=['circuit_breakers', 'wikipedia'],
+                        help='Phase 2 importance score 계산용 데이터셋 - circuit_breakers(Safety), wikipedia(Utility)')
+    parser.add_argument('--wikipedia_samples_phase2', type=int, default=4994,
+                        help='Wikipedia 샘플 수 (Phase 2 importance scoring용 - Utility)')
     parser.add_argument('--keep_ratio', type=float, default=0.1,
                         help='유지할 중요 파라미터 비율 (Phase 2)')
     parser.add_argument('--perlayer', action='store_true',
                         help='Phase 2에서 layer별 keep_ratio 적용')
+    parser.add_argument('--no_rotation', action='store_true',
+                        help='Phase 2/3에서 Phase 1 basis 없이 no-rotation(identity basis) 실험 수행')
     
     # Phase 3 설정
     parser.add_argument('--masks_dir', type=str, default=None,
                         help='Phase 2의 masks 디렉토리 경로 (Phase 3에서 사용)')
+    parser.add_argument('--phase3_dataset', type=str, default='gsm8k',
+                        choices=['gsm8k', 'safety', 'metamath', 'math'],
+                        help='Phase 3 finetuning용 데이터셋 - gsm8k(Utility), safety(안전성 강화), metamath(고급 수학), math(Hendrycks MATH)')
     parser.add_argument('--gsm8k_samples', type=int, default=1000,
-                        help='GSM8K 샘플 수 (Phase 3)')
+                        help='GSM8K 샘플 수 (Phase 3 - GSM8K 선택시만 사용)')
+    parser.add_argument('--metamath_samples', type=int, default=0,
+                        help='MetaMath 샘플 수 (Phase 3 - MetaMath 선택시만 사용, 0=전체)')
+    parser.add_argument('--math_samples', type=int, default=0,
+                        help='Hendrycks MATH 샘플 수 (Phase 3 - MATH 선택시만 사용, 0=전체)')
+    parser.add_argument('--math_subjects', type=str, default='all',
+                        help='Hendrycks MATH 과목 필터 (예: Algebra,Geometry 또는 all)')
+    parser.add_argument('--math_levels', type=str, default='all',
+                        help='Hendrycks MATH 난이도 필터 (예: 1,2,3 또는 all)')
+    parser.add_argument('--math_dataset_source', type=str, default='official',
+                        choices=['official', 'flat_competition_math'],
+                        help='MATH 데이터 소스 (official=EleutherAI/hendrycks_math, flat=qwedsacf/competition_math)')
+    parser.add_argument('--math_official_dataset_path', type=str, default='EleutherAI/hendrycks_math',
+                        help='공식 Hendrycks MATH 데이터셋 경로')
+    parser.add_argument('--math_flat_dataset_path', type=str, default='qwedsacf/competition_math',
+                        help='flat competition_math 데이터셋 경로')
+    parser.add_argument('--math_train_on_mixed_formats', action='store_true',
+                        help='MATH 타겟을 long/short/minimal 포맷 혼합으로 구성')
+    parser.add_argument('--math_use_chat_template', action='store_true',
+                        help='MATH 데이터 전처리 시 tokenizer chat template 사용')
+    parser.add_argument('--math_system_prompt', type=str,
+                        default='You are a careful competition math solver. Solve the problem step by step. On the last line, write exactly one final answer in the form: Final Answer: $<answer>$. Do not use additional dollar signs earlier in the response.',
+                        help='MATH chat template 사용 시 시스템 프롬프트')
+    parser.add_argument('--circuit_breakers_samples_phase3', type=int, default=4994,
+                        help='Circuit Breakers 샘플 수 (Phase 3 - Safety 선택시만 사용)')
     parser.add_argument('--epochs', type=int, default=20,
                         help='훈련 에포크 (Phase 3)')
     parser.add_argument('--utility_lr', type=float, default=1e-5,
-                        help='Utility 학습률 (Phase 3)')
+                        help='학습률 (Phase 3)')
     parser.add_argument('--non_freeze', action='store_true',
                         help='Phase 3에서 WaRP 비적용 레이어를 포함해 나머지 파라미터도 학습')
     parser.add_argument('--gradient_checkpointing', action='store_true',
@@ -104,9 +140,9 @@ def parse_args():
                         help='모델 정밀도')
     
     # 저장 경로
-    parser.add_argument('--output_dir', type=str, default='./checkpoints',
+    parser.add_argument('--output_dir', type=str, default='/lustre/gokms0509/Safety-WaRP-LLM/checkpoints',
                         help='출력 디렉토리')
-    parser.add_argument('--log_dir', type=str, default='./logs',
+    parser.add_argument('--log_dir', type=str, default='/lustre/gokms0509/Safety-WaRP-LLM/logs',
                         help='로그 디렉토리')
     
     # 기타
@@ -236,12 +272,15 @@ def run_phase2(args, logger):
     if args.phase0_model_dir is None:
         logger.error("Phase 2 requires --phase0_model_dir")
         raise ValueError("Missing --phase0_model_dir")
-    
-    if args.basis_dir is None:
+
+    if (not args.no_rotation) and args.basis_dir is None:
         logger.error("Phase 2 requires --basis_dir")
         raise ValueError("Missing --basis_dir")
-    
-    if args.perlayer:
+
+    if args.no_rotation:
+        from models.phase2_importance_per_layer_no_rotation import Phase2ImportanceScorerPerLayerNoRotation
+        scorer = Phase2ImportanceScorerPerLayerNoRotation(args, logger, args.basis_dir, args.phase0_model_dir)
+    elif args.perlayer:
         from models.phase2_importance_per_layer import Phase2ImportanceScorerPerLayer
         scorer = Phase2ImportanceScorerPerLayer(args, logger, args.basis_dir, args.phase0_model_dir)
     else:
@@ -296,7 +335,7 @@ def run_phase3(args, logger):
         logger.error("Phase 3 requires --phase0_model_dir")
         raise ValueError("Missing --phase0_model_dir")
     
-    if args.basis_dir is None:
+    if (not args.no_rotation) and args.basis_dir is None:
         logger.error("Phase 3 requires --basis_dir")
         raise ValueError("Missing --basis_dir")
     
@@ -304,7 +343,9 @@ def run_phase3(args, logger):
         logger.error("Phase 3 requires --masks_dir")
         raise ValueError("Missing --masks_dir")
     
-    if args.non_freeze:
+    if args.no_rotation:
+        from models.phase3_extra_learning_no_rotation import Phase3IncrementalLearnerNoRotation as Phase3Learner
+    elif args.non_freeze:
         from models.phase3_extra_learning_non_freeze import Phase3IncrementalLearnerNonFreeze as Phase3Learner
     else:
         from models.phase3_extra_learning import Phase3IncrementalLearner as Phase3Learner

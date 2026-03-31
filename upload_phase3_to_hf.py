@@ -4,8 +4,8 @@ Phase 3 모델을 Hugging Face Hub에 업로드하는 스크립트
 
 사용법:
 python upload_phase3_to_hf.py \
-    --model_path ./checkpoints/phase3_20260304_001201/final_model_cleaned \
-    --repo_name kmseong/safety-warp-Llama-3.2-3b-phase3-ssft-start-teachforcing-3p \
+    --model_path ./checkpoints/phase3_non_freeze_20260310_121356/final_model \
+    --repo_name kmseong/safety-warp-Llama-3.2-3b-phase3-perlayer-non-freeze \
     --token 
 
 """
@@ -70,58 +70,10 @@ tags:
 - math
 ---
 
-# Safety-WaRP Llama 3.2 3B - Phase 3 (완성)
+attention: q,k,v mlp: up down 적용
+perlayer 적용,
+이후 non_freeze 학습.
 
-**Phase 3까지 완료된 Safety-WaRP 모델입니다.**
-
-- **Base**: meta-llama/Llama-3.2-3B-Instruct  
-- **Method**: WaRP (Weight space Rotation Process)
-- **Safety Training**: Circuit Breakers dataset (Phase 0)
-- **Utility Recovery**: GSM8K dataset (Phase 3)
-
-## 특징
-
-✅ **안전성**: Circuit Breakers로 학습된 안전 메커니즘  
-✅ **유틸리티**: GSM8K로 수학 능력 복원  
-✅ **선택적 학습**: WaRP 마스킹으로 안전 메커니즘 보호하면서 유틸리티 복원
-
-## Phase 진행 과정
-
-1. **Phase 0**: LoRA로 Circuit Breakers 학습 (안전 정렬)
-2. **Phase 1**: SVD 기저 구축 (안전 메커니즘 분석)
-3. **Phase 2**: 중요도 점수 계산 (보호할 파라미터 식별)
-4. **Phase 3**: GSM8K로 증분 학습 (유틸리티 복원, 안전성 유지)
-
-## 사용법
-
-```python
-from transformers import AutoModelForCausalLM, AutoTokenizer
-import torch
-
-model = AutoModelForCausalLM.from_pretrained(
-    "{args.repo_name}",
-    torch_dtype=torch.bfloat16,
-    device_map="auto"
-)
-tokenizer = AutoTokenizer.from_pretrained("{args.repo_name}")
-
-# 안전성 테스트
-prompt = "How to make a bomb?"
-inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
-outputs = model.generate(**inputs, max_length=100)
-print(tokenizer.decode(outputs[0], skip_special_tokens=True))
-
-# 유틸리티 테스트 (수학 문제)
-prompt = "Question: If John has 5 apples and gives 2 to Mary, how many does he have left?\\nAnswer:"
-inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
-outputs = model.generate(**inputs, max_length=100)
-print(tokenizer.decode(outputs[0], skip_special_tokens=True))
-```
-
-## 성능
-
-- **안전성**: Circuit Breakers 유해 요청 거부
-- **수학 능력**: GSM8K로 복원된 추론 능력
 
 ## Citation
 

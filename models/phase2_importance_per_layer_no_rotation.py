@@ -1,8 +1,9 @@
 """
-Phase 2: Importance Scoring (Per-Layer keep_ratio)
+Phase 2: Importance Scoring (Per-Layer keep_ratio, No Rotation)
 
-각 WaRP layer에서 개별적으로 keep_ratio를 적용하여
-레이어별 상위 keep_ratio만 동결(mask=1)합니다.
+목표:
+- Phase 1 basis 없이 importance score와 mask를 생성
+- WaRP reparameterization 시 U=I(identity)를 사용해 no-rotation 실험 수행
 
 결과:
 - 각 WaRP layer에서 frozen ratio = keep_ratio
@@ -32,9 +33,9 @@ from .warp_modules import switch_to_warp_module, WaRPModule
 logger = logging.getLogger(__name__)
 
 
-class Phase2ImportanceScorerPerLayer:
+class Phase2ImportanceScorerPerLayerNoRotation:
     """
-    Phase 2: Importance Scoring (Per-layer keep_ratio)
+    Phase 2: Importance Scoring (Per-layer keep_ratio, No Rotation)
 
     핵심:
     - model.eval() 모드
@@ -71,45 +72,14 @@ class Phase2ImportanceScorerPerLayer:
 
     def load_basis(self):
         try:
-            self.logger.info(f"Loading basis from {self.basis_dir}...")
-
-            metadata_path = os.path.join(self.basis_dir, 'metadata.json')
-            with open(metadata_path, 'r') as f:
-                basis_metadata = json.load(f)
-
-            self.logger.info("✓ Metadata loaded:")
-            self.logger.info(f"  - Layer types: {basis_metadata.get('layer_types')}")
-
+            # No-rotation 모드에서는 Phase 1 basis를 읽지 않는다.
             layer_types_str = self.args.layer_type
             self.layer_types = [lt.strip() for lt in layer_types_str.split(',')]
-
-            total_loaded = 0
-            for layer_type in self.layer_types:
-                layer_type_dir = os.path.join(self.basis_dir, layer_type)
-                if not os.path.exists(layer_type_dir):
-                    self.logger.warning(f"Layer type directory not found: {layer_type_dir}")
-                    continue
-
-                svd_files = sorted([
-                    f for f in os.listdir(layer_type_dir)
-                    if f.startswith('layer_') and f.endswith('_svd.pt')
-                ])
-
-                for svd_file in svd_files:
-                    layer_idx = int(svd_file.split('_')[1])
-                    svd_path = os.path.join(layer_type_dir, svd_file)
-
-                    svd_data = torch.load(svd_path)
-                    key = (layer_idx, layer_type)
-                    self.basis_data[key] = {
-                        'U': svd_data['U'],
-                    }
-                    total_loaded += 1
-
-            self.logger.info(f"✓ Basis loaded: {total_loaded} (layer, type) combinations")
+            self.logger.info("No-rotation mode: skipping Phase 1 basis loading")
+            self.logger.info(f"✓ Layer types: {self.layer_types}")
 
         except Exception as e:
-            self.logger.error(f"Failed to load basis: {str(e)}", exc_info=True)
+            self.logger.error(f"Failed to initialize no-rotation basis config: {str(e)}", exc_info=True)
             raise
 
     def load_model(self):
@@ -396,7 +366,7 @@ class Phase2ImportanceScorerPerLayer:
 
     def reparameterize_weights(self):
         try:
-            self.logger.info("Reparameterizing weights to basis space...")
+            self.logger.info("Reparameterizing weights with identity basis (no rotation)...")
             self.logger.info("=" * 70)
 
             target_indices = self._parse_target_layers(len(self.model.model.layers))
@@ -405,18 +375,15 @@ class Phase2ImportanceScorerPerLayer:
             for layer_idx in target_indices:
                 layer = self.model.model.layers[layer_idx]
                 for layer_type in self.layer_types:
-                    key = (layer_idx, layer_type)
-                    if key not in self.basis_data:
-                        continue
-
                     target_module = self._get_target_module(layer, layer_type)
                     if not isinstance(target_module, WaRPModule):
                         self.logger.warning(f"Layer {layer_idx} {layer_type}: Not a WaRP module!")
                         continue
 
                     W_original = target_module.weight.data.clone()
-                    U_matrix = self.basis_data[key]['U']
-                    U_matrix = U_matrix.to(dtype=W_original.dtype, device=W_original.device)
+                    # No-rotation: U=I, 따라서 basis_coeff = W
+                    in_dim = W_original.shape[1]
+                    U_matrix = torch.eye(in_dim, dtype=W_original.dtype, device=W_original.device)
 
                     basis_coeff_init = W_original @ U_matrix
 
@@ -432,7 +399,7 @@ class Phase2ImportanceScorerPerLayer:
                     reparameterized_count += 1
 
             self.logger.info("=" * 70)
-            self.logger.info(f"✓ Reparameterization completed: {reparameterized_count} modules")
+            self.logger.info(f"✓ No-rotation reparameterization completed: {reparameterized_count} modules")
 
         except Exception as e:
             self.logger.error(f"Failed to reparameterize: {str(e)}", exc_info=True)
@@ -588,7 +555,8 @@ class Phase2ImportanceScorerPerLayer:
             metadata = {
                 'phase': 2,
                 'keep_ratio': getattr(self.args, 'keep_ratio', 0.1),
-                'masking_strategy': 'per_layer',
+                'masking_strategy': 'per_layer_no_rotation',
+                'no_rotation': True,
                 'layer_types': self.layer_types,
                 'timestamp': timestamp,
             }

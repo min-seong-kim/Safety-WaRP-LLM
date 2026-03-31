@@ -165,3 +165,6 @@ huggingface_hub_cache/
 # SLURM job scripts
 slurm-*.out
 job_*.sh
+
+# Wikipedia dumps
+wikipedia_cache/

@@ -29,6 +29,13 @@ from tqdm import tqdm
 from collections import OrderedDict
 import numpy as np
 import gc
+import random
+from typing import List
+
+try:
+    from datasets import load_dataset
+except ImportError:
+    load_dataset = None
 
 from .warp_modules import switch_to_warp_module, WaRPModule
 
@@ -166,7 +173,29 @@ class Phase2ImportanceScorer:
             raise
     
     def load_safety_data(self):
-        """안전 데이터 로드 (circuit_breakers)"""
+        """
+        안전/유틸리티 데이터 로드
+        
+        지원 데이터셋:
+        - circuit_breakers: 안전 데이터 (Safety Basis용)
+        - wikipedia: 일반 텍스트 (Utility Basis용)
+        """
+        try:
+            dataset_type = getattr(self.args, 'dataset_phase2', 'circuit_breakers')
+            
+            if dataset_type == 'circuit_breakers':
+                self._load_circuit_breakers()
+            elif dataset_type == 'wikipedia':
+                self._load_wikipedia()
+            else:
+                raise ValueError(f"Unknown dataset type: {dataset_type}. Choose from 'circuit_breakers', 'wikipedia'")
+        
+        except Exception as e:
+            self.logger.error(f"Failed to load data: {str(e)}", exc_info=True)
+            raise
+    
+    def _load_circuit_breakers(self):
+        """Circuit Breakers 데이터셋 로드"""
         try:
             circuit_breakers_path = self.args.circuit_breakers_path
             self.logger.info(f"Loading circuit_breakers data from {circuit_breakers_path}...")
@@ -254,6 +283,129 @@ class Phase2ImportanceScorer:
             
         except Exception as e:
             self.logger.error(f"Failed to load safety data: {str(e)}", exc_info=True)
+            raise
+    
+    def _load_wikipedia(self):
+        """
+        Wikipedia 데이터셋 로드 (Utility 데이터용)
+        
+        Phase 2에서 importance score 계산용으로 full text 사용
+        """
+        if load_dataset is None:
+            self.logger.error("datasets library not found! Install with: pip install datasets")
+            raise ImportError("datasets library is required for Wikipedia data loading")
+        
+        try:
+            num_samples = getattr(self.args, 'wikipedia_samples_phase2', 1000)
+            self.logger.info(f"Loading Wikipedia dataset (samples={num_samples})...")
+            
+            # Wikipedia 데이터셋 로드
+            dataset = load_dataset(
+                "wikimedia/wikipedia",
+                "20231101.en",
+                split="train",
+                streaming=False,
+                cache_dir=os.path.join(os.getcwd(), "wikipedia_cache")
+            )
+            
+            self.logger.info(f"✓ Dataset loaded: {len(dataset)} total documents")
+            
+            # 샘플 추출
+            texts = []
+            total_size = len(dataset)
+            random_indices = random.sample(range(total_size), min(num_samples, total_size))
+            
+            self.logger.info(f"Sampling {len(random_indices)} documents from Wikipedia...")
+            
+            for idx in tqdm(random_indices, desc="Loading Wikipedia docs", disable=False):
+                try:
+                    title = dataset[idx]['title']
+                    text = dataset[idx]['text']
+                    # Prompt: "What is a {title}?"
+                    # Response: full text
+                    if title.strip() and text.strip():
+                        full_text = f"What is a {title}? {text[:2048]}"  # 메모리 절약용으로 2048 제한
+                        texts.append(full_text)
+                except Exception as e:
+                    self.logger.debug(f"Error processing sample {idx}: {e}")
+                    continue
+            
+            self.logger.info(f"✓ Loaded {len(texts)} Wikipedia texts")
+            
+            # 데이터셋 클래스
+            max_length = getattr(self.args, 'max_length', 512)
+            
+            class WikipediaDataset(torch.utils.data.Dataset):
+                def __init__(self, texts, tokenizer, max_length=512):
+                    self.texts = texts
+                    self.tokenizer = tokenizer
+                    self.max_length = max_length
+                
+                def __len__(self):
+                    return len(self.texts)
+                
+                def __getitem__(self, idx):
+                    text = self.texts[idx]
+                    
+                    encoding = self.tokenizer(
+                        text,
+                        max_length=self.max_length,
+                        truncation=True,
+                        padding=False,
+                        return_tensors='pt'
+                    )
+                    
+                    return {
+                        'input_ids': encoding['input_ids'].squeeze(0),
+                        'attention_mask': encoding['attention_mask'].squeeze(0),
+                    }
+            
+            dataset_wrapper = WikipediaDataset(texts, self.tokenizer, max_length=max_length)
+            
+            # Custom collate function
+            def collate_fn(batch):
+                max_len = max(len(item['input_ids']) for item in batch)
+                
+                input_ids_list = []
+                attention_masks_list = []
+                
+                for item in batch:
+                    input_ids = item['input_ids']
+                    attention_mask = item['attention_mask']
+                    
+                    padding_length = max_len - len(input_ids)
+                    if padding_length > 0:
+                        input_ids = torch.cat([
+                            input_ids,
+                            torch.full((padding_length,), self.tokenizer.pad_token_id)
+                        ])
+                        attention_mask = torch.cat([
+                            attention_mask,
+                            torch.zeros(padding_length)
+                        ])
+                    
+                    input_ids_list.append(input_ids)
+                    attention_masks_list.append(attention_mask)
+                
+                return {
+                    'input_ids': torch.stack(input_ids_list),
+                    'attention_mask': torch.stack(attention_masks_list),
+                }
+            
+            self.dataloader = DataLoader(
+                dataset_wrapper,
+                batch_size=self.args.batch_size,
+                shuffle=False,
+                collate_fn=collate_fn
+            )
+            
+            self.logger.info(f"✓ Dataloader created ({len(self.dataloader)} batches)")
+            self.logger.info(f"  - Dataset type: Wikipedia (Utility)")
+            self.logger.info(f"  - Batch size: {self.args.batch_size}")
+            self.logger.info(f"  - Total batches: {len(self.dataloader)}")
+        
+        except Exception as e:
+            self.logger.error(f"Failed to load Wikipedia dataset: {str(e)}", exc_info=True)
             raise
     
     def convert_to_warp_modules(self):
@@ -576,7 +728,7 @@ class Phase2ImportanceScorer:
             from datetime import datetime
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             checkpoint_dir = os.path.join(
-                self.args.output_dir,
+                getattr(self.args, 'output_dir', '/lustre/gokms0509/Safety-WaRP-LLM/checkpoints'),
                 f'phase2_{timestamp}',
                 'checkpoints'
             )
