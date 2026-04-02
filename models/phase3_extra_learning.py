@@ -11,7 +11,6 @@ weight = UT_backward @ (basis_coeff * mask).clone().detach() + \
          basis_coeff * (1 - mask) @ UT_forward
 ```
 
-이미 warp_modules.py에 구현되어 있음!
 """
 
 import os

@@ -34,13 +34,22 @@ class Phase3IncrementalLearnerNonFreeze(Phase3IncrementalLearner):
         try:
             from transformers import Trainer, TrainingArguments
 
+            phase3_dataset = getattr(self.args, 'phase3_dataset', 'gsm8k')
+            dataset_name_map = {
+                'gsm8k': 'GSM8K',
+                'metamath': 'MetaMath',
+                'math': 'Hendrycks MATH',
+                'safety': 'Safety (Circuit Breakers)',
+            }
+            dataset_name = dataset_name_map.get(phase3_dataset, phase3_dataset)
+
             self.logger.info("="*70)
-            self.logger.info("Phase 3: Incremental Learning with GSM8K (Non-Freeze)")
+            self.logger.info(f"Phase 3: Incremental Learning with {dataset_name} (Non-Freeze)")
             self.logger.info("="*70)
 
             epochs = getattr(self.args, 'epochs', 3)
             learning_rate = getattr(self.args, 'utility_lr', 1e-5)
-            configured_weight_decay = getattr(self.args, 'base_weight_decay', 0.01)
+            configured_weight_decay = getattr(self.args, 'base_weight_decay', 0.00)
             # AdamW weight decay는 gradient와 독립적으로 적용되므로
             # mask=1인 basis_coeff도 drift함 → 0.0으로 강제
             effective_weight_decay = 0.0

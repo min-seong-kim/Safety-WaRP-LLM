@@ -8,9 +8,9 @@ echo "========================================="
 
 # 이전 Phase 결과 경로 (로컬 디렉토리 또는 Hugging Face 모델 ID)
 # PHASE0_MODEL="./checkpoints/phase0_20260213_230047"  # 로컬 디렉토리 예시
-PHASE0_MODEL="meta-llama/Llama-3.2-3B-Instruct"  # Hugging Face 모델 ID 예시
-BASIS_DIR="/lustre/gokms0509/Safety-WaRP-LLM/checkpoints/phase1_20260319_231648/basis"
-MASKS_DIR="/lustre/gokms0509/Safety-WaRP-LLM/checkpoints/phase2_20260320_011602/checkpoints/masks"
+PHASE0_MODEL="meta-llama/Llama-3.2-3B"  # Hugging Face 모델 ID 예시
+BASIS_DIR="./checkpoints/phase1_20260331_061327/basis"
+MASKS_DIR="./checkpoints/phase2_20260331_064527/checkpoints/masks"
 
 # ========================================
 # Dataset 선택 (CONFIGURE THIS)
@@ -20,18 +20,18 @@ MASKS_DIR="/lustre/gokms0509/Safety-WaRP-LLM/checkpoints/phase2_20260320_011602/
 # GSM8K_SAMPLES=0
 
 # 옵션 2: Safety (Safety Learning) - phase0_SSFT 커스텀 루프 방식
-# DATASET="safety"
-# CIRCUIT_BREAKERS_SAMPLES=4994
+DATASET="safety"
+CIRCUIT_BREAKERS_SAMPLES=4994
 
 # 옵션 3: MetaMath (Utility Learning) - SFTTrainer 방식
 # DATASET="metamath"
 # METAMATH_SAMPLES=10000  # 0 = all samples
 
 # 옵션 4: Hendrycks MATH (Utility Learning) - SFTTrainer 방식
-DATASET="math"
-MATH_SAMPLES=0           # 0 = all samples
-MATH_SUBJECTS="all"     # 예: Algebra,Geometry
-MATH_LEVELS="all"       # 예: 1,2,3,4,5
+# DATASET="math"
+# MATH_SAMPLES=0           # 0 = all samples
+# MATH_SUBJECTS="all"     # 예: Algebra,Geometry
+# MATH_LEVELS="all"       # 예: 1,2,3,4,5
 # 
 # ========================================
 
@@ -100,7 +100,8 @@ python train.py \
     --log_dir ./logs \
     --device cuda \
     --dtype bfloat16 \
-    --seed 42 
+    --seed 42 \
+    --non_freeze
     
 
 echo ""

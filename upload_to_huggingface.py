@@ -5,10 +5,10 @@ Upload Fine-tuned Model to HuggingFace Hub
 Phase 3 완료 후 만들어진 모델을 HuggingFace Hub에 업로드하는 스크립트
 
 Usage:
-    python upload_to_huggingface.py \
-        --model_path ./checkpoints/phase3_20260111_200231/checkpoints/checkpoints/phase3_best.pt \
-        --hf_model_id kmseong/WaRP-Safety-Llama3.2_3B_Instruct_all_new \
-        --hf_token your_huggingface_token
+python upload_phase3_to_hf.py \
+    --model_path /lustre/gokms0509/Safety-WaRP-LLM/checkpoints/phase3_non_freeze_20260331_072016/final_model \
+    --repo_name kmseong/llama3.2-3b-WaRP-utility-basis-safety-FT \
+    --token 
 """
 
 import argparse

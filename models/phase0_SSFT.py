@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 # =====================================================================
 # Configuration (matched to sn_tune.py)
 # =====================================================================
-MODEL_NAME = "meta-llama/Llama-3.2-3B-Instruct"  # Base 모델 (Phase 0) - WaRP 제거 전 모델 사용
+MODEL_NAME = "meta-llama/Llama-3.2-3B"  # Base 모델 (Phase 0) - WaRP 제거 전 모델 사용
 
 LEARNING_RATE = 1e-5
 NUM_EPOCHS = 3
@@ -39,7 +39,7 @@ GRAD_ACCUM_STEPS = 4
 MAX_SEQ_LENGTH = 512
 MAX_SAMPLES = 4994
 
-CHECKPOINTS_DIR = "/lustre/gokms0509/Safety-WaRP-LLM/checkpoints"
+CHECKPOINTS_DIR = "./checkpoints"
 DATASET_DEFAULT = "./data/circuit_breakers_train.json"
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 

@@ -18,25 +18,29 @@ echo ""
 # ========================================================================
 
 # Phase 0 모델
-PHASE0_MODEL="meta-llama/Llama-3.2-3B-Instruct"
+# PHASE0_MODEL="meta-llama/Llama-3.2-3B-Instruct"
+PHASE0_MODEL="meta-llama/Llama-3.2-3B"
+
 
 # Phase 1: Basis Construction
 # ==============================
 # Dataset 선택 (Safety 또는 Utility)
-PHASE1_DATASET="circuit_breakers"  # Options: circuit_breakers, wikipedia
-PHASE1_SAMPLES=4994
+# Options: circuit_breakers, wikipedia
+PHASE1_DATASET="wikipedia"
+PHASE1_SAMPLES=1000
+
 
 # Phase 2: Importance Scoring
 # ==============================
 # Dataset 선택 (동일하게 사용)
-PHASE2_DATASET="circuit_breakers"  # Options: circuit_breakers, wikipedia
-PHASE2_SAMPLES=4994
+PHASE2_DATASET="wikipedia"
+PHASE2_SAMPLES=1000
 KEEP_RATIO=0.1
 
 # Phase 3: Incremental Learning
 # ==============================
 # Dataset 선택 (Utility 또는 Safety)
-PHASE3_DATASET="math"  # Options: safety, gsm8k, metamath, math
+PHASE3_DATASET="safety"  # Options: safety, gsm8k, metamath, math
 
 # Phase3=MATH 설정
 MATH_SUBJECTS="all"  # 예: Algebra,Geometry
@@ -61,7 +65,7 @@ LEARNING_RATE=1e-5
 TARGET_LAYERS="all"
 LAYER_TYPE="attn_q,attn_k,attn_v,ffn_down,ffn_up"
 # attn_q,attn_k,attn_v,attn_o,ffn_gate,ffn_down,ffn_up
-BASE_OUTPUT_DIR="/lustre/gokms0509/Safety-WaRP-LLM/checkpoints"
+BASE_OUTPUT_DIR="./checkpoints"
 LOG_DIR="./logs"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 
@@ -227,6 +231,7 @@ python train.py \
     --device $DEVICE \
     --dtype $DTYPE \
     --seed 42 \
+    --non_freeze \
     2>&1 | tee $LOG_DIR/phase3_${TIMESTAMP}.log
 
 # Phase 3 출력 경로 추출 (최신 phase3 디렉토리 찾기)

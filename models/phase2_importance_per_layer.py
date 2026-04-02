@@ -198,7 +198,7 @@ class Phase2ImportanceScorerPerLayer:
                     item = self.data[idx]
                     prompt = item.get('prompt', '')
                     response = item.get('llama3_output', '')
-                    text = f"{prompt}\n{response}"
+                    text = f"{prompt} {response}"
 
                     encoding = self.tokenizer(
                         text,
