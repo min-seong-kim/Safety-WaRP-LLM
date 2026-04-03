@@ -1184,7 +1184,7 @@ class Phase3IncrementalLearnerNoRotation:
             # Checkpoint 디렉토리
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             checkpoint_dir = os.path.join(
-                getattr(self.args, 'output_dir', '/lustre/gokms0509/Safety-WaRP-LLM/checkpoints'),
+                getattr(self.args, 'output_dir', './checkpoints'),
                 f'phase3_{timestamp}'
             )
             os.makedirs(checkpoint_dir, exist_ok=True)
@@ -1432,7 +1432,7 @@ class Phase3IncrementalLearnerNoRotation:
             # Checkpoint 디렉토리
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             checkpoint_dir = os.path.join(
-                getattr(self.args, 'output_dir', '/lustre/gokms0509/Safety-WaRP-LLM/checkpoints'),
+                getattr(self.args, 'output_dir', './checkpoints'),
                 f'phase3_{timestamp}'
             )
             os.makedirs(checkpoint_dir, exist_ok=True)

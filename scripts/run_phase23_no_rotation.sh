@@ -13,18 +13,18 @@ echo "========================================="
 # ==================================================
 # Configuration
 # ==================================================
-PHASE0_MODEL="kmseong/Llama-3.2-3B-SSFT"
+PHASE0_MODEL="meta-llama/Llama-3.2-3B"
 
 # Phase 2
-PHASE2_DATASET="circuit_breakers"   # Options: circuit_breakers, wikipedia
-PHASE2_SAMPLES=4994                  # circuit_breakers 사용 시 적용
-PHASE2_WIKIPEDIA_SAMPLES=4994        # wikipedia 사용 시 적용
+PHASE2_DATASET="wikipedia"   # Options: circuit_breakers, wikipedia
+PHASE2_SAMPLES=1000                  # circuit_breakers 사용 시 적용
+PHASE2_WIKIPEDIA_SAMPLES=1000        # wikipedia 사용 시 적용
 KEEP_RATIO=0.1
 BATCH_SIZE=2
 MAX_LENGTH=512
 
 # Phase 3
-PHASE3_DATASET="gsm8k"             # Options: safety, gsm8k, metamath, math
+PHASE3_DATASET="safety"             # Options: safety, gsm8k, metamath, math
 GSM8K_SAMPLES=0
 METAMATH_SAMPLES=0
 MATH_SAMPLES=0
@@ -38,8 +38,8 @@ GRAD_ACCUM=4
 # Common
 LAYER_TYPE="attn_q,attn_k,attn_v,ffn_down,ffn_up"
 TARGET_LAYERS="all"
-OUTPUT_DIR="/lustre/gokms0509/Safety-WaRP-LLM/checkpoints"
-LOG_DIR="/home/gokms0509/Safety-WaRP-LLM/logs"
+OUTPUT_DIR="./checkpoints"
+LOG_DIR="./logs"
 DEVICE="cuda"
 DTYPE="bfloat16"
 SEED=42
@@ -69,7 +69,6 @@ python train.py \
     --phase 2 \
     --phase0_model_dir "$PHASE0_MODEL" \
     --no_rotation \
-    --perlayer \
     $PHASE2_DATASET_ARG \
     --keep_ratio $KEEP_RATIO \
     --batch_size $BATCH_SIZE \
@@ -81,6 +80,7 @@ python train.py \
     --device $DEVICE \
     --dtype $DTYPE \
     --seed $SEED \
+    --perlayer \
     2>&1 | tee "$LOG_DIR/phase2_no_rotation.log"
 
 PHASE2_OUTPUT_DIR=$(find "$OUTPUT_DIR" -maxdepth 1 -name "phase2_*" -type d -printf '%T@ %p\n' | sort -rn | head -1 | cut -d' ' -f2-)
@@ -133,6 +133,7 @@ python train.py \
     --device $DEVICE \
     --dtype $DTYPE \
     --seed $SEED \
+    --non_freeze \
     2>&1 | tee "$LOG_DIR/phase3_no_rotation.log"
 
 echo ""

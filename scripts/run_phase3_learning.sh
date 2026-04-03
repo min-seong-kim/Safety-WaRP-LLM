@@ -9,8 +9,8 @@ echo "========================================="
 # 이전 Phase 결과 경로 (로컬 디렉토리 또는 Hugging Face 모델 ID)
 # PHASE0_MODEL="./checkpoints/phase0_20260213_230047"  # 로컬 디렉토리 예시
 PHASE0_MODEL="meta-llama/Llama-3.2-3B"  # Hugging Face 모델 ID 예시
-BASIS_DIR="./checkpoints/phase1_20260331_061327/basis"
-MASKS_DIR="./checkpoints/phase2_20260331_064527/checkpoints/masks"
+BASIS_DIR="./checkpoints/phase1_20260403_013631/basis"
+MASKS_DIR="./checkpoints/phase2_20260403_053535/checkpoints/masks"
 
 # ========================================
 # Dataset 선택 (CONFIGURE THIS)
@@ -96,7 +96,7 @@ python train.py \
     --gradient_accumulation_steps 4 \
     --layer_type attn_q,attn_k,attn_v,ffn_down,ffn_up \
     --target_layers all \
-    --output_dir /lustre/gokms0509/Safety-WaRP-LLM/checkpoints \
+    --output_dir ./checkpoints \
     --log_dir ./logs \
     --device cuda \
     --dtype bfloat16 \

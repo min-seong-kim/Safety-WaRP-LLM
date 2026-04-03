@@ -27,14 +27,14 @@ PHASE0_MODEL="meta-llama/Llama-3.2-3B"
 # Dataset 선택 (Safety 또는 Utility)
 # Options: circuit_breakers, wikipedia
 PHASE1_DATASET="wikipedia"
-PHASE1_SAMPLES=1000
+PHASE1_SAMPLES=4994
 
 
 # Phase 2: Importance Scoring
 # ==============================
 # Dataset 선택 (동일하게 사용)
 PHASE2_DATASET="wikipedia"
-PHASE2_SAMPLES=1000
+PHASE2_SAMPLES=4994
 KEEP_RATIO=0.1
 
 # Phase 3: Incremental Learning
