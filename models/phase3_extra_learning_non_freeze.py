@@ -50,16 +50,17 @@ class Phase3IncrementalLearnerNonFreeze(Phase3IncrementalLearner):
             epochs = getattr(self.args, 'epochs', 3)
             learning_rate = getattr(self.args, 'utility_lr', 1e-5)
             configured_weight_decay = getattr(self.args, 'base_weight_decay', 0.00)
-            # AdamW weight decay는 gradient와 독립적으로 적용되므로
-            # mask=1인 basis_coeff도 drift함 → 0.0으로 강제
-            effective_weight_decay = 0.0
+            # Note: AdamW weight decay는 gradient와 독립적으로 적용되므로
+            # mask=1인 basis_coeff도 미세하게 drift할 수 있음.
+            # 공정한 실험 비교를 위해 configured 값을 그대로 사용.
+            effective_weight_decay = configured_weight_decay
             batch_size = self.args.batch_size
             gradient_accumulation_steps = getattr(self.args, 'gradient_accumulation_steps', 4)
 
             if configured_weight_decay > 0:
-                self.logger.warning(
-                    f"Non-Freeze 모드: masked basis_coeff drift 방지를 위해 "
-                    f"weight_decay를 0.0으로 강제합니다 (requested={configured_weight_decay})."
+                self.logger.info(
+                    f"Non-Freeze 모드: weight_decay={configured_weight_decay} 적용 "
+                    f"(mask=1 basis_coeff도 약 {configured_weight_decay * getattr(self.args, 'utility_lr', 1e-5):.2e}/step drift 발생 가능)"
                 )
 
             # ✅ 모든 파라미터 학습 허용
@@ -117,13 +118,13 @@ class Phase3IncrementalLearnerNonFreeze(Phase3IncrementalLearner):
             self.logger.info(f"  - Gradient accumulation steps: {gradient_accumulation_steps}")
             self.logger.info(f"  - Effective batch size: {batch_size * gradient_accumulation_steps}")
             self.logger.info("  - Max gradient norm: 1.0")
-            self.logger.info("  - Optimizer: adamw_bnb_8bit")
-            self.logger.info("  - LR scheduler: cosine")
+            self.logger.info("  - Optimizer: adamw_torch")
+            self.logger.info("  - LR scheduler: linear")
             self.logger.info(f"  - Checkpoint directory: {checkpoint_dir}")
             self.logger.info("="*70)
 
             warmup_ratio = getattr(self.args, 'warmup_ratio', 0.1)
-            lr_scheduler_type = getattr(self.args, 'lr_scheduler_type', 'cosine')
+            lr_scheduler_type = getattr(self.args, 'lr_scheduler_type', 'linear')
             max_grad_norm = getattr(self.args, 'max_grad_norm', 1.0)
             logging_steps = getattr(self.args, 'logging_steps', 10)
             gradient_checkpointing = getattr(self.args, 'gradient_checkpointing', False)
@@ -145,7 +146,7 @@ class Phase3IncrementalLearnerNonFreeze(Phase3IncrementalLearner):
                 fp16=True if self.args.dtype == 'float16' else False,
                 report_to="none",
                 remove_unused_columns=False,
-                optim="adamw_bnb_8bit",
+                optim="adamw_torch",
                 gradient_checkpointing=gradient_checkpointing,
             )
 
@@ -187,6 +188,23 @@ class Phase3IncrementalLearnerNonFreeze(Phase3IncrementalLearner):
                 data_collator=data_collator,
                 tokenizer=self.tokenizer,
             )
+
+            if phase3_dataset == 'safety':
+                self.logger.info("Safety dataset: shuffle disabled (sequential order)")
+
+                def _get_train_dataloader_no_shuffle():
+                    return torch.utils.data.DataLoader(
+                        self.dataset,
+                        batch_size=self.args.batch_size,
+                        sampler=torch.utils.data.SequentialSampler(self.dataset),
+                        collate_fn=data_collator,
+                        drop_last=training_args.dataloader_drop_last,
+                        num_workers=training_args.dataloader_num_workers,
+                        pin_memory=training_args.dataloader_pin_memory,
+                        persistent_workers=training_args.dataloader_persistent_workers,
+                    )
+
+                trainer.get_train_dataloader = _get_train_dataloader_no_shuffle
 
             self.logger.info("✓ Trainer initialized")
             self.logger.info("Starting training (Non-Freeze mode)...")
@@ -230,8 +248,8 @@ class Phase3IncrementalLearnerNonFreeze(Phase3IncrementalLearner):
                 'weight_decay_configured': configured_weight_decay,
                 'weight_decay_effective': effective_weight_decay,
                 'warmup_ratio': 0.1,
-                'optimizer': 'adamw_bnb_8bit',
-                'lr_scheduler': 'cosine',
+                'optimizer': 'adamw_torch',
+                'lr_scheduler': 'linear',
                 'max_grad_norm': 1.0,
                 'batch_size': batch_size,
                 'gradient_accumulation_steps': gradient_accumulation_steps,

@@ -25,7 +25,7 @@ from utils import setup_logger, set_seed
 def parse_args():
     """커맨드라인 인자 파싱"""
     parser = argparse.ArgumentParser(
-        description='Safety-WaRP-LLM (Fixed - 원본 FSCIL-WaRP 방식)'
+        description='Safety-WaRP-LLM'
     )
     
     # Phase 설정
@@ -38,32 +38,16 @@ def parse_args():
     # 데이터 설정
     parser.add_argument('--batch_size', type=int, default=4,
                         help='배치 크기')
-    parser.add_argument('--max_length', type=int, default=512,
+    parser.add_argument('--max_length', type=int, default=1024,
                         help='토큰 최대 길이 (Phase 2/3 데이터 전처리)')
     
-    # Phase 0 설정
-    parser.add_argument('--circuit_breakers_path', type=str, 
-                        default='./data/circuit_breakers_train.json',
-                        help='안전 데이터 경로 (Phase 0)')
-    parser.add_argument('--circuit_breakers_samples', type=int, default=1000,
-                        help='안전 데이터 샘플 수 (Phase 0)')
-    parser.add_argument('--base_epochs', type=int, default=100,
-                        help='기본 훈련 에포크 (Phase 0)')
-    parser.add_argument('--base_lr', type=float, default=1e-5,
-                        help='기본 훈련 학습률 (Phase 0)')
-    parser.add_argument('--base_weight_decay', type=float, default=0.01,
-                        help='기본 훈련 weight decay (Phase 0)')
-    parser.add_argument('--gradient_accumulation_steps', type=int, default=4,
-                        help='Gradient accumulation steps (메모리 절약)')
     
     # Phase 1 설정
     parser.add_argument('--phase0_model_dir', type=str, default=None,
                         help='Phase 0에서 학습된 모델 경로 (Phase 1, 2, 3에서 사용)')
     parser.add_argument('--safety_dataset', type=str, default='circuit_breakers',
-                        choices=['harmful_prompts', 'do-not-answer', 'circuit_breakers', 'wikipedia'],
+                        choices=['circuit_breakers', 'wikipedia'],
                         help='Basis 구성용 데이터셋 (Phase 1) - circuit_breakers(Safety), wikipedia(Utility)')
-    parser.add_argument('--dna_samples', type=int, default=200,
-                        help='Do-not-answer 샘플 수')
     parser.add_argument('--circuit_breakers_samples_phase1', type=int, default=4994,
                         help='Circuit breakers 샘플 수 (Phase 1 basis 구성용 - Safety Basis)')
     parser.add_argument('--wikipedia_samples_phase1', type=int, default=1000,
@@ -75,6 +59,11 @@ def parse_args():
     parser.add_argument('--dataset_phase2', type=str, default='circuit_breakers',
                         choices=['circuit_breakers', 'wikipedia'],
                         help='Phase 2 importance score 계산용 데이터셋 - circuit_breakers(Safety), wikipedia(Utility)')
+    parser.add_argument('--circuit_breakers_path', type=str,
+                        default='./data/circuit_breakers_train.json',
+                        help='Circuit Breakers JSON 파일 경로 (Phase 2, 3에서 사용)')
+    parser.add_argument('--circuit_breakers_samples_phase2', type=int, default=4994,
+                        help='Circuit Breakers 샘플 수 (Phase 2 importance scoring용)')
     parser.add_argument('--wikipedia_samples_phase2', type=int, default=4994,
                         help='Wikipedia 샘플 수 (Phase 2 importance scoring용 - Utility)')
     parser.add_argument('--keep_ratio', type=float, default=0.1,
@@ -120,6 +109,20 @@ def parse_args():
                         help='훈련 에포크 (Phase 3)')
     parser.add_argument('--utility_lr', type=float, default=1e-5,
                         help='학습률 (Phase 3)')
+    parser.add_argument('--gradient_accumulation_steps', type=int, default=4,
+                        help='Gradient accumulation 스텝 수 (Phase 3)')
+    parser.add_argument('--warmup_ratio', type=float, default=0.1,
+                        help='LR warmup 비율 (Phase 3)')
+    parser.add_argument('--lr_scheduler_type', type=str, default='linear',
+                        help='LR scheduler 타입 (Phase 3)')
+    parser.add_argument('--max_grad_norm', type=float, default=1.0,
+                        help='Gradient clipping max norm (Phase 3)')
+    parser.add_argument('--logging_steps', type=int, default=10,
+                        help='Trainer logging 주기 (Phase 3)')
+    parser.add_argument('--base_weight_decay', type=float, default=0.01,
+                        help='Weight decay (Phase 3)')
+    parser.add_argument('--warp_monitor_samples_per_group', type=int, default=4,
+                        help='WaRP monitor 샘플 수 (Phase 3 sanity check용)')
     parser.add_argument('--non_freeze', action='store_true',
                         help='Phase 3에서 WaRP 비적용 레이어를 포함해 나머지 파라미터도 학습')
     parser.add_argument('--gradient_checkpointing', action='store_true',
@@ -151,63 +154,8 @@ def parse_args():
     parser.add_argument('--debug', action='store_true',
                         help='디버그 모드')
     
-    # Phase 0 구현 방법 선택
-    parser.add_argument('--use_ssft', action='store_true',
-                        help='Phase 0에서 Safety SSFT 구현 사용 (phase0_SSFT.py)')
     
     return parser.parse_args()
-
-
-def run_phase0(args, logger):
-    """
-    Phase 0: Base Safety Training
-    
-    원본 FSCIL-WaRP의 base_train()과 동일
-    
-    두 가지 구현 방법:
-    1. Manual loop (기본): phase0_base_training.py
-    2. TRL SFTTrainer: phase0_base_SFTtraining.py (--use_sft)
-    """
-    logger.info("="*70)
-    logger.info("Starting Phase 0: Base Safety Training")
-    if args.use_ssft:
-        logger.info("Implementation: Safety SSFT (phase0_SSFT.py)")
-    logger.info("="*70)
-    
-    if args.use_ssft:
-        from argparse import Namespace
-        from models.phase0_SSFT import train as train_ssft
-
-        ssft_args = Namespace(
-            model_name=args.model_name,
-            train_json=args.circuit_breakers_path,
-            output_dir=args.output_dir,
-            max_length=512,
-            batch_size=args.batch_size,
-            num_epochs=args.base_epochs,
-            learning_rate=args.base_lr,
-            weight_decay=args.base_weight_decay,
-            warmup_ratio=0.1,
-            grad_accum=args.gradient_accumulation_steps,
-            max_grad_norm=1.0,
-            dtype={
-                'float32': 'fp32',
-                'float16': 'fp16',
-                'bfloat16': 'bf16'
-            }[args.dtype],
-            seed=args.seed,
-            save_every_epochs=1,
-            log_every_steps=20,
-        )
-
-        final_model_path = train_ssft(ssft_args)
-    
-    logger.info("="*70)
-    logger.info(f"Phase 0 Completed!")
-    logger.info(f"Trained model saved to: {final_model_path}")
-    logger.info("="*70)
-    logger.info(f"Next step: Run Phase 1 with --phase0_model_dir {final_model_path}")
-    logger.info("="*70)
 
 
 def run_phase1(args, logger):
@@ -230,12 +178,10 @@ def run_phase1(args, logger):
     builder = Phase1BasisBuilder(args, logger)
     
     # Phase 0 모델 로드
-    # ⚠️ phase1_basis.py는 아직 phase0_model_dir를 지원하지 않으므로
-    # 수동으로 model_name을 phase0_model_dir로 변경
     args.model_name = args.phase0_model_dir
     builder.load_model()
     
-    # 안전 데이터 로드 (harmful_prompts 또는 do-not-answer)
+    # 안전 데이터 로드 (circuit_breakers 또는 wikipedia)
     builder.load_safety_data()
     
     # ✅ Phase 1에서는 WaRP module 불필요!

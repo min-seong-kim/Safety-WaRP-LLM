@@ -258,7 +258,7 @@ class Phase3IncrementalLearner:
             else:
                 self.logger.info(f"✓ Using all {len(dataset)} samples (gsm8k_samples=0 or not specified)")
             
-            max_length = getattr(self.args, 'max_length', 512)
+            max_length = getattr(self.args, 'max_length', 1024)
             # Always disable multiprocessing here to avoid CUDA fork issues.
             num_proc = None
 
@@ -348,7 +348,7 @@ class Phase3IncrementalLearner:
             else:
                 self.logger.info(f"✓ Using all {len(data)} samples")
             
-            max_length = getattr(self.args, 'max_length', 512)
+            max_length = getattr(self.args, 'max_length', 1024)
             
             def tokenize_safety_example(item: Dict) -> Dict[str, List[int]]:
                 """
@@ -400,51 +400,6 @@ class Phase3IncrementalLearner:
             
             self.logger.info(f"✓ Safety dataset created ({len(self.dataset)} samples)")
             
-            # Collate function 추가 (리스트 → tensor 변환)
-            def collate_fn_safety(batch):
-                """Safety dataset 배치 처리: 리스트를 tensor로 변환"""
-                max_len = max(len(item["input_ids"]) for item in batch)
-                pad_id = self.tokenizer.pad_token_id if self.tokenizer.pad_token_id is not None else self.tokenizer.eos_token_id
-                
-                input_ids_list = []
-                attention_mask_list = []
-                labels_list = []
-                
-                for item in batch:
-                    input_ids = item["input_ids"]
-                    attention_mask = item["attention_mask"]
-                    labels = item["labels"]
-                    
-                    # 패딩 길이
-                    pad_len = max_len - len(input_ids)
-                    
-                    # 패딩 추가
-                    if pad_len > 0:
-                        input_ids = input_ids + [pad_id] * pad_len
-                        attention_mask = attention_mask + [0] * pad_len
-                        labels = labels + [-100] * pad_len
-                    
-                    input_ids_list.append(torch.tensor(input_ids, dtype=torch.long))
-                    attention_mask_list.append(torch.tensor(attention_mask, dtype=torch.long))
-                    labels_list.append(torch.tensor(labels, dtype=torch.long))
-                
-                return {
-                    "input_ids": torch.stack(input_ids_list),
-                    "attention_mask": torch.stack(attention_mask_list),
-                    "labels": torch.stack(labels_list),
-                }
-            
-            # DataLoader 생성 (collate_fn 추가)
-            self.train_loader = DataLoader(
-                self.dataset,
-                batch_size=getattr(self.args, 'batch_size', 2),
-                shuffle=True,
-                num_workers=0,
-                collate_fn=collate_fn_safety
-            )
-            
-            self.logger.info(f"✓ DataLoader created ({len(self.train_loader)} batches)")
-            
         except Exception as e:
             self.logger.error(f"Failed to load Safety data: {str(e)}", exc_info=True)
             raise
@@ -476,7 +431,7 @@ class Phase3IncrementalLearner:
             else:
                 self.logger.info(f"✓ Using all {len(dataset)} samples (metamath_samples=0 or not specified)")
             
-            max_length = getattr(self.args, 'max_length', 512)
+            max_length = getattr(self.args, 'max_length', 1024)
             num_proc = None  # CUDA fork 문제 방지
             
             def build_metamath_chat_template(query: str) -> str:
@@ -732,7 +687,7 @@ class Phase3IncrementalLearner:
             else:
                 self.logger.info(f"✓ Using all {len(dataset)} samples (math_samples=0 or not specified)")
 
-            max_length = getattr(self.args, 'max_length', 512)
+            max_length = getattr(self.args, 'max_length', 1024)
             train_on_mixed_formats = bool(getattr(self.args, 'math_train_on_mixed_formats', False))
             use_chat_template = bool(getattr(self.args, 'math_use_chat_template', False))
             system_prompt = getattr(
@@ -1132,283 +1087,23 @@ class Phase3IncrementalLearner:
         """
         Phase 3: Incremental Learning with Dataset Selection
         
-        ✅ GSM8K: SFTTrainer 방식 (원본 형태 유지)
-        ✅ MetaMath: SFTTrainer 방식 (원본 형태 유지)
-        ✅ Safety: phase0_SSFT 스타일의 custom training loop
+        ✅ GSM8K / MetaMath / Safety / Hendrycks MATH: 모두 Trainer 방식
         ✅ 모두 WaRP masking 자동 적용 (basis_coeff만 학습)
         """
         try:
-            # Dataset 타입 확인
-            phase3_dataset = getattr(self.args, 'phase3_dataset', 'gsm8k')
-            
-            if phase3_dataset == 'safety':
-                # Safety dataset: Custom training loop (phase0_SSFT 방식)
-                self.logger.info("\n" + "="*70)
-                self.logger.info("Using phase0_SSFT style training loop for Safety dataset")
-                self.logger.info("="*70 + "\n")
-                return self._train_safety_custom_loop()
-            else:
-                # GSM8K, MetaMath: SFTTrainer 방식 (원본 형태)
-                dataset_name_map = {
-                    'gsm8k': 'GSM8K',
-                    'metamath': 'MetaMath',
-                    'math': 'Hendrycks MATH',
-                }
-                dataset_name = dataset_name_map.get(phase3_dataset, phase3_dataset)
-                self.logger.info("\n" + "="*70)
-                self.logger.info(f"Using SFTTrainer for {dataset_name} dataset")
-                self.logger.info("="*70 + "\n")
-                return self._train_with_trainer()
-        
+            return self._train_with_trainer()
         except Exception as e:
             self.logger.error(f"Training failed: {str(e)}", exc_info=True)
             raise
     
-    def _train_safety_custom_loop(self):
-        """
-        Safety Dataset Training with Custom Loop (phase0_SSFT 방식)
-        
-        ✅ phase0_SSFT와 동일한 훈련:
-        - Custom training loop with manual optimizer management
-        - AdamW8bit optimizer
-        - Gradient clipping
-        - 매 배치 loss 출력
-        
-        ✅ WaRP 특화:
-        - basis_coeff만 학습 가능
-        - 마스크 기반 gradient 자동 차단
-        """
-        try:
-            from bitsandbytes.optim import AdamW8bit
-            from torch.utils.data import DataLoader
-            
-            self.logger.info("="*70)
-            self.logger.info("Phase 3: Safety Incremental Learning (Custom Loop/phase0_SSFT)")
-            self.logger.info("="*70)
-            
-            # 훈련 설정 (phase0_SSFT 방식)
-            epochs = getattr(self.args, 'epochs', 3)
-            learning_rate = getattr(self.args, 'utility_lr', 1e-5)
-            batch_size = self.args.batch_size
-            gradient_accumulation_steps = getattr(self.args, 'gradient_accumulation_steps', 4)
-            max_grad_norm = getattr(self.args, 'max_grad_norm', 1.0)
-            device = self.args.device
-            dtype = self.args.dtype
-            
-            # ✅ basis_coeff만 학습 가능하게 설정
-            trainable_params = 0
-            total_params = 0
-            
-            for name, param in self.model.named_parameters():
-                total_params += param.numel()
-                
-                # basis_coeff만 학습 가능
-                if 'basis_coeff' in name:
-                    param.requires_grad = True
-                    trainable_params += param.numel()
-                else:
-                    param.requires_grad = False
-            
-            self.logger.info(f"Parameter freeze status:")
-            self.logger.info(f"  - Total params: {total_params:,}")
-            self.logger.info(f"  - Trainable params: {trainable_params:,}")
-            self.logger.info(f"  - Frozen params: {total_params - trainable_params:,}")
-            self.logger.info(f"  - Trainable ratio: {trainable_params / total_params * 100:.2f}%")
-            
-            # Checkpoint 디렉토리
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            checkpoint_dir = os.path.join(
-                getattr(self.args, 'output_dir', '/lustre/gokms0509/Safety-WaRP-LLM/checkpoints'),
-                f'phase3_{timestamp}'
-            )
-            os.makedirs(checkpoint_dir, exist_ok=True)
-            
-            self.logger.info(f"Training configuration:")
-            self.logger.info(f"  - Epochs: {epochs}")
-            self.logger.info(f"  - Learning rate: {learning_rate}")
-            self.logger.info(f"  - Batch size: {batch_size}")
-            self.logger.info(f"  - Gradient accumulation steps: {gradient_accumulation_steps}")
-            self.logger.info(f"  - Effective batch size: {batch_size * gradient_accumulation_steps}")
-            self.logger.info(f"  - Max gradient norm: {max_grad_norm}")
-            self.logger.info(f"  - Optimizer: adamw_bnb_8bit")
-            self.logger.info(f"  - Device: {device}")
-            self.logger.info(f"  - Checkpoint directory: {checkpoint_dir}")
-            self.logger.info("="*70)
-            
-            # DataLoader 사용 (이미 _load_safety_dataset에서 collate_fn과 함께 생성됨)
-            train_dataloader = self.train_loader
-            self.logger.info(f"DataLoader created: {len(train_dataloader)} batches")
-            self.logger.info(f"  - Total samples: {len(self.dataset)}")
-            
-            # 모델을 device에 배치
-            self.model = self.model.to(device)
-            self.model.train()
-            
-            # Optimizer 초기화 (trainable 파라미터만)
-            optimizer = AdamW8bit(self.model.parameters(), lr=learning_rate)
-            
-            # 마스크 기반 gradient 동작 사전 점검 (1배치)
-            self._run_mask_gradient_sanity_check()
-            
-            # Training loop
-            total_loss = 0.0
-            total_steps = 0
-            optimizer_steps = 0
-            
-            self.logger.info("Starting training...")
-            self.logger.info("  WaRP forward will automatically apply masking:")
-            self.logger.info("    W = V @ (basis_coeff * mask).detach() + basis_coeff * (1-mask) @ U")
-            self.logger.info("    mask=1: gradient 차단 (frozen)")
-            self.logger.info("    mask=0: gradient 흐름 (trainable)")
-            self.logger.info("="*70 + "\n")
-            
-            for epoch in range(epochs):
-                self.logger.info(f"\nEpoch {epoch + 1}/{epochs}")
-                epoch_loss = 0.0
-                
-                pbar = tqdm(train_dataloader, desc=f"Training Epoch {epoch + 1}")
-                for batch_idx, batch in enumerate(pbar):
-                    input_ids = batch["input_ids"].to(device)
-                    attention_mask = batch["attention_mask"].to(device)
-                    labels = batch["labels"].to(device)
-                    
-                    if batch_idx == 0:
-                        self.logger.info("\n[First Batch Info]")
-                        self.logger.info(f"  Batch size: {input_ids.shape[0]}")
-                        self.logger.info(f"  Sequence length: {input_ids.shape[1]}")
-                        self.logger.info(f"  Device: {input_ids.device}")
-                        valid_labels = (labels != -100).sum().item()
-                        self.logger.info(f"  Valid labels (non-padding): {valid_labels}/{labels.numel()}")
-                    
-                    # Gradient accumulation 시작
-                    if batch_idx % gradient_accumulation_steps == 0:
-                        optimizer.zero_grad(set_to_none=True)
-                    
-                    # Autocast (bfloat16/float16)
-                    use_autocast = device.startswith("cuda") or device.startswith("cpu")
-                    if dtype == 'bfloat16':
-                        autocast_dtype = torch.bfloat16
-                    elif dtype == 'float16':
-                        autocast_dtype = torch.float16
-                    else:
-                        autocast_dtype = torch.float32
-                    
-                    with torch.autocast(
-                        device_type=device if use_autocast else "cuda",
-                        dtype=autocast_dtype,
-                        enabled=use_autocast
-                    ):
-                        outputs = self.model(
-                            input_ids=input_ids,
-                            attention_mask=attention_mask,
-                            labels=labels,
-                            return_dict=True,
-                        )
-                        loss = outputs.loss
-                    
-                    # NaN/Inf 처리
-                    if torch.isnan(loss) or torch.isinf(loss):
-                        self.logger.warning(f"NaN/Inf detected at batch {batch_idx + 1}. Skipping this batch.")
-                        optimizer.zero_grad(set_to_none=True)
-                        continue
-                    
-                    # Backprop with gradient accumulation
-                    (loss / gradient_accumulation_steps).backward()
-                    
-                    # Optimizer step (accumulation step 도달 시 또는 마지막 배치)
-                    if (batch_idx + 1) % gradient_accumulation_steps == 0 or (batch_idx + 1) == len(train_dataloader):
-                        torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=max_grad_norm)
-                        optimizer.step()
-                        optimizer_steps += 1
-                    
-                    loss_val = loss.item()
-                    total_loss += loss_val
-                    epoch_loss += loss_val
-                    total_steps += 1
-                    
-                    # 진행 상황 업데이트
-                    if (batch_idx + 1) % 5 == 0 or batch_idx == 0:
-                        avg_batch_loss = epoch_loss / (batch_idx + 1)
-                        pbar.set_postfix({"loss": f"{avg_batch_loss:.4f}"})
-                        self.logger.info(f"  Batch {batch_idx + 1}: loss = {loss_val:.4f}")
-                
-                epoch_avg_loss = epoch_loss / len(train_dataloader)
-                self.logger.info(f"✓ Epoch {epoch + 1} completed - Epoch Loss: {epoch_avg_loss:.4f}")
-            
-            # Training 완료
-            avg_loss = total_loss / max(1, total_steps)
-            self.logger.info(f"\n{'='*70}")
-            self.logger.info("Training Complete")
-            self.logger.info(f"{'='*70}")
-            self.logger.info(f"Average loss: {avg_loss:.4f}")
-            self.logger.info(f"Total steps: {total_steps}")
-            self.logger.info(f"Optimizer steps: {optimizer_steps}")
-            self.logger.info(f"Training time: {epochs} epoch(s)")
-            self.logger.info(f"{'='*70}\n")
-            
-            # 마스크/학습 반영 여부 사후 점검
-            self._log_warp_parameter_delta_summary()
-            
-            # 가중치 복원: basis_coeff → weight (W = basis_coeff @ U^T)
-            restore_weight(self.model)
-            
-            # WaRP 모듈 → 표준 nn.Linear 변환
-            restore_to_linear(self.model)
-            
-            # 최종 모델 저장
-            final_model_path = os.path.join(checkpoint_dir, 'final_model')
-            self.model.save_pretrained(final_model_path)
-            self.tokenizer.save_pretrained(final_model_path)
-            
-            self.logger.info("="*70)
-            self.logger.info("Phase 3 (Safety) Completed")
-            self.logger.info(f"  - Final model: {final_model_path}")
-            self.logger.info("="*70)
-            
-            # 메타데이터 저장
-            metadata = {
-                'phase': 3,
-                'dataset': 'safety',
-                'trainer': 'custom_loop',
-                'basis_dir': self.basis_dir,
-                'masks_dir': self.masks_dir,
-                'phase0_model': self.phase0_model_dir,
-                'epochs': epochs,
-                'learning_rate': learning_rate,
-                'optimizer': 'adamw_bnb_8bit',
-                'max_grad_norm': max_grad_norm,
-                'batch_size': batch_size,
-                'gradient_accumulation_steps': gradient_accumulation_steps,
-                'effective_batch_size': batch_size * gradient_accumulation_steps,
-                'total_samples': len(self.dataset),
-                'trainable_params': trainable_params,
-                'total_params': total_params,
-                'average_loss': avg_loss,
-                'total_steps': total_steps,
-                'optimizer_steps': optimizer_steps,
-                'timestamp': timestamp,
-            }
-            
-            metadata_path = os.path.join(checkpoint_dir, 'metadata.json')
-            with open(metadata_path, 'w') as f:
-                json.dump(metadata, f, indent=2)
-            
-            self.logger.info(f"✓ Metadata saved to: {metadata_path}")
-            
-            return final_model_path
-            
-        except Exception as e:
-            self.logger.error(f"Safety training failed: {str(e)}", exc_info=True)
-            raise
-    
     def _train_with_trainer(self):
         """
-        Trainer-based Training (GSM8K, MetaMath)
+        Trainer-based Training (GSM8K, MetaMath, Safety, Hendrycks MATH)
         
-        ✅ 원본 학습:
-        - SFTTrainer 사용
+        ✅ 모든 dataset 공통:
+        - HuggingFace Trainer 사용
+        - cosine LR scheduler + warmup
         - 자동 gradient accumulation
-        - Trainer 기반 안정적인 학습 루프
         
         ✅ WaRP 특화:
         - basis_coeff만 학습 가능
@@ -1422,6 +1117,7 @@ class Phase3IncrementalLearner:
                 'gsm8k': 'GSM8K',
                 'metamath': 'MetaMath',
                 'math': 'Hendrycks MATH',
+                'safety': 'Safety (Circuit Breakers)',
             }
             dataset_name = dataset_name_map.get(phase3_dataset, phase3_dataset)
             
@@ -1481,13 +1177,13 @@ class Phase3IncrementalLearner:
             self.logger.info(f"  - Gradient accumulation steps: {gradient_accumulation_steps}")
             self.logger.info(f"  - Effective batch size: {batch_size * gradient_accumulation_steps}")
             self.logger.info(f"  - Max gradient norm: 1.0")
-            self.logger.info(f"  - Optimizer: adamw_bnb_8bit")
-            self.logger.info(f"  - LR scheduler: cosine")
+            self.logger.info(f"  - Optimizer: adamw_torch")
+            self.logger.info(f"  - LR scheduler: linear")
             self.logger.info(f"  - Checkpoint directory: {checkpoint_dir}")
             self.logger.info("="*70)
             
             warmup_ratio = getattr(self.args, 'warmup_ratio', 0.1)
-            lr_scheduler_type = getattr(self.args, 'lr_scheduler_type', 'cosine')
+            lr_scheduler_type = getattr(self.args, 'lr_scheduler_type', 'linear')
             max_grad_norm = getattr(self.args, 'max_grad_norm', 1.0)
             logging_steps = getattr(self.args, 'logging_steps', 10)
             gradient_checkpointing = getattr(self.args, 'gradient_checkpointing', False)
@@ -1509,7 +1205,7 @@ class Phase3IncrementalLearner:
                 fp16=True if self.args.dtype == 'float16' else False,
                 report_to="none",
                 remove_unused_columns=False,
-                optim="adamw_bnb_8bit",
+                optim="adamw_torch",
                 gradient_checkpointing=gradient_checkpointing,
             )
 
@@ -1553,6 +1249,23 @@ class Phase3IncrementalLearner:
                 data_collator=data_collator,
                 tokenizer=self.tokenizer,
             )
+
+            if phase3_dataset == 'safety':
+                self.logger.info("Safety dataset: shuffle disabled (sequential order)")
+
+                def _get_train_dataloader_no_shuffle():
+                    return DataLoader(
+                        self.dataset,
+                        batch_size=self.args.batch_size,
+                        sampler=torch.utils.data.SequentialSampler(self.dataset),
+                        collate_fn=data_collator,
+                        drop_last=training_args.dataloader_drop_last,
+                        num_workers=training_args.dataloader_num_workers,
+                        pin_memory=training_args.dataloader_pin_memory,
+                        persistent_workers=training_args.dataloader_persistent_workers,
+                    )
+
+                trainer.get_train_dataloader = _get_train_dataloader_no_shuffle
             
             self.logger.info("✓ Trainer initialized")
             self.logger.info("Starting training...")
@@ -1597,8 +1310,8 @@ class Phase3IncrementalLearner:
                 'weight_decay_configured': configured_weight_decay,
                 'weight_decay_effective': effective_weight_decay,
                 'warmup_ratio': 0.1,
-                'optimizer': 'adamw_bnb_8bit',
-                'lr_scheduler': 'cosine',
+                'optimizer': 'adamw_torch',
+                'lr_scheduler': 'linear',
                 'max_grad_norm': 1.0,
                 'batch_size': batch_size,
                 'gradient_accumulation_steps': gradient_accumulation_steps,

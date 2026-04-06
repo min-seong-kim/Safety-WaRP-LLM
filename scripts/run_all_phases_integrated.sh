@@ -57,11 +57,11 @@ elif [ "$PHASE3_DATASET" = "math" ]; then
 fi
 
 # 공통 설정
-BATCH_SIZE=2
+BATCH_SIZE=4
 DTYPE="bfloat16"
 DEVICE="cuda"
 EPOCHS=3
-LEARNING_RATE=1e-5
+LR_LIST=("1e-5" "3e-5" "5e-5")
 TARGET_LAYERS="all"
 LAYER_TYPE="attn_q,attn_k,attn_v,ffn_down,ffn_up"
 # attn_q,attn_k,attn_v,attn_o,ffn_gate,ffn_down,ffn_up
@@ -166,7 +166,7 @@ python train.py \
     $PHASE2_DATASET_ARG \
     --keep_ratio $KEEP_RATIO \
     --batch_size $BATCH_SIZE \
-    --max_length 512 \
+    --max_length 1024 \
     --layer_type "$LAYER_TYPE" \
     --target_layers $TARGET_LAYERS \
     --output_dir $BASE_OUTPUT_DIR \
@@ -192,11 +192,11 @@ echo "   Masks saved to: $PHASE2_MASKS_DIR"
 echo ""
 
 # ========================================================================
-# Phase 3: Incremental Learning
+# Phase 3: Incremental Learning (LR sweep)
 # ========================================================================
 echo ""
 echo "========================================================================"
-echo "PHASE 3: Incremental Learning"
+echo "PHASE 3: Incremental Learning (LR sweep: ${LR_LIST[*]})"
 echo "========================================================================"
 echo ""
 
@@ -214,36 +214,45 @@ else
     exit 1
 fi
 
-python train.py \
-    --phase 3 \
-    --phase0_model_dir "$PHASE0_MODEL" \
-    --basis_dir "$PHASE1_BASIS_DIR" \
-    --masks_dir "$PHASE2_MASKS_DIR" \
-    $PHASE3_DATASET_ARG \
-    --epochs $EPOCHS \
-    --utility_lr $LEARNING_RATE \
-    --batch_size $BATCH_SIZE \
-    --gradient_accumulation_steps 4 \
-    --layer_type "$LAYER_TYPE" \
-    --target_layers $TARGET_LAYERS \
-    --output_dir $BASE_OUTPUT_DIR \
-    --log_dir $LOG_DIR \
-    --device $DEVICE \
-    --dtype $DTYPE \
-    --seed 42 \
-    --non_freeze \
-    2>&1 | tee $LOG_DIR/phase3_${TIMESTAMP}.log
+PHASE3_OUTPUT_DIRS=()
 
-# Phase 3 출력 경로 추출 (최신 phase3 디렉토리 찾기)
-PHASE3_OUTPUT_DIR=$(find $BASE_OUTPUT_DIR -maxdepth 1 -name "phase3_*" -type d -printf '%T@ %p\n' | sort -rn | head -1 | cut -d' ' -f2-)
+for LEARNING_RATE in "${LR_LIST[@]}"; do
+    LR_SAFE=$(echo "$LEARNING_RATE" | sed 's/[^a-zA-Z0-9_-]/_/g')
 
-if [ ! -d "$PHASE3_OUTPUT_DIR" ]; then
-    echo "⚠️  WARNING: Phase 3 output directory not found at: $BASE_OUTPUT_DIR"
-else
     echo ""
-    echo "✅ Phase 3 completed successfully"
-    echo "   Model saved to: $PHASE3_OUTPUT_DIR"
-fi
+    echo "──────────────────────────────────────────────────────────────────────"
+    echo "  Phase 3: LR = $LEARNING_RATE"
+    echo "──────────────────────────────────────────────────────────────────────"
+
+    python train.py \
+        --phase 3 \
+        --phase0_model_dir "$PHASE0_MODEL" \
+        --basis_dir "$PHASE1_BASIS_DIR" \
+        --masks_dir "$PHASE2_MASKS_DIR" \
+        $PHASE3_DATASET_ARG \
+        --epochs $EPOCHS \
+        --utility_lr $LEARNING_RATE \
+        --batch_size $BATCH_SIZE \
+        --gradient_accumulation_steps 4 \
+        --layer_type "$LAYER_TYPE" \
+        --target_layers $TARGET_LAYERS \
+        --output_dir $BASE_OUTPUT_DIR \
+        --log_dir $LOG_DIR \
+        --device $DEVICE \
+        --dtype $DTYPE \
+        --seed 42 \
+        --non_freeze \
+        2>&1 | tee $LOG_DIR/phase3_lr${LR_SAFE}_${TIMESTAMP}.log
+
+    PHASE3_OUTPUT_DIR=$(find $BASE_OUTPUT_DIR -maxdepth 1 -name "phase3_*" -type d -printf '%T@ %p\n' | sort -rn | head -1 | cut -d' ' -f2-)
+
+    if [ ! -d "$PHASE3_OUTPUT_DIR" ]; then
+        echo "⚠️  WARNING: Phase 3 (LR=$LEARNING_RATE) output directory not found"
+    else
+        echo "✅ Phase 3 (LR=$LEARNING_RATE) completed: $PHASE3_OUTPUT_DIR"
+        PHASE3_OUTPUT_DIRS+=("$PHASE3_OUTPUT_DIR")
+    fi
+done
 
 # ========================================================================
 # Summary
@@ -256,26 +265,30 @@ echo ""
 echo "📁 Output Directories:"
 echo "  Phase 1 Output:  $PHASE1_OUTPUT_DIR"
 echo "  Phase 2 Output:  $PHASE2_OUTPUT_DIR"
-if [ -d "$PHASE3_OUTPUT_DIR" ]; then
-    echo "  Phase 3 Output:  $PHASE3_OUTPUT_DIR"
-fi
 echo ""
 echo "📊 Key Artifacts:"
-echo "  ✅ Basis:        $PHASE1_BASIS_DIR"
-echo "  ✅ Masks:        $PHASE2_MASKS_DIR"
-echo "  ✅ Final Model:  $PHASE3_OUTPUT_DIR/final_model"
+echo "  ✅ Basis:  $PHASE1_BASIS_DIR"
+echo "  ✅ Masks:  $PHASE2_MASKS_DIR"
+echo ""
+echo "  Phase 3 Models (per LR):"
+for dir in "${PHASE3_OUTPUT_DIRS[@]}"; do
+    echo "    ✅ $dir/final_model"
+done
 echo ""
 echo "📝 Log Files:"
 echo "  Phase 1: $LOG_DIR/phase1_${TIMESTAMP}.log"
 echo "  Phase 2: $LOG_DIR/phase2_${TIMESTAMP}.log"
-echo "  Phase 3: $LOG_DIR/phase3_${TIMESTAMP}.log"
+for LEARNING_RATE in "${LR_LIST[@]}"; do
+    LR_SAFE=$(echo "$LEARNING_RATE" | sed 's/[^a-zA-Z0-9_-]/_/g')
+    echo "  Phase 3 (LR=$LEARNING_RATE): $LOG_DIR/phase3_lr${LR_SAFE}_${TIMESTAMP}.log"
+done
 echo ""
 echo "⚙️  Training Configuration Summary:"
 echo "  - Phase 1 Dataset: $PHASE1_DATASET ($PHASE1_SAMPLES samples)"
 echo "  - Phase 2 Dataset: $PHASE2_DATASET ($PHASE2_SAMPLES samples)"
 echo "  - Phase 3 Dataset: $PHASE3_DATASET ($PHASE3_SAMPLES samples)"
 echo "  - Keep Ratio:      $KEEP_RATIO"
-echo "  - Learning Rate:   $LEARNING_RATE"
+echo "  - Learning Rates:  ${LR_LIST[*]}"
 echo "  - Epochs:          $EPOCHS"
 echo "  - Batch Size:      $BATCH_SIZE"
 echo "  - Layer Types:     $LAYER_TYPE"
@@ -283,22 +296,22 @@ echo ""
 
 if [ "$PHASE3_DATASET" = "safety" ]; then
     echo "🔐 Safety Training Mode:"
-    echo "  - Using phase0_SSFT style custom loop"
-    echo "  - basis_coeff only training with WaRP masking"
+    echo "  - Using HuggingFace Trainer (Non-Freeze)"
+    echo "  - All params trainable, WaRP masking via forward"
     echo "  - Automatic gradient blocking (mask=1)"
 elif [ "$PHASE3_DATASET" = "gsm8k" ]; then
     echo "📚 Utility Training Mode (GSM8K):"
-    echo "  - Using SFTTrainer"
+    echo "  - Using HuggingFace Trainer"
     echo "  - basis_coeff only training with WaRP masking"
     echo "  - Math reasoning (GSM8K) learning"
 elif [ "$PHASE3_DATASET" = "metamath" ]; then
     echo "📚 Utility Training Mode (MetaMath):"
-    echo "  - Using SFTTrainer"
+    echo "  - Using HuggingFace Trainer"
     echo "  - basis_coeff only training with WaRP masking"
     echo "  - Advanced math reasoning (MetaMath) learning"
 elif [ "$PHASE3_DATASET" = "math" ]; then
     echo "📚 Utility Training Mode (Hendrycks MATH):"
-    echo "  - Using SFTTrainer"
+    echo "  - Using HuggingFace Trainer"
     echo "  - basis_coeff only training with WaRP masking"
     echo "  - Subject filter: $MATH_SUBJECTS, Level filter: $MATH_LEVELS"
 fi

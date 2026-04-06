@@ -532,7 +532,6 @@ class Phase2ImportanceScorer:
                 if isinstance(module, WaRPModule):
                     warp_modules.append(module)
                     # ✅ 원본 WaRP: mask 초기화
-                    module.coeff_mask_prev = module.coeff_mask.data.clone()
                     module.coeff_mask.data.zero_()
                     if hasattr(module, 'mask_mode'):
                         module.mask_mode.fill_(1)

@@ -7,7 +7,7 @@ python train.py \
     --phase0_model_dir "$PHASE0_MODEL" \
     --safety_dataset circuit_breakers \
     --circuit_breakers_samples_phase1 4994 \
-    --batch_size 2 \
+    --batch_size 4 \
     --layer_type attn_q,attn_k,attn_v,ffn_down,ffn_up \
     --target_layers all \
     --output_dir ./checkpoints \
@@ -73,7 +73,7 @@ class Phase1BasisBuilder:
         from datetime import datetime
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         checkpoint_base = os.path.join(
-            getattr(args, 'output_dir', '/lustre/gokms0509/Safety-WaRP-LLM/checkpoints'),
+            getattr(args, 'output_dir', './checkpoints'),
             f'phase1_{timestamp}'
         )
         os.makedirs(checkpoint_base, exist_ok=True)
@@ -252,7 +252,7 @@ class Phase1BasisBuilder:
             
             # 데이터셋 클래스
             class CircuitBreakersDataset(torch.utils.data.Dataset):
-                def __init__(self, prompts, tokenizer, max_length=512):
+                def __init__(self, prompts, tokenizer, max_length=1024):
                     self.prompts = prompts
                     self.tokenizer = tokenizer
                     self.max_length = max_length
@@ -275,7 +275,7 @@ class Phase1BasisBuilder:
                         'attention_mask': encoding['attention_mask'].squeeze(),
                     }
             
-            dataset_wrapper = CircuitBreakersDataset(prompts, self.tokenizer, max_length=512)
+            dataset_wrapper = CircuitBreakersDataset(prompts, self.tokenizer, max_length=1024)
             
             # Custom collate function
             def collate_fn(batch):
@@ -312,8 +312,9 @@ class Phase1BasisBuilder:
             self.dataloader = torch.utils.data.DataLoader(
                 dataset_wrapper,
                 batch_size=self.args.batch_size,
-                shuffle=True,
-                collate_fn=collate_fn
+                shuffle=False,
+                collate_fn=collate_fn,
+                generator=torch.Generator().manual_seed(112),
             )
             
             self.logger.info(f"✓ Dataloader created")
@@ -353,19 +354,16 @@ class Phase1BasisBuilder:
             # 샘플 추출
             texts = []
             total_size = len(dataset)
+            random.seed(112)
             random_indices = random.sample(range(total_size), min(num_samples, total_size))
             
             self.logger.info(f"Sampling {len(random_indices)} documents from Wikipedia...")
             
             for idx in tqdm(random_indices, desc="Loading Wikipedia docs", disable=not self.args.debug):
                 try:
-                    title = dataset[idx]['title']
                     text = dataset[idx]['text']
-                    # Prompt: "What is a {title}?"
-                    # Response: full text
-                    if title.strip() and text.strip():
-                        full_text = f"What is a {title}? {text[:2048]}"  # 메모리 절약용으로 2048 제한
-                        texts.append(full_text)
+                    if text.strip():
+                        texts.append(text)
                 except Exception as e:
                     if self.args.debug:
                         self.logger.debug(f"Error processing sample {idx}: {e}")
@@ -375,7 +373,7 @@ class Phase1BasisBuilder:
             
             # 데이터셋 클래스
             class WikipediaDataset(torch.utils.data.Dataset):
-                def __init__(self, texts, tokenizer, max_length=512):
+                def __init__(self, texts, tokenizer, max_length=1024):
                     self.texts = texts
                     self.tokenizer = tokenizer
                     self.max_length = max_length
@@ -398,7 +396,7 @@ class Phase1BasisBuilder:
                         'attention_mask': encoding['attention_mask'].squeeze(),
                     }
             
-            dataset_wrapper = WikipediaDataset(texts, self.tokenizer, max_length=512)
+            dataset_wrapper = WikipediaDataset(texts, self.tokenizer, max_length=1024)
             
             # Custom collate function
             def collate_fn(batch):
@@ -436,7 +434,8 @@ class Phase1BasisBuilder:
                 dataset_wrapper,
                 batch_size=self.args.batch_size,
                 shuffle=True,
-                collate_fn=collate_fn
+                collate_fn=collate_fn,
+                generator=torch.Generator().manual_seed(112),
             )
             
             self.logger.info(f"✓ Dataloader created")
@@ -478,20 +477,28 @@ class Phase1BasisBuilder:
                     self.gram_matrices[(layer_idx, layer_type)] = None
                     self.num_samples[(layer_idx, layer_type)] = 0
             
+            # 현재 배치의 attention_mask를 hook과 공유하기 위한 컨테이너
+            current_mask = {'val': None}
+
             # Forward hook 등록 (Gram matrix 누적용)
             hooks = []
             
             def get_accumulation_hook(layer_idx, layer_type):
-                """Gram matrix를 누적하는 hook"""
+                """Gram matrix를 누적하는 hook (패딩 마스킹 적용)"""
                 def hook(module, input, output):
                     # input[0]: (batch_size, seq_len, hidden_dim)
                     act = input[0]  # GPU에 유지
                     batch_size, seq_len, hidden_dim = act.shape
-                    
+
+                    # 패딩 위치를 0으로 마스킹: (batch, seq, 1) 브로드캐스트
+                    mask = current_mask['val']  # (batch, seq)
+                    if mask is not None:
+                        act = act * mask.unsqueeze(-1).to(act.dtype)
+
                     # Reshape: (batch*seq, hidden_dim)
                     act_flat = act.reshape(batch_size * seq_len, hidden_dim)
                     
-                    # Gram matrix 누적: Φ^T @ Φ
+                    # Gram matrix 누적: Φ^T @ Φ (패딩 위치 기여 = 0)
                     gram_batch = act_flat.t() @ act_flat  # (hidden_dim, hidden_dim)
                     
                     key = (layer_idx, layer_type)
@@ -499,8 +506,10 @@ class Phase1BasisBuilder:
                         self.gram_matrices[key] = gram_batch
                     else:
                         self.gram_matrices[key] += gram_batch
-                    
-                    self.num_samples[key] += batch_size * seq_len
+
+                    # 유효 토큰 수만 카운트
+                    valid_count = int(mask.sum().item()) if mask is not None else batch_size * seq_len
+                    self.num_samples[key] += valid_count
                 
                 return hook
             
@@ -545,7 +554,10 @@ class Phase1BasisBuilder:
                 for batch_idx, batch in enumerate(progress_bar):
                     input_ids = batch['input_ids'].to(self.model.device)
                     attention_mask = batch['attention_mask'].to(self.model.device)
-                    
+
+                    # hook에서 패딩 마스킹에 사용하도록 현재 배치 mask 공유
+                    current_mask['val'] = attention_mask
+
                     # Forward (hook에서 Gram matrix 누적)
                     _ = self.model(input_ids=input_ids, attention_mask=attention_mask)
                     
@@ -582,13 +594,6 @@ class Phase1BasisBuilder:
             self.logger.error(f"Failed to accumulate Gram matrices: {str(e)}", exc_info=True)
             raise
     
-    def register_activation_hooks(self):
-        """
-        ✅ 제거됨: Incremental accumulation 방식에서는 불필요
-        
-        collect_activations_and_accumulate_gram()에서 직접 처리
-        """
-        pass
     
     def compute_svd(self):
         """

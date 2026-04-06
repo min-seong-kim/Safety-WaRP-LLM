@@ -180,13 +180,14 @@ class Phase2ImportanceScorerPerLayer:
             with open(circuit_breakers_path, 'r', encoding='utf-8') as f:
                 circuit_breakers_data = json.load(f)
 
-            if self.args.circuit_breakers_samples > 0:
-                circuit_breakers_data = circuit_breakers_data[:self.args.circuit_breakers_samples]
+            max_samples = getattr(self.args, 'circuit_breakers_samples_phase2', 4994)
+            if max_samples > 0:
+                circuit_breakers_data = circuit_breakers_data[:max_samples]
 
             self.logger.info(f"✓ Loaded {len(circuit_breakers_data)} samples")
 
             class CircuitBreakersDataset(torch.utils.data.Dataset):
-                def __init__(self, data, tokenizer, max_length=512):
+                def __init__(self, data, tokenizer, max_length=1024):
                     self.data = data
                     self.tokenizer = tokenizer
                     self.max_length = max_length
@@ -213,7 +214,7 @@ class Phase2ImportanceScorerPerLayer:
                         'attention_mask': encoding['attention_mask'].squeeze(0),
                     }
 
-            max_length = getattr(self.args, 'max_length', 512)
+            max_length = getattr(self.args, 'max_length', 1024)
             dataset = CircuitBreakersDataset(circuit_breakers_data, self.tokenizer, max_length=max_length)
 
             def collate_fn(batch):
@@ -249,7 +250,8 @@ class Phase2ImportanceScorerPerLayer:
                 dataset,
                 batch_size=self.args.batch_size,
                 shuffle=False,
-                collate_fn=collate_fn
+                collate_fn=collate_fn,
+                generator=torch.Generator().manual_seed(112),
             )
 
             self.logger.info(f"✓ Dataloader created ({len(self.dataloader)} batches)")
@@ -286,19 +288,16 @@ class Phase2ImportanceScorerPerLayer:
             # 샘플 추출
             texts = []
             total_size = len(dataset)
+            random.seed(112)
             random_indices = random.sample(range(total_size), min(num_samples, total_size))
             
             self.logger.info(f"Sampling {len(random_indices)} documents from Wikipedia...")
             
             for idx in tqdm(random_indices, desc="Loading Wikipedia docs", disable=False):
                 try:
-                    title = dataset[idx]['title']
                     text = dataset[idx]['text']
-                    # Prompt: "What is a {title}?"
-                    # Response: full text
-                    if title.strip() and text.strip():
-                        full_text = f"What is a {title}? {text[:2048]}"  # 메모리 절약용으로 2048 제한
-                        texts.append(full_text)
+                    if text.strip():
+                        texts.append(text)
                 except Exception as e:
                     self.logger.debug(f"Error processing sample {idx}: {e}")
                     continue
@@ -307,7 +306,7 @@ class Phase2ImportanceScorerPerLayer:
             
             # 데이터셋 클래스
             class WikipediaDataset(torch.utils.data.Dataset):
-                def __init__(self, texts, tokenizer, max_length=512):
+                def __init__(self, texts, tokenizer, max_length=1024):
                     self.texts = texts
                     self.tokenizer = tokenizer
                     self.max_length = max_length
@@ -331,7 +330,7 @@ class Phase2ImportanceScorerPerLayer:
                         'attention_mask': encoding['attention_mask'].squeeze(0),
                     }
             
-            max_length = getattr(self.args, 'max_length', 512)
+            max_length = getattr(self.args, 'max_length', 1024)
             dataset_wrapper = WikipediaDataset(texts, self.tokenizer, max_length=max_length)
             
             # Custom collate function
@@ -367,8 +366,9 @@ class Phase2ImportanceScorerPerLayer:
             self.dataloader = DataLoader(
                 dataset_wrapper,
                 batch_size=self.args.batch_size,
-                shuffle=False,
-                collate_fn=collate_fn
+                shuffle=True,
+                collate_fn=collate_fn,
+                generator=torch.Generator().manual_seed(112)
             )
             
             self.logger.info(f"✓ Dataloader created ({len(self.dataloader)} batches)")
@@ -456,12 +456,11 @@ class Phase2ImportanceScorerPerLayer:
             for module in self.model.modules():
                 if isinstance(module, WaRPModule):
                     warp_modules.append(module)
-                    module.coeff_mask_prev = module.coeff_mask.data.clone()
                     module.coeff_mask.data.zero_()
                     if hasattr(module, 'mask_mode'):
                         module.mask_mode.fill_(1)
-                    module.basis_coeff.requires_grad_(True)
 
+            # 먼저 모든 파라미터 freeze, 그 다음 basis_coeff만 unfreeze
             for param in self.model.parameters():
                 param.requires_grad = False
             for module in warp_modules:

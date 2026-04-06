@@ -8,9 +8,9 @@ Phase 0: Base Safety Training
 
 사용법:
 python upload_phase0_to_hf.py \
-    --model_path ./checkpoints/phase0_20260213_230047 \
-    --repo_name kmseong/safety-warp-llama-3.2-3b-phase0_20260213_230047 \
-    --token 
+    --model_path ./checkpoints/phase0_20260406_154018 \
+    --repo_name kmseong/llama3.2_3b_new_SSFT_lr5e-5 \
+    --token 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
 
 """
 

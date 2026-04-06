@@ -6,9 +6,9 @@ Phase 3 완료 후 만들어진 모델을 HuggingFace Hub에 업로드하는 스
 
 Usage:
 python upload_phase3_to_hf.py \
-    --model_path /lustre/gokms0509/Safety-WaRP-LLM/checkpoints/phase3_non_freeze_20260331_072016/final_model \
-    --repo_name kmseong/llama3.2-3b-WaRP-utility-basis-safety-FT \
-    --token 
+    --model_path ./checkpoints/phase3_non_freeze_20260405_025757/final_model \
+    --repo_name kmseong/llama3.2-3b-WaRP-utility-basis-safety-FT-non-freeze-lr5e-5 \
+    --token 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
 """
 
 import argparse

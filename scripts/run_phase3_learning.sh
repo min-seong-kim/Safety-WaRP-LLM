@@ -9,8 +9,8 @@ echo "========================================="
 # 이전 Phase 결과 경로 (로컬 디렉토리 또는 Hugging Face 모델 ID)
 # PHASE0_MODEL="./checkpoints/phase0_20260213_230047"  # 로컬 디렉토리 예시
 PHASE0_MODEL="meta-llama/Llama-3.2-3B"  # Hugging Face 모델 ID 예시
-BASIS_DIR="./checkpoints/phase1_20260403_013631/basis"
-MASKS_DIR="./checkpoints/phase2_20260403_053535/checkpoints/masks"
+BASIS_DIR="./checkpoints/phase1_20260405_002504/basis"
+MASKS_DIR="./checkpoints/phase2_20260405_022932/checkpoints/masks"
 
 # ========================================
 # Dataset 선택 (CONFIGURE THIS)
@@ -92,7 +92,7 @@ python train.py \
     $DATASET_ARG \
     --epochs 3 \
     --utility_lr 1e-5 \
-    --batch_size 2 \
+    --batch_size 4 \
     --gradient_accumulation_steps 4 \
     --layer_type attn_q,attn_k,attn_v,ffn_down,ffn_up \
     --target_layers all \
@@ -107,27 +107,27 @@ python train.py \
 echo ""
 echo "========================================="
 echo "Phase 3 완료! (Dataset: $DATASET)"
-echo "최종 모델: /lustre/gokms0509/Safety-WaRP-LLM/checkpoints/phase3_*/final_model"
+echo "최종 모델: ./checkpoints/phase3_*/final_model"
 echo ""
 if [ "$DATASET" = "safety" ]; then
     echo "✅ Safety dataset used with phase0_SSFT training loop"
     echo "   - Custom training loop (AdamW8bit, gradient clipping)"
-    echo "   - Hyperparameters: LR=1e-5, Epochs=3, Batch=2, GradAccum=4"
+    echo "   - Hyperparameters: LR=1e-5, Epochs=3, Batch=4, GradAccum=4"
     echo "   - WaRP masking: basis_coeff만 학습 가능"
 elif [ "$DATASET" = "gsm8k" ]; then
     echo "✅ GSM8K dataset used with SFTTrainer"
     echo "   - HuggingFace Trainer-based training loop"
-    echo "   - Hyperparameters: LR=1e-5, Epochs=3, Batch=2, GradAccum=4"
+    echo "   - Hyperparameters: LR=1e-5, Epochs=3, Batch=4, GradAccum=4"
     echo "   - WaRP masking: basis_coeff만 학습 가능"
 elif [ "$DATASET" = "metamath" ]; then
     echo "✅ MetaMath dataset used with SFTTrainer"
     echo "   - HuggingFace Trainer-based training loop"
-    echo "   - Hyperparameters: LR=1e-5, Epochs=3, Batch=2, GradAccum=4"
+    echo "   - Hyperparameters: LR=1e-5, Epochs=3, Batch=4, GradAccum=4"
     echo "   - WaRP masking: basis_coeff만 학습 가능"
 elif [ "$DATASET" = "math" ]; then
     echo "✅ Hendrycks MATH dataset used with SFTTrainer"
     echo "   - HuggingFace Trainer-based training loop"
-    echo "   - Hyperparameters: LR=1e-5, Epochs=3, Batch=2, GradAccum=4"
+    echo "   - Hyperparameters: LR=1e-5, Epochs=3, Batch=4, GradAccum=4"
     echo "   - Subject filter: $MATH_SUBJECTS, Level filter: $MATH_LEVELS"
     echo "   - WaRP masking: basis_coeff만 학습 가능"
 fi

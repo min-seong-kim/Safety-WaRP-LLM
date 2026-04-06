@@ -423,7 +423,6 @@ class Phase2ImportanceScorerPerLayerNoRotation:
             for module in self.model.modules():
                 if isinstance(module, WaRPModule):
                     warp_modules.append(module)
-                    module.coeff_mask_prev = module.coeff_mask.data.clone()
                     module.coeff_mask.data.zero_()
                     if hasattr(module, 'mask_mode'):
                         module.mask_mode.fill_(1)

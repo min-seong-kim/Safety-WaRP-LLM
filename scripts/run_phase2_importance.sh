@@ -8,24 +8,24 @@
 # 2. Utility Basis: wikipedia 데이터셋 사용
 
 echo "========================================="
-echo "Phase 2: Importance Scoring (Fixed)"
+echo "Phase 2: Importance Scoring"
 echo "========================================="
 
 # Phase 0, 1 결과 경로
 # PHASE0_MODEL="./checkpoints/phase0_20260213_230047"  # 로컬 디렉토리 예시
-PHASE0_MODEL="kmseong/Llama-3.2-3B-SSFT"
-BASIS_DIR="/lustre/gokms0509/Safety-WaRP-LLM/checkpoints/phase1_20260303_165945/basis"
+PHASE0_MODEL="meta-llama/Llama-3.2-3B"
+BASIS_DIR="./checkpoints/phase1_20260403_212614/basis"
 
 # ========================================
 # Dataset 선택 (수정 필요)
 # ========================================
 # 옵션 1: Safety Basis (circuit_breakers 데이터셋)
-DATASET="circuit_breakers"
-SAFETY_SAMPLES=4994
+# DATASET="circuit_breakers"
+# SAFETY_SAMPLES=4994
 #
 # 옵션 2: Utility Basis (Wikipedia 데이터셋)
-# DATASET="wikipedia"
-# Utility_SAMPLES=4994
+DATASET="wikipedia"
+Utility_SAMPLES=1000
 # ========================================
 
 echo ""
@@ -36,7 +36,7 @@ if [ "$DATASET" = "circuit_breakers" ]; then
     DATASET_ARG="--dataset_phase2 circuit_breakers --circuit_breakers_samples $SAFETY_SAMPLES"
 elif [ "$DATASET" = "wikipedia" ]; then
     echo "  - Type: Utility Basis (Wikipedia)"
-    echo "  - Samples: $SAMPLES"
+    echo "  - Samples: $Utility_SAMPLES"
     DATASET_ARG="--dataset_phase2 wikipedia --wikipedia_samples_phase2 $Utility_SAMPLES"
 else
     echo "ERROR: Unknown dataset: $DATASET"
@@ -56,12 +56,12 @@ python train.py \
     --circuit_breakers_path ./data/circuit_breakers_train.json \
     $DATASET_ARG \
     --keep_ratio 0.1 \
-    --batch_size 2 \
-    --max_length 512 \
+    --batch_size 4 \
+    --max_length 1024 \
     --layer_type attn_q,attn_k,attn_v,ffn_down,ffn_up \
     --target_layers all \
-    --output_dir /lustre/gokms0509/Safety-WaRP-LLM/checkpoints \
-    --log_dir /home/gokms0509/Safety-WaRP-LLM/logs \
+    --output_dir ./checkpoints \
+    --log_dir ./logs \
     --device cuda \
     --dtype bfloat16 \
     --seed 42 \

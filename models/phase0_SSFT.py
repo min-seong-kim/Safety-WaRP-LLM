@@ -17,11 +17,12 @@ import sys
 import json
 from datetime import datetime
 import torch
-from bitsandbytes.optim import AdamW8bit
+from torch.optim import AdamW
 from torch.utils.data import Dataset, DataLoader
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer, get_linear_schedule_with_warmup
 from tqdm import tqdm
 import logging
+import math
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -32,11 +33,10 @@ logger = logging.getLogger(__name__)
 # =====================================================================
 MODEL_NAME = "meta-llama/Llama-3.2-3B"  # Base 모델 (Phase 0) - WaRP 제거 전 모델 사용
 
-LEARNING_RATE = 1e-5
+LEARNING_RATE = 5e-5
 NUM_EPOCHS = 3
-BATCH_SIZE = 2
-GRAD_ACCUM_STEPS = 4
-MAX_SEQ_LENGTH = 512
+BATCH_SIZE = 4
+MAX_SEQ_LENGTH = 1024
 MAX_SAMPLES = 4994
 
 CHECKPOINTS_DIR = "./checkpoints"
@@ -48,7 +48,7 @@ DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 # Safety Dataset (same format as sn_tune.py)
 # =====================================================================
 class SafetyDataset(Dataset):
-    def __init__(self, json_path, tokenizer, max_samples=None, max_length=512):
+    def __init__(self, json_path, tokenizer, max_samples=None, max_length=1024):
         with open(json_path, "r", encoding="utf-8") as f:
             self.data = json.load(f)
 
@@ -103,13 +103,22 @@ def train_base_safety_ft(
     train_dataloader,
     learning_rate=1e-5,
     num_epochs=3,
-    grad_accum_steps=1,
+    grad_accum_steps=4,
+    warmup_ratio=0.1,
     device=DEVICE,
 ):
     model = model.to(device)
+    model.gradient_checkpointing_enable()
     model.train()
 
-    optimizer = AdamW8bit(model.parameters(), lr=learning_rate)
+    optimizer = AdamW(model.parameters(), lr=learning_rate, weight_decay=0.01)
+
+    total_optimization_steps = num_epochs * math.ceil(len(train_dataloader) / grad_accum_steps)
+    warmup_steps = int(total_optimization_steps * warmup_ratio)
+    
+    scheduler = get_linear_schedule_with_warmup(
+        optimizer, num_warmup_steps=warmup_steps, num_training_steps=total_optimization_steps
+    )
 
     total_loss = 0.0
     total_steps = 0
@@ -119,7 +128,11 @@ def train_base_safety_ft(
     logger.info(f"  Learning rate: {learning_rate}")
     logger.info(f"  Epochs: {num_epochs}")
     logger.info(f"  Grad accum steps: {grad_accum_steps}")
-    logger.info(f"  Num batches: {len(train_dataloader)}")
+    logger.info(f"  Num batches (per epoch): {len(train_dataloader)}")
+    logger.info(f"  Total optimization steps: {total_optimization_steps}")
+    logger.info(f"  Warmup steps: {warmup_steps}")
+
+    optimizer.zero_grad(set_to_none=True)
 
     for epoch in range(num_epochs):
         logger.info(f"\nEpoch {epoch + 1}/{num_epochs}")
@@ -131,17 +144,6 @@ def train_base_safety_ft(
             attention_mask = batch["attention_mask"].to(device)
             labels = batch["labels"].to(device)
 
-            if batch_idx == 0:
-                logger.info("\n[First Batch Info]")
-                logger.info(f"  Batch size: {input_ids.shape[0]}")
-                logger.info(f"  Sequence length: {input_ids.shape[1]}")
-                logger.info(f"  Device: {input_ids.device}")
-                valid_labels = (labels != -100).sum().item()
-                logger.info(f"  Valid labels (non-padding): {valid_labels}/{labels.numel()}")
-
-            if batch_idx % grad_accum_steps == 0:
-                optimizer.zero_grad(set_to_none=True)
-
             use_autocast = device.startswith("cuda") or device.startswith("cpu")
             autocast_dtype = torch.bfloat16
             with torch.autocast(device_type=device if use_autocast else "cuda", dtype=autocast_dtype, enabled=use_autocast):
@@ -151,21 +153,25 @@ def train_base_safety_ft(
                     labels=labels,
                     return_dict=True,
                 )
-                loss = outputs.loss
+                loss = outputs.loss / grad_accum_steps
 
             if torch.isnan(loss) or torch.isinf(loss):
                 logger.warning(f"NaN/Inf detected at batch {batch_idx + 1}. Skipping this batch.")
                 optimizer.zero_grad(set_to_none=True)
                 continue
 
-            (loss / grad_accum_steps).backward()
+            loss.backward()
 
+            # grad_accum_steps마다 (또는 마지막 배치에서) optimizer step
             if (batch_idx + 1) % grad_accum_steps == 0 or (batch_idx + 1) == len(train_dataloader):
                 torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
                 optimizer.step()
+                scheduler.step()
+                optimizer.zero_grad(set_to_none=True)
                 optimizer_steps += 1
 
-            loss_val = loss.item()
+            # 화면 및 로깅에 표시되는 Loss는 원래 크기로 복원해서 보여줍니다.
+            loss_val = loss.item() * grad_accum_steps
             total_loss += loss_val
             epoch_loss += loss_val
             total_steps += 1
@@ -173,7 +179,6 @@ def train_base_safety_ft(
             if (batch_idx + 1) % 5 == 0 or batch_idx == 0:
                 avg_batch_loss = epoch_loss / (batch_idx + 1)
                 pbar.set_postfix({"loss": f"{avg_batch_loss:.4f}"})
-                logger.info(f"  Batch {batch_idx + 1}: loss = {loss_val:.4f}")
 
         logger.info(f"Epoch {epoch + 1} completed - Epoch Loss: {epoch_loss / len(train_dataloader):.4f}")
 
@@ -224,7 +229,7 @@ def main(argv):
     logger.info(f"Output directory: {output_dir}")
     logger.info(
         f"Training setup: LR={LEARNING_RATE}, Epochs={NUM_EPOCHS}, Batch={BATCH_SIZE}, "
-        f"GradAccum={GRAD_ACCUM_STEPS}, MaxSamples={MAX_SAMPLES}"
+        f"MaxSamples={MAX_SAMPLES}"
     )
     logger.info(f"{'=' * 70}\n")
 
@@ -255,8 +260,9 @@ def main(argv):
     train_dataloader = DataLoader(
         safety_dataset,
         batch_size=BATCH_SIZE,
-        shuffle=True,
+        shuffle=False,
         num_workers=0,
+        generator=torch.Generator().manual_seed(112),
     )
     logger.info(f"✓ DataLoader created: {len(train_dataloader)} batches")
     logger.info(f"  Total samples: {len(safety_dataset)}")
@@ -269,7 +275,6 @@ def main(argv):
         train_dataloader,
         learning_rate=LEARNING_RATE,
         num_epochs=NUM_EPOCHS,
-        grad_accum_steps=GRAD_ACCUM_STEPS,
         device=DEVICE,
     )
 
