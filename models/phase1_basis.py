@@ -129,6 +129,40 @@ class Phase1BasisBuilder:
         except ValueError:
             self.logger.error(f"Invalid target_layers format: {target}")
             raise
+
+    def _is_instruct_model(self):
+        model_ref = str(
+            getattr(self.args, 'model_name', None)
+            or getattr(self.args, 'phase0_model_dir', '')
+        )
+        return 'instruct' in model_ref.lower()
+
+    def _format_phase1_text(self, user_text: str, assistant_text: str = None) -> str:
+        user_text = str(user_text).strip()
+        assistant_text = None if assistant_text is None else str(assistant_text).strip()
+
+        if not self._is_instruct_model():
+            if assistant_text is None:
+                return user_text
+            return f"Question: {user_text}\nAnswer: {assistant_text}"
+
+        messages = [{"role": "user", "content": user_text}]
+        if assistant_text is not None:
+            messages.append({"role": "assistant", "content": assistant_text})
+
+        try:
+            return self.tokenizer.apply_chat_template(
+                messages,
+                tokenize=False,
+                add_generation_prompt=False,
+            )
+        except Exception as e:
+            self.logger.warning(
+                f"Failed to apply chat template for instruct model; falling back to plain format. Error: {e}"
+            )
+            if assistant_text is None:
+                return user_text
+            return f"Question: {user_text}\nAnswer: {assistant_text}"
     
     def load_model(self):
         """
@@ -188,6 +222,9 @@ class Phase1BasisBuilder:
             if self.tokenizer.pad_token is None:
                 self.tokenizer.pad_token = self.tokenizer.eos_token
             self.logger.info(f"✓ Tokenizer loaded successfully")
+            self.logger.info(
+                f"  - Input formatting: {'chat template' if self._is_instruct_model() else 'plain text'}"
+            )
             
             # 모델을 evaluation 모드로 설정
             self.model.eval()
@@ -247,8 +284,16 @@ class Phase1BasisBuilder:
                 dataset = dataset[:max_samples]
                 self.logger.info(f"✓ Subsampled to {len(dataset)} samples")
             
-            # Prompt만 추출
-            prompts = [item.get('prompt', '') for item in dataset]
+            # Prompt-response 쌍 추출 (Phase 0 SSFT와 동일한 포맷)
+            # harmful prompt만 사용하면 "위험 감지" subspace만 포착하지만,
+            # full sequence를 사용하면 safe response 생성 방향까지 basis에 반영됨
+            texts = [
+                self._format_phase1_text(
+                    item.get('prompt', ''),
+                    item.get('llama3_output', ''),
+                )
+                for item in dataset
+            ]
             
             # 데이터셋 클래스
             class CircuitBreakersDataset(torch.utils.data.Dataset):
@@ -275,7 +320,7 @@ class Phase1BasisBuilder:
                         'attention_mask': encoding['attention_mask'].squeeze(),
                     }
             
-            dataset_wrapper = CircuitBreakersDataset(prompts, self.tokenizer, max_length=1024)
+            dataset_wrapper = CircuitBreakersDataset(texts, self.tokenizer, max_length=1024)
             
             # Custom collate function
             def collate_fn(batch):
@@ -318,9 +363,13 @@ class Phase1BasisBuilder:
             )
             
             self.logger.info(f"✓ Dataloader created")
+            self.logger.info(
+                "  - Input format: "
+                f"{'chat template user/assistant pairs' if self._is_instruct_model() else 'full prompt-response pairs (Phase 0 SSFT aligned)'}"
+            )
             self.logger.info(f"  - Batch size: {self.args.batch_size}")
             self.logger.info(f"  - Total batches: {len(self.dataloader)}")
-            self.logger.info(f"  - Sample prompt: {prompts[0][:100]}...")
+            self.logger.info(f"  - Sample text: {texts[0][:100]}...")
         
         except Exception as e:
             self.logger.error(f"Failed to load circuit_breakers dataset: {str(e)}", exc_info=True)
@@ -363,7 +412,12 @@ class Phase1BasisBuilder:
                 try:
                     text = dataset[idx]['text']
                     if text.strip():
-                        texts.append(text)
+                        texts.append(
+                            self._format_phase1_text(
+                                "Please read and internalize the following reference text.",
+                                text,
+                            )
+                        )
                 except Exception as e:
                     if self.args.debug:
                         self.logger.debug(f"Error processing sample {idx}: {e}")
@@ -440,6 +494,10 @@ class Phase1BasisBuilder:
             
             self.logger.info(f"✓ Dataloader created")
             self.logger.info(f"  - Dataset type: Wikipedia (Utility)")
+            self.logger.info(
+                "  - Input format: "
+                f"{'chat template user/assistant pairs' if self._is_instruct_model() else 'plain Wikipedia text'}"
+            )
             self.logger.info(f"  - Batch size: {self.args.batch_size}")
             self.logger.info(f"  - Total batches: {len(self.dataloader)}")
             self.logger.info(f"  - Sample text: {texts[0][:100]}...")

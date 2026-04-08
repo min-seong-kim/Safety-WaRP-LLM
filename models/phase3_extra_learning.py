@@ -66,6 +66,107 @@ class Phase3IncrementalLearner:
             'best_loss': float('inf'),
             'best_epoch': 0,
         }
+
+    def _is_instruct_model(self) -> bool:
+        return 'instruct' in str(self.phase0_model_dir).lower()
+
+    def _build_question_answer_prompt(self, question: str) -> str:
+        return f"Question: {question.strip()}\nAnswer:"
+
+    def _tokenize_question_answer_example(
+        self,
+        question: str,
+        response: str,
+        max_length: int,
+        add_eos: bool = True,
+    ) -> Dict[str, List[int]]:
+        question = str(question).strip()
+        response = str(response).strip()
+
+        if self._is_instruct_model():
+            try:
+                prompt_text = self.tokenizer.apply_chat_template(
+                    [{"role": "user", "content": question}],
+                    tokenize=False,
+                    add_generation_prompt=True,
+                )
+                full_text = self.tokenizer.apply_chat_template(
+                    [
+                        {"role": "user", "content": question},
+                        {"role": "assistant", "content": response},
+                    ],
+                    tokenize=False,
+                    add_generation_prompt=False,
+                )
+
+                prompt_ids = self.tokenizer(
+                    prompt_text,
+                    add_special_tokens=False,
+                    truncation=True,
+                    max_length=max_length,
+                )["input_ids"]
+                full_ids = self.tokenizer(
+                    full_text,
+                    add_special_tokens=False,
+                    truncation=True,
+                    max_length=max_length,
+                )["input_ids"]
+
+                labels = full_ids.copy()
+                prompt_len = min(len(prompt_ids), len(labels))
+                for i in range(prompt_len):
+                    labels[i] = -100
+
+                attention_mask = [1] * len(full_ids)
+                return {
+                    "input_ids": full_ids,
+                    "attention_mask": attention_mask,
+                    "labels": labels,
+                }
+            except Exception as e:
+                self.logger.warning(
+                    f"Failed to apply chat template for instruct model; falling back to plain Question/Answer format. Error: {e}"
+                )
+
+        prompt_text = self._build_question_answer_prompt(question)
+
+        prompt_ids = self.tokenizer(
+            prompt_text,
+            add_special_tokens=False,
+            truncation=True,
+            max_length=max_length,
+        )["input_ids"]
+
+        remain = max(0, max_length - len(prompt_ids))
+        response_ids = self.tokenizer(
+            response,
+            add_special_tokens=False,
+            truncation=True,
+            max_length=max(1, remain) if remain > 0 else 1,
+        )["input_ids"]
+
+        if remain == 0:
+            response_ids = []
+        else:
+            response_ids = response_ids[:remain]
+
+        if (
+            add_eos
+            and self.tokenizer.eos_token_id is not None
+            and len(prompt_ids) + len(response_ids) < max_length
+            and (len(response_ids) == 0 or response_ids[-1] != self.tokenizer.eos_token_id)
+        ):
+            response_ids = response_ids + [self.tokenizer.eos_token_id]
+
+        input_ids = (prompt_ids + response_ids)[:max_length]
+        attention_mask = [1] * len(input_ids)
+        labels = ([-100] * len(prompt_ids) + response_ids)[:max_length]
+
+        return {
+            "input_ids": input_ids,
+            "attention_mask": attention_mask,
+            "labels": labels,
+        }
     
     def load_basis(self):
         """Phase 1의 basis 로드"""
@@ -209,6 +310,9 @@ class Phase3IncrementalLearner:
                 self.tokenizer.pad_token = self.tokenizer.eos_token
             
             self.logger.info(f"✓ Tokenizer loaded")
+            self.logger.info(
+                f"  - Input formatting: {'chat template' if self._is_instruct_model() else 'Question/Answer plain text'}"
+            )
             
         except Exception as e:
             self.logger.error(f"Failed to load model: {str(e)}", exc_info=True)
@@ -239,7 +343,7 @@ class Phase3IncrementalLearner:
 
     def _load_gsm8k(self):
         """GSM8K 데이터 로드 및 SFT 방식으로 변환 (prompt/labels 분리)"""
-        from datasets import load_dataset, Dataset
+        from datasets import load_dataset
         
         try:
             self.logger.info("Loading GSM8K dataset...")
@@ -262,50 +366,10 @@ class Phase3IncrementalLearner:
             # Always disable multiprocessing here to avoid CUDA fork issues.
             num_proc = None
 
-            def build_chat_prompt(question: str) -> str:
-                system_msg = (
-                    "You are a helpful assistant that solves math problems step by step. "
-                    "Always show your reasoning and provide the final numerical answer after ####."
-                )
-                user_msg = f"Solve this problem step by step:\n\n{question.strip()}"
-                return f"{system_msg}\n\nUser: {user_msg}\n\nAssistant:"
-
-            def tokenize_sft_example(prompt_text: str, answer_text: str) -> Dict[str, List[int]]:
-                prompt_ids = self.tokenizer(
-                    prompt_text,
-                    add_special_tokens=False,
-                    truncation=True,
-                    max_length=max_length,
-                )["input_ids"]
-
-                remain = max(1, max_length - len(prompt_ids))
-                answer_ids = self.tokenizer(
-                    answer_text,
-                    add_special_tokens=False,
-                    truncation=True,
-                    max_length=remain,
-                )["input_ids"]
-
-                if self.tokenizer.eos_token_id is not None and (
-                    len(answer_ids) == 0 or answer_ids[-1] != self.tokenizer.eos_token_id
-                ):
-                    if len(prompt_ids) + len(answer_ids) < max_length:
-                        answer_ids = answer_ids + [self.tokenizer.eos_token_id]
-
-                input_ids = (prompt_ids + answer_ids)[:max_length]
-                attention_mask = [1] * len(input_ids)
-                labels = ([-100] * len(prompt_ids) + answer_ids)[:max_length]
-
-                return {
-                    "input_ids": input_ids,
-                    "attention_mask": attention_mask,
-                    "labels": labels,
-                }
-
             def preprocess(ex):
-                prompt = build_chat_prompt(ex["question"])
-                answer = ex["answer"]
-                return tokenize_sft_example(prompt, answer)
+                question = ex.get("question", "")
+                answer = ex.get("answer", "")
+                return self._tokenize_question_answer_example(question, answer, max_length=max_length)
 
             self.dataset = dataset.map(
                 preprocess,
@@ -320,12 +384,57 @@ class Phase3IncrementalLearner:
             self.logger.error(f"Failed to load GSM8K data: {str(e)}", exc_info=True)
             raise
 
+    def _load_metamath(self):
+        """
+        MetaMath 데이터셋 로드
+
+        형식: Question: ... Answer:
+        라벨링: prompt는 -100 마스킹, response만 학습
+        """
+        from datasets import load_dataset
+
+        try:
+            self.logger.info("Loading MetaMath dataset...")
+
+            dataset = load_dataset("meta-math/MetaMathQA", split="train")
+
+            max_samples = getattr(self.args, 'metamath_samples', 0)
+            if max_samples > 0:
+                if len(dataset) > max_samples:
+                    dataset = dataset.select(range(max_samples))
+                    self.logger.info(f"✓ Limited to {max_samples} samples")
+                else:
+                    self.logger.info(f"✓ Using all {len(dataset)} samples (metamath_samples={max_samples} >= dataset size)")
+            else:
+                self.logger.info(f"✓ Using all {len(dataset)} samples (metamath_samples=0 or not specified)")
+
+            max_length = getattr(self.args, 'max_length', 1024)
+            num_proc = None
+
+            def preprocess_metamath(ex):
+                query = ex.get("query", "")
+                response = ex.get("response", "")
+                return self._tokenize_question_answer_example(query, response, max_length=max_length)
+
+            self.dataset = dataset.map(
+                preprocess_metamath,
+                remove_columns=dataset.column_names,
+                num_proc=num_proc,
+                desc="Tokenizing MetaMath",
+            )
+
+            self.logger.info(f"✓ MetaMath dataset created ({len(self.dataset)} samples)")
+
+        except Exception as e:
+            self.logger.error(f"Failed to load MetaMath data: {str(e)}", exc_info=True)
+            raise
+
     def _load_safety_dataset(self):
         """
         Circuit Breakers 안전 데이터셋 로드
         
         형식: JSON with prompt + llama3_output
-        라벨링: 전체 시퀀스 (padding만 -100)
+        라벨링: prompt는 -100 마스킹, response만 학습
         """
         from datasets import Dataset
         
@@ -351,35 +460,13 @@ class Phase3IncrementalLearner:
             max_length = getattr(self.args, 'max_length', 1024)
             
             def tokenize_safety_example(item: Dict) -> Dict[str, List[int]]:
-                """
-                Safety 데이터: prompt + llama3_output 결합
-                라벨링: 전체 시퀀스 학습 (padding만 -100)
-                """
                 harmful_prompt = item.get("prompt", "")
                 safe_response = item.get("llama3_output", "")
-                
-                full_text = f"{harmful_prompt} {safe_response}"
-                
-                encodings = self.tokenizer(
-                    full_text,
-                    padding='max_length',
-                    truncation=True,
+                return self._tokenize_question_answer_example(
+                    harmful_prompt,
+                    safe_response,
                     max_length=max_length,
-                    return_tensors=None,
                 )
-                
-                input_ids = encodings["input_ids"]
-                attention_mask = encodings["attention_mask"]
-                
-                # labels: padding(-100)을 제외한 모든 토큰 학습
-                labels = input_ids.copy()
-                labels = [label if mask == 1 else -100 for label, mask in zip(labels, attention_mask)]
-                
-                return {
-                    "input_ids": input_ids,
-                    "attention_mask": attention_mask,
-                    "labels": labels,
-                }
             
             # 데이터셋 생성
             tokenized_data = []
@@ -402,106 +489,6 @@ class Phase3IncrementalLearner:
             
         except Exception as e:
             self.logger.error(f"Failed to load Safety data: {str(e)}", exc_info=True)
-            raise
-
-    def _load_metamath(self):
-        """
-        MetaMath 데이터셋 로드 및 토크나이제이션
-        
-        형식: 쿼리(query) + 응답(response) 결합
-        라벨링: 쿼리 부분은 -100 마스킹, 응답 부분만 학습
-        (finetuning_metamath_full.py 스타일)
-        """
-        from datasets import load_dataset, Dataset
-        
-        try:
-            self.logger.info("Loading MetaMath dataset...")
-            
-            # MetaMath 데이터셋 로드
-            dataset = load_dataset("meta-math/MetaMathQA", split="train")
-            
-            # 샘플 수 제한
-            max_samples = getattr(self.args, 'metamath_samples', 0)
-            if max_samples > 0:
-                if len(dataset) > max_samples:
-                    dataset = dataset.select(range(max_samples))
-                    self.logger.info(f"✓ Limited to {max_samples} samples")
-                else:
-                    self.logger.info(f"✓ Using all {len(dataset)} samples (metamath_samples={max_samples} >= dataset size)")
-            else:
-                self.logger.info(f"✓ Using all {len(dataset)} samples (metamath_samples=0 or not specified)")
-            
-            max_length = getattr(self.args, 'max_length', 1024)
-            num_proc = None  # CUDA fork 문제 방지
-            
-            def build_metamath_chat_template(query: str) -> str:
-                """MetaMath용 시스템 프롬프트 + 사용자 쿼리"""
-                system_msg = (
-                    "You are an expert mathematical assistant. "
-                    "Solve the following math problem step-by-step, showing all your logical reasoning clearly. "
-                    "State the final answer at the end."
-                )
-                return f"{system_msg}\n\nUser: {query.strip()}\n\nAssistant:"
-            
-            def tokenize_metamath_example(query: str, response: str) -> Dict[str, List[int]]:
-                """
-                MetaMath 토크나이제이션 (finetuning_metamath_full.py 스타일)
-                
-                프롬프트 부분: 라벨 -100 (학습 제외)
-                응답 부분: 정상 학습
-                """
-                prompt_text = build_metamath_chat_template(query)
-                
-                # 전체 텍스트 인코딩
-                full_text = f"{prompt_text}{response}"
-                full_encoded = self.tokenizer(
-                    full_text,
-                    add_special_tokens=True,
-                    truncation=True,
-                    max_length=max_length,
-                )
-                full_ids = full_encoded["input_ids"]
-                
-                # 프롬프트만 인코딩
-                prompt_encoded = self.tokenizer(
-                    prompt_text,
-                    add_special_tokens=True,
-                    truncation=True,
-                    max_length=max_length,
-                )
-                prompt_ids = prompt_encoded["input_ids"]
-                
-                # 라벨 마스킹: 프롬프트 부분은 -100
-                labels = full_ids.copy()
-                prompt_len = min(len(prompt_ids), len(labels))
-                for i in range(prompt_len):
-                    labels[i] = -100
-                
-                attention_mask = full_encoded["attention_mask"]
-                
-                return {
-                    "input_ids": full_ids,
-                    "attention_mask": attention_mask,
-                    "labels": labels,
-                }
-            
-            def preprocess_metamath(ex):
-                """데이터셋 맵 함수"""
-                query = ex.get("query", "")
-                response = ex.get("response", "")
-                return tokenize_metamath_example(query, response)
-            
-            self.dataset = dataset.map(
-                preprocess_metamath,
-                remove_columns=dataset.column_names,
-                num_proc=num_proc,
-                desc="Tokenizing MetaMath",
-            )
-            
-            self.logger.info(f"✓ MetaMath dataset created ({len(self.dataset)} samples)")
-            
-        except Exception as e:
-            self.logger.error(f"Failed to load MetaMath data: {str(e)}", exc_info=True)
             raise
 
     def _load_hendrycks_math(self):
@@ -689,43 +676,8 @@ class Phase3IncrementalLearner:
 
             max_length = getattr(self.args, 'max_length', 1024)
             train_on_mixed_formats = bool(getattr(self.args, 'math_train_on_mixed_formats', False))
-            use_chat_template = bool(getattr(self.args, 'math_use_chat_template', False))
-            system_prompt = getattr(
-                self.args,
-                'math_system_prompt',
-                "You are a careful competition math solver. Solve the problem step by step. On the last line, write exactly one final answer in the form: Final Answer: $<answer>$. Do not use additional dollar signs earlier in the response.",
-            )
             seed = int(getattr(self.args, 'seed', 42))
             num_proc = None
-
-            def render_prompt_only_plain(problem: str) -> str:
-                return f"Problem: {problem}\nAnswer:"
-
-            def render_full_plain(problem: str, target_text: str) -> str:
-                return f"Problem: {problem}\nAnswer: {target_text}"
-
-            def render_prompt_only_chat(problem: str) -> str:
-                prompt_messages = [
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": f"Problem: {problem}\nAnswer:"},
-                ]
-                return self.tokenizer.apply_chat_template(
-                    prompt_messages,
-                    tokenize=False,
-                    add_generation_prompt=True,
-                )
-
-            def render_full_chat(problem: str, target_text: str) -> str:
-                messages = [
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": f"Problem: {problem}\nAnswer:"},
-                    {"role": "assistant", "content": target_text},
-                ]
-                return self.tokenizer.apply_chat_template(
-                    messages,
-                    tokenize=False,
-                    add_generation_prompt=False,
-                )
 
             def tokenize_math_example(ex, idx: int) -> Dict[str, List[int]]:
                 problem = ex.get("problem", "").strip()
@@ -733,33 +685,11 @@ class Phase3IncrementalLearner:
                 rng = random.Random(seed + idx)
 
                 target_text = _build_target(solution, rng, train_on_mixed_formats)
-                if self.tokenizer.eos_token:
-                    target_text = target_text + self.tokenizer.eos_token
-
-                if use_chat_template:
-                    prompt_text = render_prompt_only_chat(problem)
-                    full_text = render_full_chat(problem, target_text)
-                else:
-                    prompt_text = render_prompt_only_plain(problem)
-                    full_text = render_full_plain(problem, target_text)
-
-                full_encoded = self.tokenizer(full_text, max_length=max_length, truncation=True)
-                prompt_encoded = self.tokenizer(prompt_text, max_length=max_length, truncation=True)
-
-                input_ids = full_encoded["input_ids"]
-                attention_mask = full_encoded["attention_mask"]
-                prompt_ids = prompt_encoded["input_ids"]
-
-                labels = input_ids.copy()
-                prompt_len = min(len(prompt_ids), len(labels))
-                for i in range(prompt_len):
-                    labels[i] = -100
-
-                return {
-                    "input_ids": input_ids,
-                    "attention_mask": attention_mask,
-                    "labels": labels,
-                }
+                return self._tokenize_question_answer_example(
+                    problem,
+                    target_text,
+                    max_length=max_length,
+                )
 
             self.dataset = dataset.map(
                 tokenize_math_example,
@@ -774,7 +704,7 @@ class Phase3IncrementalLearner:
             self.logger.info(f"  - Levels: {levels_arg}")
             self.logger.info(f"  - Dataset source: {dataset_source}")
             self.logger.info(f"  - Mixed formats: {train_on_mixed_formats}")
-            self.logger.info(f"  - Chat template: {use_chat_template}")
+            self.logger.info("  - Prompt format: Question: ... Answer:")
 
         except Exception as e:
             self.logger.error(f"Failed to load Hendrycks MATH data: {str(e)}", exc_info=True)
@@ -1183,7 +1113,7 @@ class Phase3IncrementalLearner:
             self.logger.info("="*70)
             
             warmup_ratio = getattr(self.args, 'warmup_ratio', 0.1)
-            lr_scheduler_type = getattr(self.args, 'lr_scheduler_type', 'linear')
+            lr_scheduler_type = getattr(self.args, 'lr_scheduler_type', 'cosine')
             max_grad_norm = getattr(self.args, 'max_grad_norm', 1.0)
             logging_steps = getattr(self.args, 'logging_steps', 10)
             gradient_checkpointing = getattr(self.args, 'gradient_checkpointing', False)
@@ -1311,7 +1241,7 @@ class Phase3IncrementalLearner:
                 'weight_decay_effective': effective_weight_decay,
                 'warmup_ratio': 0.1,
                 'optimizer': 'adamw_torch',
-                'lr_scheduler': 'linear',
+                'lr_scheduler': 'cosine',
                 'max_grad_norm': 1.0,
                 'batch_size': batch_size,
                 'gradient_accumulation_steps': gradient_accumulation_steps,

@@ -6,9 +6,22 @@ Phase 3 완료 후 만들어진 모델을 HuggingFace Hub에 업로드하는 스
 
 Usage:
 python upload_phase3_to_hf.py \
-    --model_path ./checkpoints/phase3_non_freeze_20260405_025757/final_model \
-    --repo_name kmseong/llama3.2-3b-WaRP-utility-basis-safety-FT-non-freeze-lr5e-5 \
-    --token 
+    --model_path ./checkpoints/phase0_20260407_145653/final_model \
+    --repo_name kmseong/llama3.2_3b_new_SSFT_lr3e-5 \
+    --token <YOUR_HF_TOKEN>
+
+python upload_phase3_to_hf.py \
+    --model_path ./checkpoints/phase3_original_space_20260408_104628/final_model \
+    --repo_name kmseong/llama3.2-3b-WaRP-original-space-gsm8k-FT-lr1e-5
+
+python upload_phase3_to_hf.py \
+    --model_path ./checkpoints/phase3_original_space_20260408_105316/final_model \
+    --repo_name kmseong/llama3.2-3b-WaRP-original-space-gsm8k-FT-lr3e-5
+
+python upload_phase3_to_hf.py \
+    --model_path ./checkpoints/phase3_original_space_20260408_105959/final_model \
+    --repo_name kmseong/llama3.2-3b-WaRP-original-space-gsm8k-FT-lr5e-5
+
 """
 
 import argparse

@@ -2,26 +2,29 @@
 
 # Phase 3: Incremental Learning
 
+set -e
+set -o pipefail
+
 echo "========================================="
 echo "Phase 3: Incremental Learning (Fixed)"
 echo "========================================="
 
 # 이전 Phase 결과 경로 (로컬 디렉토리 또는 Hugging Face 모델 ID)
 # PHASE0_MODEL="./checkpoints/phase0_20260213_230047"  # 로컬 디렉토리 예시
-PHASE0_MODEL="meta-llama/Llama-3.2-3B"  # Hugging Face 모델 ID 예시
-BASIS_DIR="./checkpoints/phase1_20260405_002504/basis"
-MASKS_DIR="./checkpoints/phase2_20260405_022932/checkpoints/masks"
+PHASE0_MODEL="kmseong/llama3.2_3b_new_SSFT_lr3e-5"
+BASIS_DIR="./checkpoints/phase1_20260407_154217/basis"
+MASKS_DIR="./checkpoints/phase2_20260407_161747/checkpoints/masks"
 
 # ========================================
 # Dataset 선택 (CONFIGURE THIS)
 # ========================================
 # 옵션 1: GSM8K (Utility Learning) - SFTTrainer 방식
-# DATASET="gsm8k"
-# GSM8K_SAMPLES=0
+DATASET="gsm8k"
+GSM8K_SAMPLES=0
 
 # 옵션 2: Safety (Safety Learning) - phase0_SSFT 커스텀 루프 방식
-DATASET="safety"
-CIRCUIT_BREAKERS_SAMPLES=4994
+# DATASET="safety"
+# CIRCUIT_BREAKERS_SAMPLES=4994
 
 # 옵션 3: MetaMath (Utility Learning) - SFTTrainer 방식
 # DATASET="metamath"
@@ -34,6 +37,22 @@ CIRCUIT_BREAKERS_SAMPLES=4994
 # MATH_LEVELS="all"       # 예: 1,2,3,4,5
 # 
 # ========================================
+
+# 공통 학습 설정 (run_all 스타일)
+LR_LIST=("1e-5" "3e-5" "5e-5")
+EPOCHS=3
+BATCH_SIZE=4
+GRAD_ACCUM=4
+TARGET_LAYERS="all"
+LAYER_TYPE="attn_q,attn_k,attn_v,ffn_down,ffn_up"
+OUTPUT_DIR="./checkpoints"
+LOG_DIR="./logs"
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+
+# non_freeze 모드를 끄고 싶으면 빈 문자열로 변경
+NON_FREEZE_FLAG="--non_freeze"
+
+mkdir -p "$LOG_DIR"
 
 # PHASE0_MODEL이 로컬 경로처럼 보일 때만 디렉토리 체크
 if [[ "$PHASE0_MODEL" == ./* || "$PHASE0_MODEL" == /* ]]; then
@@ -81,53 +100,78 @@ else
 fi
 echo ""
 
-#  ${NON_FREEZE_FLAG} 옵션은 Phase 3에서 WaRP이외 layer를 freeze하지 않고 학습할 때 사용.
-#     --layer_type attn_q,attn_k,attn_v,attn_o,ffn_gate,ffn_down,ffn_up \
-#     --non_freeze
-python train.py \
-    --phase 3 \
-    --phase0_model_dir "$PHASE0_MODEL" \
-    --basis_dir "$BASIS_DIR" \
-    --masks_dir "$MASKS_DIR" \
-    $DATASET_ARG \
-    --epochs 3 \
-    --utility_lr 1e-5 \
-    --batch_size 4 \
-    --gradient_accumulation_steps 4 \
-    --layer_type attn_q,attn_k,attn_v,ffn_down,ffn_up \
-    --target_layers all \
-    --output_dir ./checkpoints \
-    --log_dir ./logs \
-    --device cuda \
-    --dtype bfloat16 \
-    --seed 42 \
-    --non_freeze
-    
+echo "LR sweep: ${LR_LIST[*]}"
+echo "Epochs: $EPOCHS, Batch: $BATCH_SIZE, GradAccum: $GRAD_ACCUM"
+echo ""
+
+PHASE3_OUTPUT_DIRS=()
+
+for LEARNING_RATE in "${LR_LIST[@]}"; do
+    LR_SAFE=$(echo "$LEARNING_RATE" | sed 's/[^a-zA-Z0-9_-]/_/g')
+    LOG_FILE="$LOG_DIR/phase3_${DATASET}_lr${LR_SAFE}_${TIMESTAMP}.log"
+
+    echo "-----------------------------------------"
+    echo "Phase 3: LR = $LEARNING_RATE"
+    echo "-----------------------------------------"
+
+    python train.py \
+        --phase 3 \
+        --phase0_model_dir "$PHASE0_MODEL" \
+        --basis_dir "$BASIS_DIR" \
+        --masks_dir "$MASKS_DIR" \
+        $DATASET_ARG \
+        --epochs $EPOCHS \
+        --utility_lr $LEARNING_RATE \
+        --batch_size $BATCH_SIZE \
+        --gradient_accumulation_steps $GRAD_ACCUM \
+        --layer_type "$LAYER_TYPE" \
+        --target_layers $TARGET_LAYERS \
+        --output_dir "$OUTPUT_DIR" \
+        --log_dir "$LOG_DIR" \
+        --device cuda \
+        --dtype bfloat16 \
+        --seed 42 \
+        $NON_FREEZE_FLAG \
+        2>&1 | tee "$LOG_FILE"
+
+    PHASE3_OUTPUT_DIR=$(find "$OUTPUT_DIR" -maxdepth 1 -name "phase3_*" -type d -printf '%T@ %p\n' | sort -rn | head -1 | cut -d' ' -f2-)
+    if [ ! -d "$PHASE3_OUTPUT_DIR" ]; then
+        echo "WARNING: Phase 3 (LR=$LEARNING_RATE) output directory not found"
+    else
+        echo "OK: Phase 3 (LR=$LEARNING_RATE) completed: $PHASE3_OUTPUT_DIR"
+        PHASE3_OUTPUT_DIRS+=("$PHASE3_OUTPUT_DIR")
+    fi
+    echo ""
+done
 
 echo ""
 echo "========================================="
-echo "Phase 3 완료! (Dataset: $DATASET)"
-echo "최종 모델: ./checkpoints/phase3_*/final_model"
+echo "Phase 3 완료! (Dataset: $DATASET, LR sweep: ${LR_LIST[*]})"
+echo "최종 모델들:"
+for dir in "${PHASE3_OUTPUT_DIRS[@]}"; do
+    echo "  - $dir/final_model"
+done
+echo "로그: $LOG_DIR/phase3_${DATASET}_lr*_${TIMESTAMP}.log"
 echo ""
 if [ "$DATASET" = "safety" ]; then
     echo "✅ Safety dataset used with phase0_SSFT training loop"
     echo "   - Custom training loop (AdamW8bit, gradient clipping)"
-    echo "   - Hyperparameters: LR=1e-5, Epochs=3, Batch=4, GradAccum=4"
+    echo "   - Hyperparameters: LR sweep (${LR_LIST[*]}), Epochs=$EPOCHS, Batch=$BATCH_SIZE, GradAccum=$GRAD_ACCUM"
     echo "   - WaRP masking: basis_coeff만 학습 가능"
 elif [ "$DATASET" = "gsm8k" ]; then
     echo "✅ GSM8K dataset used with SFTTrainer"
     echo "   - HuggingFace Trainer-based training loop"
-    echo "   - Hyperparameters: LR=1e-5, Epochs=3, Batch=4, GradAccum=4"
+    echo "   - Hyperparameters: LR sweep (${LR_LIST[*]}), Epochs=$EPOCHS, Batch=$BATCH_SIZE, GradAccum=$GRAD_ACCUM"
     echo "   - WaRP masking: basis_coeff만 학습 가능"
 elif [ "$DATASET" = "metamath" ]; then
     echo "✅ MetaMath dataset used with SFTTrainer"
     echo "   - HuggingFace Trainer-based training loop"
-    echo "   - Hyperparameters: LR=1e-5, Epochs=3, Batch=4, GradAccum=4"
+    echo "   - Hyperparameters: LR sweep (${LR_LIST[*]}), Epochs=$EPOCHS, Batch=$BATCH_SIZE, GradAccum=$GRAD_ACCUM"
     echo "   - WaRP masking: basis_coeff만 학습 가능"
 elif [ "$DATASET" = "math" ]; then
     echo "✅ Hendrycks MATH dataset used with SFTTrainer"
     echo "   - HuggingFace Trainer-based training loop"
-    echo "   - Hyperparameters: LR=1e-5, Epochs=3, Batch=4, GradAccum=4"
+    echo "   - Hyperparameters: LR sweep (${LR_LIST[*]}), Epochs=$EPOCHS, Batch=$BATCH_SIZE, GradAccum=$GRAD_ACCUM"
     echo "   - Subject filter: $MATH_SUBJECTS, Level filter: $MATH_LEVELS"
     echo "   - WaRP masking: basis_coeff만 학습 가능"
 fi

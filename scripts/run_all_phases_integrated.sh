@@ -7,6 +7,8 @@
 # 한 번에 모든 phase를 순차적으로 실행
 
 set -e  # Exit on error
+set -o pipefail  # Ensure failures are not hidden by tee pipelines
+export CUDA_VISIBLE_DEVICES=1
 
 echo "========================================================================"
 echo "Safety-WaRP-LLM: Complete Training Pipeline (Integrated)"
@@ -18,29 +20,29 @@ echo ""
 # ========================================================================
 
 # Phase 0 모델
-# PHASE0_MODEL="meta-llama/Llama-3.2-3B-Instruct"
-PHASE0_MODEL="meta-llama/Llama-3.2-3B"
+PHASE0_MODEL="meta-llama/Llama-3.2-3B-Instruct"
+# PHASE0_MODEL="kmseong/llama3.2_3b_new_SSFT_lr3e-5"
 
 
 # Phase 1: Basis Construction
 # ==============================
 # Dataset 선택 (Safety 또는 Utility)
 # Options: circuit_breakers, wikipedia
-PHASE1_DATASET="wikipedia"
+PHASE1_DATASET="circuit_breakers"
 PHASE1_SAMPLES=4994
 
 
 # Phase 2: Importance Scoring
 # ==============================
 # Dataset 선택 (동일하게 사용)
-PHASE2_DATASET="wikipedia"
+PHASE2_DATASET="circuit_breakers"
 PHASE2_SAMPLES=4994
 KEEP_RATIO=0.1
 
 # Phase 3: Incremental Learning
 # ==============================
 # Dataset 선택 (Utility 또는 Safety)
-PHASE3_DATASET="safety"  # Options: safety, gsm8k, metamath, math
+PHASE3_DATASET="math"  # Options: safety, gsm8k, metamath, math
 
 # Phase3=MATH 설정
 MATH_SUBJECTS="all"  # 예: Algebra,Geometry
@@ -61,7 +63,8 @@ BATCH_SIZE=4
 DTYPE="bfloat16"
 DEVICE="cuda"
 EPOCHS=3
-LR_LIST=("1e-5" "3e-5" "5e-5")
+# LR_LIST=("1e-5" "3e-5" "5e-5")
+LR_LIST=("3e-5")  
 TARGET_LAYERS="all"
 LAYER_TYPE="attn_q,attn_k,attn_v,ffn_down,ffn_up"
 # attn_q,attn_k,attn_v,attn_o,ffn_gate,ffn_down,ffn_up
@@ -147,7 +150,7 @@ echo "========================================================================"
 echo ""
 
 if [ "$PHASE2_DATASET" = "circuit_breakers" ]; then
-    PHASE2_DATASET_ARG="--dataset_phase2 circuit_breakers --circuit_breakers_samples $PHASE2_SAMPLES"
+    PHASE2_DATASET_ARG="--dataset_phase2 circuit_breakers --circuit_breakers_samples_phase2 $PHASE2_SAMPLES"
 elif [ "$PHASE2_DATASET" = "wikipedia" ]; then
     PHASE2_DATASET_ARG="--dataset_phase2 wikipedia --wikipedia_samples_phase2 $PHASE2_SAMPLES"
 else

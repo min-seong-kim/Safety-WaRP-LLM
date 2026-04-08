@@ -19,7 +19,7 @@ from datetime import datetime
 import torch
 from torch.optim import AdamW
 from torch.utils.data import Dataset, DataLoader
-from transformers import AutoModelForCausalLM, AutoTokenizer, get_linear_schedule_with_warmup
+from transformers import AutoModelForCausalLM, AutoTokenizer, get_cosine_schedule_with_warmup
 from tqdm import tqdm
 import logging
 import math
@@ -33,9 +33,10 @@ logger = logging.getLogger(__name__)
 # =====================================================================
 MODEL_NAME = "meta-llama/Llama-3.2-3B"  # Base 모델 (Phase 0) - WaRP 제거 전 모델 사용
 
-LEARNING_RATE = 5e-5
+LEARNING_RATE = 3e-5
 NUM_EPOCHS = 3
 BATCH_SIZE = 4
+GRAD_ACCUM_STEPS = 4
 MAX_SEQ_LENGTH = 1024
 MAX_SAMPLES = 4994
 
@@ -75,7 +76,10 @@ class SafetyDataset(Dataset):
         harmful_prompt = item.get("prompt", "")
         safe_response = item.get("llama3_output", "")
 
-        full_text = f"{harmful_prompt} {safe_response}"
+        prompt_text = f"Question: {harmful_prompt}\nAnswer:"
+        
+        # 핵심 수정: 끝에 반드시 tokenizer.eos_token을 붙여야 함.
+        full_text = f"{prompt_text} {safe_response}"
 
         encodings = self.tokenizer(
             full_text,
@@ -84,8 +88,22 @@ class SafetyDataset(Dataset):
             max_length=self.max_length,
             return_tensors="pt",
         )
+        
+        # prompt 길이 계산용 Tokenizing
+        prompt_encodings = self.tokenizer(
+            prompt_text,
+            truncation=True,
+            max_length=self.max_length,
+            return_tensors="pt",
+        )
 
         labels = encodings["input_ids"].clone()
+        prompt_length = prompt_encodings["input_ids"].size(1)
+
+        # SFT처럼 harmful prompt 구간은 loss에서 제외하고 safe response만 학습
+        labels[:, :prompt_length] = -100
+        
+        # Padding 토큰 구간도 loss에서 제외
         labels[encodings["attention_mask"] == 0] = -100
 
         return {
@@ -116,7 +134,7 @@ def train_base_safety_ft(
     total_optimization_steps = num_epochs * math.ceil(len(train_dataloader) / grad_accum_steps)
     warmup_steps = int(total_optimization_steps * warmup_ratio)
     
-    scheduler = get_linear_schedule_with_warmup(
+    scheduler = get_cosine_schedule_with_warmup(
         optimizer, num_warmup_steps=warmup_steps, num_training_steps=total_optimization_steps
     )
 
@@ -229,7 +247,7 @@ def main(argv):
     logger.info(f"Output directory: {output_dir}")
     logger.info(
         f"Training setup: LR={LEARNING_RATE}, Epochs={NUM_EPOCHS}, Batch={BATCH_SIZE}, "
-        f"MaxSamples={MAX_SAMPLES}"
+        f"GradAccum={GRAD_ACCUM_STEPS}, MaxSamples={MAX_SAMPLES}"
     )
     logger.info(f"{'=' * 70}\n")
 
@@ -267,6 +285,7 @@ def main(argv):
     logger.info(f"✓ DataLoader created: {len(train_dataloader)} batches")
     logger.info(f"  Total samples: {len(safety_dataset)}")
     logger.info(f"  Batch size: {BATCH_SIZE}")
+    logger.info(f"  Gradient accumulation steps: {GRAD_ACCUM_STEPS}")
     logger.info(f"  Max sequence length: {MAX_SEQ_LENGTH}")
 
     logger.info("\nStarting base model safety fine-tuning...")
@@ -275,6 +294,7 @@ def main(argv):
         train_dataloader,
         learning_rate=LEARNING_RATE,
         num_epochs=NUM_EPOCHS,
+        grad_accum_steps=GRAD_ACCUM_STEPS,
         device=DEVICE,
     )
 

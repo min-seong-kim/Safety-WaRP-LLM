@@ -13,19 +13,19 @@ echo "========================================="
 
 # Phase 0, 1 결과 경로
 # PHASE0_MODEL="./checkpoints/phase0_20260213_230047"  # 로컬 디렉토리 예시
-PHASE0_MODEL="meta-llama/Llama-3.2-3B"
-BASIS_DIR="./checkpoints/phase1_20260403_212614/basis"
+PHASE0_MODEL="kmseong/llama3.2_3b_new_SSFT_lr3e-5"
+BASIS_DIR="./checkpoints/phase1_20260407_154217/basis"
 
 # ========================================
 # Dataset 선택 (수정 필요)
 # ========================================
 # 옵션 1: Safety Basis (circuit_breakers 데이터셋)
-# DATASET="circuit_breakers"
-# SAFETY_SAMPLES=4994
+DATASET="circuit_breakers"
+SAFETY_SAMPLES=4994
 #
 # 옵션 2: Utility Basis (Wikipedia 데이터셋)
-DATASET="wikipedia"
-Utility_SAMPLES=1000
+# DATASET="wikipedia"
+# Utility_SAMPLES=1000
 # ========================================
 
 echo ""
@@ -33,7 +33,7 @@ echo "Dataset 설정:"
 if [ "$DATASET" = "circuit_breakers" ]; then
     echo "  - Type: Safety Basis (circuit_breakers)"
     echo "  - Samples: 4994 (fixed)"
-    DATASET_ARG="--dataset_phase2 circuit_breakers --circuit_breakers_samples $SAFETY_SAMPLES"
+    DATASET_ARG="--dataset_phase2 circuit_breakers --circuit_breakers_samples_phase2 $SAFETY_SAMPLES"
 elif [ "$DATASET" = "wikipedia" ]; then
     echo "  - Type: Utility Basis (Wikipedia)"
     echo "  - Samples: $Utility_SAMPLES"

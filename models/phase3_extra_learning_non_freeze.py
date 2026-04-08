@@ -49,10 +49,7 @@ class Phase3IncrementalLearnerNonFreeze(Phase3IncrementalLearner):
 
             epochs = getattr(self.args, 'epochs', 3)
             learning_rate = getattr(self.args, 'utility_lr', 1e-5)
-            configured_weight_decay = getattr(self.args, 'base_weight_decay', 0.00)
-            # Note: AdamW weight decay는 gradient와 독립적으로 적용되므로
-            # mask=1인 basis_coeff도 미세하게 drift할 수 있음.
-            # 공정한 실험 비교를 위해 configured 값을 그대로 사용.
+            configured_weight_decay = getattr(self.args, 'base_weight_decay', 0.01)
             effective_weight_decay = configured_weight_decay
             batch_size = self.args.batch_size
             gradient_accumulation_steps = getattr(self.args, 'gradient_accumulation_steps', 4)
@@ -120,11 +117,14 @@ class Phase3IncrementalLearnerNonFreeze(Phase3IncrementalLearner):
             self.logger.info("  - Max gradient norm: 1.0")
             self.logger.info("  - Optimizer: adamw_torch")
             self.logger.info("  - LR scheduler: linear")
+            self.logger.info(
+                f"  - Input formatting: {'chat template' if self._is_instruct_model() else 'Question/Answer plain text'}"
+            )
             self.logger.info(f"  - Checkpoint directory: {checkpoint_dir}")
             self.logger.info("="*70)
 
             warmup_ratio = getattr(self.args, 'warmup_ratio', 0.1)
-            lr_scheduler_type = getattr(self.args, 'lr_scheduler_type', 'linear')
+            lr_scheduler_type = getattr(self.args, 'lr_scheduler_type', 'cosine')
             max_grad_norm = getattr(self.args, 'max_grad_norm', 1.0)
             logging_steps = getattr(self.args, 'logging_steps', 10)
             gradient_checkpointing = getattr(self.args, 'gradient_checkpointing', False)
@@ -143,7 +143,6 @@ class Phase3IncrementalLearnerNonFreeze(Phase3IncrementalLearner):
                 save_strategy="no",
                 eval_strategy="no",
                 bf16=True if self.args.dtype == 'bfloat16' else False,
-                fp16=True if self.args.dtype == 'float16' else False,
                 report_to="none",
                 remove_unused_columns=False,
                 optim="adamw_torch",
@@ -249,7 +248,7 @@ class Phase3IncrementalLearnerNonFreeze(Phase3IncrementalLearner):
                 'weight_decay_effective': effective_weight_decay,
                 'warmup_ratio': 0.1,
                 'optimizer': 'adamw_torch',
-                'lr_scheduler': 'linear',
+                'lr_scheduler': 'cosine',
                 'max_grad_norm': 1.0,
                 'batch_size': batch_size,
                 'gradient_accumulation_steps': gradient_accumulation_steps,

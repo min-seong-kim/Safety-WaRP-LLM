@@ -69,6 +69,54 @@ class Phase2ImportanceScorerPerLayer:
             'total_tokens': 0,
         }
 
+    def _is_instruct_model(self):
+        return 'instruct' in str(self.phase0_model_dir).lower()
+
+    def _format_text_for_model(self, user_text: str, assistant_text: str = None) -> str:
+        user_text = str(user_text).strip()
+        assistant_text = None if assistant_text is None else str(assistant_text).strip()
+
+        if not self._is_instruct_model():
+            if assistant_text is None:
+                return user_text
+            return f"Question: {user_text}\nAnswer: {assistant_text}"
+
+        messages = [{"role": "user", "content": user_text}]
+        if assistant_text is not None:
+            messages.append({"role": "assistant", "content": assistant_text})
+
+        try:
+            return self.tokenizer.apply_chat_template(
+                messages,
+                tokenize=False,
+                add_generation_prompt=False,
+            )
+        except Exception as e:
+            self.logger.warning(
+                f"Failed to apply chat template for instruct model; falling back to plain format. Error: {e}"
+            )
+            if assistant_text is None:
+                return user_text
+            return f"Question: {user_text}\nAnswer: {assistant_text}"
+
+    def _format_prompt_only_for_model(self, user_text: str) -> str:
+        user_text = str(user_text).strip()
+
+        if not self._is_instruct_model():
+            return f"Question: {user_text}\nAnswer:"
+
+        try:
+            return self.tokenizer.apply_chat_template(
+                [{"role": "user", "content": user_text}],
+                tokenize=False,
+                add_generation_prompt=True,
+            )
+        except Exception as e:
+            self.logger.warning(
+                f"Failed to apply generation chat template for instruct model; falling back to plain prompt format. Error: {e}"
+            )
+            return f"Question: {user_text}\nAnswer:"
+
     def load_basis(self):
         try:
             self.logger.info(f"Loading basis from {self.basis_dir}...")
@@ -145,6 +193,9 @@ class Phase2ImportanceScorerPerLayer:
                 self.tokenizer.pad_token = self.tokenizer.eos_token
 
             self.logger.info("✓ Tokenizer loaded")
+            self.logger.info(
+                f"  - Input formatting: {'chat template' if self._is_instruct_model() else 'plain text'}"
+            )
 
         except Exception as e:
             self.logger.error(f"Failed to load model: {str(e)}", exc_info=True)
@@ -185,6 +236,7 @@ class Phase2ImportanceScorerPerLayer:
                 circuit_breakers_data = circuit_breakers_data[:max_samples]
 
             self.logger.info(f"✓ Loaded {len(circuit_breakers_data)} samples")
+            scorer = self
 
             class CircuitBreakersDataset(torch.utils.data.Dataset):
                 def __init__(self, data, tokenizer, max_length=1024):
@@ -199,7 +251,8 @@ class Phase2ImportanceScorerPerLayer:
                     item = self.data[idx]
                     prompt = item.get('prompt', '')
                     response = item.get('llama3_output', '')
-                    text = f"{prompt} {response}"
+                    prompt_text = scorer._format_prompt_only_for_model(prompt)
+                    text = scorer._format_text_for_model(prompt, response)
 
                     encoding = self.tokenizer(
                         text,
@@ -208,10 +261,22 @@ class Phase2ImportanceScorerPerLayer:
                         padding=False,
                         return_tensors='pt'
                     )
+                    prompt_encoding = self.tokenizer(
+                        prompt_text,
+                        max_length=self.max_length,
+                        truncation=True,
+                        padding=False,
+                        return_tensors='pt'
+                    )
+
+                    labels = encoding['input_ids'].clone()
+                    prompt_length = prompt_encoding['input_ids'].size(1)
+                    labels[:, :prompt_length] = -100
 
                     return {
                         'input_ids': encoding['input_ids'].squeeze(0),
                         'attention_mask': encoding['attention_mask'].squeeze(0),
+                        'labels': labels.squeeze(0),
                     }
 
             max_length = getattr(self.args, 'max_length', 1024)
@@ -222,29 +287,42 @@ class Phase2ImportanceScorerPerLayer:
 
                 input_ids_list = []
                 attention_masks_list = []
+                labels_list = []
 
                 for item in batch:
                     input_ids = item['input_ids']
                     attention_mask = item['attention_mask']
+                    labels = item.get('labels')
 
                     padding_length = max_len - len(input_ids)
                     if padding_length > 0:
                         input_ids = torch.cat([
                             input_ids,
-                            torch.full((padding_length,), self.tokenizer.pad_token_id)
+                            torch.full((padding_length,), self.tokenizer.pad_token_id, dtype=input_ids.dtype)
                         ])
                         attention_mask = torch.cat([
                             attention_mask,
-                            torch.zeros(padding_length)
+                            torch.zeros(padding_length, dtype=attention_mask.dtype)
                         ])
+                        if labels is not None:
+                            labels = torch.cat([
+                                labels,
+                                torch.full((padding_length,), -100, dtype=labels.dtype)
+                            ])
 
                     input_ids_list.append(input_ids)
                     attention_masks_list.append(attention_mask)
+                    if labels is not None:
+                        labels_list.append(labels)
 
-                return {
+                batch_dict = {
                     'input_ids': torch.stack(input_ids_list),
                     'attention_mask': torch.stack(attention_masks_list),
                 }
+                if labels_list:
+                    batch_dict['labels'] = torch.stack(labels_list)
+
+                return batch_dict
 
             self.dataloader = DataLoader(
                 dataset,
@@ -255,6 +333,10 @@ class Phase2ImportanceScorerPerLayer:
             )
 
             self.logger.info(f"✓ Dataloader created ({len(self.dataloader)} batches)")
+            self.logger.info(
+                "  - Input format: "
+                f"{'chat template user/assistant pairs' if self._is_instruct_model() else 'Question/Answer text'}"
+            )
 
         except Exception as e:
             self.logger.error(f"Failed to load safety data: {str(e)}", exc_info=True)
@@ -297,7 +379,12 @@ class Phase2ImportanceScorerPerLayer:
                 try:
                     text = dataset[idx]['text']
                     if text.strip():
-                        texts.append(text)
+                        texts.append(
+                            self._format_text_for_model(
+                                "Please read and internalize the following reference text.",
+                                text,
+                            )
+                        )
                 except Exception as e:
                     self.logger.debug(f"Error processing sample {idx}: {e}")
                     continue
@@ -348,11 +435,11 @@ class Phase2ImportanceScorerPerLayer:
                     if padding_length > 0:
                         input_ids = torch.cat([
                             input_ids,
-                            torch.full((padding_length,), self.tokenizer.pad_token_id)
+                            torch.full((padding_length,), self.tokenizer.pad_token_id, dtype=input_ids.dtype)
                         ])
                         attention_mask = torch.cat([
                             attention_mask,
-                            torch.zeros(padding_length)
+                            torch.zeros(padding_length, dtype=attention_mask.dtype)
                         ])
                     
                     input_ids_list.append(input_ids)
@@ -373,6 +460,10 @@ class Phase2ImportanceScorerPerLayer:
             
             self.logger.info(f"✓ Dataloader created ({len(self.dataloader)} batches)")
             self.logger.info(f"  - Dataset type: Wikipedia (Utility)")
+            self.logger.info(
+                "  - Input format: "
+                f"{'chat template user/assistant pairs' if self._is_instruct_model() else 'plain Wikipedia text'}"
+            )
             self.logger.info(f"  - Batch size: {self.args.batch_size}")
             self.logger.info(f"  - Total batches: {len(self.dataloader)}")
         
@@ -484,7 +575,11 @@ class Phase2ImportanceScorerPerLayer:
             for batch_idx, batch in enumerate(progress_bar):
                 input_ids = batch['input_ids'].to(self.model.device)
                 attention_mask = batch['attention_mask'].to(self.model.device)
-                labels = input_ids.masked_fill(attention_mask == 0, -100)
+                labels = batch.get('labels')
+                if labels is not None:
+                    labels = labels.to(self.model.device)
+                else:
+                    labels = input_ids.masked_fill(attention_mask == 0, -100)
 
                 self.model.zero_grad(set_to_none=True)
                 outputs = self.model(
@@ -499,18 +594,13 @@ class Phase2ImportanceScorerPerLayer:
                 if valid_tokens > 0 and loss is not None and torch.isfinite(loss):
                     loss.backward()
 
-                    temp = OrderedDict()
-
                     for module in warp_modules:
                         if module.basis_coeff.grad is not None:
-                            grad_abs = module.basis_coeff.grad.abs().detach().cpu().float().numpy()
-                            temp[module] = grad_abs
-
-                    for module, grad_abs in temp.items():
-                        if module not in importances:
-                            importances[module] = grad_abs
-                        else:
-                            importances[module] += grad_abs
+                            grad_abs = module.basis_coeff.grad.detach().abs().float()
+                            if module not in importances:
+                                importances[module] = grad_abs.clone()
+                            else:
+                                importances[module].add_(grad_abs)
 
                     self.stats['total_samples'] += len(input_ids)
                     self.stats['total_tokens'] += int(valid_tokens)
@@ -615,7 +705,10 @@ class Phase2ImportanceScorerPerLayer:
                 target_module = self._get_target_module(layer, layer_type)
                 if isinstance(target_module, WaRPModule) and target_module in importances:
                     key = (layer_idx, layer_type)
-                    result[key] = importances[target_module]
+                    importance = importances[target_module]
+                    if torch.is_tensor(importance):
+                        importance = importance.detach().cpu().float().numpy()
+                    result[key] = importance
 
         return result
 

@@ -72,6 +72,8 @@ def parse_args():
                         help='Phase 2에서 layer별 keep_ratio 적용')
     parser.add_argument('--no_rotation', action='store_true',
                         help='Phase 2/3에서 Phase 1 basis 없이 no-rotation(identity basis) 실험 수행')
+    parser.add_argument('--original_space_mask', action='store_true',
+                        help='Phase 2/3에서 basis/WaRP 없이 original weight space importance mask 사용')
     
     # Phase 3 설정
     parser.add_argument('--masks_dir', type=str, default=None,
@@ -113,7 +115,7 @@ def parse_args():
                         help='Gradient accumulation 스텝 수 (Phase 3)')
     parser.add_argument('--warmup_ratio', type=float, default=0.1,
                         help='LR warmup 비율 (Phase 3)')
-    parser.add_argument('--lr_scheduler_type', type=str, default='linear',
+    parser.add_argument('--lr_scheduler_type', type=str, default='cosine',
                         help='LR scheduler 타입 (Phase 3)')
     parser.add_argument('--max_grad_norm', type=float, default=1.0,
                         help='Gradient clipping max norm (Phase 3)')
@@ -219,11 +221,14 @@ def run_phase2(args, logger):
         logger.error("Phase 2 requires --phase0_model_dir")
         raise ValueError("Missing --phase0_model_dir")
 
-    if (not args.no_rotation) and args.basis_dir is None:
+    if (not args.no_rotation) and (not args.original_space_mask) and args.basis_dir is None:
         logger.error("Phase 2 requires --basis_dir")
         raise ValueError("Missing --basis_dir")
 
-    if args.no_rotation:
+    if args.original_space_mask:
+        from models.phase2_importance_original_space import Phase2ImportanceOriginalSpace
+        scorer = Phase2ImportanceOriginalSpace(args, logger, args.basis_dir, args.phase0_model_dir)
+    elif args.no_rotation:
         from models.phase2_importance_per_layer_no_rotation import Phase2ImportanceScorerPerLayerNoRotation
         scorer = Phase2ImportanceScorerPerLayerNoRotation(args, logger, args.basis_dir, args.phase0_model_dir)
     elif args.perlayer:
@@ -281,7 +286,7 @@ def run_phase3(args, logger):
         logger.error("Phase 3 requires --phase0_model_dir")
         raise ValueError("Missing --phase0_model_dir")
     
-    if (not args.no_rotation) and args.basis_dir is None:
+    if (not args.no_rotation) and (not args.original_space_mask) and args.basis_dir is None:
         logger.error("Phase 3 requires --basis_dir")
         raise ValueError("Missing --basis_dir")
     
@@ -289,7 +294,9 @@ def run_phase3(args, logger):
         logger.error("Phase 3 requires --masks_dir")
         raise ValueError("Missing --masks_dir")
     
-    if args.no_rotation:
+    if args.original_space_mask:
+        from models.phase3_extra_learning_original_space import Phase3OriginalSpaceMaskedLearner as Phase3Learner
+    elif args.no_rotation:
         from models.phase3_extra_learning_no_rotation import Phase3IncrementalLearnerNoRotation as Phase3Learner
     elif args.non_freeze:
         from models.phase3_extra_learning_non_freeze import Phase3IncrementalLearnerNonFreeze as Phase3Learner
