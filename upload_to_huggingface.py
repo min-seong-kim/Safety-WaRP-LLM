@@ -14,7 +14,7 @@ python upload_phase3_to_hf.py \
 python upload_phase3_to_hf.py \
     --model_path ./checkpoints/phase3_non_freeze_20260413_214727/final_model \
     --repo_name kmseong/llama3.2_3b_base-WaRP-two-mask-utility-basis-gsm8k-FT-lr3e-5 \
-    --token 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
+    --token 
 
 python upload_phase3_to_hf.py \
     --model_path ./checkpoints/phase3_non_freeze_20260411_213252/final_model \
