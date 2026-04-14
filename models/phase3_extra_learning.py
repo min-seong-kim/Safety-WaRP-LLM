@@ -955,6 +955,19 @@ class Phase3IncrementalLearner:
             f"  - trainable(=0) grad |mean|: {trainable_mean:.6e}, nonzero ratio: {trainable_nonzero_ratio:.2f}%"
         )
 
+        try:
+            import wandb
+            if wandb.run is not None:
+                wandb.log({
+                    'warp/sanity_loss': loss.item(),
+                    'warp/sanity_masked_grad_mean': masked_mean,
+                    'warp/sanity_masked_nonzero_pct': masked_nonzero_ratio,
+                    'warp/sanity_trainable_grad_mean': trainable_mean,
+                    'warp/sanity_trainable_nonzero_pct': trainable_nonzero_ratio,
+                })
+        except Exception:
+            pass
+
         self.model.zero_grad(set_to_none=True)
 
     def _log_warp_parameter_delta_summary(self):
@@ -1012,6 +1025,18 @@ class Phase3IncrementalLearner:
                 "[WaRP-ParamCheck] trainable coefficients changed very little. "
                 "(learning rate/gradient 흐름 확인 필요)"
             )
+
+        try:
+            import wandb
+            if wandb.run is not None:
+                wandb.log({
+                    'warp/delta_masked_mean': masked_mean,
+                    'warp/delta_masked_changed_pct': masked_changed_ratio,
+                    'warp/delta_trainable_mean': trainable_mean,
+                    'warp/delta_trainable_changed_pct': trainable_changed_ratio,
+                })
+        except Exception:
+            pass
     
     def train(self):
         """
@@ -1111,7 +1136,32 @@ class Phase3IncrementalLearner:
             self.logger.info(f"  - LR scheduler: linear")
             self.logger.info(f"  - Checkpoint directory: {checkpoint_dir}")
             self.logger.info("="*70)
-            
+
+            # W&B: 세션 시작 시 config 로깅
+            try:
+                import wandb as _wb3
+                _wandb_enabled = _wb3.run is not None
+            except Exception:
+                _wandb_enabled = False
+
+            if _wandb_enabled:
+                try:
+                    import wandb
+                    wandb.log({
+                        'phase3/trainable_params': trainable_params,
+                        'phase3/total_params': total_params,
+                        'phase3/trainable_ratio_pct': trainable_params / max(total_params, 1) * 100,
+                        'phase3/frozen_params': total_params - trainable_params,
+                        'phase3/frozen_ratio_pct': (total_params - trainable_params) / max(total_params, 1) * 100,
+                        'phase3/dataset': phase3_dataset,
+                        'phase3/learning_rate': learning_rate,
+                        'phase3/epochs': epochs,
+                        'phase3/batch_size': batch_size,
+                        'phase3/grad_accum_steps': gradient_accumulation_steps,
+                    }, step=0)
+                except Exception:
+                    pass
+
             warmup_ratio = getattr(self.args, 'warmup_ratio', 0.1)
             lr_scheduler_type = getattr(self.args, 'lr_scheduler_type', 'cosine')
             max_grad_norm = getattr(self.args, 'max_grad_norm', 1.0)
@@ -1133,7 +1183,7 @@ class Phase3IncrementalLearner:
                 eval_strategy="no",
                 bf16=True if self.args.dtype == 'bfloat16' else False,
                 fp16=True if self.args.dtype == 'float16' else False,
-                report_to="none",
+                report_to="wandb" if _wandb_enabled else "none",
                 remove_unused_columns=False,
                 optim="adamw_torch",
                 gradient_checkpointing=gradient_checkpointing,

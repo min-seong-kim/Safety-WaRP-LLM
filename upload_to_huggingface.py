@@ -6,21 +6,25 @@ Phase 3 완료 후 만들어진 모델을 HuggingFace Hub에 업로드하는 스
 
 Usage:
 python upload_phase3_to_hf.py \
-    --model_path ./checkpoints/phase0_20260407_145653/final_model \
-    --repo_name kmseong/llama3.2_3b_new_SSFT_lr3e-5 \
-    --token <YOUR_HF_TOKEN>
+    --model_path ./checkpoints/phase0_20260411_234413 \
+    --repo_name kmseong/llama3.2_3b_instruct-Safety-FT-lr3e-5 \
+    --token 
+
 
 python upload_phase3_to_hf.py \
-    --model_path ./checkpoints/phase3_original_space_20260408_104628/final_model \
-    --repo_name kmseong/llama3.2-3b-WaRP-original-space-gsm8k-FT-lr1e-5
+    --model_path ./checkpoints/phase3_non_freeze_20260413_214727/final_model \
+    --repo_name kmseong/llama3.2_3b_base-WaRP-two-mask-utility-basis-gsm8k-FT-lr3e-5 \
+    --token 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
 
 python upload_phase3_to_hf.py \
-    --model_path ./checkpoints/phase3_original_space_20260408_105316/final_model \
-    --repo_name kmseong/llama3.2-3b-WaRP-original-space-gsm8k-FT-lr3e-5
+    --model_path ./checkpoints/phase3_non_freeze_20260411_213252/final_model \
+    --repo_name kmseong/llama3.2_3b_instruct-WaRP-safety-basis-MATH-FT-lr1e-7 \
+    --token 
 
 python upload_phase3_to_hf.py \
-    --model_path ./checkpoints/phase3_original_space_20260408_105959/final_model \
-    --repo_name kmseong/llama3.2-3b-WaRP-original-space-gsm8k-FT-lr5e-5
+    --model_path ./checkpoints/phase3_non_freeze_20260411_220817/final_model \
+    --repo_name kmseong/llama3.2_3b_instruct-WaRP-safety-basis-MATH-FT-lr5e-7 \
+    --token 
 
 """
 

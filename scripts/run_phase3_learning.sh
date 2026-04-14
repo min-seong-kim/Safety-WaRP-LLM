@@ -11,16 +11,16 @@ echo "========================================="
 
 # 이전 Phase 결과 경로 (로컬 디렉토리 또는 Hugging Face 모델 ID)
 # PHASE0_MODEL="./checkpoints/phase0_20260213_230047"  # 로컬 디렉토리 예시
-PHASE0_MODEL="kmseong/llama3.2_3b_new_SSFT_lr3e-5"
-BASIS_DIR="./checkpoints/phase1_20260407_154217/basis"
-MASKS_DIR="./checkpoints/phase2_20260407_161747/checkpoints/masks"
+PHASE0_MODEL="meta-llama/Llama-3.2-3B-instruct"  # Hugging Face 모델 ID 예시 (LLaMA 3.2 3B 베이스 모델)
+BASIS_DIR="./checkpoints/phase1_20260411_154900/basis"
+MASKS_DIR="./checkpoints/phase2_20260411_155712/checkpoints/masks"
 
 # ========================================
 # Dataset 선택 (CONFIGURE THIS)
 # ========================================
 # 옵션 1: GSM8K (Utility Learning) - SFTTrainer 방식
-DATASET="gsm8k"
-GSM8K_SAMPLES=0
+# DATASET="gsm8k"
+# GSM8K_SAMPLES=0
 
 # 옵션 2: Safety (Safety Learning) - phase0_SSFT 커스텀 루프 방식
 # DATASET="safety"
@@ -31,15 +31,16 @@ GSM8K_SAMPLES=0
 # METAMATH_SAMPLES=10000  # 0 = all samples
 
 # 옵션 4: Hendrycks MATH (Utility Learning) - SFTTrainer 방식
-# DATASET="math"
-# MATH_SAMPLES=0           # 0 = all samples
-# MATH_SUBJECTS="all"     # 예: Algebra,Geometry
-# MATH_LEVELS="all"       # 예: 1,2,3,4,5
+DATASET="math"
+MATH_SAMPLES=0           # 0 = all samples
+MATH_SUBJECTS="all"     # 예: Algebra,Geometry
+MATH_LEVELS="all"       # 예: 1,2,3,4,5
 # 
 # ========================================
 
 # 공통 학습 설정 (run_all 스타일)
-LR_LIST=("1e-5" "3e-5" "5e-5")
+# LR_LIST=("1e-6" "5e-6" "1e-7" "5e-7")  
+LR_LIST=("3e-5") 
 EPOCHS=3
 BATCH_SIZE=4
 GRAD_ACCUM=4

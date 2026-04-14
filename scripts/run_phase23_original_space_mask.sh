@@ -8,7 +8,7 @@
 
 set -e
 set -o pipefail
-export CUDA_VISIBLE_DEVICES=1
+export CUDA_VISIBLE_DEVICES=0
 
 echo "========================================================================"
 echo "Phase 2 + 3: Original-Space Importance Mask Pipeline"
@@ -19,16 +19,16 @@ echo ""
 # Configuration
 # ========================================================================
 
-PHASE0_MODEL="kmseong/llama3.2_3b_new_SSFT_lr3e-5"
+PHASE0_MODEL="meta-llama/Llama-3.2-3B"  # Phase 0 모델 (HF 모델 ID 또는 로컬 경로)
 
 # Phase 2 (importance)
-PHASE2_DATASET="circuit_breakers"   # circuit_breakers | wikipedia
+PHASE2_DATASET="wikipedia"   # circuit_breakers | wikipedia
 PHASE2_SAMPLES=4994
 PHASE2_WIKIPEDIA_SAMPLES=4994
 KEEP_RATIO=0.1
 
 # Phase 3 (downstream)
-PHASE3_DATASET="gsm8k"              # safety | gsm8k | metamath | math
+PHASE3_DATASET="safety"              # safety | gsm8k | metamath | math
 GSM8K_SAMPLES=0
 METAMATH_SAMPLES=0
 MATH_SAMPLES=0
@@ -38,7 +38,7 @@ CIRCUIT_BREAKERS_SAMPLES_PHASE3=4994
 
 # Common training
 EPOCHS=3
-LR_LIST=("1e-5" "3e-5" "5e-5")
+LR_LIST=("3e-5")
 BATCH_SIZE=4
 GRAD_ACCUM=4
 WARMUP_RATIO=0.1

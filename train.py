@@ -74,7 +74,21 @@ def parse_args():
                         help='Phase 2/3에서 Phase 1 basis 없이 no-rotation(identity basis) 실험 수행')
     parser.add_argument('--original_space_mask', action='store_true',
                         help='Phase 2/3에서 basis/WaRP 없이 original weight space importance mask 사용')
-    
+
+    # Phase 2 Two-Mask 설정
+    parser.add_argument('--two_mask', action='store_true',
+                        help=(
+                            '[Two-Mask] Phase 2에서 두 개의 importance mask를 계산하여 '
+                            'final_mask = preserve_mask AND NOT adapt_mask로 생성. '
+                            'adapt에도 중요한 파라미터를 Phase 3에서 학습 가능하게 허용.'
+                        ))
+    parser.add_argument('--adapt_dataset_phase2', type=str, default='gsm8k',
+                        choices=['gsm8k', 'math', 'metamath', 'wikipedia', 'safety'],
+                        help='[Two-Mask] Phase 2 adapt importance scoring용 데이터셋 '
+                             '(safety=circuit_breakers, 예: wikipedia mask - safety mask)')
+    parser.add_argument('--adapt_samples_phase2', type=int, default=0,
+                        help='[Two-Mask] adapt 데이터셋 샘플 수 (0=전체)')
+
     # Phase 3 설정
     parser.add_argument('--masks_dir', type=str, default=None,
                         help='Phase 2의 masks 디렉토리 경로 (Phase 3에서 사용)')
@@ -129,6 +143,21 @@ def parse_args():
                         help='Phase 3에서 WaRP 비적용 레이어를 포함해 나머지 파라미터도 학습')
     parser.add_argument('--gradient_checkpointing', action='store_true',
                         help='Phase 3에서 gradient checkpointing 사용 (비교 실험 시 freeze/non-freeze 동일하게 설정 권장)')
+
+    # LoRA 설정 (Phase 3)
+    parser.add_argument('--use_lora', action='store_true',
+                        help='Phase 3에서 full parameter tuning 대신 PEFT LoRA 사용 (--original_space_mask 와 함께 사용)')
+    parser.add_argument('--use_lora_warp_v2', action='store_true',
+                        help='[권장] Phase 3에서 WaRP-LoRA v2 사용: basis_coeff 공간에서 직접 LoRA + element-level mask 사전 제약')
+    parser.add_argument('--lora_rank', type=int, default=8,
+                        help='LoRA rank (기본값: 8)')
+    parser.add_argument('--lora_alpha', type=int, default=16,
+                        help='LoRA alpha (기본값: 16)')
+    parser.add_argument('--lora_dropout', type=float, default=0.05,
+                        help='LoRA dropout (기본값: 0.05)')
+    parser.add_argument('--lora_projection_interval', type=int, default=0,
+                        help='LoRA adapter를 mask에 투영하는 주기 (steps). '
+                             '0이면 학습 종료 후 1회만 투영 (기본값: 0)')
     
     # 레이어 설정
     parser.add_argument('--target_layers', type=str, default='all',
@@ -155,8 +184,15 @@ def parse_args():
                         help='시드값')
     parser.add_argument('--debug', action='store_true',
                         help='디버그 모드')
-    
-    
+
+    # W&B 설정
+    parser.add_argument('--wandb_project', type=str, default='Safety-WaRP-LLM',
+                        help='W&B 프로젝트 이름 (--no_wandb로 비활성화 가능)')
+    parser.add_argument('--wandb_run_name', type=str, default=None,
+                        help='W&B 실행 이름 (미지정 시 자동 생성)')
+    parser.add_argument('--no_wandb', action='store_true',
+                        help='W&B 로깅 비활성화')
+
     return parser.parse_args()
 
 
@@ -255,12 +291,23 @@ def run_phase2(args, logger):
     
     # ✅ Importance 계산 (eval 모드, optimizer.step 없음!)
     scorer.compute_importance()
-    
+
+    use_two_mask = getattr(args, 'two_mask', False)
+
+    if use_two_mask:
+        logger.info("="*70)
+        logger.info("[Two-Mask] Loading adapt dataset and computing adapt importance...")
+        logger.info(f"  adapt_dataset: {getattr(args, 'adapt_dataset_phase2', 'gsm8k')}")
+        logger.info(f"  adapt_samples: {getattr(args, 'adapt_samples_phase2', 0)} (0=all)")
+        logger.info("="*70)
+        scorer.load_adapt_data()
+        scorer.compute_adapt_importance()
+
     # 마스크 생성
-    scorer.generate_masks(keep_ratio=args.keep_ratio)
+    scorer.generate_masks(keep_ratio=args.keep_ratio, two_mask=use_two_mask)
     
     # 마스크 저장
-    masks_dir = scorer.save_masks()
+    masks_dir = scorer.save_masks(two_mask=use_two_mask)
     
     logger.info("="*70)
     logger.info(f"Phase 2 Completed!")
@@ -295,11 +342,20 @@ def run_phase3(args, logger):
         raise ValueError("Missing --masks_dir")
     
     if args.original_space_mask:
-        from models.phase3_extra_learning_original_space import Phase3OriginalSpaceMaskedLearner as Phase3Learner
+        if args.use_lora:
+            from models.phase3_extra_learning_lora import Phase3LoRAMaskedLearner as Phase3Learner
+        else:
+            from models.phase3_extra_learning_original_space import Phase3OriginalSpaceMaskedLearner as Phase3Learner
     elif args.no_rotation:
         from models.phase3_extra_learning_no_rotation import Phase3IncrementalLearnerNoRotation as Phase3Learner
     elif args.non_freeze:
         from models.phase3_extra_learning_non_freeze import Phase3IncrementalLearnerNonFreeze as Phase3Learner
+    elif args.use_lora_warp_v2:
+        # [v2, 권장] basis_coeff 공간 LoRA + element-level forward mask (진정한 pre-constraint)
+        from models.phase3_extra_learning_lora_warp_v2 import Phase3LoRAWaRPMaskedLearnerV2 as Phase3Learner
+    elif args.use_lora:
+        # [v1, 레거시] WaRP basis-rotated space mask + post-hoc LoRA projection
+        from models.phase3_extra_learning_lora_warp import Phase3LoRAWaRPMaskedLearner as Phase3Learner
     else:
         from models.phase3_extra_learning import Phase3IncrementalLearner as Phase3Learner
     
@@ -353,7 +409,22 @@ def main():
     logger.info(f"Layer types: {args.layer_type}")
     logger.info(f"Target layers: {args.target_layers}")
     logger.info("="*70)
-    
+
+    # W&B 초기화
+    if not getattr(args, 'no_wandb', False):
+        try:
+            import wandb
+            run_name = getattr(args, 'wandb_run_name', None) or f"phase{args.phase}_{timestamp}"
+            wandb.init(
+                project=getattr(args, 'wandb_project', 'Safety-WaRP-LLM'),
+                name=run_name,
+                config=vars(args),
+                reinit=True,
+            )
+            logger.info(f"✓ W&B initialized: project={getattr(args, 'wandb_project', 'Safety-WaRP-LLM')}, run={run_name}")
+        except Exception as e:
+            logger.warning(f"W&B 초기화 실패 (로깅 없이 계속): {e}")
+
     # Phase별 실행
     if args.phase == 0:
         run_phase0(args, logger)
@@ -369,6 +440,13 @@ def main():
     logger.info("="*70)
     logger.info("All tasks completed successfully!")
     logger.info("="*70)
+
+    try:
+        import wandb
+        if wandb.run is not None:
+            wandb.finish()
+    except Exception:
+        pass
 
 
 if __name__ == '__main__':

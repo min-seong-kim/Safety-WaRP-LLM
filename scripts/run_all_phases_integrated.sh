@@ -5,7 +5,8 @@
 # 
 # run_phase1_basis.sh, run_phase2_importance.sh, run_phase3_learning.sh를 통합
 # 한 번에 모든 phase를 순차적으로 실행
-
+source /home/yonsei_jong/miniconda3/etc/profile.d/conda.sh
+conda activate hb
 set -e  # Exit on error
 set -o pipefail  # Ensure failures are not hidden by tee pipelines
 export CUDA_VISIBLE_DEVICES=1
@@ -20,29 +21,35 @@ echo ""
 # ========================================================================
 
 # Phase 0 모델
-PHASE0_MODEL="meta-llama/Llama-3.2-3B-Instruct"
-# PHASE0_MODEL="kmseong/llama3.2_3b_new_SSFT_lr3e-5"
+PHASE0_MODEL="meta-llama/Llama-3.2-3B"  
+# PHASE0_MODEL="kmseong/llama3.2_3b_instruct-Safety-FT-lr3e-5"
 
 
 # Phase 1: Basis Construction
 # ==============================
 # Dataset 선택 (Safety 또는 Utility)
 # Options: circuit_breakers, wikipedia
-PHASE1_DATASET="circuit_breakers"
+PHASE1_DATASET="wikipedia"
 PHASE1_SAMPLES=4994
 
 
 # Phase 2: Importance Scoring
 # ==============================
 # Dataset 선택 (동일하게 사용)
-PHASE2_DATASET="circuit_breakers"
+PHASE2_DATASET="wikipedia"
 PHASE2_SAMPLES=4994
 KEEP_RATIO=0.1
+
+# Two-Mask 설정 (비활성화하려면 TWO_MASK="" 로 설정)
+# preserve_mask AND NOT adapt_mask → adapt에 중요한 파라미터는 Phase 3에서 학습 가능
+TWO_MASK="true"           # "" = 비활성화 (기본), "true" = 활성화
+ADAPT_DATASET="safety" # adapt 데이터셋: gsm8k, math, metamath, wikipedia, safety
+ADAPT_SAMPLES=4994       # 0=전체
 
 # Phase 3: Incremental Learning
 # ==============================
 # Dataset 선택 (Utility 또는 Safety)
-PHASE3_DATASET="math"  # Options: safety, gsm8k, metamath, math
+PHASE3_DATASET="safety" # Options: safety, gsm8k, metamath, math
 
 # Phase3=MATH 설정
 MATH_SUBJECTS="all"  # 예: Algebra,Geometry
@@ -159,6 +166,14 @@ else
     exit 1
 fi
 
+# Two-Mask 인자 구성
+if [ -n "$TWO_MASK" ]; then
+    TWO_MASK_ARG="--two_mask --adapt_dataset_phase2 $ADAPT_DATASET --adapt_samples_phase2 $ADAPT_SAMPLES"
+    echo "[Two-Mask] Enabled: adapt_dataset=$ADAPT_DATASET, adapt_samples=$ADAPT_SAMPLES"
+else
+    TWO_MASK_ARG=""
+fi
+
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 python train.py \
@@ -178,6 +193,7 @@ python train.py \
     --dtype $DTYPE \
     --seed 42 \
     --perlayer \
+    $TWO_MASK_ARG \
     2>&1 | tee $LOG_DIR/phase2_${TIMESTAMP}.log
 
 # Phase 2 출력 경로 추출 (최신 phase2 디렉토리 찾기)
@@ -288,7 +304,7 @@ done
 echo ""
 echo "⚙️  Training Configuration Summary:"
 echo "  - Phase 1 Dataset: $PHASE1_DATASET ($PHASE1_SAMPLES samples)"
-echo "  - Phase 2 Dataset: $PHASE2_DATASET ($PHASE2_SAMPLES samples)"
+echo "  - Phase 2 Dataset: $PHASE2_DATASET ($PHASE2_SAMPLES samples), Two-Mask: ${TWO_MASK:-disabled}"
 echo "  - Phase 3 Dataset: $PHASE3_DATASET ($PHASE3_SAMPLES samples)"
 echo "  - Keep Ratio:      $KEEP_RATIO"
 echo "  - Learning Rates:  ${LR_LIST[*]}"

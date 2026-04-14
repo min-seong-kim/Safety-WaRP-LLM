@@ -123,6 +123,32 @@ class Phase3IncrementalLearnerNonFreeze(Phase3IncrementalLearner):
             self.logger.info(f"  - Checkpoint directory: {checkpoint_dir}")
             self.logger.info("="*70)
 
+            # W&B: 세션 시작 시 config 로깅
+            try:
+                import wandb as _wb3nf
+                _wandb_enabled = _wb3nf.run is not None
+            except Exception:
+                _wandb_enabled = False
+
+            if _wandb_enabled:
+                try:
+                    import wandb
+                    wandb.log({
+                        'phase3/trainable_params': trainable_params,
+                        'phase3/total_params': total_params,
+                        'phase3/trainable_ratio_pct': trainable_params / max(total_params, 1) * 100,
+                        'phase3/masked_frozen_coeff_elems': masked_frozen_coeff_elems,
+                        'phase3/masked_total_coeff_elems': masked_total_coeff_elems,
+                        'phase3/dataset': phase3_dataset,
+                        'phase3/learning_rate': learning_rate,
+                        'phase3/epochs': epochs,
+                        'phase3/batch_size': batch_size,
+                        'phase3/grad_accum_steps': gradient_accumulation_steps,
+                        'phase3/mode': 'non_freeze',
+                    }, step=0)
+                except Exception:
+                    pass
+
             warmup_ratio = getattr(self.args, 'warmup_ratio', 0.1)
             lr_scheduler_type = getattr(self.args, 'lr_scheduler_type', 'cosine')
             max_grad_norm = getattr(self.args, 'max_grad_norm', 1.0)
@@ -143,7 +169,7 @@ class Phase3IncrementalLearnerNonFreeze(Phase3IncrementalLearner):
                 save_strategy="no",
                 eval_strategy="no",
                 bf16=True if self.args.dtype == 'bfloat16' else False,
-                report_to="none",
+                report_to="wandb" if _wandb_enabled else "none",
                 remove_unused_columns=False,
                 optim="adamw_torch",
                 gradient_checkpointing=gradient_checkpointing,

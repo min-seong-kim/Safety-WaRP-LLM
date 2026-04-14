@@ -47,6 +47,15 @@ echo ""
 
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
+# ========================================
+# Two-Mask 설정 (선택적)
+# ========================================
+# 활성화하려면 아래 주석 해제 후 ADAPT_DATASET, ADAPT_SAMPLES 설정:
+# TWO_MASK_FLAG="--two_mask --adapt_dataset_phase2 gsm8k --adapt_samples_phase2 0"
+# Options: gsm8k, math, metamath, wikipedia, safety
+TWO_MASK_FLAG=""  # 비어있으면 기본 single-mask
+# ========================================
+
 # 각 WaRP layer 별로 keep ratio 적용할 거면 --perlayer 옵션 추가
 # --layer_type attn_q,attn_k,attn_v,attn_o,ffn_gate,ffn_down,ffn_up
 python train.py \
@@ -65,7 +74,8 @@ python train.py \
     --device cuda \
     --dtype bfloat16 \
     --seed 42 \
-    --perlayer
+    --perlayer \
+    $TWO_MASK_FLAG
 
 echo ""
 echo "========================================="
