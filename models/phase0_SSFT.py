@@ -9,8 +9,8 @@ Goal:
   - Fine-tune all model parameters on the same safety dataset
 
 Usage:
-python models/phase0_SSFT.py --model_name meta-llama/Llama-3.2-3B
-python models/phase0_SSFT.py --model_name meta-llama/Llama-3.2-3B-Instruct
+python models/phase0_SSFT.py --model_name meta-llama/Llama-2-7b-hf
+python models/phase0_SSFT.py --model_name meta-llama/Llama-2-7b-chat-hf
 
 """
 
@@ -27,8 +27,21 @@ from tqdm import tqdm
 import logging
 import math
 
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+
+# 로거는 main()에서 setup_logger로 초기화됨
+# 모듈 레벨 fallback (직접 import 시)
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('safety_warp')
+
+# setup_logger 임포트 (train.py와 동일한 유틸)
+try:
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    from utils import setup_logger as _setup_logger
+except ImportError:
+    _setup_logger = None
+
+
 
 try:
     import wandb as _wandb
@@ -48,7 +61,7 @@ def _wb_log(metrics: dict, step: int = None):
 # =====================================================================
 # Configuration (matched to sn_tune.py)
 # =====================================================================
-MODEL_NAME = "meta-llama/Llama-3.2-3B-instruct"  # Base 모델 (Phase 0) - WaRP 제거 전 모델 사용
+MODEL_NAME = "meta-llama/Llama-3.1-8B"  # Base 모델 (Phase 0) - WaRP 제거 전 모델 사용
 
 LEARNING_RATE = 3e-5
 NUM_EPOCHS = 3
@@ -63,7 +76,8 @@ DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 
 def is_instruct_model(model_name: str) -> bool:
-    return "instruct" in str(model_name).lower()
+    model_ref = model_name.lower()
+    return any(tag in model_ref for tag in ('instruct', 'chat'))
 
 
 # =====================================================================
@@ -346,6 +360,8 @@ def parse_args(argv):
                         help='W&B 실행 이름 (미지정 시 자동 생성)')
     parser.add_argument('--no_wandb', action='store_true',
                         help='W&B 로깅 비활성화')
+    parser.add_argument('--log_dir', type=str, default='./logs',
+                        help='로그 파일 저장 디렉토리')
     return parser.parse_args(argv)
 
 
@@ -353,10 +369,31 @@ def parse_args(argv):
 # Main
 # =====================================================================
 def main(argv):
+    global logger
     args = parse_args(argv)
     safety_dataset_json = args.dataset_json
     model_name = args.model_name
     output_dir = args.output_dir or build_output_dir()
+
+    # 로그 파일 설정
+    log_dir = getattr(args, 'log_dir', './logs')
+    os.makedirs(log_dir, exist_ok=True)
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    log_file = os.path.join(log_dir, f'phase0_{timestamp}.log')
+    if _setup_logger is not None:
+        logger = _setup_logger('safety_warp', log_file=log_file)
+    else:
+        logging.basicConfig(
+            level=logging.INFO,
+            format='[%(asctime)s] [%(name)s] [%(levelname)s] %(message)s',
+            datefmt='%Y-%m-%d %H:%M:%S',
+            handlers=[
+                logging.StreamHandler(),
+                logging.FileHandler(log_file),
+            ],
+        )
+        logger = logging.getLogger('safety_warp')
+    logger.info(f'Log file: {log_file}')
 
     if not os.path.exists(safety_dataset_json):
         logger.error(f"Safety dataset file not found: {safety_dataset_json}")
@@ -409,6 +446,7 @@ def main(argv):
     model = AutoModelForCausalLM.from_pretrained(
         model_name,
         torch_dtype=torch.bfloat16,
+        device_map="auto",
         trust_remote_code=True,
     )
     logger.info("✓ Model and tokenizer loaded (bfloat16)")

@@ -126,7 +126,7 @@ class Phase2ImportanceOriginalSpace(Phase2ImportanceScorerPerLayer):
             self.logger.error(f"Failed to compute importance (original space): {str(e)}", exc_info=True)
             raise
 
-    def generate_masks(self, keep_ratio=0.1):
+    def generate_masks(self, keep_ratio=0.1, **kwargs):
         """각 layer별 keep_ratio로 mask 생성 (mask=1: freeze)."""
         try:
             self.logger.info("=" * 70)
@@ -155,7 +155,7 @@ class Phase2ImportanceOriginalSpace(Phase2ImportanceScorerPerLayer):
             self.logger.error(f"Failed to generate masks (original space): {str(e)}", exc_info=True)
             raise
 
-    def save_masks(self):
+    def save_masks(self, **kwargs):
         """mask 저장 (Phase3 original-space learner에서 사용)."""
         try:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")

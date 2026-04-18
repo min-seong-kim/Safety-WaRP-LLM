@@ -21,35 +21,34 @@ echo ""
 # ========================================================================
 
 # Phase 0 모델
-PHASE0_MODEL="meta-llama/Llama-3.2-3B"  
-# PHASE0_MODEL="kmseong/llama3.2_3b_instruct-Safety-FT-lr3e-5"
+PHASE0_MODEL="./checkpoints/phase0_20260417_114858"  
 
 
 # Phase 1: Basis Construction
 # ==============================
 # Dataset 선택 (Safety 또는 Utility)
 # Options: circuit_breakers, wikipedia
-PHASE1_DATASET="wikipedia"
+PHASE1_DATASET="circuit_breakers"
 PHASE1_SAMPLES=4994
 
 
 # Phase 2: Importance Scoring
 # ==============================
 # Dataset 선택 (동일하게 사용)
-PHASE2_DATASET="wikipedia"
+PHASE2_DATASET="circuit_breakers"
 PHASE2_SAMPLES=4994
 KEEP_RATIO=0.1
 
 # Two-Mask 설정 (비활성화하려면 TWO_MASK="" 로 설정)
 # preserve_mask AND NOT adapt_mask → adapt에 중요한 파라미터는 Phase 3에서 학습 가능
-TWO_MASK="true"           # "" = 비활성화 (기본), "true" = 활성화
+TWO_MASK=""           # "" = 비활성화 (기본), "true" = 활성화
 ADAPT_DATASET="safety" # adapt 데이터셋: gsm8k, math, metamath, wikipedia, safety
 ADAPT_SAMPLES=4994       # 0=전체
 
 # Phase 3: Incremental Learning
 # ==============================
 # Dataset 선택 (Utility 또는 Safety)
-PHASE3_DATASET="safety" # Options: safety, gsm8k, metamath, math
+PHASE3_DATASET="gsm8k" # Options: safety, gsm8k, metamath, math
 
 # Phase3=MATH 설정
 MATH_SUBJECTS="all"  # 예: Algebra,Geometry
@@ -251,8 +250,8 @@ for LEARNING_RATE in "${LR_LIST[@]}"; do
         $PHASE3_DATASET_ARG \
         --epochs $EPOCHS \
         --utility_lr $LEARNING_RATE \
-        --batch_size $BATCH_SIZE \
-        --gradient_accumulation_steps 4 \
+        --batch_size 1 \
+        --gradient_accumulation_steps 16 \
         --layer_type "$LAYER_TYPE" \
         --target_layers $TARGET_LAYERS \
         --output_dir $BASE_OUTPUT_DIR \

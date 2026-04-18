@@ -6,19 +6,19 @@ Phase 3 완료 후 만들어진 모델을 HuggingFace Hub에 업로드하는 스
 
 Usage:
 python upload_phase3_to_hf.py \
-    --model_path ./checkpoints/phase0_20260411_234413 \
-    --repo_name kmseong/llama3.2_3b_instruct-Safety-FT-lr3e-5 \
+    --model_path ./checkpoints/phase0_20260417_114858 \
+    --repo_name kmseong/llama2_7b-chat-Safety-FT-lr3e-5 \
     --token 
 
 
 python upload_phase3_to_hf.py \
-    --model_path ./checkpoints/phase3_non_freeze_20260413_214727/final_model \
-    --repo_name kmseong/llama3.2_3b_base-WaRP-two-mask-utility-basis-gsm8k-FT-lr3e-5 \
-    --token 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
+    --model_path ./checkpoints/phase3_non_freeze_20260417_145847/final_model \
+    --repo_name kmseong/llama2_7B_chat_SSFT_WaRP_safety_basis_gsm8k_FT_lr3e-5 \
+    --token 
 
 python upload_phase3_to_hf.py \
-    --model_path ./checkpoints/phase3_non_freeze_20260411_213252/final_model \
-    --repo_name kmseong/llama3.2_3b_instruct-WaRP-safety-basis-MATH-FT-lr1e-7 \
+    --model_path ./checkpoints/phase3_non_freeze_20260417_141058/final_model \
+    --repo_name kmseong/llama2_7B_SSFT_WaRP_safety_basis_gsm8k_FT_lr3e-5 \
     --token 
 
 python upload_phase3_to_hf.py \

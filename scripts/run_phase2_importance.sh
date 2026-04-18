@@ -13,8 +13,8 @@ echo "========================================="
 
 # Phase 0, 1 결과 경로
 # PHASE0_MODEL="./checkpoints/phase0_20260213_230047"  # 로컬 디렉토리 예시
-PHASE0_MODEL="kmseong/llama3.2_3b_new_SSFT_lr3e-5"
-BASIS_DIR="./checkpoints/phase1_20260407_154217/basis"
+PHASE0_MODEL="kmseong/llama2_7b-chat-Safety-FT-lr3e-5"
+BASIS_DIR="/NHNHOME/0226010080_A/kms/phase1_20260417_130943/basis"
 
 # ========================================
 # Dataset 선택 (수정 필요)

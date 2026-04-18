@@ -135,7 +135,8 @@ class Phase1BasisBuilder:
             getattr(self.args, 'model_name', None)
             or getattr(self.args, 'phase0_model_dir', '')
         )
-        return 'instruct' in model_ref.lower()
+        model_ref = model_ref.lower()
+        return any(tag in model_ref for tag in ('instruct', 'chat'))
 
     def _format_phase1_text(self, user_text: str, assistant_text: str = None) -> str:
         user_text = str(user_text).strip()

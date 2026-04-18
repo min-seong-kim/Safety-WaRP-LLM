@@ -68,7 +68,8 @@ class Phase3IncrementalLearner:
         }
 
     def _is_instruct_model(self) -> bool:
-        return 'instruct' in str(self.phase0_model_dir).lower()
+        model_ref = self.phase0_model_dir.lower()
+        return any(tag in model_ref for tag in ('instruct', 'chat'))
 
     def _build_question_answer_prompt(self, question: str) -> str:
         return f"Question: {question.strip()}\nAnswer:"
@@ -363,20 +364,20 @@ class Phase3IncrementalLearner:
                 self.logger.info(f"✓ Using all {len(dataset)} samples (gsm8k_samples=0 or not specified)")
             
             max_length = getattr(self.args, 'max_length', 1024)
-            # Always disable multiprocessing here to avoid CUDA fork issues.
-            num_proc = None
 
-            def preprocess(ex):
+            tokenized_data = []
+            for ex in dataset:
                 question = ex.get("question", "")
                 answer = ex.get("answer", "")
-                return self._tokenize_question_answer_example(question, answer, max_length=max_length)
+                tokenized_data.append(self._tokenize_question_answer_example(question, answer, max_length=max_length))
 
-            self.dataset = dataset.map(
-                preprocess,
-                remove_columns=dataset.column_names,
-                num_proc=num_proc,
-                desc="Tokenizing train",
-            )
+            from datasets import Dataset as HFDataset
+            self.dataset = HFDataset.from_dict({
+                "input_ids": [d["input_ids"] for d in tokenized_data],
+                "attention_mask": [d["attention_mask"] for d in tokenized_data],
+                "labels": [d["labels"] for d in tokenized_data],
+            })
+            del tokenized_data
             
             self.logger.info(f"✓ Dataset created ({len(self.dataset)} samples)")
             
@@ -409,19 +410,20 @@ class Phase3IncrementalLearner:
                 self.logger.info(f"✓ Using all {len(dataset)} samples (metamath_samples=0 or not specified)")
 
             max_length = getattr(self.args, 'max_length', 1024)
-            num_proc = None
 
-            def preprocess_metamath(ex):
+            tokenized_data = []
+            for ex in dataset:
                 query = ex.get("query", "")
                 response = ex.get("response", "")
-                return self._tokenize_question_answer_example(query, response, max_length=max_length)
+                tokenized_data.append(self._tokenize_question_answer_example(query, response, max_length=max_length))
 
-            self.dataset = dataset.map(
-                preprocess_metamath,
-                remove_columns=dataset.column_names,
-                num_proc=num_proc,
-                desc="Tokenizing MetaMath",
-            )
+            from datasets import Dataset as HFDataset
+            self.dataset = HFDataset.from_dict({
+                "input_ids": [d["input_ids"] for d in tokenized_data],
+                "attention_mask": [d["attention_mask"] for d in tokenized_data],
+                "labels": [d["labels"] for d in tokenized_data],
+            })
+            del tokenized_data
 
             self.logger.info(f"✓ MetaMath dataset created ({len(self.dataset)} samples)")
 
@@ -677,27 +679,23 @@ class Phase3IncrementalLearner:
             max_length = getattr(self.args, 'max_length', 1024)
             train_on_mixed_formats = bool(getattr(self.args, 'math_train_on_mixed_formats', False))
             seed = int(getattr(self.args, 'seed', 42))
-            num_proc = None
-
-            def tokenize_math_example(ex, idx: int) -> Dict[str, List[int]]:
+            tokenized_data = []
+            for idx, ex in enumerate(dataset):
                 problem = ex.get("problem", "").strip()
                 solution = ex.get("solution", "").strip()
                 rng = random.Random(seed + idx)
-
                 target_text = _build_target(solution, rng, train_on_mixed_formats)
-                return self._tokenize_question_answer_example(
-                    problem,
-                    target_text,
-                    max_length=max_length,
-                )
+                tokenized_data.append(self._tokenize_question_answer_example(
+                    problem, target_text, max_length=max_length,
+                ))
 
-            self.dataset = dataset.map(
-                tokenize_math_example,
-                with_indices=True,
-                remove_columns=dataset.column_names,
-                num_proc=num_proc,
-                desc="Tokenizing Hendrycks MATH",
-            )
+            from datasets import Dataset as HFDataset
+            self.dataset = HFDataset.from_dict({
+                "input_ids": [d["input_ids"] for d in tokenized_data],
+                "attention_mask": [d["attention_mask"] for d in tokenized_data],
+                "labels": [d["labels"] for d in tokenized_data],
+            })
+            del tokenized_data
 
             self.logger.info(f"✓ Hendrycks MATH dataset created ({len(self.dataset)} samples)")
             self.logger.info(f"  - Subjects: {subjects_arg}")
@@ -1133,7 +1131,7 @@ class Phase3IncrementalLearner:
             self.logger.info(f"  - Effective batch size: {batch_size * gradient_accumulation_steps}")
             self.logger.info(f"  - Max gradient norm: 1.0")
             self.logger.info(f"  - Optimizer: adamw_torch")
-            self.logger.info(f"  - LR scheduler: linear")
+            self.logger.info(f"  - LR scheduler: cosine")
             self.logger.info(f"  - Checkpoint directory: {checkpoint_dir}")
             self.logger.info("="*70)
 

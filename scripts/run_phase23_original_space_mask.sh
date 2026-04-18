@@ -19,16 +19,16 @@ echo ""
 # Configuration
 # ========================================================================
 
-PHASE0_MODEL="meta-llama/Llama-3.2-3B"  # Phase 0 모델 (HF 모델 ID 또는 로컬 경로)
+PHASE0_MODEL="kmseong/llama3.1_8b_base-Safety-FT-lr3e-5"  # Phase 0 모델 (HF 모델 ID 또는 로컬 경로)
 
 # Phase 2 (importance)
-PHASE2_DATASET="wikipedia"   # circuit_breakers | wikipedia
+PHASE2_DATASET="circuit_breakers"   # circuit_breakers | wikipedia
 PHASE2_SAMPLES=4994
 PHASE2_WIKIPEDIA_SAMPLES=4994
 KEEP_RATIO=0.1
 
 # Phase 3 (downstream)
-PHASE3_DATASET="safety"              # safety | gsm8k | metamath | math
+PHASE3_DATASET="gsm8k"              # safety | gsm8k | metamath | math
 GSM8K_SAMPLES=0
 METAMATH_SAMPLES=0
 MATH_SAMPLES=0

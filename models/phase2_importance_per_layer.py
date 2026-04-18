@@ -85,7 +85,8 @@ class Phase2ImportanceScorerPerLayer:
         }
 
     def _is_instruct_model(self):
-        return 'instruct' in str(self.phase0_model_dir).lower()
+        model_ref = self.phase0_model_dir.lower()
+        return any(tag in model_ref for tag in ('instruct', 'chat'))
 
     def _format_text_for_model(self, user_text: str, assistant_text: str = None) -> str:
         user_text = str(user_text).strip()

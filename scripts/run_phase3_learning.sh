@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # Phase 3: Incremental Learning
-
 set -e
 set -o pipefail
 
@@ -11,16 +10,20 @@ echo "========================================="
 
 # 이전 Phase 결과 경로 (로컬 디렉토리 또는 Hugging Face 모델 ID)
 # PHASE0_MODEL="./checkpoints/phase0_20260213_230047"  # 로컬 디렉토리 예시
-PHASE0_MODEL="meta-llama/Llama-3.2-3B-instruct"  # Hugging Face 모델 ID 예시 (LLaMA 3.2 3B 베이스 모델)
-BASIS_DIR="./checkpoints/phase1_20260411_154900/basis"
-MASKS_DIR="./checkpoints/phase2_20260411_155712/checkpoints/masks"
+PHASE0_MODEL="kmseong/llama2_7b-chat-Safety-FT-lr3e-5"
+BASIS_DIR="/NHNHOME/0226010080_A/kms/phase1_20260417_130943/basis"
+MASKS_DIR="./checkpoints/phase2_20260417_135720/checkpoints/masks"
+
+# PHASE0_MODEL="kmseong/llama2_7b-Safety-FT-lr3e-5"
+# BASIS_DIR="/NHNHOME/0226010080_A/kms/phase1_20260417_130853/basis"
+# MASKS_DIR="./checkpoints/phase2_20260417_135654/checkpoints/masks"
 
 # ========================================
 # Dataset 선택 (CONFIGURE THIS)
 # ========================================
 # 옵션 1: GSM8K (Utility Learning) - SFTTrainer 방식
-# DATASET="gsm8k"
-# GSM8K_SAMPLES=0
+DATASET="gsm8k"
+GSM8K_SAMPLES=0
 
 # 옵션 2: Safety (Safety Learning) - phase0_SSFT 커스텀 루프 방식
 # DATASET="safety"
@@ -31,10 +34,10 @@ MASKS_DIR="./checkpoints/phase2_20260411_155712/checkpoints/masks"
 # METAMATH_SAMPLES=10000  # 0 = all samples
 
 # 옵션 4: Hendrycks MATH (Utility Learning) - SFTTrainer 방식
-DATASET="math"
-MATH_SAMPLES=0           # 0 = all samples
-MATH_SUBJECTS="all"     # 예: Algebra,Geometry
-MATH_LEVELS="all"       # 예: 1,2,3,4,5
+# DATASET="math"
+# MATH_SAMPLES=0           # 0 = all samples
+# MATH_SUBJECTS="all"     # 예: Algebra,Geometry
+# MATH_LEVELS="all"       # 예: 1,2,3,4,5
 # 
 # ========================================
 
@@ -52,6 +55,8 @@ TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 
 # non_freeze 모드를 끄고 싶으면 빈 문자열로 변경
 NON_FREEZE_FLAG="--non_freeze"
+
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 mkdir -p "$LOG_DIR"
 
@@ -132,7 +137,8 @@ for LEARNING_RATE in "${LR_LIST[@]}"; do
         --device cuda \
         --dtype bfloat16 \
         --seed 42 \
-        $NON_FREEZE_FLAG \
+        --gradient_checkpointing \
+        --non_freeze \
         2>&1 | tee "$LOG_FILE"
 
     PHASE3_OUTPUT_DIR=$(find "$OUTPUT_DIR" -maxdepth 1 -name "phase3_*" -type d -printf '%T@ %p\n' | sort -rn | head -1 | cut -d' ' -f2-)
@@ -154,26 +160,4 @@ for dir in "${PHASE3_OUTPUT_DIRS[@]}"; do
 done
 echo "로그: $LOG_DIR/phase3_${DATASET}_lr*_${TIMESTAMP}.log"
 echo ""
-if [ "$DATASET" = "safety" ]; then
-    echo "✅ Safety dataset used with phase0_SSFT training loop"
-    echo "   - Custom training loop (AdamW8bit, gradient clipping)"
-    echo "   - Hyperparameters: LR sweep (${LR_LIST[*]}), Epochs=$EPOCHS, Batch=$BATCH_SIZE, GradAccum=$GRAD_ACCUM"
-    echo "   - WaRP masking: basis_coeff만 학습 가능"
-elif [ "$DATASET" = "gsm8k" ]; then
-    echo "✅ GSM8K dataset used with SFTTrainer"
-    echo "   - HuggingFace Trainer-based training loop"
-    echo "   - Hyperparameters: LR sweep (${LR_LIST[*]}), Epochs=$EPOCHS, Batch=$BATCH_SIZE, GradAccum=$GRAD_ACCUM"
-    echo "   - WaRP masking: basis_coeff만 학습 가능"
-elif [ "$DATASET" = "metamath" ]; then
-    echo "✅ MetaMath dataset used with SFTTrainer"
-    echo "   - HuggingFace Trainer-based training loop"
-    echo "   - Hyperparameters: LR sweep (${LR_LIST[*]}), Epochs=$EPOCHS, Batch=$BATCH_SIZE, GradAccum=$GRAD_ACCUM"
-    echo "   - WaRP masking: basis_coeff만 학습 가능"
-elif [ "$DATASET" = "math" ]; then
-    echo "✅ Hendrycks MATH dataset used with SFTTrainer"
-    echo "   - HuggingFace Trainer-based training loop"
-    echo "   - Hyperparameters: LR sweep (${LR_LIST[*]}), Epochs=$EPOCHS, Batch=$BATCH_SIZE, GradAccum=$GRAD_ACCUM"
-    echo "   - Subject filter: $MATH_SUBJECTS, Level filter: $MATH_LEVELS"
-    echo "   - WaRP masking: basis_coeff만 학습 가능"
-fi
 echo "========================================="
