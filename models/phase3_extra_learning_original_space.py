@@ -16,8 +16,32 @@ from typing import Dict, List
 import numpy as np
 import torch
 from torch.utils.data import DataLoader
+from transformers import TrainerCallback
 
 from .phase3_extra_learning import Phase3IncrementalLearner
+
+
+class OriginalSpaceMaskRestoreCallback(TrainerCallback):
+    """
+    Restores frozen weight elements (mask=1) after every optimizer step.
+
+    gradient hooks zero out the gradient for mask=1 positions, but AdamW
+    weight decay (λθ) is applied independently and still modifies those
+    elements each step. This callback saves the initial frozen values at
+    construction time and writes them back after every optimizer.step(),
+    guaranteeing true parameter freeze for mask=1 positions.
+    """
+
+    def __init__(self, frozen_weight_specs):
+        # frozen_weight_specs: list of (param, bool_mask, frozen_vals)
+        self._specs = frozen_weight_specs
+
+    def on_step_end(self, args, state, control, **kwargs):
+        """Called after each optimizer step — restore frozen weight elements."""
+        for param, mask, frozen_vals in self._specs:
+            with torch.no_grad():
+                param.data[mask] = frozen_vals
+        return control
 
 
 class Phase3OriginalSpaceMaskedLearner(Phase3IncrementalLearner):
@@ -26,6 +50,7 @@ class Phase3OriginalSpaceMaskedLearner(Phase3IncrementalLearner):
     def __init__(self, args, logger, basis_dir, masks_dir, phase0_model_dir):
         super().__init__(args, logger, basis_dir, masks_dir, phase0_model_dir)
         self.grad_hooks = []
+        self.frozen_weight_specs = []  # (param, bool_mask, frozen_vals) for RestoreCallback
 
     def load_basis(self):
         """No-basis 모드: basis 로드 생략."""
@@ -132,6 +157,11 @@ class Phase3OriginalSpaceMaskedLearner(Phase3IncrementalLearner):
                     self.grad_hooks.append(handle)
                     hook_count += 1
 
+                    # Save frozen values for weight-decay restore callback
+                    with torch.no_grad():
+                        frozen_vals = param.data[mask].clone()
+                    self.frozen_weight_specs.append((param, mask, frozen_vals))
+
                     fcnt = int(mask.sum().item())
                     tcnt = int(mask.numel())
                     frozen_weights += fcnt
@@ -236,12 +266,19 @@ class Phase3OriginalSpaceMaskedLearner(Phase3IncrementalLearner):
         data_collator = DataCollatorForCausalLMWithPadding(self.tokenizer)
         self.model.train()
 
+        restore_callback = OriginalSpaceMaskRestoreCallback(self.frozen_weight_specs)
+        self.logger.info(
+            f"[OriginalSpaceMaskRestoreCallback] registered {len(self.frozen_weight_specs)} "
+            f"param tensors for post-step weight-decay restore"
+        )
+
         trainer = Trainer(
             model=self.model,
             args=training_args,
             train_dataset=self.dataset,
             data_collator=data_collator,
             tokenizer=self.tokenizer,
+            callbacks=[restore_callback],
         )
 
         if phase3_dataset == 'safety':

@@ -9,7 +9,7 @@ Goal:
   - Fine-tune all model parameters on the same safety dataset
 
 Usage:
-python models/phase0_SSFT.py --model_name meta-llama/Llama-2-7b-hf
+python models/phase0_SSFT.py --model_name meta-llama/Llama-3.1-8B-Instruct
 python models/phase0_SSFT.py --model_name meta-llama/Llama-2-7b-chat-hf
 
 """
@@ -34,29 +34,6 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('safety_warp')
 
-# setup_logger 임포트 (train.py와 동일한 유틸)
-try:
-    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    from utils import setup_logger as _setup_logger
-except ImportError:
-    _setup_logger = None
-
-
-
-try:
-    import wandb as _wandb
-except ImportError:
-    _wandb = None
-
-
-def _wb_log(metrics: dict, step: int = None):
-    """wandb.run이 활성화된 경우에만 로깅. 실패해도 무시."""
-    try:
-        if _wandb is not None and _wandb.run is not None:
-            _wandb.log(metrics, step=step)
-    except Exception:
-        pass
-
 
 # =====================================================================
 # Configuration (matched to sn_tune.py)
@@ -73,6 +50,43 @@ MAX_SAMPLES = 4994
 CHECKPOINTS_DIR = "./checkpoints"
 DATASET_DEFAULT = "./data/circuit_breakers_train.json"
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+
+# LoRA 하이퍼파라미터 기본값
+LORA_R = 16
+LORA_ALPHA = 32
+LORA_DROPOUT = 0.05
+LORA_TARGET_MODULES = ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+
+
+# setup_logger 임포트 (train.py와 동일한 유틸)
+try:
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    from utils import setup_logger as _setup_logger
+except ImportError:
+    _setup_logger = None
+
+
+
+try:
+    import wandb as _wandb
+except ImportError:
+    _wandb = None
+
+try:
+    from peft import LoraConfig, get_peft_model, TaskType
+    _peft_available = True
+except ImportError:
+    _peft_available = False
+
+
+def _wb_log(metrics: dict, step: int = None):
+    """wandb.run이 활성화된 경우에만 로깅. 실패해도 무시."""
+    try:
+        if _wandb is not None and _wandb.run is not None:
+            _wandb.log(metrics, step=step)
+    except Exception:
+        pass
+
 
 
 def is_instruct_model(model_name: str) -> bool:
@@ -327,9 +341,10 @@ def save_model_and_tokenizer(model, tokenizer, save_path):
     logger.info(f"Model and tokenizer saved to {save_path}")
 
 
-def build_output_dir(base_dir=CHECKPOINTS_DIR):
+def build_output_dir(base_dir=CHECKPOINTS_DIR, use_lora=False):
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    return os.path.join(base_dir, f"phase0_{timestamp}")
+    prefix = "phase0_lora" if use_lora else "phase0"
+    return os.path.join(base_dir, f"{prefix}_{timestamp}")
 
 
 def parse_args(argv):
@@ -362,6 +377,18 @@ def parse_args(argv):
                         help='W&B 로깅 비활성화')
     parser.add_argument('--log_dir', type=str, default='./logs',
                         help='로그 파일 저장 디렉토리')
+    # LoRA 옵션
+    parser.add_argument('--lora', action='store_true',
+                        help='LoRA를 사용하여 학습 (peft 필요)')
+    parser.add_argument('--lora_r', type=int, default=LORA_R,
+                        help=f'LoRA rank (default: {LORA_R})')
+    parser.add_argument('--lora_alpha', type=int, default=LORA_ALPHA,
+                        help=f'LoRA alpha (default: {LORA_ALPHA})')
+    parser.add_argument('--lora_dropout', type=float, default=LORA_DROPOUT,
+                        help=f'LoRA dropout (default: {LORA_DROPOUT})')
+    parser.add_argument('--lora_target_modules', type=str, nargs='+',
+                        default=LORA_TARGET_MODULES,
+                        help='LoRA를 적용할 모듈 이름 목록')
     return parser.parse_args(argv)
 
 
@@ -373,7 +400,7 @@ def main(argv):
     args = parse_args(argv)
     safety_dataset_json = args.dataset_json
     model_name = args.model_name
-    output_dir = args.output_dir or build_output_dir()
+    output_dir = args.output_dir or build_output_dir(use_lora=args.lora)
 
     # 로그 파일 설정
     log_dir = getattr(args, 'log_dir', './logs')
@@ -431,6 +458,10 @@ def main(argv):
                     'max_seq_length': MAX_SEQ_LENGTH,
                     'max_samples': MAX_SAMPLES,
                     'dataset': safety_dataset_json,
+                    'lora': args.lora,
+                    'lora_r': args.lora_r if args.lora else None,
+                    'lora_alpha': args.lora_alpha if args.lora else None,
+                    'lora_dropout': args.lora_dropout if args.lora else None,
                 },
                 reinit=True,
             )
@@ -450,6 +481,23 @@ def main(argv):
         trust_remote_code=True,
     )
     logger.info("✓ Model and tokenizer loaded (bfloat16)")
+
+    # LoRA 적용
+    if args.lora:
+        if not _peft_available:
+            logger.error("peft 라이브러리가 설치되지 않았습니다. 'pip install peft'를 실행하세요.")
+            sys.exit(1)
+        lora_config = LoraConfig(
+            task_type=TaskType.CAUSAL_LM,
+            r=args.lora_r,
+            lora_alpha=args.lora_alpha,
+            lora_dropout=args.lora_dropout,
+            target_modules=args.lora_target_modules,
+            bias="none",
+        )
+        model = get_peft_model(model, lora_config)
+        logger.info(f"✓ LoRA 적용: r={args.lora_r}, alpha={args.lora_alpha}, "
+                    f"dropout={args.lora_dropout}, target_modules={args.lora_target_modules}")
 
     total_params = sum(p.numel() for p in model.parameters())
     trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
@@ -494,7 +542,9 @@ def main(argv):
     logger.info(f"\n{'=' * 70}")
     logger.info("Base Model Safety FT Complete!")
     logger.info(f"{'=' * 70}")
-    logger.info(f"Fine-tuned model saved to: {output_dir}")
+    logger.info(f"Fine-tuned model saved to: {output_dir}")    
+    if args.lora:
+        logger.info(f"(LoRA 어댑터만 저장됨 - 전체 모델 복원 시 base model과 병합 필요)")    
     logger.info(f"{'=' * 70}\n")
 
     if _wandb is not None and _wandb.run is not None:

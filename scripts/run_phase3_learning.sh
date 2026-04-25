@@ -10,9 +10,9 @@ echo "========================================="
 
 # 이전 Phase 결과 경로 (로컬 디렉토리 또는 Hugging Face 모델 ID)
 # PHASE0_MODEL="./checkpoints/phase0_20260213_230047"  # 로컬 디렉토리 예시
-PHASE0_MODEL="kmseong/llama2_7b-chat-Safety-FT-lr3e-5"
-BASIS_DIR="/NHNHOME/0226010080_A/kms/phase1_20260417_130943/basis"
-MASKS_DIR="./checkpoints/phase2_20260417_135720/checkpoints/masks"
+PHASE0_MODEL="kmseong/llama2_7b_chat_only_sn_tuned_lr3e-5"  
+BASIS_DIR="./checkpoints/phase1_20260424_110519/basis"
+MASKS_DIR="./checkpoints/phase2_sn_20260424_111822/checkpoints/masks"
 
 # PHASE0_MODEL="kmseong/llama2_7b-Safety-FT-lr3e-5"
 # BASIS_DIR="/NHNHOME/0226010080_A/kms/phase1_20260417_130853/basis"
@@ -43,7 +43,7 @@ GSM8K_SAMPLES=0
 
 # 공통 학습 설정 (run_all 스타일)
 # LR_LIST=("1e-6" "5e-6" "1e-7" "5e-7")  
-LR_LIST=("3e-5") 
+LR_LIST=("7e-5") 
 EPOCHS=3
 BATCH_SIZE=4
 GRAD_ACCUM=4

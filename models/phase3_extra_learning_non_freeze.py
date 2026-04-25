@@ -18,8 +18,39 @@ from datetime import datetime
 from dataclasses import dataclass
 from typing import Dict, List
 
+from transformers import TrainerCallback
+
 from .warp_modules import WaRPModule, restore_weight, restore_to_linear
 from .phase3_extra_learning import Phase3IncrementalLearner
+
+
+class WaRPMaskRestoreCallback(TrainerCallback):
+    """
+    Restores frozen basis_coeff elements (mask=1) after every optimizer step.
+
+    WaRP's forward() uses mask+detach() to block gradients for mask=1 elements,
+    but AdamW weight decay (λθ) is applied independently of the gradient graph and
+    still modifies those elements each step.  This callback saves the initial
+    (frozen) values at construction time and writes them back after every
+    optimizer.step(), guaranteeing true parameter freeze for mask=1 positions.
+    """
+
+    def __init__(self, model):
+        self._specs = []  # list of (module, mask, frozen_vals)
+        for module in model.modules():
+            if isinstance(module, WaRPModule):
+                mask = module.coeff_mask
+                if mask is not None and mask.any():
+                    with torch.no_grad():
+                        frozen_vals = module.basis_coeff.data[mask].clone()
+                    self._specs.append((module, mask, frozen_vals))
+
+    def on_step_end(self, args, state, control, **kwargs):
+        """Called after each optimizer step — restore frozen basis_coeff elements."""
+        for module, mask, frozen_vals in self._specs:
+            with torch.no_grad():
+                module.basis_coeff.data[mask] = frozen_vals
+        return control
 
 
 class Phase3IncrementalLearnerNonFreeze(Phase3IncrementalLearner):
@@ -57,7 +88,7 @@ class Phase3IncrementalLearnerNonFreeze(Phase3IncrementalLearner):
             if configured_weight_decay > 0:
                 self.logger.info(
                     f"Non-Freeze 모드: weight_decay={configured_weight_decay} 적용 "
-                    f"(mask=1 basis_coeff도 약 {configured_weight_decay * getattr(self.args, 'utility_lr', 1e-5):.2e}/step drift 발생 가능)"
+                    f"(WaRPMaskRestoreCallback으로 mask=1 basis_coeff drift 완전 차단)"
                 )
 
             # ✅ 모든 파라미터 학습 허용
@@ -206,12 +237,19 @@ class Phase3IncrementalLearnerNonFreeze(Phase3IncrementalLearner):
             # 마스크 기반 gradient 동작 사전 점검 (1배치)
             self._run_mask_gradient_sanity_check()
 
+            restore_callback = WaRPMaskRestoreCallback(self.model)
+            self.logger.info(
+                f"[WaRPMaskRestoreCallback] registered {len(restore_callback._specs)} modules "
+                f"for post-step weight-decay restore"
+            )
+
             trainer = Trainer(
                 model=self.model,
                 args=training_args,
                 train_dataset=self.dataset,
                 data_collator=data_collator,
                 tokenizer=self.tokenizer,
+                callbacks=[restore_callback],
             )
 
             if phase3_dataset == 'safety':

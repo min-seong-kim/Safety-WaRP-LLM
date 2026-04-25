@@ -1,3 +1,14 @@
+우선 safety model을 만드는 코드는 models/phase0_SSFT.py에 있습니다. 허깅페이스 주소를 넣고 하이퍼 파라미터를 적절히 맞춰주시면 됩니다.
+python models/phase0_SSFT.py --model_name meta-llama/Llama-2-7b-chat-hf
+
+WaRP는 크게 3가지 단계로 구성되어 있습니다.
+1. basis 추출, 2. important mask 생성, 3. downstream task 학습
+
+각 모델별로 scripts 디렉토리에 쉘 스크립트가 있으나 scripts/run_all_phases_integrated.sh을 사용하시면 될 것 같습니다.
+이 PHASE0_MODEL을 safety FT model 허깅페이스 경로로 수정하시면 됩니다. 나머지는 제가 다 맞춰나서 나중에 # 공통 설정 부분에서 하이퍼파라미터만 수정해주시면 될 것 같습니다. 
+PHASE0_MODEL="kmseong/llama2_7b-Safety-FT-lr3e-5" 
+
+
 # Safety-WaRP-LLM: Weight Space Rotation for LLM Safety Alignment
 
 **Safety-First WaRP for Large Language Model Alignment**

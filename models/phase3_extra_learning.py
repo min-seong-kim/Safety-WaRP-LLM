@@ -1080,7 +1080,7 @@ class Phase3IncrementalLearner:
             
             # 훈련 설정
             epochs = getattr(self.args, 'epochs', 3)
-            learning_rate = getattr(self.args, 'utility_lr', 1e-5)
+            learning_rate = getattr(self.args, 'utility_lr', 3e-5)
             configured_weight_decay = getattr(self.args, 'base_weight_decay', 0.01)
             effective_weight_decay = 0.0 if configured_weight_decay > 0 else configured_weight_decay
             batch_size = self.args.batch_size
