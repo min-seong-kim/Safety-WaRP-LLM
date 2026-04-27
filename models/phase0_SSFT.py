@@ -1,6 +1,8 @@
 """
 Base Model Safety Fine-tuning (Full Parameter FT)
 
+This Branch Files is for Qwen2.5-7B-Instruct model.
+
 Goal:
 - Fair comparison baseline for SN-Tune.
 - Keep training setup aligned with sn_tune.py, except:
@@ -9,8 +11,7 @@ Goal:
   - Fine-tune all model parameters on the same safety dataset
 
 Usage:
-python models/phase0_SSFT.py --model_name meta-llama/Llama-3.1-8B-Instruct
-python models/phase0_SSFT.py --model_name meta-llama/Llama-2-7b-chat-hf
+python models/phase0_SSFT.py --model_name Qwen/Qwen2.5-7B-Instruct
 
 """
 
@@ -27,7 +28,7 @@ from tqdm import tqdm
 import logging
 import math
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 # 로거는 main()에서 setup_logger로 초기화됨
 # 모듈 레벨 fallback (직접 import 시)
@@ -38,16 +39,16 @@ logger = logging.getLogger('safety_warp')
 # =====================================================================
 # Configuration (matched to sn_tune.py)
 # =====================================================================
-MODEL_NAME = "meta-llama/Llama-3.1-8B"  # Base 모델 (Phase 0) - WaRP 제거 전 모델 사용
+MODEL_NAME = "Qwen/Qwen2.5-7B-Instruct"  # Base 모델 (Phase 0) - WaRP 제거 전 모델 사용
 
-LEARNING_RATE = 3e-5
+LEARNING_RATE = 5e-5
 NUM_EPOCHS = 3
 BATCH_SIZE = 4
 GRAD_ACCUM_STEPS = 4
 MAX_SEQ_LENGTH = 1024
 MAX_SAMPLES = 4994
 
-CHECKPOINTS_DIR = "./checkpoints"
+CHECKPOINTS_DIR = "/home/users/jongbokwon/minseong_results/checkpoints"
 DATASET_DEFAULT = "./data/circuit_breakers_train.json"
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -122,7 +123,7 @@ class SafetyDataset(Dataset):
     def __getitem__(self, idx):
         item = self.data[idx]
         harmful_prompt = item.get("prompt", "")
-        safe_response = item.get("llama3_output", "")
+        safe_response = item.get("qwen2.5_output", "")
 
         if self.use_chat_template:
             # ── Instruct model: apply_chat_template(tokenize=True) ──────────
@@ -352,7 +353,7 @@ def parse_args(argv):
         description="Base Model Safety Fine-tuning (Full Parameter FT)"
     )
     parser.add_argument(
-        "dataset_json",
+        "--dataset_json",
         nargs="?",
         default=DATASET_DEFAULT,
         help="Safety dataset JSON path",
@@ -368,6 +369,48 @@ def parse_args(argv):
         type=str,
         default=None,
         help="Optional output directory override",
+    )
+    parser.add_argument(
+        "--checkpoints_dir",
+        type=str,
+        default=CHECKPOINTS_DIR,
+        help="Checkpoints directory"
+    )
+    parser.add_argument(
+        "--learning_rate",
+        type=float,
+        default=LEARNING_RATE,
+        help="Learning rate"
+    )
+    parser.add_argument(
+        "--num_epochs",
+        type=int,
+        default=NUM_EPOCHS,
+        help="Number of epochs"
+    )
+    parser.add_argument(
+        "--batch_size",
+        type=int,
+        default=BATCH_SIZE,
+        help="Batch size"
+    )
+    parser.add_argument(
+        "--grad_accum_steps",
+        type=int,
+        default=GRAD_ACCUM_STEPS,
+        help="Gradient accumulation steps"
+    )
+    parser.add_argument(
+        "--max_seq_length",
+        type=int,
+        default=MAX_SEQ_LENGTH,
+        help="Maximum sequence length"
+    )
+    parser.add_argument(
+        "--max_samples",
+        type=int,
+        default=MAX_SAMPLES,
+        help="Maximum samples"
     )
     parser.add_argument('--wandb_project', type=str, default='Safety-WaRP-LLM',
                         help='W&B 프로젝트 이름')

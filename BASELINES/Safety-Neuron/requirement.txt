@@ -1,0 +1,9 @@
+pandas
+datasets
+torch
+requests
+tenacity
+vllm
+openai==1.2.2
+anthropic==0.18.1
+google-generativeai

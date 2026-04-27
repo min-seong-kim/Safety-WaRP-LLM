@@ -9,7 +9,7 @@ source /home/yonsei_jong/miniconda3/etc/profile.d/conda.sh
 conda activate hb
 set -e  # Exit on error
 set -o pipefail  # Ensure failures are not hidden by tee pipelines
-export CUDA_VISIBLE_DEVICES=1
+export CUDA_VISIBLE_DEVICES=0
 
 echo "========================================================================"
 echo "Safety-WaRP-LLM: Complete Training Pipeline (Integrated)"
