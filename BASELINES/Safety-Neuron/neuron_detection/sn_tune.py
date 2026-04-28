@@ -684,6 +684,8 @@ def main(argv):
     parser.add_argument("--model_name", type=str, default=DEFAULT_MODEL_NAME, help="HuggingFace model name or local path")
     parser.add_argument("--upload_name", type=str, default=None, help="Optional Hugging Face repo id (e.g., username/model-name). If set, upload after training")
     parser.add_argument("--hf_token", type=str, default=None, help="Optional Hugging Face token for upload")
+    
+    parser.add_argument("--wandb_run_name", type=str, default=None, help="Wandb run name")
     args = parser.parse_args(argv)
 
     safety_neurons_file = args.neuron_file or args.safety_neurons_file
@@ -721,9 +723,8 @@ def main(argv):
     logger.info(f"Model: {model_name}")
     logger.info(f"Instruct model detected: {_is_instruct} → using {'chat template' if _is_instruct else 'plain text'} format\n")
 
-    run_name = os.path.basename(output_dir)
+    run_name = args.wandb_run_name or os.path.basename(output_dir)
     wandb.init(
-        entity="gokms0509-yonsei-university",
         project="SN-Tune",
         name=run_name,
         config={

@@ -28,7 +28,7 @@ from tqdm import tqdm
 import logging
 import math
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+# os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 # 로거는 main()에서 setup_logger로 초기화됨
 # 모듈 레벨 fallback (직접 import 시)
@@ -123,7 +123,7 @@ class SafetyDataset(Dataset):
     def __getitem__(self, idx):
         item = self.data[idx]
         harmful_prompt = item.get("prompt", "")
-        safe_response = item.get("qwen2.5_output", "")
+        safe_response = item.get("llama3_output", "")
 
         if self.use_chat_template:
             # ── Instruct model: apply_chat_template(tokenize=True) ──────────
@@ -479,8 +479,8 @@ def main(argv):
     logger.info(f"Safety dataset file: {safety_dataset_json}")
     logger.info(f"Output directory: {output_dir}")
     logger.info(
-        f"Training setup: LR={LEARNING_RATE}, Epochs={NUM_EPOCHS}, Batch={BATCH_SIZE}, "
-        f"GradAccum={GRAD_ACCUM_STEPS}, MaxSamples={MAX_SAMPLES}"
+        f"Training setup: LR={args.learning_rate}, Epochs={args.num_epochs}, Batch={args.batch_size}, "
+        f"GradAccum={args.grad_accum_steps}, MaxSamples={args.max_samples}"
     )
     logger.info(f"{'=' * 70}\n")
 
@@ -494,12 +494,12 @@ def main(argv):
                 config={
                     'phase': 0,
                     'model_name': model_name,
-                    'learning_rate': LEARNING_RATE,
-                    'num_epochs': NUM_EPOCHS,
-                    'batch_size': BATCH_SIZE,
-                    'grad_accum_steps': GRAD_ACCUM_STEPS,
-                    'max_seq_length': MAX_SEQ_LENGTH,
-                    'max_samples': MAX_SAMPLES,
+                    'learning_rate': args.learning_rate,
+                    'num_epochs': args.num_epochs,
+                    'batch_size': args.batch_size,
+                    'grad_accum_steps': args.grad_accum_steps,
+                    'max_seq_length': args.max_seq_length,
+                    'max_samples': args.max_samples,
                     'dataset': safety_dataset_json,
                     'lora': args.lora,
                     'lora_r': args.lora_r if args.lora else None,
@@ -552,30 +552,30 @@ def main(argv):
         safety_dataset_json,
         tokenizer,
         model_name=model_name,
-        max_samples=MAX_SAMPLES,
+        max_samples=args.max_samples,
         max_length=MAX_SEQ_LENGTH,
     )
 
     train_dataloader = DataLoader(
         safety_dataset,
-        batch_size=BATCH_SIZE,
+        batch_size=args.batch_size,
         shuffle=False,
         num_workers=0,
         generator=torch.Generator().manual_seed(112),
     )
     logger.info(f"✓ DataLoader created: {len(train_dataloader)} batches")
     logger.info(f"  Total samples: {len(safety_dataset)}")
-    logger.info(f"  Batch size: {BATCH_SIZE}")
+    logger.info(f"  Batch size: {args.batch_size}")
     logger.info(f"  Gradient accumulation steps: {GRAD_ACCUM_STEPS}")
-    logger.info(f"  Max sequence length: {MAX_SEQ_LENGTH}")
+    logger.info(f"  Max sequence length: {args.max_seq_length}")
 
     logger.info("\nStarting base model safety fine-tuning...")
     model = train_base_safety_ft(
         model,
         train_dataloader,
-        learning_rate=LEARNING_RATE,
-        num_epochs=NUM_EPOCHS,
-        grad_accum_steps=GRAD_ACCUM_STEPS,
+        learning_rate=args.learning_rate,
+        num_epochs=args.num_epochs,
+        grad_accum_steps=args.grad_accum_steps,
         device=DEVICE,
     )
 

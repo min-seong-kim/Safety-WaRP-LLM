@@ -27,7 +27,7 @@ import torch.nn.functional as F
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from datetime import datetime
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+# os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 # 로거 초기 설정 (나중에 파일 핸들러 추가됨)
 logging.basicConfig(level=logging.INFO)
@@ -119,6 +119,12 @@ def parse_args(argv):
         type=float,
         default=DEFAULT_ATTN_ACTIVE_FRACTION,
         help="Global top fraction for attention neurons (0~1)",
+    )
+    parser.add_argument(
+        "--dataset_json",
+        type=str,
+        default="corpus_all/circuit_breakers_train.json",
+        help="Dataset JSON file path",
     )
 
     args = parser.parse_args(argv)
@@ -998,7 +1004,7 @@ def main(argv):
 
     num_prompts = args.num_prompts
     logger.info(f"Number of prompts to process: {num_prompts}")
-    file_path = os.path.join(SCRIPT_DIR, "corpus_all", "circuit_breakers_train.json")
+    file_path = args.dataset_json if args.dataset_json is not None else os.path.join(SCRIPT_DIR, "corpus_all", "circuit_breakers_train.json")
     if not os.path.exists(file_path):
         logger.error(f"Dataset file not found: {file_path}")
         sys.exit(1)
