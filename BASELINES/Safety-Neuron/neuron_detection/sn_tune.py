@@ -16,6 +16,16 @@ python sn_tune.py \
     --model_name meta-llama/Llama-2-7b-chat-hf \
     --upload_name kmseong/llama2_7b_chat_only_sn_tuned_lr3e-5_shuffle
   
+수정:
+WANDB_API_KEY="..." \
+HF_TOKEN="..." \
+python sn_tune.py \
+    --neuron_file ./output_neurons/llama_2_7b_chat_safety_neuron_accelerated_20260416_160653.txt \
+    --dataset_file ./corpus_all/circuit_breakers_train.json \
+    --local_model_name ./only_sn_tuned_model_llama2_7b_chat_lr3e-5 \
+    --model_name meta-llama/Llama-2-7b-chat-hf \
+    --upload_name kmseong/llama2_7b_chat_only_sn_tuned_lr3e-5_shuffle
+    
 
 # RSN-Tune
 python sn_tune.py \
@@ -32,6 +42,8 @@ import os
 import sys
 import json
 import math
+import shutil
+import tempfile
 import torch
 import torch.nn as nn
 from torch.optim import AdamW
@@ -45,7 +57,7 @@ from contextlib import nullcontext
 import wandb
 
 logger = logging.getLogger(__name__)
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+# os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 # =====================================================================
 # Configuration
@@ -686,6 +698,7 @@ def main(argv):
     parser.add_argument("--hf_token", type=str, default=None, help="Optional Hugging Face token for upload")
     
     parser.add_argument("--wandb_run_name", type=str, default=None, help="Wandb run name")
+    parser.add_argument("--wandb_api_key", type=str, default=None, help="Optional WandB API key (scoped to this run; no global login)")
     args = parser.parse_args(argv)
 
     safety_neurons_file = args.neuron_file or args.safety_neurons_file
@@ -694,7 +707,7 @@ def main(argv):
     learning_rate = args.learning_rate
     model_name = args.model_name
     upload_name = args.upload_name
-    hf_token = args.hf_token
+    hf_token = args.hf_token or os.getenv("HF_TOKEN") or os.getenv("HUGGINGFACE_HUB_TOKEN")
 
     if safety_neurons_file is None or safety_dataset_json is None:
         parser.error("Provide neuron/dataset via --neuron_file and --dataset_file (or positional args).")
@@ -722,6 +735,18 @@ def main(argv):
     _is_instruct = is_instruct_model(model_name)
     logger.info(f"Model: {model_name}")
     logger.info(f"Instruct model detected: {_is_instruct} → using {'chat template' if _is_instruct else 'plain text'} format\n")
+
+    wandb_api_key = args.wandb_api_key or os.getenv("WANDB_API_KEY")
+    if wandb_api_key:
+        # Keep W&B auth scoped to this process/directory (avoid persisting ~/.netrc).
+        os.environ["WANDB_API_KEY"] = wandb_api_key
+        wandb_root = os.path.join(output_dir, ".wandb")
+        os.makedirs(wandb_root, exist_ok=True)
+        os.environ.setdefault("WANDB_DIR", wandb_root)
+        os.environ.setdefault("WANDB_CONFIG_DIR", os.path.join(wandb_root, "config"))
+        os.environ.setdefault("WANDB_CACHE_DIR", os.path.join(wandb_root, "cache"))
+        os.makedirs(os.environ["WANDB_CONFIG_DIR"], exist_ok=True)
+        os.makedirs(os.environ["WANDB_CACHE_DIR"], exist_ok=True)
 
     run_name = args.wandb_run_name or os.path.basename(output_dir)
     wandb.init(
@@ -839,7 +864,14 @@ def main(argv):
         try:
             from upload_sn_tuned_model import upload_to_huggingface
 
-            upload_to_huggingface(final_output_dir, upload_name, hf_token)
+            with tempfile.TemporaryDirectory(prefix="hf_upload_") as temp_dir:
+                upload_dir = os.path.join(temp_dir, os.path.basename(os.path.normpath(final_output_dir)))
+                shutil.copytree(
+                    final_output_dir,
+                    upload_dir,
+                    ignore=shutil.ignore_patterns(".wandb", "wandb", "*.log"),
+                )
+                upload_to_huggingface(upload_dir, upload_name, hf_token)
             logger.info(f"✓ Upload completed: https://huggingface.co/{upload_name}")
         except Exception as e:
             logger.error(f"Upload failed: {e}")

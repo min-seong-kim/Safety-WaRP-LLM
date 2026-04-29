@@ -21,7 +21,7 @@ echo ""
 # ========================================================================
 
 # Phase 0 모델
-PHASE0_MODEL="wvnvwn/qwen-2.5-7b-ssft-lr5e-5"
+PHASE0_MODEL="wvnvwn/qwen-2.5-3B-SSFT-lr3e-5"
 
 
 # Phase 1: Basis Construction

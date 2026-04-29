@@ -42,17 +42,23 @@ from transformers import (
     LlamaTokenizer,
     LlamaConfig,
     default_data_collator,
+    AutoTokenizer,
+    AutoModelForCausalLM,
+    AutoConfig,
 )
 
 transformers.set_seed(0)
 
-from transformers import LlamaConfig, LlamaTokenizer, LlamaForCausalLM, AutoTokenizer
 from safedelta.safedelta_runner import get_safe_data_systemprompt, find_layers, SafeDeltaRunner, get_safe_data, get_circuit_breakers_data
 
 DEBUG = True
 
 torch.backends.cuda.matmul.allow_tf32 = False
 torch.backends.cudnn.allow_tf32 = False
+# PyTorch 2.11 + cuDNN 9 SDPA can fail with "No valid execution plans built" on Qwen2;
+# disable cuDNN-backed SDPA so flash/mem_efficient/math paths are used instead.
+if hasattr(torch.backends.cuda, "enable_cudnn_sdp"):
+    torch.backends.cuda.enable_cudnn_sdp(False)
 
 
 @torch.no_grad()
@@ -65,41 +71,38 @@ def recovery_safety(
     **kwargs,
 ):
     ## load model
-
-    align_model = LlamaForCausalLM.from_pretrained(
-        model_name_align,
+    _load_kw = dict(
         return_dict=True,
         device_map="cuda",
         low_cpu_mem_usage=True,
         torch_dtype="auto",
     )
+    _align_l = model_name_align.lower()
+    _ft_l = model_name_ft.lower()
 
-    ft_model = LlamaForCausalLM.from_pretrained(
-        model_name_ft,
-        return_dict=True,
-        # load_in_8bit=False,
-        device_map="cuda",
-        low_cpu_mem_usage=True,
-        torch_dtype="auto",
-    )
+    if "qwen" in _align_l:
+        align_model = AutoModelForCausalLM.from_pretrained(model_name_align, **_load_kw)
+    else:
+        align_model = LlamaForCausalLM.from_pretrained(model_name_align, **_load_kw)
 
-    # Load the tokenizer and add special tokens
-    if 'llama3' in model_name_ft:
-        tokenizer = AutoTokenizer.from_pretrained(
-            model_name_align
-        )
-        if not tokenizer.pad_token_id:
+    if "qwen" in _ft_l:
+        ft_model = AutoModelForCausalLM.from_pretrained(model_name_ft, **_load_kw)
+    else:
+        ft_model = LlamaForCausalLM.from_pretrained(model_name_ft, **_load_kw)
+
+    # tokenizer: HF class follows checkpoint (Auto for Qwen / LLaMA-3; slow Llama SPM for LLaMA-2)
+    if "llama3" in _ft_l or "qwen" in _ft_l:
+        tokenizer = AutoTokenizer.from_pretrained(model_name_align)
+        if tokenizer.pad_token_id is None:
             tokenizer.pad_token_id = tokenizer.eos_token_id
     else:
-        if 'llama2' not in model_name_ft:
-            warnings.warn("Warning: Current implementation only supports LLaMA-2.", UserWarning)
-
+        if "llama2" not in _ft_l:
+            warnings.warn(
+                "Warning: Current implementation only supports LLaMA-2.",
+                UserWarning,
+            )
         tokenizer = LlamaTokenizer.from_pretrained(model_name_align)
-        tokenizer.add_special_tokens(
-            {
-                "pad_token": "<PAD>",
-            }
-        )
+        tokenizer.add_special_tokens({"pad_token": "<PAD>"})
 
     final_model = run_safedelta(
         align_model, ft_model, tokenizer, s, st_layer,
@@ -164,9 +167,19 @@ def run_safedelta(align_model, ft_model, tokenizer, s, st_layer_idx, nsamples=12
     position_embeddings = []
 
     class Catcher(nn.Module):
+        """Wraps a decoder block to capture inputs; delegates attrs for Qwen2 etc."""
+
         def __init__(self, module):
             super().__init__()
             self.module = module
+
+        def __getattr__(self, name):
+            if name == "module":
+                return self._modules["module"]
+            try:
+                return super().__getattr__(name)
+            except AttributeError:
+                return getattr(self._modules["module"], name)
 
         def forward(self, inp, **kwargs):
             inps.append(inp)
@@ -184,7 +197,7 @@ def run_safedelta(align_model, ft_model, tokenizer, s, st_layer_idx, nsamples=12
         except ValueError:
             pass
 
-    align_layers[0] = align_layers[0].module
+    align_layers[st_layer_idx] = align_layers[st_layer_idx].module
     torch.cuda.empty_cache()
 
     # outs = torch.zeros_like(inps)

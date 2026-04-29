@@ -30,7 +30,7 @@ from datasets import load_dataset
 
 from neuron_percentage_utils import calculate_total_model_neurons_from_config
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+# os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

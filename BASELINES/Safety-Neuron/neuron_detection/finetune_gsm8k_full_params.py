@@ -13,6 +13,16 @@ python finetune_gsm8k_full_params.py \
     --output_dir ./full_finetune_llama2_7b_base_gsm8k_lr5e-5 \
     --learning_rate 5e-5 --epochs 3 \
     --upload_name kmseong/llama2_7b-base-gsm8k_ssft_lr5e-5
+
+수정:
+HF_TOKEN="..." python finetune_gsm8k_full_params.py \
+    --model_path kmseong/llama2_7b-Safety-FT-lr3e-5 \
+    --output_dir ./full_gsm8k_llama2_7b_safetymix \
+    --learning_rate 5e-5 --epochs 3 \
+    --upload_name kmseong/llama2_7b-chat-gsm8k_safelnstr_5p_lr5e-5 \
+    --wandb_run_name llama2_7b_base-gsm8k_safetymix_lr5e-5 \
+    --wandb_api_key "..."
+    
 LoRA:
 python finetune_gsm8k_full_params.py \
     --model_path kmseong/llama2_7b-Safety-FT-lr3e-5 \
@@ -28,7 +38,8 @@ python finetune_gsm8k_full_params.py \
     --output_dir ./full_gsm8k_llama2_7b_safetymix \
     --learning_rate 5e-5 --epochs 3 \
     --safety_mix_ratio 0.05 \
-    --upload_name kmseong/llama2_7b-chat-gsm8k_safelnstr_5p_lr5e-5
+    --upload_name kmseong/llama2_7b-chat-gsm8k_safelnstr_5p_lr5e-5 \
+    --safety_data_path /NHNHOME/WORKSPACE/26msit001_A/edge_ai_lab/jongbokwon/Safety-WaRP-LLM/data/circuit_breakers_train.json
 
 
 """
@@ -37,6 +48,8 @@ import argparse
 import os
 import json
 import random
+import shutil
+import tempfile
 from dataclasses import dataclass
 from typing import Dict, List, Optional
 from datetime import datetime
@@ -58,7 +71,7 @@ try:
 except ImportError:
     _peft_available = False
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+# os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 def parse_args():
     p = argparse.ArgumentParser(description='Full Parameter Finetune SN-Tuned Model on GSM8K')
@@ -88,6 +101,11 @@ def parse_args():
     p.add_argument("--warmup_ratio", type=float, default=0.1)
     p.add_argument("--lr_scheduler_type", type=str, default="cosine")
     p.add_argument("--max_grad_norm", type=float, default=1.0)
+    
+    p.add_argument("--wandb_api_key", type=str, default=None,
+                    help="Optional WandB API key")
+    p.add_argument("--wandb_run_name", type=str, default=None,
+                    help="Optional WandB run name")
     
     # seq
     p.add_argument("--max_length", type=int, default=1024)
@@ -289,6 +307,18 @@ def main():
     args = parse_args()
     os.makedirs(args.output_dir, exist_ok=True)
     set_seed(args.seed)
+    
+    WANDB_API_KEY = args.wandb_api_key
+    if WANDB_API_KEY is not None:
+        # Keep W&B auth scoped to this process instead of persisting ~/.netrc.
+        os.environ["WANDB_API_KEY"] = WANDB_API_KEY
+        wandb_root = os.path.join(args.output_dir, ".wandb")
+        os.makedirs(wandb_root, exist_ok=True)
+        os.environ.setdefault("WANDB_DIR", wandb_root)
+        os.environ.setdefault("WANDB_CONFIG_DIR", os.path.join(wandb_root, "config"))
+        os.environ.setdefault("WANDB_CACHE_DIR", os.path.join(wandb_root, "cache"))
+        os.makedirs(os.environ["WANDB_CONFIG_DIR"], exist_ok=True)
+        os.makedirs(os.environ["WANDB_CACHE_DIR"], exist_ok=True)
     
     # 로컬 경로(./  또는 /로 시작)만 절대 경로로 변환, HuggingFace Hub ID는 그대로 유지
     raw_path = args.model_path
@@ -549,9 +579,8 @@ def main():
         seed=args.seed,
     )
 
-    run_name = os.path.basename(os.path.normpath(args.output_dir))
+    run_name = args.wandb_run_name or os.path.basename(os.path.normpath(args.output_dir))
     wandb.init(
-        entity="gokms0509-yonsei-university",
         project="GSM8K Full Finetuning",
         name=run_name,
         config={
@@ -636,8 +665,19 @@ def main():
         logger.info(f"\nStarting upload to Hugging Face: {args.upload_name}")
         try:
             from upload_sn_tuned_model import upload_to_huggingface
-
-            upload_to_huggingface(args.output_dir, args.upload_name, args.hf_token)
+            hf_token = (
+                args.hf_token
+                or os.getenv("HF_TOKEN")
+                or os.getenv("HUGGINGFACE_HUB_TOKEN")
+            )
+            with tempfile.TemporaryDirectory(prefix="hf_upload_") as temp_dir:
+                upload_dir = os.path.join(temp_dir, os.path.basename(os.path.normpath(args.output_dir)))
+                shutil.copytree(
+                    args.output_dir,
+                    upload_dir,
+                    ignore=shutil.ignore_patterns(".wandb", "wandb", "*.log"),
+                )
+                upload_to_huggingface(upload_dir, args.upload_name, hf_token)
             logger.info(f"✅ Upload completed: https://huggingface.co/{args.upload_name}")
         except Exception as e:
             logger.error(f"Upload failed: {e}")

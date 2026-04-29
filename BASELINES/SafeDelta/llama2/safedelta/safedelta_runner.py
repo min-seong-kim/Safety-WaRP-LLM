@@ -26,6 +26,33 @@ torch.backends.cuda.matmul.allow_tf32 = False
 torch.backends.cudnn.allow_tf32 = False
 
 
+def _cholesky_with_jitter(A: torch.Tensor, *, upper: bool, max_retries: int = 50) -> torch.Tensor:
+    """
+    대칭·(거의) PSD 행렬의 Cholesky. float32에서 Hessian 역 등이 미세하게 비양의정부호일 때
+    `cholesky_inverse` 뒤의 두 번째 Cholesky가 실패하는 경우가 있어 대칭화 후 지터를 키우며 재시도한다.
+    첫 시도는 지터 없이 원본과 동일한 분해를 시도한다.
+    """
+    n = A.shape[0]
+    A = 0.5 * (A + A.mT)
+    eye = torch.eye(n, device=A.device, dtype=A.dtype)
+    diag_mean = torch.mean(torch.diag(A).clamp(min=0.0))
+    base = diag_mean.clamp(min=torch.finfo(A.dtype).eps * 1e4)
+    jitter = base * (1e-8 if A.dtype == torch.float32 else 1e-14)
+
+    for attempt in range(max_retries + 1):
+        try:
+            if attempt == 0:
+                return torch.linalg.cholesky(A, upper=upper)
+            return torch.linalg.cholesky(A + jitter * eye, upper=upper)
+        except torch._C._LinAlgError:
+            if attempt == 0:
+                pass  # fall through to jittered attempts
+            else:
+                jitter = jitter * 2.0
+    raise RuntimeError(
+        f"linalg.cholesky failed after {max_retries} jitter steps (final jitter={float(jitter)})."
+    )
+
 
 def find_layers(module, layers=[nn.Conv2d, nn.Linear], name=''):
     if type(module) in layers:
@@ -97,10 +124,10 @@ class SafeDeltaRunner:
         damp = percdamp * torch.mean(torch.diag(H))
         diag = torch.arange(self.columns, device=self.dev)
         H[diag, diag] += damp
-        H = torch.linalg.cholesky(H)
-        H = torch.cholesky_inverse(H)
-        H = torch.linalg.cholesky(H, upper=True)
-        Hinv = H
+        L = _cholesky_with_jitter(H, upper=False)
+        H = torch.cholesky_inverse(L)
+        H = 0.5 * (H + H.mT)
+        Hinv = _cholesky_with_jitter(H, upper=True)
 
         scale = self.rows / 4096
         s = s / 2 # 2 = 4096 / blocksize=2048

@@ -443,7 +443,7 @@ def main(argv):
     args = parse_args(argv)
     safety_dataset_json = args.dataset_json
     model_name = args.model_name
-    output_dir = args.output_dir or build_output_dir(use_lora=args.lora)
+    output_dir = args.output_dir or build_output_dir(args.checkpoints_dir, use_lora=args.lora)
 
     # 로그 파일 설정
     log_dir = getattr(args, 'log_dir', './logs')

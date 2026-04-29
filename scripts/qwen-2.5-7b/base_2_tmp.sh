@@ -9,7 +9,7 @@ source /home/korea_bupj/miniconda3/etc/profile.d/conda.sh
 conda activate hb
 set -e  # Exit on error
 set -o pipefail  # Ensure failures are not hidden by tee pipelines
-export CUDA_VISIBLE_DEVICES=5
+export CUDA_VISIBLE_DEVICES=4
 
 echo "========================================================================"
 echo "Safety-WaRP-LLM: Complete Training Pipeline (Integrated)"
@@ -21,7 +21,7 @@ echo ""
 # ========================================================================
 
 # Phase 0 모델
-PHASE0_MODEL="wvnvwn/qwen-2.5-7b-ssft-lr5e-5"
+PHASE0_MODEL="wvnvwn/qwen-2.5-7B-SSFT-lr3e-5"
 
 
 # Phase 1: Basis Construction
@@ -75,7 +75,7 @@ LR_LIST=("3e-5" "5e-5")
 TARGET_LAYERS="all"
 LAYER_TYPE="attn_q,attn_k,attn_v,ffn_down,ffn_up"
 BASE_OUTPUT_DIR="./checkpoints"
-LOG_DIR="./logs"
+LOG_DIR="./logs/base_2_tmp"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 
 mkdir -p $BASE_OUTPUT_DIR

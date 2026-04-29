@@ -514,9 +514,11 @@ class Phase1BasisBuilder:
         배치별로 forward pass를 수행하면서 Gram matrix를 즉시 누적
         - Activation을 저장하지 않음 (메모리 효율적)
         - GPU에서 계산 (빠름)
-        - 패딩 마스킹 적용
+        - 패딩/special token 마스킹 적용
+        - 샘플별 mean-pooled activation으로 Gram matrix 누적
         
-        수식: Gram = Σ(Φ_batch^T @ Φ_batch) for all batches
+        수식: Gram = Σ(P_batch^T @ P_batch) for all batches
+              where P_batch[b] = mean(valid token activations in sample b)
         """
         try:
             self.logger.info("Collecting activations and accumulating Gram matrices (GPU)...")
@@ -536,29 +538,51 @@ class Phase1BasisBuilder:
                     self.gram_matrices[(layer_idx, layer_type)] = None
                     self.num_samples[(layer_idx, layer_type)] = 0
             
-            # 현재 배치의 attention_mask를 hook과 공유하기 위한 컨테이너
+            # 현재 배치의 content-token mask를 hook과 공유하기 위한 컨테이너
             current_mask = {'val': None}
+            special_token_ids = set(getattr(self.tokenizer, 'all_special_ids', []) or [])
+            if getattr(self.tokenizer, 'pad_token_id', None) is not None:
+                special_token_ids.add(self.tokenizer.pad_token_id)
+            special_token_ids = sorted(int(tok_id) for tok_id in special_token_ids if tok_id is not None)
+            self.logger.info(
+                "Sample-level pooling: padding and special tokens excluded "
+                f"({len(special_token_ids)} special token ids)"
+            )
 
             # Forward hook 등록 (Gram matrix 누적용)
             hooks = []
             
             def get_accumulation_hook(layer_idx, layer_type):
-                """Gram matrix를 누적하는 hook (패딩 마스킹 적용)"""
+                """Gram matrix를 누적하는 hook (sample-level mean pooling 적용)"""
                 def hook(module, input, output):
                     # input[0]: (batch_size, seq_len, hidden_dim)
                     act = input[0]  # GPU에 유지
                     batch_size, seq_len, hidden_dim = act.shape
 
-                    # 패딩 위치를 0으로 마스킹: (batch, seq, 1) 브로드캐스트
+                    # content-token mask: attention_mask에서 padding/special token 제외
                     mask = current_mask['val']  # (batch, seq)
-                    if mask is not None:
-                        act = act * mask.unsqueeze(-1).to(act.dtype)
+                    if mask is None:
+                        mask = torch.ones((batch_size, seq_len), device=act.device, dtype=torch.bool)
+                    elif mask.shape != (batch_size, seq_len):
+                        raise ValueError(
+                            f"Mask shape {tuple(mask.shape)} does not match activation shape "
+                            f"{(batch_size, seq_len)} for layer {layer_idx} ({layer_type})"
+                        )
+                    else:
+                        mask = mask.to(device=act.device, dtype=torch.bool)
 
-                    # Reshape: (batch*seq, hidden_dim)
-                    act_flat = act.reshape(batch_size * seq_len, hidden_dim)
+                    token_counts = mask.sum(dim=1)  # (batch,)
+                    nonempty_samples = token_counts > 0
+                    if not nonempty_samples.any().item():
+                        return
+
+                    # Sample-level mean pooling: (batch, hidden_dim)
+                    pooled = (act * mask.unsqueeze(-1).to(act.dtype)).sum(dim=1)
+                    pooled = pooled / token_counts.clamp_min(1).unsqueeze(-1).to(act.dtype)
+                    pooled = pooled[nonempty_samples]
                     
-                    # Gram matrix 누적: Φ^T @ Φ (패딩 위치 기여 = 0)
-                    gram_batch = act_flat.t() @ act_flat  # (hidden_dim, hidden_dim)
+                    # Gram matrix 누적: P^T @ P, P=(valid samples, hidden_dim)
+                    gram_batch = pooled.t() @ pooled  # (hidden_dim, hidden_dim)
                     
                     key = (layer_idx, layer_type)
                     if self.gram_matrices[key] is None:
@@ -566,9 +590,8 @@ class Phase1BasisBuilder:
                     else:
                         self.gram_matrices[key] += gram_batch
 
-                    # 유효 토큰 수만 카운트
-                    valid_count = int(mask.sum().item()) if mask is not None else batch_size * seq_len
-                    self.num_samples[key] += valid_count
+                    # Gram에 실제로 들어간 pooled sample 수
+                    self.num_samples[key] += int(nonempty_samples.sum().item())
                 
                 return hook
             
@@ -614,8 +637,11 @@ class Phase1BasisBuilder:
                     input_ids = batch['input_ids'].to(self.model.device)
                     attention_mask = batch['attention_mask'].to(self.model.device)
 
-                    # hook에서 패딩 마스킹에 사용하도록 현재 배치 mask 공유
-                    current_mask['val'] = attention_mask
+                    # hook에서 sample-level pooling에 사용하도록 content-token mask 공유
+                    valid_token_mask = attention_mask.to(torch.bool)
+                    for special_token_id in special_token_ids:
+                        valid_token_mask = valid_token_mask & input_ids.ne(special_token_id)
+                    current_mask['val'] = valid_token_mask
 
                     # Forward (hook에서 Gram matrix 누적)
                     _ = self.model(input_ids=input_ids, attention_mask=attention_mask)
@@ -623,7 +649,7 @@ class Phase1BasisBuilder:
                     total_batches += 1
                     
                     # 통계 업데이트
-                    valid_tokens = attention_mask.sum().item()
+                    valid_tokens = valid_token_mask.sum().item()
                     self.stats['total_samples'] += input_ids.shape[0]
                     self.stats['total_tokens'] += valid_tokens
                     
@@ -637,14 +663,14 @@ class Phase1BasisBuilder:
             self.logger.info(f"✓ Gram matrix accumulation completed")
             self.logger.info(f"  - Total batches: {total_batches}")
             self.logger.info(f"  - Total samples: {self.stats['total_samples']}")
-            self.logger.info(f"  - Total tokens: {self.stats['total_tokens']}")
+            self.logger.info(f"  - Total content tokens: {self.stats['total_tokens']}")
             self.logger.info(f"  - Gram matrices: {len(self.gram_matrices)}")
             
             # 통계 출력
             for key in sorted(self.gram_matrices.keys())[:3]:
                 gram = self.gram_matrices[key]
                 num = self.num_samples[key]
-                self.logger.info(f"  - Layer {key}: Gram shape={gram.shape}, samples={num}")
+                self.logger.info(f"  - Layer {key}: Gram shape={gram.shape}, pooled_samples={num}")
             
             if len(self.gram_matrices) > 3:
                 self.logger.info(f"  - ... and {len(self.gram_matrices) - 3} more")
@@ -664,7 +690,9 @@ class Phase1BasisBuilder:
         - Layer별 순차 처리 및 즉시 저장
         
         수식:
-        - Gram = Φ^T @ Φ (이미 누적됨)
+        - P ∈ R^(num_samples x hidden_dim): sample-level mean-pooled activations
+        - Gram_sum = P^T @ P (이미 누적됨)
+        - Gram = Gram_sum / num_samples
         - Gram = U @ S @ U^T (SVD)
         """
         try:
@@ -684,14 +712,21 @@ class Phase1BasisBuilder:
                 self.logger.info(f"Layer {layer_idx} ({layer_type}):")
                 self.logger.info(f"  - Gram matrix shape: {gram_matrix.shape}")
                 self.logger.info(f"  - Gram matrix device: {gram_matrix.device}")
-                self.logger.info(f"  - Samples accumulated: {self.num_samples[(layer_idx, layer_type)]}")
+                sample_count = self.num_samples[(layer_idx, layer_type)]
+                self.logger.info(f"  - Pooled samples accumulated: {sample_count}")
                 
-                # float32로 변환 (SVD 정확도)
-                gram_matrix_float = gram_matrix.float()
+                if sample_count <= 0:
+                    self.logger.warning(
+                        f"Layer {layer_idx} ({layer_type}): No pooled samples accumulated, skipping"
+                    )
+                    continue
+
+                # float32로 변환하고 sample 수로 평균화 (SVD 정확도 및 scale 안정화)
+                gram_matrix_float = gram_matrix.float() / float(sample_count)
                 
                 # 통계
                 trace = gram_matrix_float.trace().item()
-                self.logger.info(f"  - Gram matrix trace: {trace:.4f}")
+                self.logger.info(f"  - Mean Gram matrix trace: {trace:.4f}")
                 
                 # ✅ GPU에서 SVD 수행 (빠름!)
                 U, S, UT = torch.linalg.svd(gram_matrix_float, full_matrices=False)
@@ -808,11 +843,14 @@ class Phase1BasisBuilder:
                 'target_layers': self.args.target_layers,
                 'num_layers_saved': total_files,
                 'batch_size': self.args.batch_size,
-                'total_tokens': self.stats['total_tokens'],
+                'total_content_tokens': self.stats['total_tokens'],
                 'total_samples': self.stats['total_samples'],
                 'dtype': self.args.dtype,
+                'activation_pooling': 'sample_mean',
+                'token_filtering': 'attention_mask plus tokenizer all_special_ids',
+                'gram_normalization': 'divide_by_pooled_sample_count_before_svd',
                 'memory_optimization': 'Layer-wise incremental saving (each layer saved immediately after SVD)',
-                'notes': 'Phase 1: Activations filtered using attention_mask (padding tokens excluded). SVD results saved to disk immediately (not in memory).',
+                'notes': 'Phase 1: Per-sample mean-pooled activations are computed after excluding padding and special tokens. SVD results saved to disk immediately (not in memory).',
             }
             
             metadata_path = os.path.join(basis_dir, 'metadata.json')

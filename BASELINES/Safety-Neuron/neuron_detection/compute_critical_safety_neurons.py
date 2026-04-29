@@ -20,9 +20,16 @@ python compute_critical_safety_neurons.py \
     ./output_neurons/llama_31_8b_instruct_safety_neuron_accelerated_20260418_195634.txt \
     ./output_neurons/utility_neurons_1000_20260418_162404.txt
 
+수정:
+python compute_critical_safety_neurons.py \
+    --model_name Qwen/Qwen2.5-7B \
+    --safety_file ./output_neurons/qwen2_5_7b_base_safety_neuron_accelerated_20260428_194552.txt \
+    --utility_file ./output_neurons/utility_neurons_1000_20260428_194552.txt \
+    --output_dir ./output_neurons
 
 """
 
+import argparse
 import os
 import sys
 import logging
@@ -251,6 +258,18 @@ def compute_statistics(safety_neurons: Dict, utility_neurons: Dict, critical_neu
     
     return stats
 
+def parse_args():
+    parser = argparse.ArgumentParser(description="Compute Critical Safety Neurons")
+    parser.add_argument("--model_name", type=str, required=True,
+                        help="Model name")
+    parser.add_argument("--safety_file", type=str, required=True,
+                        help="Path to safety neuron file")
+    parser.add_argument("--utility_file", type=str, required=True,
+                        help="Path to utility neuron file")
+    parser.add_argument("--output_dir", type=str, required=True,
+                        help="Output directory")
+    return parser.parse_args()
+
 
 def main(argv):
     """
@@ -261,18 +280,17 @@ def main(argv):
     
     If files are not provided, the script will search for the latest ones in ./output_neurons/
     """
-    
+    args = parse_args()
     log_file = setup_logging()
 
-    output_dir = os.path.join(SCRIPT_DIR, "output_neurons")
+    model_name = args.model_name if args.model_name else DEFAULT_MODEL_NAME
+    output_dir = args.output_dir if args.output_dir else os.path.join(SCRIPT_DIR, "output_neurons")
+    safety_file = args.safety_file if args.safety_file else None
+    utility_file = args.utility_file if args.utility_file else None
 
     # Find files if not provided
-    if len(argv) < 2:
+    if safety_file is None or utility_file is None:
         logger.info(f"Searching for neuron detection files in {output_dir}...")
-        
-        if not os.path.exists(output_dir):
-            logger.error(f"Directory does not exist: {output_dir}")
-            sys.exit(1)
         
         files = os.listdir(output_dir)
         
@@ -308,8 +326,8 @@ def main(argv):
         logger.info(f"Using safety file: {safety_file}")
         logger.info(f"Using utility file: {utility_file}")
     else:
-        safety_file = argv[0]
-        utility_file = argv[1]
+        safety_file = args.safety_file
+        utility_file = args.utility_file
     
     logger.info("\n" + "="*80)
     logger.info("Critical Safety Neuron Computation")
@@ -405,7 +423,7 @@ def main(argv):
     logger.info(f"  • Overlapping neurons: {overlap_total}")
     logger.info(f"  • Critical neurons (Safety - Overlap): {critical_total}")
 
-    total_model_neurons = calculate_model_total_neurons(DEFAULT_MODEL_NAME)
+    total_model_neurons = calculate_model_total_neurons(args.model_name)
     critical_pct_total = (critical_total / total_model_neurons * 100) if total_model_neurons > 0 else 0.0
     logger.info(f"  • Total model neurons (q/k/v/o + gate/up/down): {total_model_neurons:,}")
     logger.info(f"  • Critical neurons over total model neurons: {critical_pct_total:.4f}%")
