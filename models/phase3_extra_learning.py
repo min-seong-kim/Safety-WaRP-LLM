@@ -168,6 +168,85 @@ class Phase3IncrementalLearner:
             "attention_mask": attention_mask,
             "labels": labels,
         }
+
+    def _tokenize_swebench_example(
+        self,
+        prompt: str,
+        patch: str,
+        max_length: int,
+    ) -> Dict[str, List[int]]:
+        """
+        Tokenize long SWE-bench prompt/patch examples while preserving patch labels.
+
+        The generic QA tokenizer can consume the full budget with the prompt and
+        leave no supervised tokens. SWE-bench prompts are often long, so this
+        keeps a bounded patch budget and truncates the prompt from the middle.
+        """
+        prompt = str(prompt).strip()
+        patch = str(patch).strip()
+
+        if self._is_instruct_model():
+            try:
+                prompt_text = self.tokenizer.apply_chat_template(
+                    [{"role": "user", "content": prompt}],
+                    tokenize=False,
+                    add_generation_prompt=True,
+                )
+                full_text = self.tokenizer.apply_chat_template(
+                    [
+                        {"role": "user", "content": prompt},
+                        {"role": "assistant", "content": patch},
+                    ],
+                    tokenize=False,
+                    add_generation_prompt=False,
+                )
+                prompt_ids = self.tokenizer(prompt_text, add_special_tokens=False)["input_ids"]
+                full_ids = self.tokenizer(full_text, add_special_tokens=False)["input_ids"]
+                if full_ids[:len(prompt_ids)] == prompt_ids:
+                    patch_ids = full_ids[len(prompt_ids):]
+                else:
+                    patch_ids = self.tokenizer(patch, add_special_tokens=False)["input_ids"]
+                    if self.tokenizer.eos_token_id is not None:
+                        patch_ids.append(self.tokenizer.eos_token_id)
+            except Exception as e:
+                self.logger.warning(
+                    f"Failed to apply chat template for SWE-bench; falling back to plain format. Error: {e}"
+                )
+                prompt_ids = self.tokenizer(prompt + "\n", add_special_tokens=False)["input_ids"]
+                patch_ids = self.tokenizer(patch, add_special_tokens=False)["input_ids"]
+                if self.tokenizer.eos_token_id is not None:
+                    patch_ids.append(self.tokenizer.eos_token_id)
+        else:
+            prompt_ids = self.tokenizer(prompt + "\n", add_special_tokens=False)["input_ids"]
+            patch_ids = self.tokenizer(patch, add_special_tokens=False)["input_ids"]
+            if self.tokenizer.eos_token_id is not None:
+                patch_ids.append(self.tokenizer.eos_token_id)
+
+        if max_length <= 1:
+            raise ValueError(f"max_length must be > 1 for SWE-bench, got {max_length}")
+
+        if len(prompt_ids) + len(patch_ids) > max_length:
+            patch_budget = min(len(patch_ids), max(max_length // 2, 1))
+            prompt_budget = max_length - patch_budget
+            patch_ids = patch_ids[:patch_budget]
+
+            if len(prompt_ids) > prompt_budget:
+                prefix_budget = prompt_budget // 2
+                suffix_budget = prompt_budget - prefix_budget
+                prompt_ids = prompt_ids[:prefix_budget] + prompt_ids[-suffix_budget:]
+
+        input_ids = prompt_ids + patch_ids
+        labels = [-100] * len(prompt_ids) + patch_ids
+        attention_mask = [1] * len(input_ids)
+
+        if not any(label != -100 for label in labels):
+            raise ValueError("SWE-bench tokenization produced no supervised patch tokens")
+
+        return {
+            "input_ids": input_ids,
+            "attention_mask": attention_mask,
+            "labels": labels,
+        }
     
     def load_basis(self):
         """Phase 1의 basis 로드"""
@@ -328,6 +407,8 @@ class Phase3IncrementalLearner:
         - 'safety': Circuit breakers (safety learning)
         - 'metamath': Advanced math reasoning (utility learning)
         - 'math': Hendrycks MATH (utility learning)
+        - 'swebench': SWE-bench patch generation (software engineering utility)
+        - 'agnews': AG News classification (utility learning)
         """
         phase3_dataset = getattr(self.args, 'phase3_dataset', 'gsm8k')
         
@@ -339,8 +420,250 @@ class Phase3IncrementalLearner:
             self._load_metamath()
         elif phase3_dataset == 'math':
             self._load_hendrycks_math()
+        elif phase3_dataset == 'swebench':
+            self._load_swebench()
+        elif phase3_dataset == 'agnews':
+            self._load_agnews()
         else:
             raise ValueError(f"Unknown phase3_dataset: {phase3_dataset}")
+
+    def _load_agnews(self):
+        """
+        AG News JSONL 로드.
+
+        지원 row 형식:
+        - {"prompt": ..., "completion": ...}
+        - {"messages": [{"role": "user", ...}, {"role": "assistant", ...}]}
+        - {"instruction": ..., "input": ..., "output": ...}
+        - {"text": ..., "label": 0..3} 또는 {"title": ..., "description": ..., "label": ...}
+        """
+        from pathlib import Path
+        from datasets import Dataset as HFDataset, load_dataset, load_from_disk
+
+        label_names = {
+            0: "World",
+            1: "Sports",
+            2: "Business",
+            3: "Sci/Tech",
+        }
+        default_instruction = (
+            "Categorize the news article given in the input into one of the 4 categories:\n\n"
+            "World\n"
+            "Sports\n"
+            "Business\n"
+            "Sci/Tech"
+        )
+
+        def _as_text(value) -> str:
+            return "" if value is None else str(value).strip()
+
+        def _label_to_text(row: Dict) -> str:
+            if row.get("label_text") is not None:
+                return _as_text(row.get("label_text"))
+            if row.get("output") is not None:
+                return _as_text(row.get("output"))
+            label = row.get("label")
+            if label is None:
+                return ""
+            try:
+                return label_names[int(label)]
+            except (TypeError, ValueError, KeyError):
+                return _as_text(label)
+
+        def _prompt_answer_from_row(row: Dict) -> tuple[str, str]:
+            messages = row.get("messages")
+            if isinstance(messages, list) and messages:
+                assistant_messages = [
+                    _as_text(message.get("content"))
+                    for message in messages
+                    if message.get("role") == "assistant"
+                ]
+                non_assistant = [
+                    _as_text(message.get("content"))
+                    for message in messages
+                    if message.get("role") != "assistant"
+                ]
+                return "\n\n".join(x for x in non_assistant if x), assistant_messages[-1] if assistant_messages else ""
+
+            if row.get("prompt") is not None and row.get("completion") is not None:
+                return _as_text(row.get("prompt")), _as_text(row.get("completion"))
+
+            if row.get("instruction") is not None and row.get("input") is not None:
+                prompt = f"{_as_text(row.get('instruction'))}\n\nNews article:\n{_as_text(row.get('input'))}"
+                return prompt, _label_to_text(row)
+
+            if row.get("text") is not None:
+                prompt = f"{default_instruction}\n\nNews article:\n{_as_text(row.get('text'))}"
+                return prompt, _label_to_text(row)
+
+            title = _as_text(row.get("title"))
+            description = _as_text(row.get("description"))
+            if title or description:
+                article = " ".join(x for x in (title, description) if x)
+                prompt = f"{default_instruction}\n\nNews article:\n{article}"
+                return prompt, _label_to_text(row)
+
+            return "", ""
+
+        dataset_path = getattr(self.args, 'agnews_dataset_path', None)
+        if not dataset_path:
+            raise ValueError("--agnews_dataset_path is required when --phase3_dataset agnews")
+
+        split = getattr(self.args, 'agnews_split', 'train')
+        max_samples = getattr(self.args, 'agnews_samples', 8000)
+        max_length = getattr(self.args, 'max_length', 1024)
+
+        try:
+            self.logger.info(f"Loading AG News dataset from {dataset_path}...")
+
+            path = Path(dataset_path)
+            if path.exists() and path.is_dir():
+                loaded = load_from_disk(dataset_path)
+                dataset = loaded[split] if hasattr(loaded, "keys") else loaded
+            elif path.exists():
+                dataset = load_dataset("json", data_files=dataset_path, split="train")
+            else:
+                loaded = load_dataset(dataset_path)
+                dataset = loaded[split] if hasattr(loaded, "keys") else loaded
+
+            if max_samples > 0:
+                if len(dataset) > max_samples:
+                    dataset = dataset.shuffle(seed=getattr(self.args, 'seed', 42)).select(range(max_samples))
+                    self.logger.info(f"✓ Randomly sampled {max_samples} AG News examples")
+                else:
+                    self.logger.info(f"✓ Using all {len(dataset)} AG News examples")
+            else:
+                self.logger.info(f"✓ Using all {len(dataset)} AG News examples")
+
+            tokenized_data = []
+            skipped = 0
+            for idx, row in enumerate(dataset):
+                prompt, answer = _prompt_answer_from_row(dict(row))
+                if not prompt or not answer:
+                    skipped += 1
+                    continue
+
+                if idx == 0:
+                    self.logger.info("\n[AG News Sample #0]")
+                    self.logger.info(f"  Prompt (first 100 chars): {prompt[:100]}...")
+                    self.logger.info(f"  Answer: {answer}")
+
+                tokenized_data.append(
+                    self._tokenize_question_answer_example(
+                        prompt,
+                        answer,
+                        max_length=max_length,
+                    )
+                )
+
+            if not tokenized_data:
+                raise ValueError("AG News dataset produced no valid training examples")
+
+            self.dataset = HFDataset.from_dict({
+                "input_ids": [d["input_ids"] for d in tokenized_data],
+                "attention_mask": [d["attention_mask"] for d in tokenized_data],
+                "labels": [d["labels"] for d in tokenized_data],
+            })
+            del tokenized_data
+
+            if skipped:
+                self.logger.warning(f"Skipped {skipped} AG News rows with missing prompt/answer")
+            self.logger.info(f"✓ AG News dataset created ({len(self.dataset)} samples)")
+
+        except Exception as e:
+            self.logger.error(f"Failed to load AG News data: {str(e)}", exc_info=True)
+            raise
+
+    def _load_swebench(self):
+        """
+        SWE-bench text dataset 로드.
+
+        예상 입력은 swebench.inference.make_datasets.create_text_dataset 출력이며,
+        각 row가 `text`(prompt/context)와 `patch`(gold unified diff)를 가져야 한다.
+        Base 모델은 plain prompt/patch 형식으로, Instruct/Chat 모델은 tokenizer의
+        chat template으로 변환되며 loss는 patch에만 적용된다.
+        """
+        from pathlib import Path
+        from datasets import Dataset as HFDataset, load_dataset, load_from_disk
+
+        dataset_path = getattr(self.args, 'swebench_dataset_path', None)
+        if not dataset_path:
+            raise ValueError(
+                "--swebench_dataset_path is required when --phase3_dataset swebench"
+            )
+
+        split = getattr(self.args, 'swebench_split', 'train')
+        max_samples = getattr(self.args, 'swebench_samples', 8000)
+        max_length = getattr(self.args, 'max_length', 1024)
+
+        try:
+            self.logger.info(f"Loading SWE-bench dataset from {dataset_path} (split={split})...")
+
+            if Path(dataset_path).exists():
+                loaded = load_from_disk(dataset_path)
+            else:
+                loaded = load_dataset(dataset_path)
+
+            if hasattr(loaded, "keys"):
+                if split not in loaded:
+                    raise ValueError(
+                        f"Split '{split}' not found in SWE-bench dataset. "
+                        f"Available splits: {list(loaded.keys())}"
+                    )
+                dataset = loaded[split]
+            else:
+                dataset = loaded
+
+            required_columns = {"text", "patch"}
+            missing = required_columns - set(dataset.column_names)
+            if missing:
+                raise ValueError(
+                    f"SWE-bench dataset must contain columns {sorted(required_columns)}; "
+                    f"missing {sorted(missing)} from {dataset.column_names}"
+                )
+
+            dataset = dataset.filter(
+                lambda ex: bool(str(ex.get("text", "")).strip())
+                and bool(str(ex.get("patch", "")).strip())
+            )
+
+            if max_samples > 0:
+                if len(dataset) > max_samples:
+                    dataset = dataset.shuffle(seed=getattr(self.args, 'seed', 42)).select(range(max_samples))
+                    self.logger.info(f"✓ Randomly sampled {max_samples} SWE-bench examples")
+                else:
+                    self.logger.info(f"✓ Using all {len(dataset)} SWE-bench examples")
+            else:
+                self.logger.info(f"✓ Using all {len(dataset)} SWE-bench examples")
+
+            tokenized_data = []
+            for idx, ex in enumerate(dataset):
+                if idx == 0:
+                    self.logger.info("\n[SWE-bench Sample #0]")
+                    self.logger.info(f"  instance_id: {ex.get('instance_id', '<none>')}")
+                    self.logger.info(f"  text (first 100 chars): {str(ex.get('text', ''))[:100]}...")
+                    self.logger.info(f"  patch (first 100 chars): {str(ex.get('patch', ''))[:100]}...")
+
+                tokenized_data.append(
+                    self._tokenize_swebench_example(
+                        ex.get("text", ""),
+                        ex.get("patch", ""),
+                        max_length=max_length,
+                    )
+                )
+
+            self.dataset = HFDataset.from_dict({
+                "input_ids": [d["input_ids"] for d in tokenized_data],
+                "attention_mask": [d["attention_mask"] for d in tokenized_data],
+                "labels": [d["labels"] for d in tokenized_data],
+            })
+            del tokenized_data
+
+            self.logger.info(f"✓ SWE-bench dataset created ({len(self.dataset)} samples)")
+
+        except Exception as e:
+            self.logger.error(f"Failed to load SWE-bench data: {str(e)}", exc_info=True)
+            raise
 
     def _load_gsm8k(self):
         """GSM8K 데이터 로드 및 SFT 방식으로 변환 (prompt/labels 분리)"""

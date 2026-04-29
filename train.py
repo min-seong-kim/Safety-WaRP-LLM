@@ -93,8 +93,8 @@ def parse_args():
     parser.add_argument('--masks_dir', type=str, default=None,
                         help='Phase 2의 masks 디렉토리 경로 (Phase 3에서 사용)')
     parser.add_argument('--phase3_dataset', type=str, default='gsm8k',
-                        choices=['gsm8k', 'safety', 'metamath', 'math'],
-                        help='Phase 3 finetuning용 데이터셋 - gsm8k(Utility), safety(안전성 강화), metamath(고급 수학), math(Hendrycks MATH)')
+                        choices=['gsm8k', 'safety', 'metamath', 'math', 'swebench', 'agnews'],
+                        help='Phase 3 finetuning용 데이터셋 - gsm8k(Utility), safety(안전성 강화), metamath(고급 수학), math(Hendrycks MATH), swebench(SWE-bench patch SFT), agnews(뉴스 분류)')
     parser.add_argument('--gsm8k_samples', type=int, default=1000,
                         help='GSM8K 샘플 수 (Phase 3 - GSM8K 선택시만 사용)')
     parser.add_argument('--metamath_samples', type=int, default=0,
@@ -121,6 +121,18 @@ def parse_args():
                         help='MATH chat template 사용 시 시스템 프롬프트')
     parser.add_argument('--circuit_breakers_samples_phase3', type=int, default=4994,
                         help='Circuit Breakers 샘플 수 (Phase 3 - Safety 선택시만 사용)')
+    parser.add_argument('--swebench_dataset_path', type=str, default=None,
+                        help='SWE-bench text dataset 경로. create_text_dataset.py의 save_to_disk 출력 디렉토리 또는 HF dataset id')
+    parser.add_argument('--swebench_split', type=str, default='train',
+                        help='SWE-bench dataset split (기본: train)')
+    parser.add_argument('--swebench_samples', type=int, default=8000,
+                        help='SWE-bench 샘플 수 (0=전체)')
+    parser.add_argument('--agnews_dataset_path', type=str, default=None,
+                        help='AG News train JSONL 경로 또는 HF save_to_disk 디렉토리')
+    parser.add_argument('--agnews_split', type=str, default='train',
+                        help='AG News dataset split (save_to_disk/HF dataset 사용 시 기본: train)')
+    parser.add_argument('--agnews_samples', type=int, default=8000,
+                        help='AG News 샘플 수 (0=전체)')
     parser.add_argument('--epochs', type=int, default=20,
                         help='훈련 에포크 (Phase 3)')
     parser.add_argument('--utility_lr', type=float, default=1e-5,

@@ -48,7 +48,19 @@ KEEP_RATIO_LIST=("0.1")
 # Phase 3: Incremental Learning
 # ==============================
 # Dataset 선택 (Utility 또는 Safety)
-PHASE3_DATASET="gsm8k" # Options: safety, gsm8k, metamath, math
+PHASE3_DATASET="swebench" # Options: safety, gsm8k, metamath, math, swebench, agnews
+
+# Phase3=SWE-bench 설정
+# create_text_dataset.py로 만든 save_to_disk 출력 디렉토리를 지정한다.
+SWEBENCH_DATASET_PATH="./swebench_text_datasets/SWE-bench__style-3__fs-oracle"
+SWEBENCH_SPLIT="train"
+SWEBENCH_MAX_LENGTH=4096
+
+# Phase3=AG News 설정
+# JSONL 예: {"prompt": "...", "completion": "World"} 또는 messages/instruction/input/output 형식
+AGNEWS_DATASET_PATH="./data/agnews_train.jsonl"
+AGNEWS_SPLIT="train"
+AGNEWS_MAX_LENGTH=1024
 
 # Phase3=MATH 설정
 MATH_SUBJECTS="all"  # 예: Algebra,Geometry
@@ -62,6 +74,10 @@ elif [ "$PHASE3_DATASET" = "metamath" ]; then
     PHASE3_SAMPLES=10000  # 0 = all samples
 elif [ "$PHASE3_DATASET" = "math" ]; then
     PHASE3_SAMPLES=0  # 0 = all samples
+elif [ "$PHASE3_DATASET" = "swebench" ]; then
+    PHASE3_SAMPLES=8000
+elif [ "$PHASE3_DATASET" = "agnews" ]; then
+    PHASE3_SAMPLES=8000
 fi
 
 # 공통 설정
@@ -93,9 +109,9 @@ echo "  Output Dir: $BASE_OUTPUT_DIR"
 echo ""
 
 # Phase 3 Dataset validation
-if [[ ! "$PHASE3_DATASET" =~ ^(safety|gsm8k|metamath|math)$ ]]; then
+if [[ ! "$PHASE3_DATASET" =~ ^(safety|gsm8k|metamath|math|swebench|agnews)$ ]]; then
     echo "❌ ERROR: Unknown Phase 3 dataset: $PHASE3_DATASET"
-    echo "Choose from: safety, gsm8k, metamath, math"
+    echo "Choose from: safety, gsm8k, metamath, math, swebench, agnews"
     exit 1
 fi
 
@@ -178,6 +194,10 @@ elif [ "$PHASE3_DATASET" = "metamath" ]; then
     PHASE3_DATASET_ARG="--phase3_dataset metamath --metamath_samples $PHASE3_SAMPLES"
 elif [ "$PHASE3_DATASET" = "math" ]; then
     PHASE3_DATASET_ARG="--phase3_dataset math --math_samples $PHASE3_SAMPLES --math_subjects $MATH_SUBJECTS --math_levels $MATH_LEVELS"
+elif [ "$PHASE3_DATASET" = "swebench" ]; then
+    PHASE3_DATASET_ARG="--phase3_dataset swebench --swebench_dataset_path $SWEBENCH_DATASET_PATH --swebench_split $SWEBENCH_SPLIT --swebench_samples $PHASE3_SAMPLES --max_length $SWEBENCH_MAX_LENGTH"
+elif [ "$PHASE3_DATASET" = "agnews" ]; then
+    PHASE3_DATASET_ARG="--phase3_dataset agnews --agnews_dataset_path $AGNEWS_DATASET_PATH --agnews_split $AGNEWS_SPLIT --agnews_samples $PHASE3_SAMPLES --max_length $AGNEWS_MAX_LENGTH"
 else
     echo "ERROR: Unknown Phase 3 dataset: $PHASE3_DATASET"
     exit 1

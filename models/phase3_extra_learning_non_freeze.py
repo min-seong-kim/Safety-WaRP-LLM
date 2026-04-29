@@ -71,6 +71,8 @@ class Phase3IncrementalLearnerNonFreeze(Phase3IncrementalLearner):
                 'metamath': 'MetaMath',
                 'math': 'Hendrycks MATH',
                 'safety': 'Safety (Circuit Breakers)',
+                'swebench': 'SWE-bench',
+                'agnews': 'AG News',
             }
             dataset_name = dataset_name_map.get(phase3_dataset, phase3_dataset)
 
