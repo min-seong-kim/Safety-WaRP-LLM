@@ -1,0 +1,15 @@
+group: hendrycks_math_safe
+task:
+  - hendrycks_math_algebra_safe
+  - hendrycks_math_counting_and_prob_safe
+  - hendrycks_math_geometry_safe
+  - hendrycks_math_intermediate_algebra_safe
+  - hendrycks_math_num_theory_safe
+  - hendrycks_math_prealgebra_safe
+  - hendrycks_math_precalc_safe
+aggregate_metric_list:
+  - metric: exact_match
+    aggregation: mean
+    weight_by_size: true
+metadata:
+  version: 1.0

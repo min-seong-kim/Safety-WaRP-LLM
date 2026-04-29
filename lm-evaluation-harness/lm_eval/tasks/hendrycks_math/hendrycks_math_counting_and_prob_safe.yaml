@@ -1,0 +1,3 @@
+include: hendrycks_math_algebra_safe.yaml
+task: hendrycks_math_counting_and_prob_safe
+dataset_name: counting_and_probability
