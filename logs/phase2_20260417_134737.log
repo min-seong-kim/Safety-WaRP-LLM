@@ -1,0 +1,70 @@
+[2026-04-17 13:47:37] [safety_warp] [INFO] ======================================================================
+[2026-04-17 13:47:37] [safety_warp] [INFO] Safety-WaRP-LLM (Fixed - 원본 FSCIL-WaRP 방식)
+[2026-04-17 13:47:37] [safety_warp] [INFO] ======================================================================
+[2026-04-17 13:47:37] [safety_warp] [INFO] Phase: 2
+[2026-04-17 13:47:37] [safety_warp] [INFO] Model: None
+[2026-04-17 13:47:37] [safety_warp] [INFO] Layer types: attn_q,attn_k,attn_v,ffn_down,ffn_up
+[2026-04-17 13:47:37] [safety_warp] [INFO] Target layers: all
+[2026-04-17 13:47:37] [safety_warp] [INFO] ======================================================================
+[2026-04-17 13:47:39] [safety_warp] [INFO] ✓ W&B initialized: project=Safety-WaRP-LLM, run=phase2_20260417_134737
+[2026-04-17 13:47:39] [safety_warp] [INFO] ======================================================================
+[2026-04-17 13:47:39] [safety_warp] [INFO] Starting Phase 2: Importance Scoring (Fixed)
+[2026-04-17 13:47:39] [safety_warp] [INFO] ======================================================================
+[2026-04-17 13:47:40] [safety_warp] [INFO] Loading basis from /NHNHOME/0226010080_A/kms/phase1_20260417_130943/basis...
+[2026-04-17 13:47:40] [safety_warp] [INFO] ✓ Metadata loaded:
+[2026-04-17 13:47:40] [safety_warp] [INFO]   - Layer types: ['attn_k', 'attn_q', 'attn_v', 'ffn_down', 'ffn_up']
+[2026-04-17 13:47:52] [safety_warp] [INFO] ✓ Basis loaded: 160 (layer, type) combinations
+[2026-04-17 13:47:53] [safety_warp] [INFO] Loading Phase 0 trained model from kmseong/llama2_7-chat-Safety-FT-lr3e-5...
+[2026-04-17 13:47:53] [safety_warp] [ERROR] Failed to load model: kmseong/llama2_7-chat-Safety-FT-lr3e-5 is not a local folder and is not a valid model identifier listed on 'https://huggingface.co/models'
+If this is a private repository, make sure to pass a token having permission to this repo either by logging in with `hf auth login` or by passing `token=<your_token>`
+Traceback (most recent call last):
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/huggingface_hub/utils/_http.py", line 402, in hf_raise_for_status
+    response.raise_for_status()
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/requests/models.py", line 1026, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 404 Client Error: Not Found for url: https://huggingface.co/kmseong/llama2_7-chat-Safety-FT-lr3e-5/resolve/main/config.json
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/transformers/utils/hub.py", line 479, in cached_files
+    hf_hub_download(
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/huggingface_hub/utils/_validators.py", line 114, in _inner_fn
+    return fn(*args, **kwargs)
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/huggingface_hub/file_download.py", line 1007, in hf_hub_download
+    return _hf_hub_download_to_cache_dir(
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/huggingface_hub/file_download.py", line 1114, in _hf_hub_download_to_cache_dir
+    _raise_on_head_call_error(head_call_error, force_download, local_files_only)
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/huggingface_hub/file_download.py", line 1655, in _raise_on_head_call_error
+    raise head_call_error
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/huggingface_hub/file_download.py", line 1543, in _get_metadata_or_catch_error
+    metadata = get_hf_file_metadata(
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/huggingface_hub/utils/_validators.py", line 114, in _inner_fn
+    return fn(*args, **kwargs)
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/huggingface_hub/file_download.py", line 1460, in get_hf_file_metadata
+    r = _request_wrapper(
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/huggingface_hub/file_download.py", line 283, in _request_wrapper
+    response = _request_wrapper(
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/huggingface_hub/file_download.py", line 307, in _request_wrapper
+    hf_raise_for_status(response)
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/huggingface_hub/utils/_http.py", line 452, in hf_raise_for_status
+    raise _format(RepositoryNotFoundError, message, response) from e
+huggingface_hub.errors.RepositoryNotFoundError: 404 Client Error. (Request ID: Root=1-69e1bb79-3c3cdc6246b26e0d7ea79be8;54b14b56-aedf-47f5-adfa-05c5421e9465)
+
+Repository Not Found for url: https://huggingface.co/kmseong/llama2_7-chat-Safety-FT-lr3e-5/resolve/main/config.json.
+Please make sure you specified the correct `repo_id` and `repo_type`.
+If you are trying to access a private or gated repo, make sure you are authenticated. For more details, see https://huggingface.co/docs/huggingface_hub/authentication
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/yonsei_jong/Safety-WaRP-LLM/models/phase2_importance_per_layer.py", line 192, in load_model
+    self.model = AutoModelForCausalLM.from_pretrained(
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/transformers/models/auto/auto_factory.py", line 508, in from_pretrained
+    resolved_config_file = cached_file(
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/transformers/utils/hub.py", line 322, in cached_file
+    file = cached_files(path_or_repo_id=path_or_repo_id, filenames=[filename], **kwargs)
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/transformers/utils/hub.py", line 511, in cached_files
+    raise OSError(
+OSError: kmseong/llama2_7-chat-Safety-FT-lr3e-5 is not a local folder and is not a valid model identifier listed on 'https://huggingface.co/models'
+If this is a private repository, make sure to pass a token having permission to this repo either by logging in with `hf auth login` or by passing `token=<your_token>`

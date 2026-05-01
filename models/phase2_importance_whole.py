@@ -203,9 +203,11 @@ class Phase2ImportanceScorer:
             with open(circuit_breakers_path, 'r', encoding='utf-8') as f:
                 circuit_breakers_data = json.load(f)
             
-            # 샘플 수 제한
-            if self.args.circuit_breakers_samples > 0:
-                circuit_breakers_data = circuit_breakers_data[:self.args.circuit_breakers_samples]
+            # 샘플 수 제한 (arg 이름 호환: circuit_breakers_samples_phase2 또는 circuit_breakers_samples)
+            n_samples = getattr(self.args, 'circuit_breakers_samples_phase2',
+                        getattr(self.args, 'circuit_breakers_samples', 0))
+            if n_samples > 0:
+                circuit_breakers_data = circuit_breakers_data[:n_samples]
             
             self.logger.info(f"✓ Loaded {len(circuit_breakers_data)} samples")
             

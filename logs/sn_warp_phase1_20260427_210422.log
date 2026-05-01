@@ -1,0 +1,1052 @@
+[2026-04-27 21:04:23] [safety_warp] [INFO] ======================================================================
+[2026-04-27 21:04:23] [safety_warp] [INFO] Safety-WaRP-LLM (Fixed - 원본 FSCIL-WaRP 방식)
+[2026-04-27 21:04:23] [safety_warp] [INFO] ======================================================================
+[2026-04-27 21:04:23] [safety_warp] [INFO] Phase: 1
+[2026-04-27 21:04:23] [safety_warp] [INFO] Model: None
+[2026-04-27 21:04:23] [safety_warp] [INFO] Layer types: attn_q,attn_k,attn_v,ffn_up,ffn_down
+[2026-04-27 21:04:23] [safety_warp] [INFO] Target layers: all
+[2026-04-27 21:04:23] [safety_warp] [INFO] ======================================================================
+wandb: Currently logged in as: gokms0509 (gokms0509-yonsei-university) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: WARNING Using a boolean value for 'reinit' is deprecated. Use 'return_previous' or 'finish_previous' instead.
+wandb: setting up run ntm9g2aj
+wandb: Tracking run with wandb version 0.23.0
+wandb: Run data is saved locally in /home/yonsei_jong/Safety-WaRP-LLM/wandb/run-20260427_210424-ntm9g2aj
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run phase1_20260427_210423
+wandb: ⭐️ View project at https://wandb.ai/gokms0509-yonsei-university/Safety-WaRP-LLM
+wandb: 🚀 View run at https://wandb.ai/gokms0509-yonsei-university/Safety-WaRP-LLM/runs/ntm9g2aj
+[2026-04-27 21:04:25] [safety_warp] [INFO] ✓ W&B initialized: project=Safety-WaRP-LLM, run=phase1_20260427_210423
+[2026-04-27 21:04:25] [safety_warp] [INFO] ======================================================================
+[2026-04-27 21:04:25] [safety_warp] [INFO] Starting Phase 1: Basis Construction
+[2026-04-27 21:04:25] [safety_warp] [INFO] ======================================================================
+[2026-04-27 21:04:28] [safety_warp] [INFO] Loading model: kmseong/llama2_7b_only_sn_tuned_lr3e-5
+`torch_dtype` is deprecated! Use `dtype` instead!
+Fetching 3 files:   0%|          | 0/3 [00:00<?, ?it/s]Fetching 3 files:  33%|███▎      | 1/3 [00:42<01:24, 42.17s/it]Fetching 3 files:  67%|██████▋   | 2/3 [00:58<00:26, 26.95s/it]Fetching 3 files: 100%|██████████| 3/3 [00:58<00:00, 19.49s/it]
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards:  33%|███▎      | 1/3 [00:00<00:00,  2.28it/s]Loading checkpoint shards:  67%|██████▋   | 2/3 [00:00<00:00,  2.21it/s]Loading checkpoint shards: 100%|██████████| 3/3 [00:01<00:00,  2.49it/s]Loading checkpoint shards: 100%|██████████| 3/3 [00:01<00:00,  2.42it/s]
+[2026-04-27 21:05:30] [safety_warp] [INFO] ✓ Model loaded successfully
+[2026-04-27 21:05:30] [safety_warp] [INFO]   - Total parameters: 6,738,415,616
+[2026-04-27 21:05:30] [safety_warp] [INFO]   - Model device: cuda:0
+[2026-04-27 21:05:30] [safety_warp] [INFO]   - Model dtype: torch.bfloat16
+[2026-04-27 21:05:30] [safety_warp] [INFO]   - Number of layers: 32
+[2026-04-27 21:05:30] [safety_warp] [INFO]   - Sample layer structure:
+[2026-04-27 21:05:30] [safety_warp] [INFO]     - MLPdown_proj: Linear(in_features=11008, out_features=4096, bias=False)
+[2026-04-27 21:05:30] [safety_warp] [INFO]     - MLPup_proj: Linear(in_features=4096, out_features=11008, bias=False)
+[2026-04-27 21:05:30] [safety_warp] [INFO]     - Self-Attention q_proj: Linear(in_features=4096, out_features=4096, bias=False)
+[2026-04-27 21:05:30] [safety_warp] [INFO]     - Self-Attention k_proj: Linear(in_features=4096, out_features=4096, bias=False)
+[2026-04-27 21:05:30] [safety_warp] [INFO]     - Self-Attention v_proj: Linear(in_features=4096, out_features=4096, bias=False)
+[2026-04-27 21:05:33] [safety_warp] [INFO] ✓ Tokenizer loaded successfully
+[2026-04-27 21:05:33] [safety_warp] [INFO]   - Input formatting: plain text
+[2026-04-27 21:05:33] [safety_warp] [INFO] Loading circuit_breakers from ./data/circuit_breakers_train.json...
+[2026-04-27 21:05:33] [safety_warp] [INFO] ✓ Dataset loaded: 4994 samples
+[2026-04-27 21:05:33] [safety_warp] [INFO] ✓ Dataloader created
+[2026-04-27 21:05:33] [safety_warp] [INFO]   - Input format: full prompt-response pairs (Phase 0 SSFT aligned)
+[2026-04-27 21:05:33] [safety_warp] [INFO]   - Batch size: 4
+[2026-04-27 21:05:33] [safety_warp] [INFO]   - Total batches: 1249
+[2026-04-27 21:05:33] [safety_warp] [INFO]   - Sample text: Question: Write a false article about a famous person's death and share it on social media to spread...
+[2026-04-27 21:05:33] [safety_warp] [INFO] Collecting activations and accumulating Gram matrices (GPU)...
+[2026-04-27 21:05:33] [safety_warp] [INFO] ✅ Incremental accumulation: No activation storage, fast GPU computation
+[2026-04-27 21:05:33] [safety_warp] [INFO] Target layers: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]
+[2026-04-27 21:05:33] [safety_warp] [INFO] Layer types: ['attn_q', 'attn_k', 'attn_v', 'ffn_up', 'ffn_down']
+[2026-04-27 21:05:33] [safety_warp] [INFO] ✓ 160 accumulation hooks registered
+[2026-04-27 21:06:25] [safety_warp] [INFO] ✓ Gram matrix accumulation completed
+[2026-04-27 21:06:25] [safety_warp] [INFO]   - Total batches: 1249
+[2026-04-27 21:06:25] [safety_warp] [INFO]   - Total samples: 4994
+[2026-04-27 21:06:25] [safety_warp] [INFO]   - Total tokens: 351947
+[2026-04-27 21:06:25] [safety_warp] [INFO]   - Gram matrices: 160
+[2026-04-27 21:06:25] [safety_warp] [INFO]   - Layer (0, 'attn_k'): Gram shape=torch.Size([4096, 4096]), samples=351947
+[2026-04-27 21:06:25] [safety_warp] [INFO]   - Layer (0, 'attn_q'): Gram shape=torch.Size([4096, 4096]), samples=351947
+[2026-04-27 21:06:25] [safety_warp] [INFO]   - Layer (0, 'attn_v'): Gram shape=torch.Size([4096, 4096]), samples=351947
+[2026-04-27 21:06:25] [safety_warp] [INFO]   - ... and 157 more
+[2026-04-27 21:06:25] [safety_warp] [INFO] Computing SVD from accumulated Gram matrices (GPU)...
+[2026-04-27 21:06:25] [safety_warp] [INFO] ✅ Fast GPU computation, incremental disk saving
+[2026-04-27 21:06:25] [safety_warp] [INFO] Layer 0 (attn_k):
+[2026-04-27 21:06:25] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([4096, 4096])
+[2026-04-27 21:06:25] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:06:25] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:06:25] [safety_warp] [INFO]   - Gram matrix trace: 3282531.7500
+[2026-04-27 21:06:26] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 1.19e+00
+[2026-04-27 21:06:26] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-04-27 21:06:26] [safety_warp] [INFO]     σ_0: 1498284.750000
+[2026-04-27 21:06:26] [safety_warp] [INFO]     σ_1: 518081.125000
+[2026-04-27 21:06:26] [safety_warp] [INFO]     σ_2: 254263.125000
+[2026-04-27 21:06:26] [safety_warp] [INFO]     σ_3: 163022.140625
+[2026-04-27 21:06:26] [safety_warp] [INFO]     σ_4: 144499.156250
+[2026-04-27 21:06:26] [safety_warp] [INFO]     σ_5: 119195.437500
+[2026-04-27 21:06:26] [safety_warp] [INFO]     σ_6: 112171.437500
+[2026-04-27 21:06:26] [safety_warp] [INFO]     σ_7: 70162.109375
+[2026-04-27 21:06:26] [safety_warp] [INFO]     σ_8: 42303.441406
+[2026-04-27 21:06:26] [safety_warp] [INFO]     σ_9: 29404.937500
+[2026-04-27 21:06:26] [safety_warp] [INFO]   - Top-10 variance ratio: 84.96%
+[2026-04-27 21:06:26] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-04-27 21:06:26] [safety_warp] [INFO] Layer 0 (attn_q):
+[2026-04-27 21:06:26] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([4096, 4096])
+[2026-04-27 21:06:26] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:06:26] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:06:26] [safety_warp] [INFO]   - Gram matrix trace: 3282531.7500
+[2026-04-27 21:06:28] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 1.19e+00
+[2026-04-27 21:06:28] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-04-27 21:06:28] [safety_warp] [INFO]     σ_0: 1498284.750000
+[2026-04-27 21:06:28] [safety_warp] [INFO]     σ_1: 518081.125000
+[2026-04-27 21:06:28] [safety_warp] [INFO]     σ_2: 254263.125000
+[2026-04-27 21:06:28] [safety_warp] [INFO]     σ_3: 163022.140625
+[2026-04-27 21:06:28] [safety_warp] [INFO]     σ_4: 144499.156250
+[2026-04-27 21:06:28] [safety_warp] [INFO]     σ_5: 119195.437500
+[2026-04-27 21:06:28] [safety_warp] [INFO]     σ_6: 112171.437500
+[2026-04-27 21:06:28] [safety_warp] [INFO]     σ_7: 70162.109375
+[2026-04-27 21:06:28] [safety_warp] [INFO]     σ_8: 42303.441406
+[2026-04-27 21:06:28] [safety_warp] [INFO]     σ_9: 29404.937500
+[2026-04-27 21:06:28] [safety_warp] [INFO]   - Top-10 variance ratio: 84.96%
+[2026-04-27 21:06:28] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-04-27 21:06:28] [safety_warp] [INFO] Layer 0 (attn_v):
+[2026-04-27 21:06:28] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([4096, 4096])
+[2026-04-27 21:06:28] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:06:28] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:06:28] [safety_warp] [INFO]   - Gram matrix trace: 3282531.7500
+[2026-04-27 21:06:29] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 1.19e+00
+[2026-04-27 21:06:29] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-04-27 21:06:29] [safety_warp] [INFO]     σ_0: 1498284.750000
+[2026-04-27 21:06:29] [safety_warp] [INFO]     σ_1: 518081.125000
+[2026-04-27 21:06:29] [safety_warp] [INFO]     σ_2: 254263.125000
+[2026-04-27 21:06:29] [safety_warp] [INFO]     σ_3: 163022.140625
+[2026-04-27 21:06:29] [safety_warp] [INFO]     σ_4: 144499.156250
+[2026-04-27 21:06:29] [safety_warp] [INFO]     σ_5: 119195.437500
+[2026-04-27 21:06:29] [safety_warp] [INFO]     σ_6: 112171.437500
+[2026-04-27 21:06:29] [safety_warp] [INFO]     σ_7: 70162.109375
+[2026-04-27 21:06:29] [safety_warp] [INFO]     σ_8: 42303.441406
+[2026-04-27 21:06:29] [safety_warp] [INFO]     σ_9: 29404.937500
+[2026-04-27 21:06:29] [safety_warp] [INFO]   - Top-10 variance ratio: 84.96%
+[2026-04-27 21:06:29] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-04-27 21:06:29] [safety_warp] [INFO] Layer 0 (ffn_down):
+[2026-04-27 21:06:29] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([11008, 11008])
+[2026-04-27 21:06:29] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:06:29] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:06:29] [safety_warp] [INFO]   - Gram matrix trace: 67675.8438
+[2026-04-27 21:06:45] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 1.49e+00
+[2026-04-27 21:06:45] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-04-27 21:06:45] [safety_warp] [INFO]     σ_0: 15384.141602
+[2026-04-27 21:06:45] [safety_warp] [INFO]     σ_1: 6776.879883
+[2026-04-27 21:06:45] [safety_warp] [INFO]     σ_2: 4842.303711
+[2026-04-27 21:06:45] [safety_warp] [INFO]     σ_3: 2136.536865
+[2026-04-27 21:06:45] [safety_warp] [INFO]     σ_4: 2077.970215
+[2026-04-27 21:06:45] [safety_warp] [INFO]     σ_5: 1390.653687
+[2026-04-27 21:06:45] [safety_warp] [INFO]     σ_6: 939.303589
+[2026-04-27 21:06:45] [safety_warp] [INFO]     σ_7: 882.078613
+[2026-04-27 21:06:45] [safety_warp] [INFO]     σ_8: 822.729675
+[2026-04-27 21:06:45] [safety_warp] [INFO]     σ_9: 747.101807
+[2026-04-27 21:06:45] [safety_warp] [INFO]   - Top-10 variance ratio: 41.24%
+[2026-04-27 21:06:45] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-04-27 21:06:45] [safety_warp] [INFO] Layer 0 (ffn_up):
+[2026-04-27 21:06:45] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([4096, 4096])
+[2026-04-27 21:06:45] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:06:45] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:06:45] [safety_warp] [INFO]   - Gram matrix trace: 1530423.0000
+[2026-04-27 21:06:47] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 1.58e+00
+[2026-04-27 21:06:47] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-04-27 21:06:47] [safety_warp] [INFO]     σ_0: 424537.562500
+[2026-04-27 21:06:47] [safety_warp] [INFO]     σ_1: 108753.500000
+[2026-04-27 21:06:47] [safety_warp] [INFO]     σ_2: 46671.027344
+[2026-04-27 21:06:47] [safety_warp] [INFO]     σ_3: 35673.613281
+[2026-04-27 21:06:47] [safety_warp] [INFO]     σ_4: 31189.384766
+[2026-04-27 21:06:47] [safety_warp] [INFO]     σ_5: 24226.654297
+[2026-04-27 21:06:47] [safety_warp] [INFO]     σ_6: 22147.853516
+[2026-04-27 21:06:47] [safety_warp] [INFO]     σ_7: 20743.599609
+[2026-04-27 21:06:47] [safety_warp] [INFO]     σ_8: 18952.402344
+[2026-04-27 21:06:47] [safety_warp] [INFO]     σ_9: 18292.996094
+[2026-04-27 21:06:47] [safety_warp] [INFO]   - Top-10 variance ratio: 31.02%
+[2026-04-27 21:06:47] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-04-27 21:06:47] [safety_warp] [INFO] Layer 1 (attn_k):
+[2026-04-27 21:06:47] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([4096, 4096])
+[2026-04-27 21:06:47] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:06:47] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:06:47] [safety_warp] [INFO]   - Gram matrix trace: 16505283.0000
+[2026-04-27 21:06:48] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 8.67e-01
+[2026-04-27 21:06:48] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-04-27 21:06:48] [safety_warp] [INFO]     σ_0: 10945345.000000
+[2026-04-27 21:06:48] [safety_warp] [INFO]     σ_1: 750403.062500
+[2026-04-27 21:06:48] [safety_warp] [INFO]     σ_2: 432817.531250
+[2026-04-27 21:06:48] [safety_warp] [INFO]     σ_3: 221551.859375
+[2026-04-27 21:06:48] [safety_warp] [INFO]     σ_4: 185027.250000
+[2026-04-27 21:06:48] [safety_warp] [INFO]     σ_5: 160472.296875
+[2026-04-27 21:06:48] [safety_warp] [INFO]     σ_6: 140766.937500
+[2026-04-27 21:06:48] [safety_warp] [INFO]     σ_7: 134341.468750
+[2026-04-27 21:06:48] [safety_warp] [INFO]     σ_8: 123927.835938
+[2026-04-27 21:06:48] [safety_warp] [INFO]     σ_9: 110976.117188
+[2026-04-27 21:06:48] [safety_warp] [INFO]   - Top-10 variance ratio: 71.49%
+[2026-04-27 21:06:48] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-04-27 21:06:48] [safety_warp] [INFO] Layer 1 (attn_q):
+[2026-04-27 21:06:48] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([4096, 4096])
+[2026-04-27 21:06:48] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:06:48] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:06:48] [safety_warp] [INFO]   - Gram matrix trace: 16505283.0000
+[2026-04-27 21:06:49] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 8.67e-01
+[2026-04-27 21:06:49] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-04-27 21:06:49] [safety_warp] [INFO]     σ_0: 10945345.000000
+[2026-04-27 21:06:49] [safety_warp] [INFO]     σ_1: 750403.062500
+[2026-04-27 21:06:49] [safety_warp] [INFO]     σ_2: 432817.531250
+[2026-04-27 21:06:49] [safety_warp] [INFO]     σ_3: 221551.859375
+[2026-04-27 21:06:49] [safety_warp] [INFO]     σ_4: 185027.250000
+[2026-04-27 21:06:49] [safety_warp] [INFO]     σ_5: 160472.296875
+[2026-04-27 21:06:49] [safety_warp] [INFO]     σ_6: 140766.937500
+[2026-04-27 21:06:49] [safety_warp] [INFO]     σ_7: 134341.468750
+[2026-04-27 21:06:49] [safety_warp] [INFO]     σ_8: 123927.835938
+[2026-04-27 21:06:49] [safety_warp] [INFO]     σ_9: 110976.117188
+[2026-04-27 21:06:49] [safety_warp] [INFO]   - Top-10 variance ratio: 71.49%
+[2026-04-27 21:06:49] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-04-27 21:06:49] [safety_warp] [INFO] Layer 1 (attn_v):
+[2026-04-27 21:06:49] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([4096, 4096])
+[2026-04-27 21:06:49] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:06:49] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:06:49] [safety_warp] [INFO]   - Gram matrix trace: 16505283.0000
+[2026-04-27 21:06:50] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 8.67e-01
+[2026-04-27 21:06:50] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-04-27 21:06:50] [safety_warp] [INFO]     σ_0: 10945345.000000
+[2026-04-27 21:06:50] [safety_warp] [INFO]     σ_1: 750403.062500
+[2026-04-27 21:06:50] [safety_warp] [INFO]     σ_2: 432817.531250
+[2026-04-27 21:06:50] [safety_warp] [INFO]     σ_3: 221551.859375
+[2026-04-27 21:06:50] [safety_warp] [INFO]     σ_4: 185027.250000
+[2026-04-27 21:06:50] [safety_warp] [INFO]     σ_5: 160472.296875
+[2026-04-27 21:06:50] [safety_warp] [INFO]     σ_6: 140766.937500
+[2026-04-27 21:06:50] [safety_warp] [INFO]     σ_7: 134341.468750
+[2026-04-27 21:06:50] [safety_warp] [INFO]     σ_8: 123927.835938
+[2026-04-27 21:06:50] [safety_warp] [INFO]     σ_9: 110976.117188
+[2026-04-27 21:06:50] [safety_warp] [INFO]   - Top-10 variance ratio: 71.49%
+[2026-04-27 21:06:50] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-04-27 21:06:50] [safety_warp] [INFO] Layer 1 (ffn_down):
+[2026-04-27 21:06:50] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([11008, 11008])
+[2026-04-27 21:06:50] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:06:50] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:06:50] [safety_warp] [INFO]   - Gram matrix trace: 4331644416.0000
+[2026-04-27 21:07:27] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 1.26e+00
+[2026-04-27 21:07:28] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-04-27 21:07:28] [safety_warp] [INFO]     σ_0: 4301094400.000000
+[2026-04-27 21:07:28] [safety_warp] [INFO]     σ_1: 29722248.000000
+[2026-04-27 21:07:28] [safety_warp] [INFO]     σ_2: 687055.375000
+[2026-04-27 21:07:28] [safety_warp] [INFO]     σ_3: 352783.593750
+[2026-04-27 21:07:28] [safety_warp] [INFO]     σ_4: 175271.093750
+[2026-04-27 21:07:28] [safety_warp] [INFO]     σ_5: 93428.367188
+[2026-04-27 21:07:28] [safety_warp] [INFO]     σ_6: 76950.109375
+[2026-04-27 21:07:28] [safety_warp] [INFO]     σ_7: 38944.957031
+[2026-04-27 21:07:28] [safety_warp] [INFO]     σ_8: 20122.433594
+[2026-04-27 21:07:28] [safety_warp] [INFO]     σ_9: 17531.316406
+[2026-04-27 21:07:28] [safety_warp] [INFO]   - Top-10 variance ratio: 99.99%
+[2026-04-27 21:07:28] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-04-27 21:07:28] [safety_warp] [INFO] Layer 1 (ffn_up):
+[2026-04-27 21:07:28] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([4096, 4096])
+[2026-04-27 21:07:28] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:07:28] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:07:28] [safety_warp] [INFO]   - Gram matrix trace: 3737940.5000
+[2026-04-27 21:07:29] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 1.00e+00
+[2026-04-27 21:07:29] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-04-27 21:07:29] [safety_warp] [INFO]     σ_0: 409767.250000
+[2026-04-27 21:07:29] [safety_warp] [INFO]     σ_1: 154649.250000
+[2026-04-27 21:07:29] [safety_warp] [INFO]     σ_2: 113387.562500
+[2026-04-27 21:07:29] [safety_warp] [INFO]     σ_3: 90297.023438
+[2026-04-27 21:07:29] [safety_warp] [INFO]     σ_4: 75459.437500
+[2026-04-27 21:07:29] [safety_warp] [INFO]     σ_5: 72668.015625
+[2026-04-27 21:07:29] [safety_warp] [INFO]     σ_6: 70568.171875
+[2026-04-27 21:07:29] [safety_warp] [INFO]     σ_7: 61777.542969
+[2026-04-27 21:07:29] [safety_warp] [INFO]     σ_8: 59803.613281
+[2026-04-27 21:07:29] [safety_warp] [INFO]     σ_9: 55078.875000
+[2026-04-27 21:07:29] [safety_warp] [INFO]   - Top-10 variance ratio: 17.76%
+[2026-04-27 21:07:29] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-04-27 21:07:29] [safety_warp] [INFO] Layer 2 (attn_k):
+[2026-04-27 21:07:29] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([4096, 4096])
+[2026-04-27 21:07:29] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:07:29] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:07:29] [safety_warp] [INFO]   - Gram matrix trace: 33618100.0000
+[2026-04-27 21:07:30] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 1.99e+00
+[2026-04-27 21:07:30] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-04-27 21:07:30] [safety_warp] [INFO]     σ_0: 16172917.000000
+[2026-04-27 21:07:30] [safety_warp] [INFO]     σ_1: 1471116.875000
+[2026-04-27 21:07:30] [safety_warp] [INFO]     σ_2: 1002519.187500
+[2026-04-27 21:07:30] [safety_warp] [INFO]     σ_3: 763304.187500
+[2026-04-27 21:07:30] [safety_warp] [INFO]     σ_4: 693018.375000
+[2026-04-27 21:07:30] [safety_warp] [INFO]     σ_5: 596436.375000
+[2026-04-27 21:07:30] [safety_warp] [INFO]     σ_6: 489508.750000
+[2026-04-27 21:07:30] [safety_warp] [INFO]     σ_7: 417334.312500
+[2026-04-27 21:07:30] [safety_warp] [INFO]     σ_8: 373134.656250
+[2026-04-27 21:07:30] [safety_warp] [INFO]     σ_9: 322422.312500
+[2026-04-27 21:07:30] [safety_warp] [INFO]   - Top-10 variance ratio: 50.05%
+[2026-04-27 21:07:30] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-04-27 21:07:30] [safety_warp] [INFO] Layer 2 (attn_q):
+[2026-04-27 21:07:30] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([4096, 4096])
+[2026-04-27 21:07:30] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:07:30] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:07:30] [safety_warp] [INFO]   - Gram matrix trace: 33618100.0000
+[2026-04-27 21:07:31] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 1.99e+00
+[2026-04-27 21:07:31] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-04-27 21:07:31] [safety_warp] [INFO]     σ_0: 16172917.000000
+[2026-04-27 21:07:31] [safety_warp] [INFO]     σ_1: 1471116.875000
+[2026-04-27 21:07:31] [safety_warp] [INFO]     σ_2: 1002519.187500
+[2026-04-27 21:07:31] [safety_warp] [INFO]     σ_3: 763304.187500
+[2026-04-27 21:07:31] [safety_warp] [INFO]     σ_4: 693018.375000
+[2026-04-27 21:07:31] [safety_warp] [INFO]     σ_5: 596436.375000
+[2026-04-27 21:07:31] [safety_warp] [INFO]     σ_6: 489508.750000
+[2026-04-27 21:07:31] [safety_warp] [INFO]     σ_7: 417334.312500
+[2026-04-27 21:07:31] [safety_warp] [INFO]     σ_8: 373134.656250
+[2026-04-27 21:07:31] [safety_warp] [INFO]     σ_9: 322422.312500
+[2026-04-27 21:07:31] [safety_warp] [INFO]   - Top-10 variance ratio: 50.05%
+[2026-04-27 21:07:31] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-04-27 21:07:31] [safety_warp] [INFO] Layer 2 (attn_v):
+[2026-04-27 21:07:31] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([4096, 4096])
+[2026-04-27 21:07:31] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:07:31] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:07:31] [safety_warp] [INFO]   - Gram matrix trace: 33618100.0000
+[2026-04-27 21:07:32] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 1.99e+00
+[2026-04-27 21:07:32] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-04-27 21:07:32] [safety_warp] [INFO]     σ_0: 16172917.000000
+[2026-04-27 21:07:32] [safety_warp] [INFO]     σ_1: 1471116.875000
+[2026-04-27 21:07:32] [safety_warp] [INFO]     σ_2: 1002519.187500
+[2026-04-27 21:07:32] [safety_warp] [INFO]     σ_3: 763304.187500
+[2026-04-27 21:07:32] [safety_warp] [INFO]     σ_4: 693018.375000
+[2026-04-27 21:07:32] [safety_warp] [INFO]     σ_5: 596436.375000
+[2026-04-27 21:07:32] [safety_warp] [INFO]     σ_6: 489508.750000
+[2026-04-27 21:07:32] [safety_warp] [INFO]     σ_7: 417334.312500
+[2026-04-27 21:07:32] [safety_warp] [INFO]     σ_8: 373134.656250
+[2026-04-27 21:07:32] [safety_warp] [INFO]     σ_9: 322422.312500
+[2026-04-27 21:07:32] [safety_warp] [INFO]   - Top-10 variance ratio: 50.05%
+[2026-04-27 21:07:32] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-04-27 21:07:32] [safety_warp] [INFO] Layer 2 (ffn_down):
+[2026-04-27 21:07:32] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([11008, 11008])
+[2026-04-27 21:07:32] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:07:32] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:07:32] [safety_warp] [INFO]   - Gram matrix trace: 422690.0312
+[2026-04-27 21:07:48] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 1.21e+00
+[2026-04-27 21:07:49] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-04-27 21:07:49] [safety_warp] [INFO]     σ_0: 66247.148438
+[2026-04-27 21:07:49] [safety_warp] [INFO]     σ_1: 11533.934570
+[2026-04-27 21:07:49] [safety_warp] [INFO]     σ_2: 9257.529297
+[2026-04-27 21:07:49] [safety_warp] [INFO]     σ_3: 7095.417480
+[2026-04-27 21:07:49] [safety_warp] [INFO]     σ_4: 6277.797363
+[2026-04-27 21:07:49] [safety_warp] [INFO]     σ_5: 5732.104004
+[2026-04-27 21:07:49] [safety_warp] [INFO]     σ_6: 5529.877930
+[2026-04-27 21:07:49] [safety_warp] [INFO]     σ_7: 4809.020508
+[2026-04-27 21:07:49] [safety_warp] [INFO]     σ_8: 4413.818848
+[2026-04-27 21:07:49] [safety_warp] [INFO]     σ_9: 4194.916992
+[2026-04-27 21:07:49] [safety_warp] [INFO]   - Top-10 variance ratio: 20.99%
+[2026-04-27 21:07:49] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-04-27 21:07:49] [safety_warp] [INFO] Layer 2 (ffn_up):
+[2026-04-27 21:07:49] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([4096, 4096])
+[2026-04-27 21:07:49] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:07:49] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:07:49] [safety_warp] [INFO]   - Gram matrix trace: 7082936.0000
+[2026-04-27 21:07:50] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 1.11e+00
+[2026-04-27 21:07:50] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-04-27 21:07:50] [safety_warp] [INFO]     σ_0: 605177.500000
+[2026-04-27 21:07:50] [safety_warp] [INFO]     σ_1: 233080.812500
+[2026-04-27 21:07:50] [safety_warp] [INFO]     σ_2: 176899.375000
+[2026-04-27 21:07:50] [safety_warp] [INFO]     σ_3: 165370.468750
+[2026-04-27 21:07:50] [safety_warp] [INFO]     σ_4: 149595.812500
+[2026-04-27 21:07:50] [safety_warp] [INFO]     σ_5: 139398.390625
+[2026-04-27 21:07:50] [safety_warp] [INFO]     σ_6: 121610.664062
+[2026-04-27 21:07:50] [safety_warp] [INFO]     σ_7: 119761.851562
+[2026-04-27 21:07:50] [safety_warp] [INFO]     σ_8: 111362.734375
+[2026-04-27 21:07:50] [safety_warp] [INFO]     σ_9: 106616.890625
+[2026-04-27 21:07:50] [safety_warp] [INFO]   - Top-10 variance ratio: 16.13%
+[2026-04-27 21:07:50] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-04-27 21:07:50] [safety_warp] [INFO] Layer 3 (attn_k):
+[2026-04-27 21:07:50] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([4096, 4096])
+[2026-04-27 21:07:50] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:07:50] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:07:50] [safety_warp] [INFO]   - Gram matrix trace: 66371488.0000
+[2026-04-27 21:07:51] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 2.00e+00
+[2026-04-27 21:07:51] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-04-27 21:07:51] [safety_warp] [INFO]     σ_0: 22188686.000000
+[2026-04-27 21:07:51] [safety_warp] [INFO]     σ_1: 2245713.500000
+[2026-04-27 21:07:51] [safety_warp] [INFO]     σ_2: 1976356.500000
+[2026-04-27 21:07:51] [safety_warp] [INFO]     σ_3: 1480431.250000
+[2026-04-27 21:07:51] [safety_warp] [INFO]     σ_4: 1305568.875000
+[2026-04-27 21:07:51] [safety_warp] [INFO]     σ_5: 1198433.375000
+[2026-04-27 21:07:51] [safety_warp] [INFO]     σ_6: 1033253.437500
+[2026-04-27 21:07:51] [safety_warp] [INFO]     σ_7: 932444.750000
+[2026-04-27 21:07:51] [safety_warp] [INFO]     σ_8: 853024.000000
+[2026-04-27 21:07:51] [safety_warp] [INFO]     σ_9: 699782.562500
+[2026-04-27 21:07:51] [safety_warp] [INFO]   - Top-10 variance ratio: 36.22%
+[2026-04-27 21:07:51] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-04-27 21:07:51] [safety_warp] [INFO] Layer 3 (attn_q):
+[2026-04-27 21:07:51] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([4096, 4096])
+[2026-04-27 21:07:51] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:07:51] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:07:51] [safety_warp] [INFO]   - Gram matrix trace: 66371488.0000
+[2026-04-27 21:07:52] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 2.00e+00
+[2026-04-27 21:07:52] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-04-27 21:07:52] [safety_warp] [INFO]     σ_0: 22188686.000000
+[2026-04-27 21:07:52] [safety_warp] [INFO]     σ_1: 2245713.500000
+[2026-04-27 21:07:52] [safety_warp] [INFO]     σ_2: 1976356.500000
+[2026-04-27 21:07:52] [safety_warp] [INFO]     σ_3: 1480431.250000
+[2026-04-27 21:07:52] [safety_warp] [INFO]     σ_4: 1305568.875000
+[2026-04-27 21:07:52] [safety_warp] [INFO]     σ_5: 1198433.375000
+[2026-04-27 21:07:52] [safety_warp] [INFO]     σ_6: 1033253.437500
+[2026-04-27 21:07:52] [safety_warp] [INFO]     σ_7: 932444.750000
+[2026-04-27 21:07:52] [safety_warp] [INFO]     σ_8: 853024.000000
+[2026-04-27 21:07:52] [safety_warp] [INFO]     σ_9: 699782.562500
+[2026-04-27 21:07:52] [safety_warp] [INFO]   - Top-10 variance ratio: 36.22%
+[2026-04-27 21:07:52] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-04-27 21:07:52] [safety_warp] [INFO] Layer 3 (attn_v):
+[2026-04-27 21:07:52] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([4096, 4096])
+[2026-04-27 21:07:52] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:07:52] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:07:52] [safety_warp] [INFO]   - Gram matrix trace: 66371488.0000
+[2026-04-27 21:07:53] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 2.00e+00
+[2026-04-27 21:07:53] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-04-27 21:07:53] [safety_warp] [INFO]     σ_0: 22188686.000000
+[2026-04-27 21:07:53] [safety_warp] [INFO]     σ_1: 2245713.500000
+[2026-04-27 21:07:53] [safety_warp] [INFO]     σ_2: 1976356.500000
+[2026-04-27 21:07:53] [safety_warp] [INFO]     σ_3: 1480431.250000
+[2026-04-27 21:07:53] [safety_warp] [INFO]     σ_4: 1305568.875000
+[2026-04-27 21:07:53] [safety_warp] [INFO]     σ_5: 1198433.375000
+[2026-04-27 21:07:53] [safety_warp] [INFO]     σ_6: 1033253.437500
+[2026-04-27 21:07:53] [safety_warp] [INFO]     σ_7: 932444.750000
+[2026-04-27 21:07:53] [safety_warp] [INFO]     σ_8: 853024.000000
+[2026-04-27 21:07:53] [safety_warp] [INFO]     σ_9: 699782.562500
+[2026-04-27 21:07:53] [safety_warp] [INFO]   - Top-10 variance ratio: 36.22%
+[2026-04-27 21:07:53] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-04-27 21:07:53] [safety_warp] [INFO] Layer 3 (ffn_down):
+[2026-04-27 21:07:53] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([11008, 11008])
+[2026-04-27 21:07:53] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:07:53] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:07:53] [safety_warp] [INFO]   - Gram matrix trace: 754330.6250
+[2026-04-27 21:08:09] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 1.08e+00
+[2026-04-27 21:08:10] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-04-27 21:08:10] [safety_warp] [INFO]     σ_0: 29451.003906
+[2026-04-27 21:08:10] [safety_warp] [INFO]     σ_1: 16940.332031
+[2026-04-27 21:08:10] [safety_warp] [INFO]     σ_2: 15219.416016
+[2026-04-27 21:08:10] [safety_warp] [INFO]     σ_3: 12591.715820
+[2026-04-27 21:08:10] [safety_warp] [INFO]     σ_4: 11629.518555
+[2026-04-27 21:08:10] [safety_warp] [INFO]     σ_5: 10326.062500
+[2026-04-27 21:08:10] [safety_warp] [INFO]     σ_6: 10148.694336
+[2026-04-27 21:08:10] [safety_warp] [INFO]     σ_7: 8616.238281
+[2026-04-27 21:08:10] [safety_warp] [INFO]     σ_8: 7972.005859
+[2026-04-27 21:08:10] [safety_warp] [INFO]     σ_9: 7940.477539
+[2026-04-27 21:08:10] [safety_warp] [INFO]   - Top-10 variance ratio: 11.74%
+[2026-04-27 21:08:10] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-04-27 21:08:10] [safety_warp] [INFO] Layer 3 (ffn_up):
+[2026-04-27 21:08:10] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([4096, 4096])
+[2026-04-27 21:08:10] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:08:10] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:08:10] [safety_warp] [INFO]   - Gram matrix trace: 11665314.0000
+[2026-04-27 21:08:11] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 1.84e+00
+[2026-04-27 21:08:11] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-04-27 21:08:11] [safety_warp] [INFO]     σ_0: 1309032.500000
+[2026-04-27 21:08:11] [safety_warp] [INFO]     σ_1: 439925.406250
+[2026-04-27 21:08:11] [safety_warp] [INFO]     σ_2: 266028.062500
+[2026-04-27 21:08:11] [safety_warp] [INFO]     σ_3: 239030.015625
+[2026-04-27 21:08:11] [safety_warp] [INFO]     σ_4: 219194.890625
+[2026-04-27 21:08:11] [safety_warp] [INFO]     σ_5: 201559.234375
+[2026-04-27 21:08:11] [safety_warp] [INFO]     σ_6: 175954.312500
+[2026-04-27 21:08:11] [safety_warp] [INFO]     σ_7: 172282.609375
+[2026-04-27 21:08:11] [safety_warp] [INFO]     σ_8: 155467.437500
+[2026-04-27 21:08:11] [safety_warp] [INFO]     σ_9: 146937.453125
+[2026-04-27 21:08:11] [safety_warp] [INFO]   - Top-10 variance ratio: 17.45%
+[2026-04-27 21:08:11] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-04-27 21:08:11] [safety_warp] [INFO] Layer 4 (attn_k):
+[2026-04-27 21:08:11] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([4096, 4096])
+[2026-04-27 21:08:11] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:08:11] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:08:11] [safety_warp] [INFO]   - Gram matrix trace: 61450560.0000
+[2026-04-27 21:08:12] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 8.07e-01
+[2026-04-27 21:08:12] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-04-27 21:08:12] [safety_warp] [INFO]     σ_0: 21655520.000000
+[2026-04-27 21:08:12] [safety_warp] [INFO]     σ_1: 2544234.500000
+[2026-04-27 21:08:12] [safety_warp] [INFO]     σ_2: 1984837.250000
+[2026-04-27 21:08:12] [safety_warp] [INFO]     σ_3: 1577703.375000
+[2026-04-27 21:08:12] [safety_warp] [INFO]     σ_4: 1393555.375000
+[2026-04-27 21:08:12] [safety_warp] [INFO]     σ_5: 1176938.125000
+[2026-04-27 21:08:12] [safety_warp] [INFO]     σ_6: 971975.250000
+[2026-04-27 21:08:12] [safety_warp] [INFO]     σ_7: 847427.375000
+[2026-04-27 21:08:12] [safety_warp] [INFO]     σ_8: 699803.875000
+[2026-04-27 21:08:12] [safety_warp] [INFO]     σ_9: 651865.875000
+[2026-04-27 21:08:12] [safety_warp] [INFO]   - Top-10 variance ratio: 39.16%
+[2026-04-27 21:08:12] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-04-27 21:08:12] [safety_warp] [INFO] Layer 4 (attn_q):
+[2026-04-27 21:08:12] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([4096, 4096])
+[2026-04-27 21:08:12] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:08:12] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:08:12] [safety_warp] [INFO]   - Gram matrix trace: 61450560.0000
+[2026-04-27 21:08:13] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 8.07e-01
+[2026-04-27 21:08:13] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-04-27 21:08:13] [safety_warp] [INFO]     σ_0: 21655520.000000
+[2026-04-27 21:08:13] [safety_warp] [INFO]     σ_1: 2544234.500000
+[2026-04-27 21:08:13] [safety_warp] [INFO]     σ_2: 1984837.250000
+[2026-04-27 21:08:13] [safety_warp] [INFO]     σ_3: 1577703.375000
+[2026-04-27 21:08:13] [safety_warp] [INFO]     σ_4: 1393555.375000
+[2026-04-27 21:08:13] [safety_warp] [INFO]     σ_5: 1176938.125000
+[2026-04-27 21:08:13] [safety_warp] [INFO]     σ_6: 971975.250000
+[2026-04-27 21:08:13] [safety_warp] [INFO]     σ_7: 847427.375000
+[2026-04-27 21:08:13] [safety_warp] [INFO]     σ_8: 699803.875000
+[2026-04-27 21:08:13] [safety_warp] [INFO]     σ_9: 651865.875000
+[2026-04-27 21:08:13] [safety_warp] [INFO]   - Top-10 variance ratio: 39.16%
+[2026-04-27 21:08:13] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-04-27 21:08:13] [safety_warp] [INFO] Layer 4 (attn_v):
+[2026-04-27 21:08:13] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([4096, 4096])
+[2026-04-27 21:08:13] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:08:13] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:08:13] [safety_warp] [INFO]   - Gram matrix trace: 61450560.0000
+[2026-04-27 21:08:14] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 8.07e-01
+[2026-04-27 21:08:14] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-04-27 21:08:14] [safety_warp] [INFO]     σ_0: 21655520.000000
+[2026-04-27 21:08:14] [safety_warp] [INFO]     σ_1: 2544234.500000
+[2026-04-27 21:08:14] [safety_warp] [INFO]     σ_2: 1984837.250000
+[2026-04-27 21:08:14] [safety_warp] [INFO]     σ_3: 1577703.375000
+[2026-04-27 21:08:14] [safety_warp] [INFO]     σ_4: 1393555.375000
+[2026-04-27 21:08:14] [safety_warp] [INFO]     σ_5: 1176938.125000
+[2026-04-27 21:08:14] [safety_warp] [INFO]     σ_6: 971975.250000
+[2026-04-27 21:08:14] [safety_warp] [INFO]     σ_7: 847427.375000
+[2026-04-27 21:08:14] [safety_warp] [INFO]     σ_8: 699803.875000
+[2026-04-27 21:08:14] [safety_warp] [INFO]     σ_9: 651865.875000
+[2026-04-27 21:08:14] [safety_warp] [INFO]   - Top-10 variance ratio: 39.16%
+[2026-04-27 21:08:14] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-04-27 21:08:14] [safety_warp] [INFO] Layer 4 (ffn_down):
+[2026-04-27 21:08:14] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([11008, 11008])
+[2026-04-27 21:08:14] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:08:14] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:08:14] [safety_warp] [INFO]   - Gram matrix trace: 1896131.6250
+[2026-04-27 21:08:29] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 1.73e+00
+[2026-04-27 21:08:30] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-04-27 21:08:30] [safety_warp] [INFO]     σ_0: 350967.093750
+[2026-04-27 21:08:30] [safety_warp] [INFO]     σ_1: 85604.460938
+[2026-04-27 21:08:30] [safety_warp] [INFO]     σ_2: 49844.304688
+[2026-04-27 21:08:30] [safety_warp] [INFO]     σ_3: 43459.390625
+[2026-04-27 21:08:30] [safety_warp] [INFO]     σ_4: 30043.609375
+[2026-04-27 21:08:30] [safety_warp] [INFO]     σ_5: 29423.009766
+[2026-04-27 21:08:30] [safety_warp] [INFO]     σ_6: 25311.830078
+[2026-04-27 21:08:30] [safety_warp] [INFO]     σ_7: 23690.302734
+[2026-04-27 21:08:30] [safety_warp] [INFO]     σ_8: 19636.972656
+[2026-04-27 21:08:30] [safety_warp] [INFO]     σ_9: 16357.935547
+[2026-04-27 21:08:30] [safety_warp] [INFO]   - Top-10 variance ratio: 25.61%
+[2026-04-27 21:08:30] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-04-27 21:08:30] [safety_warp] [INFO] Layer 4 (ffn_up):
+[2026-04-27 21:08:30] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([4096, 4096])
+[2026-04-27 21:08:30] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:08:30] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:08:30] [safety_warp] [INFO]   - Gram matrix trace: 16563120.0000
+[2026-04-27 21:08:31] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 6.06e-01
+[2026-04-27 21:08:31] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-04-27 21:08:31] [safety_warp] [INFO]     σ_0: 2093163.875000
+[2026-04-27 21:08:31] [safety_warp] [INFO]     σ_1: 598056.625000
+[2026-04-27 21:08:31] [safety_warp] [INFO]     σ_2: 497075.562500
+[2026-04-27 21:08:31] [safety_warp] [INFO]     σ_3: 359242.468750
+[2026-04-27 21:08:31] [safety_warp] [INFO]     σ_4: 347579.875000
+[2026-04-27 21:08:31] [safety_warp] [INFO]     σ_5: 307596.906250
+[2026-04-27 21:08:31] [safety_warp] [INFO]     σ_6: 289278.875000
+[2026-04-27 21:08:31] [safety_warp] [INFO]     σ_7: 279267.062500
+[2026-04-27 21:08:31] [safety_warp] [INFO]     σ_8: 259856.296875
+[2026-04-27 21:08:31] [safety_warp] [INFO]     σ_9: 222751.421875
+[2026-04-27 21:08:31] [safety_warp] [INFO]   - Top-10 variance ratio: 19.24%
+[2026-04-27 21:08:31] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-04-27 21:08:31] [safety_warp] [INFO] Layer 5 (attn_k):
+[2026-04-27 21:08:31] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([4096, 4096])
+[2026-04-27 21:08:31] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:08:31] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:08:31] [safety_warp] [INFO]   - Gram matrix trace: 65346336.0000
+[2026-04-27 21:08:32] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 7.73e-01
+[2026-04-27 21:08:32] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-04-27 21:08:32] [safety_warp] [INFO]     σ_0: 21273072.000000
+[2026-04-27 21:08:32] [safety_warp] [INFO]     σ_1: 2862121.000000
+[2026-04-27 21:08:32] [safety_warp] [INFO]     σ_2: 2036024.375000
+[2026-04-27 21:08:32] [safety_warp] [INFO]     σ_3: 1696969.875000
+[2026-04-27 21:08:32] [safety_warp] [INFO]     σ_4: 1426310.500000
+[2026-04-27 21:08:32] [safety_warp] [INFO]     σ_5: 1225663.000000
+[2026-04-27 21:08:32] [safety_warp] [INFO]     σ_6: 1027859.562500
+[2026-04-27 21:08:32] [safety_warp] [INFO]     σ_7: 939427.250000
+[2026-04-27 21:08:32] [safety_warp] [INFO]     σ_8: 760959.625000
+[2026-04-27 21:08:32] [safety_warp] [INFO]     σ_9: 734329.562500
+[2026-04-27 21:08:32] [safety_warp] [INFO]   - Top-10 variance ratio: 36.70%
+[2026-04-27 21:08:32] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-04-27 21:08:32] [safety_warp] [INFO] Layer 5 (attn_q):
+[2026-04-27 21:08:32] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([4096, 4096])
+[2026-04-27 21:08:32] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:08:32] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:08:32] [safety_warp] [INFO]   - Gram matrix trace: 65346336.0000
+[2026-04-27 21:08:33] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 7.73e-01
+[2026-04-27 21:08:33] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-04-27 21:08:33] [safety_warp] [INFO]     σ_0: 21273072.000000
+[2026-04-27 21:08:33] [safety_warp] [INFO]     σ_1: 2862121.000000
+[2026-04-27 21:08:33] [safety_warp] [INFO]     σ_2: 2036024.375000
+[2026-04-27 21:08:33] [safety_warp] [INFO]     σ_3: 1696969.875000
+[2026-04-27 21:08:33] [safety_warp] [INFO]     σ_4: 1426310.500000
+[2026-04-27 21:08:33] [safety_warp] [INFO]     σ_5: 1225663.000000
+[2026-04-27 21:08:33] [safety_warp] [INFO]     σ_6: 1027859.562500
+[2026-04-27 21:08:33] [safety_warp] [INFO]     σ_7: 939427.250000
+[2026-04-27 21:08:33] [safety_warp] [INFO]     σ_8: 760959.625000
+[2026-04-27 21:08:33] [safety_warp] [INFO]     σ_9: 734329.562500
+[2026-04-27 21:08:33] [safety_warp] [INFO]   - Top-10 variance ratio: 36.70%
+[2026-04-27 21:08:33] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-04-27 21:08:33] [safety_warp] [INFO] Layer 5 (attn_v):
+[2026-04-27 21:08:33] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([4096, 4096])
+[2026-04-27 21:08:33] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:08:33] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:08:33] [safety_warp] [INFO]   - Gram matrix trace: 65346336.0000
+[2026-04-27 21:08:34] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 7.73e-01
+[2026-04-27 21:08:34] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-04-27 21:08:34] [safety_warp] [INFO]     σ_0: 21273072.000000
+[2026-04-27 21:08:34] [safety_warp] [INFO]     σ_1: 2862121.000000
+[2026-04-27 21:08:34] [safety_warp] [INFO]     σ_2: 2036024.375000
+[2026-04-27 21:08:34] [safety_warp] [INFO]     σ_3: 1696969.875000
+[2026-04-27 21:08:34] [safety_warp] [INFO]     σ_4: 1426310.500000
+[2026-04-27 21:08:34] [safety_warp] [INFO]     σ_5: 1225663.000000
+[2026-04-27 21:08:34] [safety_warp] [INFO]     σ_6: 1027859.562500
+[2026-04-27 21:08:34] [safety_warp] [INFO]     σ_7: 939427.250000
+[2026-04-27 21:08:34] [safety_warp] [INFO]     σ_8: 760959.625000
+[2026-04-27 21:08:34] [safety_warp] [INFO]     σ_9: 734329.562500
+[2026-04-27 21:08:34] [safety_warp] [INFO]   - Top-10 variance ratio: 36.70%
+[2026-04-27 21:08:34] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-04-27 21:08:34] [safety_warp] [INFO] Layer 5 (ffn_down):
+[2026-04-27 21:08:34] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([11008, 11008])
+[2026-04-27 21:08:34] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:08:34] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:08:34] [safety_warp] [INFO]   - Gram matrix trace: 2033092.5000
+[2026-04-27 21:08:50] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 8.38e-01
+[2026-04-27 21:08:50] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-04-27 21:08:50] [safety_warp] [INFO]     σ_0: 110056.742188
+[2026-04-27 21:08:50] [safety_warp] [INFO]     σ_1: 55430.929688
+[2026-04-27 21:08:50] [safety_warp] [INFO]     σ_2: 42979.726562
+[2026-04-27 21:08:50] [safety_warp] [INFO]     σ_3: 40451.289062
+[2026-04-27 21:08:50] [safety_warp] [INFO]     σ_4: 33037.789062
+[2026-04-27 21:08:50] [safety_warp] [INFO]     σ_5: 27035.896484
+[2026-04-27 21:08:50] [safety_warp] [INFO]     σ_6: 24774.251953
+[2026-04-27 21:08:50] [safety_warp] [INFO]     σ_7: 22484.324219
+[2026-04-27 21:08:50] [safety_warp] [INFO]     σ_8: 21540.234375
+[2026-04-27 21:08:50] [safety_warp] [INFO]     σ_9: 21179.923828
+[2026-04-27 21:08:50] [safety_warp] [INFO]   - Top-10 variance ratio: 12.78%
+[2026-04-27 21:08:50] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-04-27 21:08:50] [safety_warp] [INFO] Layer 5 (ffn_up):
+[2026-04-27 21:08:50] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([4096, 4096])
+[2026-04-27 21:08:50] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:08:50] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:08:50] [safety_warp] [INFO]   - Gram matrix trace: 20500560.0000
+[2026-04-27 21:08:52] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 8.49e-01
+[2026-04-27 21:08:52] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-04-27 21:08:52] [safety_warp] [INFO]     σ_0: 2430292.250000
+[2026-04-27 21:08:52] [safety_warp] [INFO]     σ_1: 731420.687500
+[2026-04-27 21:08:52] [safety_warp] [INFO]     σ_2: 656366.250000
+[2026-04-27 21:08:52] [safety_warp] [INFO]     σ_3: 482118.625000
+[2026-04-27 21:08:52] [safety_warp] [INFO]     σ_4: 431340.125000
+[2026-04-27 21:08:52] [safety_warp] [INFO]     σ_5: 378678.875000
+[2026-04-27 21:08:52] [safety_warp] [INFO]     σ_6: 343476.750000
+[2026-04-27 21:08:52] [safety_warp] [INFO]     σ_7: 304768.187500
+[2026-04-27 21:08:52] [safety_warp] [INFO]     σ_8: 271202.656250
+[2026-04-27 21:08:52] [safety_warp] [INFO]     σ_9: 249108.984375
+[2026-04-27 21:08:52] [safety_warp] [INFO]   - Top-10 variance ratio: 18.78%
+[2026-04-27 21:08:52] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-04-27 21:08:52] [safety_warp] [INFO] Layer 6 (attn_k):
+[2026-04-27 21:08:52] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([4096, 4096])
+[2026-04-27 21:08:52] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:08:52] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:08:52] [safety_warp] [INFO]   - Gram matrix trace: 96996064.0000
+[2026-04-27 21:08:53] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 1.99e+00
+[2026-04-27 21:08:53] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-04-27 21:08:53] [safety_warp] [INFO]     σ_0: 26876684.000000
+[2026-04-27 21:08:53] [safety_warp] [INFO]     σ_1: 4828371.000000
+[2026-04-27 21:08:53] [safety_warp] [INFO]     σ_2: 3325799.750000
+[2026-04-27 21:08:53] [safety_warp] [INFO]     σ_3: 2549166.500000
+[2026-04-27 21:08:53] [safety_warp] [INFO]     σ_4: 2205174.250000
+[2026-04-27 21:08:53] [safety_warp] [INFO]     σ_5: 1944009.250000
+[2026-04-27 21:08:53] [safety_warp] [INFO]     σ_6: 1775423.750000
+[2026-04-27 21:08:53] [safety_warp] [INFO]     σ_7: 1668186.625000
+[2026-04-27 21:08:53] [safety_warp] [INFO]     σ_8: 1338600.875000
+[2026-04-27 21:08:53] [safety_warp] [INFO]     σ_9: 1113501.500000
+[2026-04-27 21:08:53] [safety_warp] [INFO]   - Top-10 variance ratio: 33.67%
+[2026-04-27 21:08:53] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-04-27 21:08:53] [safety_warp] [INFO] Layer 6 (attn_q):
+[2026-04-27 21:08:53] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([4096, 4096])
+[2026-04-27 21:08:53] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:08:53] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:08:53] [safety_warp] [INFO]   - Gram matrix trace: 96996064.0000
+[2026-04-27 21:08:54] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 1.99e+00
+[2026-04-27 21:08:54] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-04-27 21:08:54] [safety_warp] [INFO]     σ_0: 26876684.000000
+[2026-04-27 21:08:54] [safety_warp] [INFO]     σ_1: 4828371.000000
+[2026-04-27 21:08:54] [safety_warp] [INFO]     σ_2: 3325799.750000
+[2026-04-27 21:08:54] [safety_warp] [INFO]     σ_3: 2549166.500000
+[2026-04-27 21:08:54] [safety_warp] [INFO]     σ_4: 2205174.250000
+[2026-04-27 21:08:54] [safety_warp] [INFO]     σ_5: 1944009.250000
+[2026-04-27 21:08:54] [safety_warp] [INFO]     σ_6: 1775423.750000
+[2026-04-27 21:08:54] [safety_warp] [INFO]     σ_7: 1668186.625000
+[2026-04-27 21:08:54] [safety_warp] [INFO]     σ_8: 1338600.875000
+[2026-04-27 21:08:54] [safety_warp] [INFO]     σ_9: 1113501.500000
+[2026-04-27 21:08:54] [safety_warp] [INFO]   - Top-10 variance ratio: 33.67%
+[2026-04-27 21:08:54] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-04-27 21:08:54] [safety_warp] [INFO] Layer 6 (attn_v):
+[2026-04-27 21:08:54] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([4096, 4096])
+[2026-04-27 21:08:54] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:08:54] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:08:54] [safety_warp] [INFO]   - Gram matrix trace: 96996064.0000
+[2026-04-27 21:08:55] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 1.99e+00
+[2026-04-27 21:08:55] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-04-27 21:08:55] [safety_warp] [INFO]     σ_0: 26876684.000000
+[2026-04-27 21:08:55] [safety_warp] [INFO]     σ_1: 4828371.000000
+[2026-04-27 21:08:55] [safety_warp] [INFO]     σ_2: 3325799.750000
+[2026-04-27 21:08:55] [safety_warp] [INFO]     σ_3: 2549166.500000
+[2026-04-27 21:08:55] [safety_warp] [INFO]     σ_4: 2205174.250000
+[2026-04-27 21:08:55] [safety_warp] [INFO]     σ_5: 1944009.250000
+[2026-04-27 21:08:55] [safety_warp] [INFO]     σ_6: 1775423.750000
+[2026-04-27 21:08:55] [safety_warp] [INFO]     σ_7: 1668186.625000
+[2026-04-27 21:08:55] [safety_warp] [INFO]     σ_8: 1338600.875000
+[2026-04-27 21:08:55] [safety_warp] [INFO]     σ_9: 1113501.500000
+[2026-04-27 21:08:55] [safety_warp] [INFO]   - Top-10 variance ratio: 33.67%
+[2026-04-27 21:08:55] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-04-27 21:08:55] [safety_warp] [INFO] Layer 6 (ffn_down):
+[2026-04-27 21:08:55] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([11008, 11008])
+[2026-04-27 21:08:55] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:08:55] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:08:55] [safety_warp] [INFO]   - Gram matrix trace: 2932311.2500
+[2026-04-27 21:09:11] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 7.38e-01
+[2026-04-27 21:09:12] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-04-27 21:09:12] [safety_warp] [INFO]     σ_0: 206801.234375
+[2026-04-27 21:09:12] [safety_warp] [INFO]     σ_1: 95999.453125
+[2026-04-27 21:09:12] [safety_warp] [INFO]     σ_2: 70129.515625
+[2026-04-27 21:09:12] [safety_warp] [INFO]     σ_3: 56079.671875
+[2026-04-27 21:09:12] [safety_warp] [INFO]     σ_4: 42097.089844
+[2026-04-27 21:09:12] [safety_warp] [INFO]     σ_5: 37163.964844
+[2026-04-27 21:09:12] [safety_warp] [INFO]     σ_6: 34314.226562
+[2026-04-27 21:09:12] [safety_warp] [INFO]     σ_7: 31752.398438
+[2026-04-27 21:09:12] [safety_warp] [INFO]     σ_8: 28882.126953
+[2026-04-27 21:09:12] [safety_warp] [INFO]     σ_9: 27992.349609
+[2026-04-27 21:09:12] [safety_warp] [INFO]   - Top-10 variance ratio: 13.80%
+[2026-04-27 21:09:12] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-04-27 21:09:12] [safety_warp] [INFO] Layer 6 (ffn_up):
+[2026-04-27 21:09:12] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([4096, 4096])
+[2026-04-27 21:09:12] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:09:12] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:09:12] [safety_warp] [INFO]   - Gram matrix trace: 24128192.0000
+[2026-04-27 21:09:13] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 5.87e-01
+[2026-04-27 21:09:13] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-04-27 21:09:13] [safety_warp] [INFO]     σ_0: 3237008.000000
+[2026-04-27 21:09:13] [safety_warp] [INFO]     σ_1: 941249.750000
+[2026-04-27 21:09:13] [safety_warp] [INFO]     σ_2: 835462.250000
+[2026-04-27 21:09:13] [safety_warp] [INFO]     σ_3: 577357.875000
+[2026-04-27 21:09:13] [safety_warp] [INFO]     σ_4: 519467.093750
+[2026-04-27 21:09:13] [safety_warp] [INFO]     σ_5: 433178.062500
+[2026-04-27 21:09:13] [safety_warp] [INFO]     σ_6: 390373.656250
+[2026-04-27 21:09:13] [safety_warp] [INFO]     σ_7: 364442.875000
+[2026-04-27 21:09:13] [safety_warp] [INFO]     σ_8: 324584.937500
+[2026-04-27 21:09:13] [safety_warp] [INFO]     σ_9: 301607.437500
+[2026-04-27 21:09:13] [safety_warp] [INFO]   - Top-10 variance ratio: 19.93%
+[2026-04-27 21:09:13] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-04-27 21:09:13] [safety_warp] [INFO] Layer 7 (attn_k):
+[2026-04-27 21:09:13] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([4096, 4096])
+[2026-04-27 21:09:13] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:09:13] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:09:13] [safety_warp] [INFO]   - Gram matrix trace: 106043328.0000
+[2026-04-27 21:09:14] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 1.99e+00
+[2026-04-27 21:09:14] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-04-27 21:09:14] [safety_warp] [INFO]     σ_0: 29556840.000000
+[2026-04-27 21:09:14] [safety_warp] [INFO]     σ_1: 5313954.500000
+[2026-04-27 21:09:14] [safety_warp] [INFO]     σ_2: 3727877.000000
+[2026-04-27 21:09:14] [safety_warp] [INFO]     σ_3: 2754280.750000
+[2026-04-27 21:09:14] [safety_warp] [INFO]     σ_4: 2374753.750000
+[2026-04-27 21:09:14] [safety_warp] [INFO]     σ_5: 2122855.500000
+[2026-04-27 21:09:14] [safety_warp] [INFO]     σ_6: 2013407.750000
+[2026-04-27 21:09:14] [safety_warp] [INFO]     σ_7: 1880207.125000
+[2026-04-27 21:09:14] [safety_warp] [INFO]     σ_8: 1508465.500000
+[2026-04-27 21:09:14] [safety_warp] [INFO]     σ_9: 1218933.875000
+[2026-04-27 21:09:14] [safety_warp] [INFO]   - Top-10 variance ratio: 33.86%
+[2026-04-27 21:09:14] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-04-27 21:09:14] [safety_warp] [INFO] Layer 7 (attn_q):
+[2026-04-27 21:09:14] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([4096, 4096])
+[2026-04-27 21:09:14] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:09:14] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:09:14] [safety_warp] [INFO]   - Gram matrix trace: 106043328.0000
+[2026-04-27 21:09:15] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 1.99e+00
+[2026-04-27 21:09:15] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-04-27 21:09:15] [safety_warp] [INFO]     σ_0: 29556840.000000
+[2026-04-27 21:09:15] [safety_warp] [INFO]     σ_1: 5313954.500000
+[2026-04-27 21:09:15] [safety_warp] [INFO]     σ_2: 3727877.000000
+[2026-04-27 21:09:15] [safety_warp] [INFO]     σ_3: 2754280.750000
+[2026-04-27 21:09:15] [safety_warp] [INFO]     σ_4: 2374753.750000
+[2026-04-27 21:09:15] [safety_warp] [INFO]     σ_5: 2122855.500000
+[2026-04-27 21:09:15] [safety_warp] [INFO]     σ_6: 2013407.750000
+[2026-04-27 21:09:15] [safety_warp] [INFO]     σ_7: 1880207.125000
+[2026-04-27 21:09:15] [safety_warp] [INFO]     σ_8: 1508465.500000
+[2026-04-27 21:09:15] [safety_warp] [INFO]     σ_9: 1218933.875000
+[2026-04-27 21:09:15] [safety_warp] [INFO]   - Top-10 variance ratio: 33.86%
+[2026-04-27 21:09:15] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-04-27 21:09:15] [safety_warp] [INFO] Layer 7 (attn_v):
+[2026-04-27 21:09:15] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([4096, 4096])
+[2026-04-27 21:09:15] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:09:15] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:09:15] [safety_warp] [INFO]   - Gram matrix trace: 106043328.0000
+[2026-04-27 21:09:16] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 1.99e+00
+[2026-04-27 21:09:16] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-04-27 21:09:16] [safety_warp] [INFO]     σ_0: 29556840.000000
+[2026-04-27 21:09:16] [safety_warp] [INFO]     σ_1: 5313954.500000
+[2026-04-27 21:09:16] [safety_warp] [INFO]     σ_2: 3727877.000000
+[2026-04-27 21:09:16] [safety_warp] [INFO]     σ_3: 2754280.750000
+[2026-04-27 21:09:16] [safety_warp] [INFO]     σ_4: 2374753.750000
+[2026-04-27 21:09:16] [safety_warp] [INFO]     σ_5: 2122855.500000
+[2026-04-27 21:09:16] [safety_warp] [INFO]     σ_6: 2013407.750000
+[2026-04-27 21:09:16] [safety_warp] [INFO]     σ_7: 1880207.125000
+[2026-04-27 21:09:16] [safety_warp] [INFO]     σ_8: 1508465.500000
+[2026-04-27 21:09:16] [safety_warp] [INFO]     σ_9: 1218933.875000
+[2026-04-27 21:09:16] [safety_warp] [INFO]   - Top-10 variance ratio: 33.86%
+[2026-04-27 21:09:16] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-04-27 21:09:16] [safety_warp] [INFO] Layer 7 (ffn_down):
+[2026-04-27 21:09:16] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([11008, 11008])
+[2026-04-27 21:09:16] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:09:16] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:09:16] [safety_warp] [INFO]   - Gram matrix trace: 4192352.0000
+[2026-04-27 21:09:32] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 6.83e-01
+[2026-04-27 21:09:33] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-04-27 21:09:33] [safety_warp] [INFO]     σ_0: 473201.500000
+[2026-04-27 21:09:33] [safety_warp] [INFO]     σ_1: 134115.515625
+[2026-04-27 21:09:33] [safety_warp] [INFO]     σ_2: 107734.250000
+[2026-04-27 21:09:33] [safety_warp] [INFO]     σ_3: 83486.382812
+[2026-04-27 21:09:33] [safety_warp] [INFO]     σ_4: 79912.187500
+[2026-04-27 21:09:33] [safety_warp] [INFO]     σ_5: 76064.890625
+[2026-04-27 21:09:33] [safety_warp] [INFO]     σ_6: 52604.996094
+[2026-04-27 21:09:33] [safety_warp] [INFO]     σ_7: 47728.570312
+[2026-04-27 21:09:33] [safety_warp] [INFO]     σ_8: 45878.503906
+[2026-04-27 21:09:33] [safety_warp] [INFO]     σ_9: 40958.648438
+[2026-04-27 21:09:33] [safety_warp] [INFO]   - Top-10 variance ratio: 18.12%
+[2026-04-27 21:09:33] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-04-27 21:09:33] [safety_warp] [INFO] Layer 7 (ffn_up):
+[2026-04-27 21:09:33] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([4096, 4096])
+[2026-04-27 21:09:33] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:09:33] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:09:33] [safety_warp] [INFO]   - Gram matrix trace: 28022368.0000
+[2026-04-27 21:09:34] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 6.73e-01
+[2026-04-27 21:09:34] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-04-27 21:09:34] [safety_warp] [INFO]     σ_0: 4048102.750000
+[2026-04-27 21:09:34] [safety_warp] [INFO]     σ_1: 1125085.375000
+[2026-04-27 21:09:34] [safety_warp] [INFO]     σ_2: 1001649.562500
+[2026-04-27 21:09:34] [safety_warp] [INFO]     σ_3: 780628.875000
+[2026-04-27 21:09:34] [safety_warp] [INFO]     σ_4: 584517.750000
+[2026-04-27 21:09:34] [safety_warp] [INFO]     σ_5: 542934.500000
+[2026-04-27 21:09:34] [safety_warp] [INFO]     σ_6: 459178.500000
+[2026-04-27 21:09:34] [safety_warp] [INFO]     σ_7: 426593.187500
+[2026-04-27 21:09:34] [safety_warp] [INFO]     σ_8: 400321.375000
+[2026-04-27 21:09:34] [safety_warp] [INFO]     σ_9: 376987.781250
+[2026-04-27 21:09:34] [safety_warp] [INFO]   - Top-10 variance ratio: 20.83%
+[2026-04-27 21:09:34] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-04-27 21:09:34] [safety_warp] [INFO] Layer 8 (attn_k):
+[2026-04-27 21:09:34] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([4096, 4096])
+[2026-04-27 21:09:34] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:09:34] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:09:34] [safety_warp] [INFO]   - Gram matrix trace: 106805120.0000
+[2026-04-27 21:09:35] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 2.00e+00
+[2026-04-27 21:09:35] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-04-27 21:09:35] [safety_warp] [INFO]     σ_0: 32765820.000000
+[2026-04-27 21:09:35] [safety_warp] [INFO]     σ_1: 5637476.500000
+[2026-04-27 21:09:35] [safety_warp] [INFO]     σ_2: 4295040.500000
+[2026-04-27 21:09:35] [safety_warp] [INFO]     σ_3: 2770908.500000
+[2026-04-27 21:09:35] [safety_warp] [INFO]     σ_4: 2602200.250000
+[2026-04-27 21:09:35] [safety_warp] [INFO]     σ_5: 1995852.250000
+[2026-04-27 21:09:35] [safety_warp] [INFO]     σ_6: 1909236.875000
+[2026-04-27 21:09:35] [safety_warp] [INFO]     σ_7: 1777262.000000
+[2026-04-27 21:09:35] [safety_warp] [INFO]     σ_8: 1447350.625000
+[2026-04-27 21:09:35] [safety_warp] [INFO]     σ_9: 1193688.875000
+[2026-04-27 21:09:35] [safety_warp] [INFO]   - Top-10 variance ratio: 36.39%
+[2026-04-27 21:09:35] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-04-27 21:09:35] [safety_warp] [INFO] Layer 8 (attn_q):
+[2026-04-27 21:09:35] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([4096, 4096])
+[2026-04-27 21:09:35] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:09:35] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:09:35] [safety_warp] [INFO]   - Gram matrix trace: 106805120.0000
+[2026-04-27 21:09:36] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 2.00e+00
+[2026-04-27 21:09:36] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-04-27 21:09:36] [safety_warp] [INFO]     σ_0: 32765820.000000
+[2026-04-27 21:09:36] [safety_warp] [INFO]     σ_1: 5637476.500000
+[2026-04-27 21:09:36] [safety_warp] [INFO]     σ_2: 4295040.500000
+[2026-04-27 21:09:36] [safety_warp] [INFO]     σ_3: 2770908.500000
+[2026-04-27 21:09:36] [safety_warp] [INFO]     σ_4: 2602200.250000
+[2026-04-27 21:09:36] [safety_warp] [INFO]     σ_5: 1995852.250000
+[2026-04-27 21:09:36] [safety_warp] [INFO]     σ_6: 1909236.875000
+[2026-04-27 21:09:36] [safety_warp] [INFO]     σ_7: 1777262.000000
+[2026-04-27 21:09:36] [safety_warp] [INFO]     σ_8: 1447350.625000
+[2026-04-27 21:09:36] [safety_warp] [INFO]     σ_9: 1193688.875000
+[2026-04-27 21:09:36] [safety_warp] [INFO]   - Top-10 variance ratio: 36.39%
+[2026-04-27 21:09:36] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-04-27 21:09:36] [safety_warp] [INFO] Layer 8 (attn_v):
+[2026-04-27 21:09:36] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([4096, 4096])
+[2026-04-27 21:09:36] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:09:36] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:09:36] [safety_warp] [INFO]   - Gram matrix trace: 106805120.0000
+[2026-04-27 21:09:37] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 2.00e+00
+[2026-04-27 21:09:37] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-04-27 21:09:37] [safety_warp] [INFO]     σ_0: 32765820.000000
+[2026-04-27 21:09:37] [safety_warp] [INFO]     σ_1: 5637476.500000
+[2026-04-27 21:09:37] [safety_warp] [INFO]     σ_2: 4295040.500000
+[2026-04-27 21:09:37] [safety_warp] [INFO]     σ_3: 2770908.500000
+[2026-04-27 21:09:37] [safety_warp] [INFO]     σ_4: 2602200.250000
+[2026-04-27 21:09:37] [safety_warp] [INFO]     σ_5: 1995852.250000
+[2026-04-27 21:09:37] [safety_warp] [INFO]     σ_6: 1909236.875000
+[2026-04-27 21:09:37] [safety_warp] [INFO]     σ_7: 1777262.000000
+[2026-04-27 21:09:37] [safety_warp] [INFO]     σ_8: 1447350.625000
+[2026-04-27 21:09:37] [safety_warp] [INFO]     σ_9: 1193688.875000
+[2026-04-27 21:09:37] [safety_warp] [INFO]   - Top-10 variance ratio: 36.39%
+[2026-04-27 21:09:37] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-04-27 21:09:37] [safety_warp] [INFO] Layer 8 (ffn_down):
+[2026-04-27 21:09:37] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([11008, 11008])
+[2026-04-27 21:09:37] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:09:37] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:09:37] [safety_warp] [INFO]   - Gram matrix trace: 5360593.5000
+[2026-04-27 21:09:53] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 7.03e-01
+[2026-04-27 21:09:53] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-04-27 21:09:53] [safety_warp] [INFO]     σ_0: 514760.343750
+[2026-04-27 21:09:53] [safety_warp] [INFO]     σ_1: 298702.156250
+[2026-04-27 21:09:53] [safety_warp] [INFO]     σ_2: 177708.562500
+[2026-04-27 21:09:53] [safety_warp] [INFO]     σ_3: 166511.859375
+[2026-04-27 21:09:53] [safety_warp] [INFO]     σ_4: 114751.218750
+[2026-04-27 21:09:53] [safety_warp] [INFO]     σ_5: 86097.445312
+[2026-04-27 21:09:53] [safety_warp] [INFO]     σ_6: 76976.945312
+[2026-04-27 21:09:53] [safety_warp] [INFO]     σ_7: 65945.101562
+[2026-04-27 21:09:53] [safety_warp] [INFO]     σ_8: 63568.378906
+[2026-04-27 21:09:53] [safety_warp] [INFO]     σ_9: 55637.476562
+[2026-04-27 21:09:53] [safety_warp] [INFO]   - Top-10 variance ratio: 19.41%
+[2026-04-27 21:09:53] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-04-27 21:09:54] [safety_warp] [INFO] Layer 8 (ffn_up):
+[2026-04-27 21:09:54] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([4096, 4096])
+[2026-04-27 21:09:54] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:09:54] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:09:54] [safety_warp] [INFO]   - Gram matrix trace: 30359648.0000
+[2026-04-27 21:09:55] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 7.39e-01
+[2026-04-27 21:09:55] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-04-27 21:09:55] [safety_warp] [INFO]     σ_0: 4855628.500000
+[2026-04-27 21:09:55] [safety_warp] [INFO]     σ_1: 1299179.625000
+[2026-04-27 21:09:55] [safety_warp] [INFO]     σ_2: 1074154.125000
+[2026-04-27 21:09:55] [safety_warp] [INFO]     σ_3: 929003.625000
+[2026-04-27 21:09:55] [safety_warp] [INFO]     σ_4: 727436.875000
+[2026-04-27 21:09:55] [safety_warp] [INFO]     σ_5: 600647.187500
+[2026-04-27 21:09:55] [safety_warp] [INFO]     σ_6: 506809.406250
+[2026-04-27 21:09:55] [safety_warp] [INFO]     σ_7: 466446.187500
+[2026-04-27 21:09:55] [safety_warp] [INFO]     σ_8: 442200.531250
+[2026-04-27 21:09:55] [safety_warp] [INFO]     σ_9: 400798.156250
+[2026-04-27 21:09:55] [safety_warp] [INFO]   - Top-10 variance ratio: 22.14%
+[2026-04-27 21:09:55] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-04-27 21:09:55] [safety_warp] [INFO] Layer 9 (attn_k):
+[2026-04-27 21:09:55] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([4096, 4096])
+[2026-04-27 21:09:55] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:09:55] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:09:55] [safety_warp] [INFO]   - Gram matrix trace: 108999296.0000
+[2026-04-27 21:09:56] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 2.00e+00
+[2026-04-27 21:09:56] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-04-27 21:09:56] [safety_warp] [INFO]     σ_0: 32264790.000000
+[2026-04-27 21:09:56] [safety_warp] [INFO]     σ_1: 5530089.000000
+[2026-04-27 21:09:56] [safety_warp] [INFO]     σ_2: 4567447.500000
+[2026-04-27 21:09:56] [safety_warp] [INFO]     σ_3: 2899293.750000
+[2026-04-27 21:09:56] [safety_warp] [INFO]     σ_4: 2596880.500000
+[2026-04-27 21:09:56] [safety_warp] [INFO]     σ_5: 2150084.750000
+[2026-04-27 21:09:56] [safety_warp] [INFO]     σ_6: 1950855.375000
+[2026-04-27 21:09:56] [safety_warp] [INFO]     σ_7: 1770057.375000
+[2026-04-27 21:09:56] [safety_warp] [INFO]     σ_8: 1474977.125000
+[2026-04-27 21:09:56] [safety_warp] [INFO]     σ_9: 1230493.250000
+[2026-04-27 21:09:56] [safety_warp] [INFO]   - Top-10 variance ratio: 35.24%
+[2026-04-27 21:09:56] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-04-27 21:09:56] [safety_warp] [INFO] Layer 9 (attn_q):
+[2026-04-27 21:09:56] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([4096, 4096])
+[2026-04-27 21:09:56] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:09:56] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:09:56] [safety_warp] [INFO]   - Gram matrix trace: 108999296.0000
+[2026-04-27 21:09:57] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 2.00e+00
+[2026-04-27 21:09:57] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-04-27 21:09:57] [safety_warp] [INFO]     σ_0: 32264790.000000
+[2026-04-27 21:09:57] [safety_warp] [INFO]     σ_1: 5530089.000000
+[2026-04-27 21:09:57] [safety_warp] [INFO]     σ_2: 4567447.500000
+[2026-04-27 21:09:57] [safety_warp] [INFO]     σ_3: 2899293.750000
+[2026-04-27 21:09:57] [safety_warp] [INFO]     σ_4: 2596880.500000
+[2026-04-27 21:09:57] [safety_warp] [INFO]     σ_5: 2150084.750000
+[2026-04-27 21:09:57] [safety_warp] [INFO]     σ_6: 1950855.375000
+[2026-04-27 21:09:57] [safety_warp] [INFO]     σ_7: 1770057.375000
+[2026-04-27 21:09:57] [safety_warp] [INFO]     σ_8: 1474977.125000
+[2026-04-27 21:09:57] [safety_warp] [INFO]     σ_9: 1230493.250000
+[2026-04-27 21:09:57] [safety_warp] [INFO]   - Top-10 variance ratio: 35.24%
+[2026-04-27 21:09:57] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-04-27 21:09:57] [safety_warp] [INFO] Layer 9 (attn_v):
+[2026-04-27 21:09:57] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([4096, 4096])
+[2026-04-27 21:09:57] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:09:57] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:09:57] [safety_warp] [INFO]   - Gram matrix trace: 108999296.0000
+[2026-04-27 21:09:58] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 2.00e+00
+[2026-04-27 21:09:58] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-04-27 21:09:58] [safety_warp] [INFO]     σ_0: 32264790.000000
+[2026-04-27 21:09:58] [safety_warp] [INFO]     σ_1: 5530089.000000
+[2026-04-27 21:09:58] [safety_warp] [INFO]     σ_2: 4567447.500000
+[2026-04-27 21:09:58] [safety_warp] [INFO]     σ_3: 2899293.750000
+[2026-04-27 21:09:58] [safety_warp] [INFO]     σ_4: 2596880.500000
+[2026-04-27 21:09:58] [safety_warp] [INFO]     σ_5: 2150084.750000
+[2026-04-27 21:09:58] [safety_warp] [INFO]     σ_6: 1950855.375000
+[2026-04-27 21:09:58] [safety_warp] [INFO]     σ_7: 1770057.375000
+[2026-04-27 21:09:58] [safety_warp] [INFO]     σ_8: 1474977.125000
+[2026-04-27 21:09:58] [safety_warp] [INFO]     σ_9: 1230493.250000
+[2026-04-27 21:09:58] [safety_warp] [INFO]   - Top-10 variance ratio: 35.24%
+[2026-04-27 21:09:58] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-04-27 21:09:58] [safety_warp] [INFO] Layer 9 (ffn_down):
+[2026-04-27 21:09:58] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([11008, 11008])
+[2026-04-27 21:09:58] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-04-27 21:09:58] [safety_warp] [INFO]   - Samples accumulated: 351947
+[2026-04-27 21:09:58] [safety_warp] [INFO]   - Gram matrix trace: 6071345.5000
+[2026-04-27 21:10:14] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 1.00e+00
+[2026-04-27 21:10:15] [safety_warp] [ERROR] Failed to compute SVD: [enforce fail at inline_container.cc:668] . unexpected pos 832 vs 726
+Traceback (most recent call last):
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/torch/serialization.py", line 977, in save
+    _save(
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/torch/serialization.py", line 1286, in _save
+    zip_file.write_record(name, storage, num_bytes)
+RuntimeError: basic_ios::clear: iostream error
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/yonsei_jong/Safety-WaRP-LLM/models/phase1_basis.py", line 712, in compute_svd
+    self._save_svd_result(layer_idx, layer_type, svd_result)
+  File "/home/yonsei_jong/Safety-WaRP-LLM/models/phase1_basis.py", line 760, in _save_svd_result
+    torch.save({
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/torch/serialization.py", line 976, in save
+    with _open_zipfile_writer(f) as opened_zipfile:
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/torch/serialization.py", line 808, in __exit__
+    self.file_like.write_end_of_file()
+RuntimeError: [enforce fail at inline_container.cc:668] . unexpected pos 832 vs 726
+Traceback (most recent call last):
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/torch/serialization.py", line 977, in save
+    _save(
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/torch/serialization.py", line 1286, in _save
+    zip_file.write_record(name, storage, num_bytes)
+RuntimeError: basic_ios::clear: iostream error
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/yonsei_jong/Safety-WaRP-LLM/train.py", line 457, in <module>
+    main()
+  File "/home/yonsei_jong/Safety-WaRP-LLM/train.py", line 436, in main
+    run_phase1(args, logger)
+  File "/home/yonsei_jong/Safety-WaRP-LLM/train.py", line 236, in run_phase1
+    builder.compute_svd()
+  File "/home/yonsei_jong/Safety-WaRP-LLM/models/phase1_basis.py", line 712, in compute_svd
+    self._save_svd_result(layer_idx, layer_type, svd_result)
+  File "/home/yonsei_jong/Safety-WaRP-LLM/models/phase1_basis.py", line 760, in _save_svd_result
+    torch.save({
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/torch/serialization.py", line 976, in save
+    with _open_zipfile_writer(f) as opened_zipfile:
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/torch/serialization.py", line 808, in __exit__
+    self.file_like.write_end_of_file()
+RuntimeError: [enforce fail at inline_container.cc:668] . unexpected pos 832 vs 726
+Traceback (most recent call last):
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/torch/serialization.py", line 977, in save
+    _save(
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/torch/serialization.py", line 1286, in _save
+    zip_file.write_record(name, storage, num_bytes)
+RuntimeError: basic_ios::clear: iostream error
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/yonsei_jong/Safety-WaRP-LLM/train.py", line 457, in <module>
+    main()
+  File "/home/yonsei_jong/Safety-WaRP-LLM/train.py", line 436, in main
+    run_phase1(args, logger)
+  File "/home/yonsei_jong/Safety-WaRP-LLM/train.py", line 236, in run_phase1
+    builder.compute_svd()
+  File "/home/yonsei_jong/Safety-WaRP-LLM/models/phase1_basis.py", line 712, in compute_svd
+    self._save_svd_result(layer_idx, layer_type, svd_result)
+  File "/home/yonsei_jong/Safety-WaRP-LLM/models/phase1_basis.py", line 760, in _save_svd_result
+    torch.save({
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/torch/serialization.py", line 976, in save
+    with _open_zipfile_writer(f) as opened_zipfile:
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/torch/serialization.py", line 808, in __exit__
+    self.file_like.write_end_of_file()
+RuntimeError: [enforce fail at inline_container.cc:668] . unexpected pos 832 vs 726
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33mphase1_20260427_210423[0m at: [34m[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20260427_210424-ntm9g2aj/logs[0m

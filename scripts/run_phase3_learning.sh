@@ -8,11 +8,12 @@ echo "========================================="
 echo "Phase 3: Incremental Learning (Fixed)"
 echo "========================================="
 
+CUDA_VISIBLE_DEVICES=1
 # 이전 Phase 결과 경로 (로컬 디렉토리 또는 Hugging Face 모델 ID)
 # PHASE0_MODEL="./checkpoints/phase0_20260213_230047"  # 로컬 디렉토리 예시
-PHASE0_MODEL="kmseong/llama2_7b_chat_only_sn_tuned_lr3e-5"  
-BASIS_DIR="./checkpoints/phase1_20260424_110519/basis"
-MASKS_DIR="./checkpoints/phase2_sn_20260424_111822/checkpoints/masks"
+PHASE0_MODEL="kmseong/llama2_7b-chat-Safety-FT-lr5e-5"  
+BASIS_DIR="./checkpoints/phase1_20260430_220656/basis"
+MASKS_DIR="./checkpoints/phase2_20260430_222621/checkpoints/masks"
 
 # PHASE0_MODEL="kmseong/llama2_7b-Safety-FT-lr3e-5"
 # BASIS_DIR="/NHNHOME/0226010080_A/kms/phase1_20260417_130853/basis"
@@ -22,8 +23,8 @@ MASKS_DIR="./checkpoints/phase2_sn_20260424_111822/checkpoints/masks"
 # Dataset 선택 (CONFIGURE THIS)
 # ========================================
 # 옵션 1: GSM8K (Utility Learning) - SFTTrainer 방식
-DATASET="gsm8k"
-GSM8K_SAMPLES=0
+# DATASET="gsm8k"
+# GSM8K_SAMPLES=0
 
 # 옵션 2: Safety (Safety Learning) - phase0_SSFT 커스텀 루프 방식
 # DATASET="safety"
@@ -38,12 +39,22 @@ GSM8K_SAMPLES=0
 # MATH_SAMPLES=0           # 0 = all samples
 # MATH_SUBJECTS="all"     # 예: Algebra,Geometry
 # MATH_LEVELS="all"       # 예: 1,2,3,4,5
+
+# 옵션 5: AG News (Utility Learning) - SFTTrainer 방식
+# DATASET="agnews"
+# AGNEWS_DATASET_PATH=""   # 필수: 데이터셋 경로 설정
+# AGNEWS_SAMPLES=8000      # 0 = all samples
+
+# 옵션 6: MedQA (Utility Learning) - SFTTrainer 방식
+DATASET="medqa"
+MEDQA_DATASET_PATH="/home/yonsei_jong/Safety-WaRP-LLM/data/medqa_train_10178.jsonl"   # 필수: 데이터셋 경로 설정
+MEDQA_SAMPLES=0      # 0 = all samples
 # 
 # ========================================
 
 # 공통 학습 설정 (run_all 스타일)
 # LR_LIST=("1e-6" "5e-6" "1e-7" "5e-7")  
-LR_LIST=("7e-5") 
+LR_LIST=("1e-5") 
 EPOCHS=3
 BATCH_SIZE=4
 GRAD_ACCUM=4
@@ -99,9 +110,27 @@ elif [ "$DATASET" = "math" ]; then
     echo "  - Subjects: $MATH_SUBJECTS"
     echo "  - Levels: $MATH_LEVELS"
     DATASET_ARG="--phase3_dataset math --math_samples $MATH_SAMPLES --math_subjects $MATH_SUBJECTS --math_levels $MATH_LEVELS"
+elif [ "$DATASET" = "agnews" ]; then
+    echo "  - Type: Utility Learning (AG News)"
+    echo "  - Samples: ${AGNEWS_SAMPLES:-8000} (0=all)"
+    echo "  - Dataset path: ${AGNEWS_DATASET_PATH:-<not set>}"
+    if [ -z "${AGNEWS_DATASET_PATH:-}" ]; then
+        echo "ERROR: AGNEWS_DATASET_PATH must be set when DATASET=agnews"
+        exit 1
+    fi
+    DATASET_ARG="--phase3_dataset agnews --agnews_dataset_path $AGNEWS_DATASET_PATH --agnews_samples ${AGNEWS_SAMPLES:-8000}"
+elif [ "$DATASET" = "medqa" ]; then
+    echo "  - Type: Utility Learning (MedQA USMLE)"
+    echo "  - Samples: ${MEDQA_SAMPLES:-10000} (0=all)"
+    echo "  - Dataset path: ${MEDQA_DATASET_PATH:-<not set>}"
+    if [ -z "${MEDQA_DATASET_PATH:-}" ]; then
+        echo "ERROR: MEDQA_DATASET_PATH must be set when DATASET=medqa"
+        exit 1
+    fi
+    DATASET_ARG="--phase3_dataset medqa --medqa_dataset_path $MEDQA_DATASET_PATH --medqa_samples ${MEDQA_SAMPLES:-10000}"
 else
     echo "ERROR: Unknown dataset: $DATASET"
-    echo "Choose from: gsm8k, safety, metamath, math"
+    echo "Choose from: gsm8k, safety, metamath, math, agnews, medqa"
     exit 1
 fi
 echo ""

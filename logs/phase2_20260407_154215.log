@@ -1,0 +1,80 @@
+[2026-04-07 15:48:00] [safety_warp] [INFO] ======================================================================
+[2026-04-07 15:48:00] [safety_warp] [INFO] Safety-WaRP-LLM (Fixed - 원본 FSCIL-WaRP 방식)
+[2026-04-07 15:48:00] [safety_warp] [INFO] ======================================================================
+[2026-04-07 15:48:00] [safety_warp] [INFO] Phase: 2
+[2026-04-07 15:48:00] [safety_warp] [INFO] Model: None
+[2026-04-07 15:48:00] [safety_warp] [INFO] Layer types: attn_q,attn_k,attn_v,ffn_down,ffn_up
+[2026-04-07 15:48:00] [safety_warp] [INFO] Target layers: all
+[2026-04-07 15:48:00] [safety_warp] [INFO] ======================================================================
+[2026-04-07 15:48:00] [safety_warp] [INFO] ======================================================================
+[2026-04-07 15:48:00] [safety_warp] [INFO] Starting Phase 2: Importance Scoring (Fixed)
+[2026-04-07 15:48:00] [safety_warp] [INFO] ======================================================================
+[2026-04-07 15:48:01] [safety_warp] [INFO] Loading basis from ./checkpoints/phase1_20260407_154217/basis...
+[2026-04-07 15:48:01] [safety_warp] [INFO] ✓ Metadata loaded:
+[2026-04-07 15:48:01] [safety_warp] [INFO]   - Layer types: ['attn_k', 'attn_q', 'attn_v', 'ffn_down', 'ffn_up']
+[2026-04-07 15:48:06] [safety_warp] [INFO] ✓ Basis loaded: 140 (layer, type) combinations
+[2026-04-07 15:48:07] [safety_warp] [INFO] Loading Phase 0 trained model from kmseong/llama3.2_3b_new_SSFT_lr3e-5...
+`torch_dtype` is deprecated! Use `dtype` instead!
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:00<00:00,  2.78it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00,  4.79it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00,  4.32it/s]
+[2026-04-07 15:48:09] [safety_warp] [INFO] ✓ Phase 0 model loaded
+[2026-04-07 15:48:11] [safety_warp] [INFO] ✓ Tokenizer loaded
+[2026-04-07 15:48:11] [safety_warp] [INFO]   - Input formatting: plain text
+[2026-04-07 15:48:11] [safety_warp] [INFO] Converting to WaRP modules...
+[2026-04-07 15:48:11] [safety_warp] [INFO] ✓ Conversion completed
+[2026-04-07 15:48:11] [safety_warp] [INFO] Reparameterizing weights to basis space...
+[2026-04-07 15:48:11] [safety_warp] [INFO] ======================================================================
+[2026-04-07 15:48:18] [safety_warp] [INFO] ======================================================================
+[2026-04-07 15:48:18] [safety_warp] [INFO] ✓ Reparameterization completed: 140 modules
+[2026-04-07 15:48:18] [safety_warp] [INFO] Loading circuit_breakers data from ./data/circuit_breakers_train.json...
+[2026-04-07 15:48:18] [safety_warp] [INFO] ✓ Loaded 4994 samples
+[2026-04-07 15:48:18] [safety_warp] [INFO] ✓ Dataloader created (1249 batches)
+[2026-04-07 15:48:18] [safety_warp] [INFO]   - Input format: Question/Answer text
+[2026-04-07 15:48:18] [safety_warp] [INFO] ======================================================================
+[2026-04-07 15:48:18] [safety_warp] [INFO] Phase 2: Importance Scoring (Per-layer keep_ratio)
+[2026-04-07 15:48:18] [safety_warp] [INFO] ======================================================================
+[2026-04-07 15:48:18] [safety_warp] [INFO] ✅ model.eval() 모드 - 파라미터 업데이트 없음
+[2026-04-07 15:48:18] [safety_warp] [INFO] ✅ Gradient만 계산하여 importance 측정
+[2026-04-07 15:48:18] [safety_warp] [INFO] ======================================================================
+[2026-04-07 15:48:18] [safety_warp] [INFO] ✓ Model set to eval mode (파라미터 변경 없음)
+[2026-04-07 15:48:18] [safety_warp] [INFO] ✓ Found 140 WaRP modules
+[2026-04-07 15:48:18] [safety_warp] [INFO] ✓ Trainable params in Phase 2: 1,849,688,064/3,212,749,824 (57.57%)
+Computing importance (eval mode):   0%|          | 0/1249 [00:00<?, ?it/s]Computing importance (eval mode):   0%|          | 0/1249 [00:00<?, ?it/s]
+[2026-04-07 15:48:18] [safety_warp] [ERROR] Failed to compute importance: 'CircuitBreakersDataset' object has no attribute '_format_prompt_only_for_model'
+Traceback (most recent call last):
+  File "/home/yonsei_jong/Safety-WaRP-LLM/models/phase2_importance_per_layer.py", line 574, in compute_importance
+    for batch_idx, batch in enumerate(progress_bar):
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/tqdm/std.py", line 1181, in __iter__
+    for obj in iterable:
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/torch/utils/data/dataloader.py", line 741, in __next__
+    data = self._next_data()
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/torch/utils/data/dataloader.py", line 801, in _next_data
+    data = self._dataset_fetcher.fetch(index)  # may raise StopIteration
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/torch/utils/data/_utils/fetch.py", line 54, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/torch/utils/data/_utils/fetch.py", line 54, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/yonsei_jong/Safety-WaRP-LLM/models/phase2_importance_per_layer.py", line 253, in __getitem__
+    prompt_text = self._format_prompt_only_for_model(prompt)
+AttributeError: 'CircuitBreakersDataset' object has no attribute '_format_prompt_only_for_model'
+Traceback (most recent call last):
+  File "/home/yonsei_jong/Safety-WaRP-LLM/train.py", line 368, in <module>
+    main()
+  File "/home/yonsei_jong/Safety-WaRP-LLM/train.py", line 356, in main
+    run_phase2(args, logger)
+  File "/home/yonsei_jong/Safety-WaRP-LLM/train.py", line 252, in run_phase2
+    scorer.compute_importance()
+  File "/home/yonsei_jong/Safety-WaRP-LLM/models/phase2_importance_per_layer.py", line 574, in compute_importance
+    for batch_idx, batch in enumerate(progress_bar):
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/tqdm/std.py", line 1181, in __iter__
+    for obj in iterable:
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/torch/utils/data/dataloader.py", line 741, in __next__
+    data = self._next_data()
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/torch/utils/data/dataloader.py", line 801, in _next_data
+    data = self._dataset_fetcher.fetch(index)  # may raise StopIteration
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/torch/utils/data/_utils/fetch.py", line 54, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/torch/utils/data/_utils/fetch.py", line 54, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/yonsei_jong/Safety-WaRP-LLM/models/phase2_importance_per_layer.py", line 253, in __getitem__
+    prompt_text = self._format_prompt_only_for_model(prompt)
+AttributeError: 'CircuitBreakersDataset' object has no attribute '_format_prompt_only_for_model'

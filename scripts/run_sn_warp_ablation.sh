@@ -41,12 +41,13 @@ echo ""
 # ========================================================================
 # Configuration
 # ========================================================================
+export CUDA_VISIBLE_DEVICES=0
 
 # SN-Tuned base model
-PHASE0_MODEL="kmseong/llama2_7b_chat_only_sn_tuned_lr3e-5"
+PHASE0_MODEL="kmseong/llama2_7b_base_only_sn_tuned_lr3e-5_rotation"
 
 # Safety neuron file (pre-detected, used instead of Phase 2 gradient importance)
-SAFETY_NEURONS_FILE="/home/yonsei_jong/Safety-Neuron/neuron_detection/output_neurons/llama_2_7b_chat_safety_neuron_accelerated_20260416_160653.txt"
+SAFETY_NEURONS_FILE="/home/yonsei_jong/Safety-Neuron/neuron_detection/output_neurons/safety_neuron_rotation_20260428_002346.txt"
 
 # Phase 1: safety basis construction
 PHASE1_DATASET="circuit_breakers"
@@ -60,7 +61,7 @@ PHASE3_SAMPLES=0       # 0 = all ~7473 samples
 BATCH_SIZE=4
 GRAD_ACCUM=4
 EPOCHS=3
-LR="7e-5"
+LR="3e-5"
 DTYPE="bfloat16"
 DEVICE="cuda"
 TARGET_LAYERS="all"

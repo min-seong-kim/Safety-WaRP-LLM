@@ -1,0 +1,61 @@
+`torch_dtype` is deprecated! Use `dtype` instead!
+INFO:accelerate.utils.modeling:We will use 90% of the memory on device 0 for storing the model, and 10% for the buffer to avoid OOM. You can set `max_memory` in to a higher value to use more memory (at your own risk).
+[✓] SafeLoRA 라이브러리 로드 성공
+[✓] upload_sn_tuned_model 로드 성공
+
+================================================================================
+🚀 Safe LoRA + GSM8K 파인튜닝 시작
+================================================================================
+  Base Model    : meta-llama/Llama-2-7b-hf    (huggingface)
+  Aligned Model : kmseong/llama2_7b-Safety-FT-lr3e-5 (huggingface)
+  Dataset       : openai/gsm8k / main / train
+  Train Samples : 7473
+  LR=0.0002, Epochs=3, r=16, α=32
+  SafeLoRA      : threshold, threshold=0.5
+  WaRP Rotation : ENABLED  basis=./checkpoints/phase1_20260426_161130/basis  top_k_ratio=0.5
+  LoRA Output   : /home/yonsei_jong/Safety-WaRP-LLM/checkpoints/lora_gsm8k_20260426_161127
+  Safe Output   : /home/yonsei_jong/SafeLoRA/safe_lora_models/llama2-7b-safe-lora-gsm8k-20260426-162557
+  HF Upload     : (비활성화 - --upload-name 미지정)
+
+================================================================================
+단계 1: Base / Aligned(Safety-Tuned) 모델 준비
+================================================================================
+
+[1-1] Base Model 로드 중... (meta-llama/Llama-2-7b-hf)
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:00<00:00,  1.38it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00,  2.24it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00,  2.05it/s]
+INFO:accelerate.utils.modeling:We will use 90% of the memory on device 0 for storing the model, and 10% for the buffer to avoid OOM. You can set `max_memory` in to a higher value to use more memory (at your own risk).
+✓ Base Model 로드 완료
+
+[1-2] Aligned(Safety-Tuned) Model 로드 중... (kmseong/llama2_7b-Safety-FT-lr3e-5)
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards:  33%|███▎      | 1/3 [00:00<00:00,  2.46it/s]Loading checkpoint shards:  67%|██████▋   | 2/3 [00:00<00:00,  2.73it/s]Loading checkpoint shards: 100%|██████████| 3/3 [00:01<00:00,  2.75it/s]Loading checkpoint shards: 100%|██████████| 3/3 [00:01<00:00,  2.71it/s]
+Traceback (most recent call last):
+  File "/home/yonsei_jong/SafeLoRA/safe_lora_gsm8k_training.py", line 897, in main
+    result = step2_lora_finetuning(models_dict)
+  File "/home/yonsei_jong/SafeLoRA/safe_lora_gsm8k_training.py", line 555, in step2_lora_finetuning
+    warp_basis = _load_warp_basis(BASIS_DIR)
+  File "/home/yonsei_jong/SafeLoRA/safe_lora_gsm8k_training.py", line 343, in _load_warp_basis
+    for layer_type in os.listdir(basis_dir):
+FileNotFoundError: [Errno 2] No such file or directory: './checkpoints/phase1_20260426_161130/basis'
+✓ Aligned Model 로드 완료
+
+[1-3] Tokenizer 로드 중...
+✓ Tokenizer 로드 완료
+
+✅ 단계 1 완료
+
+================================================================================
+단계 2: LoRA + GSM8K 파인튜닝
+================================================================================
+
+[2-1] GSM8K 데이터셋 로드 중...
+✓ GSM8K 로드 완료: 7473 samples
+
+[2-2] 데이터 전처리 중...
+✓ 데이터 전처리 완료
+
+[2-3] LoRA 설정...
+✓ Trainable params: 39,976,960 (0.59%)
+
+[2-3b] WaRP basis rotation 적용 중... (top_k_ratio=0.5)
+
+❌ 오류 발생: [Errno 2] No such file or directory: './checkpoints/phase1_20260426_161130/basis'

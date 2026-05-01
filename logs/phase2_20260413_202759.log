@@ -1,0 +1,783 @@
+[2026-04-13 20:27:59] [safety_warp] [INFO] ======================================================================
+[2026-04-13 20:27:59] [safety_warp] [INFO] Safety-WaRP-LLM (Fixed - 원본 FSCIL-WaRP 방식)
+[2026-04-13 20:27:59] [safety_warp] [INFO] ======================================================================
+[2026-04-13 20:27:59] [safety_warp] [INFO] Phase: 2
+[2026-04-13 20:27:59] [safety_warp] [INFO] Model: None
+[2026-04-13 20:27:59] [safety_warp] [INFO] Layer types: attn_q,attn_k,attn_v,ffn_down,ffn_up
+[2026-04-13 20:27:59] [safety_warp] [INFO] Target layers: all
+[2026-04-13 20:27:59] [safety_warp] [INFO] ======================================================================
+[2026-04-13 20:27:59] [safety_warp] [INFO] ======================================================================
+[2026-04-13 20:27:59] [safety_warp] [INFO] Starting Phase 2: Importance Scoring (Fixed)
+[2026-04-13 20:27:59] [safety_warp] [INFO] ======================================================================
+[2026-04-13 20:27:59] [safety_warp] [INFO] Loading basis from ./checkpoints/phase1_20260413_202006/basis...
+[2026-04-13 20:27:59] [safety_warp] [INFO] ✓ Metadata loaded:
+[2026-04-13 20:27:59] [safety_warp] [INFO]   - Layer types: ['attn_k', 'attn_q', 'attn_v', 'ffn_down', 'ffn_up']
+[2026-04-13 20:28:04] [safety_warp] [INFO] ✓ Basis loaded: 140 (layer, type) combinations
+[2026-04-13 20:28:06] [safety_warp] [INFO] Loading Phase 0 trained model from kmseong/llama3.2_3b_instruct-Safety-FT-lr3e-5...
+[2026-04-13 20:28:08] [safety_warp] [INFO] ✓ Phase 0 model loaded
+[2026-04-13 20:28:09] [safety_warp] [INFO] ✓ Tokenizer loaded
+[2026-04-13 20:28:09] [safety_warp] [INFO]   - Input formatting: chat template
+[2026-04-13 20:28:09] [safety_warp] [INFO] Converting to WaRP modules...
+[2026-04-13 20:28:09] [safety_warp] [INFO] ✓ Conversion completed
+[2026-04-13 20:28:09] [safety_warp] [INFO] Reparameterizing weights to basis space...
+[2026-04-13 20:28:09] [safety_warp] [INFO] ======================================================================
+[2026-04-13 20:28:16] [safety_warp] [INFO] ======================================================================
+[2026-04-13 20:28:16] [safety_warp] [INFO] ✓ Reparameterization completed: 140 modules
+[2026-04-13 20:28:16] [safety_warp] [INFO] Loading Wikipedia dataset (samples=4994)...
+[2026-04-13 20:28:21] [safety_warp] [INFO] ✓ Dataset loaded: 6407814 total documents
+[2026-04-13 20:28:21] [safety_warp] [INFO] Sampling 4994 documents from Wikipedia...
+[2026-04-13 20:28:21] [safety_warp] [INFO] ✓ Loaded 4994 Wikipedia texts
+[2026-04-13 20:28:21] [safety_warp] [INFO] ✓ Dataloader created (1249 batches)
+[2026-04-13 20:28:21] [safety_warp] [INFO]   - Dataset type: Wikipedia (Utility)
+[2026-04-13 20:28:21] [safety_warp] [INFO]   - Input format: chat template user/assistant pairs
+[2026-04-13 20:28:21] [safety_warp] [INFO]   - Batch size: 4
+[2026-04-13 20:28:21] [safety_warp] [INFO]   - Total batches: 1249
+[2026-04-13 20:28:21] [safety_warp] [INFO] ======================================================================
+[2026-04-13 20:28:21] [safety_warp] [INFO] Phase 2: Importance Scoring (Per-layer keep_ratio)
+[2026-04-13 20:28:21] [safety_warp] [INFO] ======================================================================
+[2026-04-13 20:28:21] [safety_warp] [INFO] ✅ model.eval() 모드 - 파라미터 업데이트 없음
+[2026-04-13 20:28:21] [safety_warp] [INFO] ✅ Gradient만 계산하여 importance 측정
+[2026-04-13 20:28:21] [safety_warp] [INFO] ======================================================================
+[2026-04-13 20:28:21] [safety_warp] [INFO] ✓ Model set to eval mode (파라미터 변경 없음)
+[2026-04-13 20:28:21] [safety_warp] [INFO] ✓ Found 140 WaRP modules
+[2026-04-13 20:28:21] [safety_warp] [INFO] ✓ Trainable params in Phase 2: 1,849,688,064/3,212,749,824 (57.57%)
+[2026-04-13 20:36:04] [safety_warp] [INFO] ======================================================================
+[2026-04-13 20:36:04] [safety_warp] [INFO] ✓ Importance computation completed
+[2026-04-13 20:36:04] [safety_warp] [INFO]   - Total samples: 4994
+[2026-04-13 20:36:04] [safety_warp] [INFO]   - Total tokens: 2453155
+[2026-04-13 20:36:04] [safety_warp] [INFO]   ⚠️  파라미터는 변경되지 않음 (optimizer.step 없음)
+[2026-04-13 20:36:04] [safety_warp] [INFO] ======================================================================
+[2026-04-13 20:36:06] [safety_warp] [INFO] ======================================================================
+[2026-04-13 20:36:06] [safety_warp] [INFO] [Two-Mask] Loading adapt dataset and computing adapt importance...
+[2026-04-13 20:36:06] [safety_warp] [INFO]   adapt_dataset: safety
+[2026-04-13 20:36:06] [safety_warp] [INFO]   adapt_samples: 4994 (0=all)
+[2026-04-13 20:36:06] [safety_warp] [INFO] ======================================================================
+[2026-04-13 20:36:06] [safety_warp] [INFO] [Two-Mask] Loading adapt dataset: safety
+[2026-04-13 20:36:06] [safety_warp] [INFO] [Two-Mask] Loading circuit_breakers data from ./data/circuit_breakers_train.json...
+[2026-04-13 20:36:06] [safety_warp] [INFO] [Two-Mask] ✓ Loaded 4994 samples
+[2026-04-13 20:36:06] [safety_warp] [INFO] [Two-Mask] Safety (circuit_breakers) adapt dataloader: 1249 batches, 4994 samples
+[2026-04-13 20:36:06] [safety_warp] [INFO] ======================================================================
+[2026-04-13 20:36:06] [safety_warp] [INFO] [Two-Mask] Computing adapt dataset importance
+[2026-04-13 20:36:06] [safety_warp] [INFO] ======================================================================
+[2026-04-13 20:42:48] [safety_warp] [INFO] [Two-Mask] ✓ Adapt importance computation completed
+[2026-04-13 20:42:48] [safety_warp] [INFO]   - Total samples: 4994
+[2026-04-13 20:42:48] [safety_warp] [INFO]   - Total tokens: 205685
+[2026-04-13 20:42:48] [safety_warp] [INFO] ======================================================================
+[2026-04-13 20:42:50] [safety_warp] [INFO] ======================================================================
+[2026-04-13 20:42:50] [safety_warp] [INFO] [Two-Mask] Generating masks per-layer (keep_ratio=0.1, strategy=preserve & ~adapt)
+[2026-04-13 20:42:50] [safety_warp] [INFO] ======================================================================
+[2026-04-13 20:42:50] [safety_warp] [INFO] Layer 0 (attn_q) [Two-Mask]:
+[2026-04-13 20:42:50] [safety_warp] [INFO]   preserve_mask: 943720/9437184 frozen (10.00%)
+[2026-04-13 20:42:50] [safety_warp] [INFO]   adapt_mask:    943720/9437184 frozen (10.00%)
+[2026-04-13 20:42:50] [safety_warp] [INFO]   overlap (both): 751952/9437184 (7.97%) → unfrozen in final
+[2026-04-13 20:42:50] [safety_warp] [INFO]   final_mask:    191768.0/9437184 frozen (2.03%)
+[2026-04-13 20:42:50] [safety_warp] [INFO] Layer 0 (attn_k) [Two-Mask]:
+[2026-04-13 20:42:50] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:42:50] [safety_warp] [INFO]   adapt_mask:    314573/3145728 frozen (10.00%)
+[2026-04-13 20:42:50] [safety_warp] [INFO]   overlap (both): 252005/3145728 (8.01%) → unfrozen in final
+[2026-04-13 20:42:50] [safety_warp] [INFO]   final_mask:    62568.0/3145728 frozen (1.99%)
+[2026-04-13 20:42:51] [safety_warp] [INFO] Layer 0 (attn_v) [Two-Mask]:
+[2026-04-13 20:42:51] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:42:51] [safety_warp] [INFO]   adapt_mask:    314573/3145728 frozen (10.00%)
+[2026-04-13 20:42:51] [safety_warp] [INFO]   overlap (both): 263376/3145728 (8.37%) → unfrozen in final
+[2026-04-13 20:42:51] [safety_warp] [INFO]   final_mask:    51197.0/3145728 frozen (1.63%)
+[2026-04-13 20:42:51] [safety_warp] [INFO] Layer 0 (ffn_down) [Two-Mask]:
+[2026-04-13 20:42:51] [safety_warp] [INFO]   preserve_mask: 2516585/25165824 frozen (10.00%)
+[2026-04-13 20:42:51] [safety_warp] [INFO]   adapt_mask:    2516585/25165824 frozen (10.00%)
+[2026-04-13 20:42:51] [safety_warp] [INFO]   overlap (both): 2171748/25165824 (8.63%) → unfrozen in final
+[2026-04-13 20:42:51] [safety_warp] [INFO]   final_mask:    344837.0/25165824 frozen (1.37%)
+[2026-04-13 20:42:51] [safety_warp] [INFO] Layer 0 (ffn_up) [Two-Mask]:
+[2026-04-13 20:42:51] [safety_warp] [INFO]   preserve_mask: 2516585/25165824 frozen (10.00%)
+[2026-04-13 20:42:51] [safety_warp] [INFO]   adapt_mask:    2516584/25165824 frozen (10.00%)
+[2026-04-13 20:42:51] [safety_warp] [INFO]   overlap (both): 1464048/25165824 (5.82%) → unfrozen in final
+[2026-04-13 20:42:51] [safety_warp] [INFO]   final_mask:    1052537.0/25165824 frozen (4.18%)
+[2026-04-13 20:42:52] [safety_warp] [INFO] Layer 1 (attn_q) [Two-Mask]:
+[2026-04-13 20:42:52] [safety_warp] [INFO]   preserve_mask: 943720/9437184 frozen (10.00%)
+[2026-04-13 20:42:52] [safety_warp] [INFO]   adapt_mask:    943720/9437184 frozen (10.00%)
+[2026-04-13 20:42:52] [safety_warp] [INFO]   overlap (both): 696443/9437184 (7.38%) → unfrozen in final
+[2026-04-13 20:42:52] [safety_warp] [INFO]   final_mask:    247277.0/9437184 frozen (2.62%)
+[2026-04-13 20:42:52] [safety_warp] [INFO] Layer 1 (attn_k) [Two-Mask]:
+[2026-04-13 20:42:52] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:42:52] [safety_warp] [INFO]   adapt_mask:    314573/3145728 frozen (10.00%)
+[2026-04-13 20:42:52] [safety_warp] [INFO]   overlap (both): 226996/3145728 (7.22%) → unfrozen in final
+[2026-04-13 20:42:52] [safety_warp] [INFO]   final_mask:    87577.0/3145728 frozen (2.78%)
+[2026-04-13 20:42:52] [safety_warp] [INFO] Layer 1 (attn_v) [Two-Mask]:
+[2026-04-13 20:42:52] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:42:52] [safety_warp] [INFO]   adapt_mask:    314573/3145728 frozen (10.00%)
+[2026-04-13 20:42:52] [safety_warp] [INFO]   overlap (both): 266680/3145728 (8.48%) → unfrozen in final
+[2026-04-13 20:42:52] [safety_warp] [INFO]   final_mask:    47893.0/3145728 frozen (1.52%)
+[2026-04-13 20:42:52] [safety_warp] [INFO] Layer 1 (ffn_down) [Two-Mask]:
+[2026-04-13 20:42:52] [safety_warp] [INFO]   preserve_mask: 2516585/25165824 frozen (10.00%)
+[2026-04-13 20:42:52] [safety_warp] [INFO]   adapt_mask:    2516584/25165824 frozen (10.00%)
+[2026-04-13 20:42:52] [safety_warp] [INFO]   overlap (both): 2012802/25165824 (8.00%) → unfrozen in final
+[2026-04-13 20:42:52] [safety_warp] [INFO]   final_mask:    503783.0/25165824 frozen (2.00%)
+[2026-04-13 20:42:52] [safety_warp] [INFO] Layer 1 (ffn_up) [Two-Mask]:
+[2026-04-13 20:42:52] [safety_warp] [INFO]   preserve_mask: 2516584/25165824 frozen (10.00%)
+[2026-04-13 20:42:52] [safety_warp] [INFO]   adapt_mask:    2516584/25165824 frozen (10.00%)
+[2026-04-13 20:42:52] [safety_warp] [INFO]   overlap (both): 1726233/25165824 (6.86%) → unfrozen in final
+[2026-04-13 20:42:52] [safety_warp] [INFO]   final_mask:    790351.0/25165824 frozen (3.14%)
+[2026-04-13 20:42:53] [safety_warp] [INFO] Layer 2 (attn_q) [Two-Mask]:
+[2026-04-13 20:42:53] [safety_warp] [INFO]   preserve_mask: 943720/9437184 frozen (10.00%)
+[2026-04-13 20:42:53] [safety_warp] [INFO]   adapt_mask:    943721/9437184 frozen (10.00%)
+[2026-04-13 20:42:53] [safety_warp] [INFO]   overlap (both): 660997/9437184 (7.00%) → unfrozen in final
+[2026-04-13 20:42:53] [safety_warp] [INFO]   final_mask:    282723.0/9437184 frozen (3.00%)
+[2026-04-13 20:42:53] [safety_warp] [INFO] Layer 2 (attn_k) [Two-Mask]:
+[2026-04-13 20:42:53] [safety_warp] [INFO]   preserve_mask: 314574/3145728 frozen (10.00%)
+[2026-04-13 20:42:53] [safety_warp] [INFO]   adapt_mask:    314574/3145728 frozen (10.00%)
+[2026-04-13 20:42:53] [safety_warp] [INFO]   overlap (both): 221872/3145728 (7.05%) → unfrozen in final
+[2026-04-13 20:42:53] [safety_warp] [INFO]   final_mask:    92702.0/3145728 frozen (2.95%)
+[2026-04-13 20:42:53] [safety_warp] [INFO] Layer 2 (attn_v) [Two-Mask]:
+[2026-04-13 20:42:53] [safety_warp] [INFO]   preserve_mask: 314574/3145728 frozen (10.00%)
+[2026-04-13 20:42:53] [safety_warp] [INFO]   adapt_mask:    314574/3145728 frozen (10.00%)
+[2026-04-13 20:42:53] [safety_warp] [INFO]   overlap (both): 199021/3145728 (6.33%) → unfrozen in final
+[2026-04-13 20:42:53] [safety_warp] [INFO]   final_mask:    115553.0/3145728 frozen (3.67%)
+[2026-04-13 20:42:53] [safety_warp] [INFO] Layer 2 (ffn_down) [Two-Mask]:
+[2026-04-13 20:42:53] [safety_warp] [INFO]   preserve_mask: 2516584/25165824 frozen (10.00%)
+[2026-04-13 20:42:53] [safety_warp] [INFO]   adapt_mask:    2516584/25165824 frozen (10.00%)
+[2026-04-13 20:42:53] [safety_warp] [INFO]   overlap (both): 1863610/25165824 (7.41%) → unfrozen in final
+[2026-04-13 20:42:53] [safety_warp] [INFO]   final_mask:    652974.0/25165824 frozen (2.59%)
+[2026-04-13 20:42:53] [safety_warp] [INFO] Layer 2 (ffn_up) [Two-Mask]:
+[2026-04-13 20:42:53] [safety_warp] [INFO]   preserve_mask: 2516584/25165824 frozen (10.00%)
+[2026-04-13 20:42:53] [safety_warp] [INFO]   adapt_mask:    2516584/25165824 frozen (10.00%)
+[2026-04-13 20:42:53] [safety_warp] [INFO]   overlap (both): 1713016/25165824 (6.81%) → unfrozen in final
+[2026-04-13 20:42:53] [safety_warp] [INFO]   final_mask:    803568.0/25165824 frozen (3.19%)
+[2026-04-13 20:42:54] [safety_warp] [INFO] Layer 3 (attn_q) [Two-Mask]:
+[2026-04-13 20:42:54] [safety_warp] [INFO]   preserve_mask: 943720/9437184 frozen (10.00%)
+[2026-04-13 20:42:54] [safety_warp] [INFO]   adapt_mask:    943720/9437184 frozen (10.00%)
+[2026-04-13 20:42:54] [safety_warp] [INFO]   overlap (both): 621696/9437184 (6.59%) → unfrozen in final
+[2026-04-13 20:42:54] [safety_warp] [INFO]   final_mask:    322024.0/9437184 frozen (3.41%)
+[2026-04-13 20:42:54] [safety_warp] [INFO] Layer 3 (attn_k) [Two-Mask]:
+[2026-04-13 20:42:54] [safety_warp] [INFO]   preserve_mask: 314574/3145728 frozen (10.00%)
+[2026-04-13 20:42:54] [safety_warp] [INFO]   adapt_mask:    314573/3145728 frozen (10.00%)
+[2026-04-13 20:42:54] [safety_warp] [INFO]   overlap (both): 220976/3145728 (7.02%) → unfrozen in final
+[2026-04-13 20:42:54] [safety_warp] [INFO]   final_mask:    93598.0/3145728 frozen (2.98%)
+[2026-04-13 20:42:54] [safety_warp] [INFO] Layer 3 (attn_v) [Two-Mask]:
+[2026-04-13 20:42:54] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:42:54] [safety_warp] [INFO]   adapt_mask:    314573/3145728 frozen (10.00%)
+[2026-04-13 20:42:54] [safety_warp] [INFO]   overlap (both): 229536/3145728 (7.30%) → unfrozen in final
+[2026-04-13 20:42:54] [safety_warp] [INFO]   final_mask:    85037.0/3145728 frozen (2.70%)
+[2026-04-13 20:42:54] [safety_warp] [INFO] Layer 3 (ffn_down) [Two-Mask]:
+[2026-04-13 20:42:54] [safety_warp] [INFO]   preserve_mask: 2516584/25165824 frozen (10.00%)
+[2026-04-13 20:42:54] [safety_warp] [INFO]   adapt_mask:    2516584/25165824 frozen (10.00%)
+[2026-04-13 20:42:54] [safety_warp] [INFO]   overlap (both): 1782325/25165824 (7.08%) → unfrozen in final
+[2026-04-13 20:42:54] [safety_warp] [INFO]   final_mask:    734259.0/25165824 frozen (2.92%)
+[2026-04-13 20:42:55] [safety_warp] [INFO] Layer 3 (ffn_up) [Two-Mask]:
+[2026-04-13 20:42:55] [safety_warp] [INFO]   preserve_mask: 2516586/25165824 frozen (10.00%)
+[2026-04-13 20:42:55] [safety_warp] [INFO]   adapt_mask:    2516584/25165824 frozen (10.00%)
+[2026-04-13 20:42:55] [safety_warp] [INFO]   overlap (both): 1590113/25165824 (6.32%) → unfrozen in final
+[2026-04-13 20:42:55] [safety_warp] [INFO]   final_mask:    926473.0/25165824 frozen (3.68%)
+[2026-04-13 20:42:55] [safety_warp] [INFO] Layer 4 (attn_q) [Two-Mask]:
+[2026-04-13 20:42:55] [safety_warp] [INFO]   preserve_mask: 943720/9437184 frozen (10.00%)
+[2026-04-13 20:42:55] [safety_warp] [INFO]   adapt_mask:    943720/9437184 frozen (10.00%)
+[2026-04-13 20:42:55] [safety_warp] [INFO]   overlap (both): 702300/9437184 (7.44%) → unfrozen in final
+[2026-04-13 20:42:55] [safety_warp] [INFO]   final_mask:    241420.0/9437184 frozen (2.56%)
+[2026-04-13 20:42:55] [safety_warp] [INFO] Layer 4 (attn_k) [Two-Mask]:
+[2026-04-13 20:42:55] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:42:55] [safety_warp] [INFO]   adapt_mask:    314573/3145728 frozen (10.00%)
+[2026-04-13 20:42:55] [safety_warp] [INFO]   overlap (both): 237348/3145728 (7.55%) → unfrozen in final
+[2026-04-13 20:42:55] [safety_warp] [INFO]   final_mask:    77225.0/3145728 frozen (2.45%)
+[2026-04-13 20:42:55] [safety_warp] [INFO] Layer 4 (attn_v) [Two-Mask]:
+[2026-04-13 20:42:55] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:42:55] [safety_warp] [INFO]   adapt_mask:    314574/3145728 frozen (10.00%)
+[2026-04-13 20:42:55] [safety_warp] [INFO]   overlap (both): 222842/3145728 (7.08%) → unfrozen in final
+[2026-04-13 20:42:55] [safety_warp] [INFO]   final_mask:    91731.0/3145728 frozen (2.92%)
+[2026-04-13 20:42:55] [safety_warp] [INFO] Layer 4 (ffn_down) [Two-Mask]:
+[2026-04-13 20:42:55] [safety_warp] [INFO]   preserve_mask: 2516584/25165824 frozen (10.00%)
+[2026-04-13 20:42:55] [safety_warp] [INFO]   adapt_mask:    2516584/25165824 frozen (10.00%)
+[2026-04-13 20:42:55] [safety_warp] [INFO]   overlap (both): 1729773/25165824 (6.87%) → unfrozen in final
+[2026-04-13 20:42:55] [safety_warp] [INFO]   final_mask:    786811.0/25165824 frozen (3.13%)
+[2026-04-13 20:42:56] [safety_warp] [INFO] Layer 4 (ffn_up) [Two-Mask]:
+[2026-04-13 20:42:56] [safety_warp] [INFO]   preserve_mask: 2516585/25165824 frozen (10.00%)
+[2026-04-13 20:42:56] [safety_warp] [INFO]   adapt_mask:    2516584/25165824 frozen (10.00%)
+[2026-04-13 20:42:56] [safety_warp] [INFO]   overlap (both): 1571986/25165824 (6.25%) → unfrozen in final
+[2026-04-13 20:42:56] [safety_warp] [INFO]   final_mask:    944599.0/25165824 frozen (3.75%)
+[2026-04-13 20:42:56] [safety_warp] [INFO] Layer 5 (attn_q) [Two-Mask]:
+[2026-04-13 20:42:56] [safety_warp] [INFO]   preserve_mask: 943720/9437184 frozen (10.00%)
+[2026-04-13 20:42:56] [safety_warp] [INFO]   adapt_mask:    943721/9437184 frozen (10.00%)
+[2026-04-13 20:42:56] [safety_warp] [INFO]   overlap (both): 665677/9437184 (7.05%) → unfrozen in final
+[2026-04-13 20:42:56] [safety_warp] [INFO]   final_mask:    278043.0/9437184 frozen (2.95%)
+[2026-04-13 20:42:56] [safety_warp] [INFO] Layer 5 (attn_k) [Two-Mask]:
+[2026-04-13 20:42:56] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:42:56] [safety_warp] [INFO]   adapt_mask:    314574/3145728 frozen (10.00%)
+[2026-04-13 20:42:56] [safety_warp] [INFO]   overlap (both): 222170/3145728 (7.06%) → unfrozen in final
+[2026-04-13 20:42:56] [safety_warp] [INFO]   final_mask:    92403.0/3145728 frozen (2.94%)
+[2026-04-13 20:42:56] [safety_warp] [INFO] Layer 5 (attn_v) [Two-Mask]:
+[2026-04-13 20:42:56] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:42:56] [safety_warp] [INFO]   adapt_mask:    314573/3145728 frozen (10.00%)
+[2026-04-13 20:42:56] [safety_warp] [INFO]   overlap (both): 211333/3145728 (6.72%) → unfrozen in final
+[2026-04-13 20:42:56] [safety_warp] [INFO]   final_mask:    103240.0/3145728 frozen (3.28%)
+[2026-04-13 20:42:56] [safety_warp] [INFO] Layer 5 (ffn_down) [Two-Mask]:
+[2026-04-13 20:42:56] [safety_warp] [INFO]   preserve_mask: 2516586/25165824 frozen (10.00%)
+[2026-04-13 20:42:56] [safety_warp] [INFO]   adapt_mask:    2516584/25165824 frozen (10.00%)
+[2026-04-13 20:42:56] [safety_warp] [INFO]   overlap (both): 1732191/25165824 (6.88%) → unfrozen in final
+[2026-04-13 20:42:56] [safety_warp] [INFO]   final_mask:    784395.0/25165824 frozen (3.12%)
+[2026-04-13 20:42:57] [safety_warp] [INFO] Layer 5 (ffn_up) [Two-Mask]:
+[2026-04-13 20:42:57] [safety_warp] [INFO]   preserve_mask: 2516584/25165824 frozen (10.00%)
+[2026-04-13 20:42:57] [safety_warp] [INFO]   adapt_mask:    2516584/25165824 frozen (10.00%)
+[2026-04-13 20:42:57] [safety_warp] [INFO]   overlap (both): 1469383/25165824 (5.84%) → unfrozen in final
+[2026-04-13 20:42:57] [safety_warp] [INFO]   final_mask:    1047201.0/25165824 frozen (4.16%)
+[2026-04-13 20:42:57] [safety_warp] [INFO] Layer 6 (attn_q) [Two-Mask]:
+[2026-04-13 20:42:57] [safety_warp] [INFO]   preserve_mask: 943720/9437184 frozen (10.00%)
+[2026-04-13 20:42:57] [safety_warp] [INFO]   adapt_mask:    943720/9437184 frozen (10.00%)
+[2026-04-13 20:42:57] [safety_warp] [INFO]   overlap (both): 655995/9437184 (6.95%) → unfrozen in final
+[2026-04-13 20:42:57] [safety_warp] [INFO]   final_mask:    287725.0/9437184 frozen (3.05%)
+[2026-04-13 20:42:57] [safety_warp] [INFO] Layer 6 (attn_k) [Two-Mask]:
+[2026-04-13 20:42:57] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:42:57] [safety_warp] [INFO]   adapt_mask:    314573/3145728 frozen (10.00%)
+[2026-04-13 20:42:57] [safety_warp] [INFO]   overlap (both): 225378/3145728 (7.16%) → unfrozen in final
+[2026-04-13 20:42:57] [safety_warp] [INFO]   final_mask:    89195.0/3145728 frozen (2.84%)
+[2026-04-13 20:42:57] [safety_warp] [INFO] Layer 6 (attn_v) [Two-Mask]:
+[2026-04-13 20:42:57] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:42:57] [safety_warp] [INFO]   adapt_mask:    314573/3145728 frozen (10.00%)
+[2026-04-13 20:42:57] [safety_warp] [INFO]   overlap (both): 212193/3145728 (6.75%) → unfrozen in final
+[2026-04-13 20:42:57] [safety_warp] [INFO]   final_mask:    102380.0/3145728 frozen (3.25%)
+[2026-04-13 20:42:58] [safety_warp] [INFO] Layer 6 (ffn_down) [Two-Mask]:
+[2026-04-13 20:42:58] [safety_warp] [INFO]   preserve_mask: 2516585/25165824 frozen (10.00%)
+[2026-04-13 20:42:58] [safety_warp] [INFO]   adapt_mask:    2516586/25165824 frozen (10.00%)
+[2026-04-13 20:42:58] [safety_warp] [INFO]   overlap (both): 1787513/25165824 (7.10%) → unfrozen in final
+[2026-04-13 20:42:58] [safety_warp] [INFO]   final_mask:    729072.0/25165824 frozen (2.90%)
+[2026-04-13 20:42:58] [safety_warp] [INFO] Layer 6 (ffn_up) [Two-Mask]:
+[2026-04-13 20:42:58] [safety_warp] [INFO]   preserve_mask: 2516585/25165824 frozen (10.00%)
+[2026-04-13 20:42:58] [safety_warp] [INFO]   adapt_mask:    2516584/25165824 frozen (10.00%)
+[2026-04-13 20:42:58] [safety_warp] [INFO]   overlap (both): 1505845/25165824 (5.98%) → unfrozen in final
+[2026-04-13 20:42:58] [safety_warp] [INFO]   final_mask:    1010740.0/25165824 frozen (4.02%)
+[2026-04-13 20:42:58] [safety_warp] [INFO] Layer 7 (attn_q) [Two-Mask]:
+[2026-04-13 20:42:58] [safety_warp] [INFO]   preserve_mask: 943720/9437184 frozen (10.00%)
+[2026-04-13 20:42:58] [safety_warp] [INFO]   adapt_mask:    943720/9437184 frozen (10.00%)
+[2026-04-13 20:42:58] [safety_warp] [INFO]   overlap (both): 666972/9437184 (7.07%) → unfrozen in final
+[2026-04-13 20:42:58] [safety_warp] [INFO]   final_mask:    276748.0/9437184 frozen (2.93%)
+[2026-04-13 20:42:58] [safety_warp] [INFO] Layer 7 (attn_k) [Two-Mask]:
+[2026-04-13 20:42:58] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:42:58] [safety_warp] [INFO]   adapt_mask:    314573/3145728 frozen (10.00%)
+[2026-04-13 20:42:58] [safety_warp] [INFO]   overlap (both): 228237/3145728 (7.26%) → unfrozen in final
+[2026-04-13 20:42:58] [safety_warp] [INFO]   final_mask:    86336.0/3145728 frozen (2.74%)
+[2026-04-13 20:42:58] [safety_warp] [INFO] Layer 7 (attn_v) [Two-Mask]:
+[2026-04-13 20:42:58] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:42:58] [safety_warp] [INFO]   adapt_mask:    314574/3145728 frozen (10.00%)
+[2026-04-13 20:42:58] [safety_warp] [INFO]   overlap (both): 208673/3145728 (6.63%) → unfrozen in final
+[2026-04-13 20:42:58] [safety_warp] [INFO]   final_mask:    105900.0/3145728 frozen (3.37%)
+[2026-04-13 20:42:59] [safety_warp] [INFO] Layer 7 (ffn_down) [Two-Mask]:
+[2026-04-13 20:42:59] [safety_warp] [INFO]   preserve_mask: 2516585/25165824 frozen (10.00%)
+[2026-04-13 20:42:59] [safety_warp] [INFO]   adapt_mask:    2516584/25165824 frozen (10.00%)
+[2026-04-13 20:42:59] [safety_warp] [INFO]   overlap (both): 1747830/25165824 (6.95%) → unfrozen in final
+[2026-04-13 20:42:59] [safety_warp] [INFO]   final_mask:    768755.0/25165824 frozen (3.05%)
+[2026-04-13 20:42:59] [safety_warp] [INFO] Layer 7 (ffn_up) [Two-Mask]:
+[2026-04-13 20:42:59] [safety_warp] [INFO]   preserve_mask: 2516585/25165824 frozen (10.00%)
+[2026-04-13 20:42:59] [safety_warp] [INFO]   adapt_mask:    2516584/25165824 frozen (10.00%)
+[2026-04-13 20:42:59] [safety_warp] [INFO]   overlap (both): 1448934/25165824 (5.76%) → unfrozen in final
+[2026-04-13 20:42:59] [safety_warp] [INFO]   final_mask:    1067651.0/25165824 frozen (4.24%)
+[2026-04-13 20:42:59] [safety_warp] [INFO] Layer 8 (attn_q) [Two-Mask]:
+[2026-04-13 20:42:59] [safety_warp] [INFO]   preserve_mask: 943720/9437184 frozen (10.00%)
+[2026-04-13 20:42:59] [safety_warp] [INFO]   adapt_mask:    943720/9437184 frozen (10.00%)
+[2026-04-13 20:42:59] [safety_warp] [INFO]   overlap (both): 650854/9437184 (6.90%) → unfrozen in final
+[2026-04-13 20:42:59] [safety_warp] [INFO]   final_mask:    292866.0/9437184 frozen (3.10%)
+[2026-04-13 20:42:59] [safety_warp] [INFO] Layer 8 (attn_k) [Two-Mask]:
+[2026-04-13 20:42:59] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:42:59] [safety_warp] [INFO]   adapt_mask:    314573/3145728 frozen (10.00%)
+[2026-04-13 20:42:59] [safety_warp] [INFO]   overlap (both): 219874/3145728 (6.99%) → unfrozen in final
+[2026-04-13 20:42:59] [safety_warp] [INFO]   final_mask:    94699.0/3145728 frozen (3.01%)
+[2026-04-13 20:42:59] [safety_warp] [INFO] Layer 8 (attn_v) [Two-Mask]:
+[2026-04-13 20:42:59] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:42:59] [safety_warp] [INFO]   adapt_mask:    314573/3145728 frozen (10.00%)
+[2026-04-13 20:42:59] [safety_warp] [INFO]   overlap (both): 211887/3145728 (6.74%) → unfrozen in final
+[2026-04-13 20:42:59] [safety_warp] [INFO]   final_mask:    102686.0/3145728 frozen (3.26%)
+[2026-04-13 20:43:00] [safety_warp] [INFO] Layer 8 (ffn_down) [Two-Mask]:
+[2026-04-13 20:43:00] [safety_warp] [INFO]   preserve_mask: 2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:00] [safety_warp] [INFO]   adapt_mask:    2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:00] [safety_warp] [INFO]   overlap (both): 1725644/25165824 (6.86%) → unfrozen in final
+[2026-04-13 20:43:00] [safety_warp] [INFO]   final_mask:    790940.0/25165824 frozen (3.14%)
+[2026-04-13 20:43:00] [safety_warp] [INFO] Layer 8 (ffn_up) [Two-Mask]:
+[2026-04-13 20:43:00] [safety_warp] [INFO]   preserve_mask: 2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:00] [safety_warp] [INFO]   adapt_mask:    2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:00] [safety_warp] [INFO]   overlap (both): 1347595/25165824 (5.35%) → unfrozen in final
+[2026-04-13 20:43:00] [safety_warp] [INFO]   final_mask:    1168989.0/25165824 frozen (4.65%)
+[2026-04-13 20:43:00] [safety_warp] [INFO] Layer 9 (attn_q) [Two-Mask]:
+[2026-04-13 20:43:00] [safety_warp] [INFO]   preserve_mask: 943721/9437184 frozen (10.00%)
+[2026-04-13 20:43:00] [safety_warp] [INFO]   adapt_mask:    943720/9437184 frozen (10.00%)
+[2026-04-13 20:43:00] [safety_warp] [INFO]   overlap (both): 634592/9437184 (6.72%) → unfrozen in final
+[2026-04-13 20:43:00] [safety_warp] [INFO]   final_mask:    309129.0/9437184 frozen (3.28%)
+[2026-04-13 20:43:00] [safety_warp] [INFO] Layer 9 (attn_k) [Two-Mask]:
+[2026-04-13 20:43:00] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:00] [safety_warp] [INFO]   adapt_mask:    314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:00] [safety_warp] [INFO]   overlap (both): 212472/3145728 (6.75%) → unfrozen in final
+[2026-04-13 20:43:00] [safety_warp] [INFO]   final_mask:    102101.0/3145728 frozen (3.25%)
+[2026-04-13 20:43:00] [safety_warp] [INFO] Layer 9 (attn_v) [Two-Mask]:
+[2026-04-13 20:43:00] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:00] [safety_warp] [INFO]   adapt_mask:    314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:00] [safety_warp] [INFO]   overlap (both): 206344/3145728 (6.56%) → unfrozen in final
+[2026-04-13 20:43:00] [safety_warp] [INFO]   final_mask:    108229.0/3145728 frozen (3.44%)
+[2026-04-13 20:43:01] [safety_warp] [INFO] Layer 9 (ffn_down) [Two-Mask]:
+[2026-04-13 20:43:01] [safety_warp] [INFO]   preserve_mask: 2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:01] [safety_warp] [INFO]   adapt_mask:    2516585/25165824 frozen (10.00%)
+[2026-04-13 20:43:01] [safety_warp] [INFO]   overlap (both): 1734252/25165824 (6.89%) → unfrozen in final
+[2026-04-13 20:43:01] [safety_warp] [INFO]   final_mask:    782332.0/25165824 frozen (3.11%)
+[2026-04-13 20:43:01] [safety_warp] [INFO] Layer 9 (ffn_up) [Two-Mask]:
+[2026-04-13 20:43:01] [safety_warp] [INFO]   preserve_mask: 2516585/25165824 frozen (10.00%)
+[2026-04-13 20:43:01] [safety_warp] [INFO]   adapt_mask:    2516585/25165824 frozen (10.00%)
+[2026-04-13 20:43:01] [safety_warp] [INFO]   overlap (both): 1324837/25165824 (5.26%) → unfrozen in final
+[2026-04-13 20:43:01] [safety_warp] [INFO]   final_mask:    1191748.0/25165824 frozen (4.74%)
+[2026-04-13 20:43:01] [safety_warp] [INFO] Layer 10 (attn_q) [Two-Mask]:
+[2026-04-13 20:43:01] [safety_warp] [INFO]   preserve_mask: 943720/9437184 frozen (10.00%)
+[2026-04-13 20:43:01] [safety_warp] [INFO]   adapt_mask:    943720/9437184 frozen (10.00%)
+[2026-04-13 20:43:01] [safety_warp] [INFO]   overlap (both): 647718/9437184 (6.86%) → unfrozen in final
+[2026-04-13 20:43:01] [safety_warp] [INFO]   final_mask:    296002.0/9437184 frozen (3.14%)
+[2026-04-13 20:43:01] [safety_warp] [INFO] Layer 10 (attn_k) [Two-Mask]:
+[2026-04-13 20:43:01] [safety_warp] [INFO]   preserve_mask: 314574/3145728 frozen (10.00%)
+[2026-04-13 20:43:01] [safety_warp] [INFO]   adapt_mask:    314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:01] [safety_warp] [INFO]   overlap (both): 206857/3145728 (6.58%) → unfrozen in final
+[2026-04-13 20:43:01] [safety_warp] [INFO]   final_mask:    107717.0/3145728 frozen (3.42%)
+[2026-04-13 20:43:01] [safety_warp] [INFO] Layer 10 (attn_v) [Two-Mask]:
+[2026-04-13 20:43:01] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:01] [safety_warp] [INFO]   adapt_mask:    314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:01] [safety_warp] [INFO]   overlap (both): 209886/3145728 (6.67%) → unfrozen in final
+[2026-04-13 20:43:01] [safety_warp] [INFO]   final_mask:    104687.0/3145728 frozen (3.33%)
+[2026-04-13 20:43:02] [safety_warp] [INFO] Layer 10 (ffn_down) [Two-Mask]:
+[2026-04-13 20:43:02] [safety_warp] [INFO]   preserve_mask: 2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:02] [safety_warp] [INFO]   adapt_mask:    2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:02] [safety_warp] [INFO]   overlap (both): 1802215/25165824 (7.16%) → unfrozen in final
+[2026-04-13 20:43:02] [safety_warp] [INFO]   final_mask:    714369.0/25165824 frozen (2.84%)
+[2026-04-13 20:43:02] [safety_warp] [INFO] Layer 10 (ffn_up) [Two-Mask]:
+[2026-04-13 20:43:02] [safety_warp] [INFO]   preserve_mask: 2516585/25165824 frozen (10.00%)
+[2026-04-13 20:43:02] [safety_warp] [INFO]   adapt_mask:    2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:02] [safety_warp] [INFO]   overlap (both): 1365917/25165824 (5.43%) → unfrozen in final
+[2026-04-13 20:43:02] [safety_warp] [INFO]   final_mask:    1150668.0/25165824 frozen (4.57%)
+[2026-04-13 20:43:02] [safety_warp] [INFO] Layer 11 (attn_q) [Two-Mask]:
+[2026-04-13 20:43:02] [safety_warp] [INFO]   preserve_mask: 943721/9437184 frozen (10.00%)
+[2026-04-13 20:43:02] [safety_warp] [INFO]   adapt_mask:    943721/9437184 frozen (10.00%)
+[2026-04-13 20:43:02] [safety_warp] [INFO]   overlap (both): 666484/9437184 (7.06%) → unfrozen in final
+[2026-04-13 20:43:02] [safety_warp] [INFO]   final_mask:    277237.0/9437184 frozen (2.94%)
+[2026-04-13 20:43:02] [safety_warp] [INFO] Layer 11 (attn_k) [Two-Mask]:
+[2026-04-13 20:43:02] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:02] [safety_warp] [INFO]   adapt_mask:    314575/3145728 frozen (10.00%)
+[2026-04-13 20:43:02] [safety_warp] [INFO]   overlap (both): 228405/3145728 (7.26%) → unfrozen in final
+[2026-04-13 20:43:02] [safety_warp] [INFO]   final_mask:    86168.0/3145728 frozen (2.74%)
+[2026-04-13 20:43:03] [safety_warp] [INFO] Layer 11 (attn_v) [Two-Mask]:
+[2026-04-13 20:43:03] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:03] [safety_warp] [INFO]   adapt_mask:    314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:03] [safety_warp] [INFO]   overlap (both): 203202/3145728 (6.46%) → unfrozen in final
+[2026-04-13 20:43:03] [safety_warp] [INFO]   final_mask:    111371.0/3145728 frozen (3.54%)
+[2026-04-13 20:43:03] [safety_warp] [INFO] Layer 11 (ffn_down) [Two-Mask]:
+[2026-04-13 20:43:03] [safety_warp] [INFO]   preserve_mask: 2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:03] [safety_warp] [INFO]   adapt_mask:    2516587/25165824 frozen (10.00%)
+[2026-04-13 20:43:03] [safety_warp] [INFO]   overlap (both): 1846587/25165824 (7.34%) → unfrozen in final
+[2026-04-13 20:43:03] [safety_warp] [INFO]   final_mask:    669997.0/25165824 frozen (2.66%)
+[2026-04-13 20:43:03] [safety_warp] [INFO] Layer 11 (ffn_up) [Two-Mask]:
+[2026-04-13 20:43:03] [safety_warp] [INFO]   preserve_mask: 2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:03] [safety_warp] [INFO]   adapt_mask:    2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:03] [safety_warp] [INFO]   overlap (both): 1374035/25165824 (5.46%) → unfrozen in final
+[2026-04-13 20:43:03] [safety_warp] [INFO]   final_mask:    1142549.0/25165824 frozen (4.54%)
+[2026-04-13 20:43:04] [safety_warp] [INFO] Layer 12 (attn_q) [Two-Mask]:
+[2026-04-13 20:43:04] [safety_warp] [INFO]   preserve_mask: 943720/9437184 frozen (10.00%)
+[2026-04-13 20:43:04] [safety_warp] [INFO]   adapt_mask:    943720/9437184 frozen (10.00%)
+[2026-04-13 20:43:04] [safety_warp] [INFO]   overlap (both): 581507/9437184 (6.16%) → unfrozen in final
+[2026-04-13 20:43:04] [safety_warp] [INFO]   final_mask:    362213.0/9437184 frozen (3.84%)
+[2026-04-13 20:43:04] [safety_warp] [INFO] Layer 12 (attn_k) [Two-Mask]:
+[2026-04-13 20:43:04] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:04] [safety_warp] [INFO]   adapt_mask:    314574/3145728 frozen (10.00%)
+[2026-04-13 20:43:04] [safety_warp] [INFO]   overlap (both): 207679/3145728 (6.60%) → unfrozen in final
+[2026-04-13 20:43:04] [safety_warp] [INFO]   final_mask:    106894.0/3145728 frozen (3.40%)
+[2026-04-13 20:43:04] [safety_warp] [INFO] Layer 12 (attn_v) [Two-Mask]:
+[2026-04-13 20:43:04] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:04] [safety_warp] [INFO]   adapt_mask:    314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:04] [safety_warp] [INFO]   overlap (both): 184261/3145728 (5.86%) → unfrozen in final
+[2026-04-13 20:43:04] [safety_warp] [INFO]   final_mask:    130312.0/3145728 frozen (4.14%)
+[2026-04-13 20:43:04] [safety_warp] [INFO] Layer 12 (ffn_down) [Two-Mask]:
+[2026-04-13 20:43:04] [safety_warp] [INFO]   preserve_mask: 2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:04] [safety_warp] [INFO]   adapt_mask:    2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:04] [safety_warp] [INFO]   overlap (both): 1735406/25165824 (6.90%) → unfrozen in final
+[2026-04-13 20:43:04] [safety_warp] [INFO]   final_mask:    781178.0/25165824 frozen (3.10%)
+[2026-04-13 20:43:04] [safety_warp] [INFO] Layer 12 (ffn_up) [Two-Mask]:
+[2026-04-13 20:43:04] [safety_warp] [INFO]   preserve_mask: 2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:04] [safety_warp] [INFO]   adapt_mask:    2516585/25165824 frozen (10.00%)
+[2026-04-13 20:43:04] [safety_warp] [INFO]   overlap (both): 1350453/25165824 (5.37%) → unfrozen in final
+[2026-04-13 20:43:04] [safety_warp] [INFO]   final_mask:    1166131.0/25165824 frozen (4.63%)
+[2026-04-13 20:43:05] [safety_warp] [INFO] Layer 13 (attn_q) [Two-Mask]:
+[2026-04-13 20:43:05] [safety_warp] [INFO]   preserve_mask: 943720/9437184 frozen (10.00%)
+[2026-04-13 20:43:05] [safety_warp] [INFO]   adapt_mask:    943720/9437184 frozen (10.00%)
+[2026-04-13 20:43:05] [safety_warp] [INFO]   overlap (both): 623528/9437184 (6.61%) → unfrozen in final
+[2026-04-13 20:43:05] [safety_warp] [INFO]   final_mask:    320192.0/9437184 frozen (3.39%)
+[2026-04-13 20:43:05] [safety_warp] [INFO] Layer 13 (attn_k) [Two-Mask]:
+[2026-04-13 20:43:05] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:05] [safety_warp] [INFO]   adapt_mask:    314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:05] [safety_warp] [INFO]   overlap (both): 214156/3145728 (6.81%) → unfrozen in final
+[2026-04-13 20:43:05] [safety_warp] [INFO]   final_mask:    100417.0/3145728 frozen (3.19%)
+[2026-04-13 20:43:05] [safety_warp] [INFO] Layer 13 (attn_v) [Two-Mask]:
+[2026-04-13 20:43:05] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:05] [safety_warp] [INFO]   adapt_mask:    314574/3145728 frozen (10.00%)
+[2026-04-13 20:43:05] [safety_warp] [INFO]   overlap (both): 191680/3145728 (6.09%) → unfrozen in final
+[2026-04-13 20:43:05] [safety_warp] [INFO]   final_mask:    122893.0/3145728 frozen (3.91%)
+[2026-04-13 20:43:05] [safety_warp] [INFO] Layer 13 (ffn_down) [Two-Mask]:
+[2026-04-13 20:43:05] [safety_warp] [INFO]   preserve_mask: 2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:05] [safety_warp] [INFO]   adapt_mask:    2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:05] [safety_warp] [INFO]   overlap (both): 1625761/25165824 (6.46%) → unfrozen in final
+[2026-04-13 20:43:05] [safety_warp] [INFO]   final_mask:    890823.0/25165824 frozen (3.54%)
+[2026-04-13 20:43:05] [safety_warp] [INFO] Layer 13 (ffn_up) [Two-Mask]:
+[2026-04-13 20:43:05] [safety_warp] [INFO]   preserve_mask: 2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:05] [safety_warp] [INFO]   adapt_mask:    2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:05] [safety_warp] [INFO]   overlap (both): 1360494/25165824 (5.41%) → unfrozen in final
+[2026-04-13 20:43:05] [safety_warp] [INFO]   final_mask:    1156090.0/25165824 frozen (4.59%)
+[2026-04-13 20:43:06] [safety_warp] [INFO] Layer 14 (attn_q) [Two-Mask]:
+[2026-04-13 20:43:06] [safety_warp] [INFO]   preserve_mask: 943720/9437184 frozen (10.00%)
+[2026-04-13 20:43:06] [safety_warp] [INFO]   adapt_mask:    943720/9437184 frozen (10.00%)
+[2026-04-13 20:43:06] [safety_warp] [INFO]   overlap (both): 559181/9437184 (5.93%) → unfrozen in final
+[2026-04-13 20:43:06] [safety_warp] [INFO]   final_mask:    384539.0/9437184 frozen (4.07%)
+[2026-04-13 20:43:06] [safety_warp] [INFO] Layer 14 (attn_k) [Two-Mask]:
+[2026-04-13 20:43:06] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:06] [safety_warp] [INFO]   adapt_mask:    314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:06] [safety_warp] [INFO]   overlap (both): 196447/3145728 (6.24%) → unfrozen in final
+[2026-04-13 20:43:06] [safety_warp] [INFO]   final_mask:    118126.0/3145728 frozen (3.76%)
+[2026-04-13 20:43:06] [safety_warp] [INFO] Layer 14 (attn_v) [Two-Mask]:
+[2026-04-13 20:43:06] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:06] [safety_warp] [INFO]   adapt_mask:    314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:06] [safety_warp] [INFO]   overlap (both): 161073/3145728 (5.12%) → unfrozen in final
+[2026-04-13 20:43:06] [safety_warp] [INFO]   final_mask:    153500.0/3145728 frozen (4.88%)
+[2026-04-13 20:43:06] [safety_warp] [INFO] Layer 14 (ffn_down) [Two-Mask]:
+[2026-04-13 20:43:06] [safety_warp] [INFO]   preserve_mask: 2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:06] [safety_warp] [INFO]   adapt_mask:    2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:06] [safety_warp] [INFO]   overlap (both): 1664776/25165824 (6.62%) → unfrozen in final
+[2026-04-13 20:43:06] [safety_warp] [INFO]   final_mask:    851808.0/25165824 frozen (3.38%)
+[2026-04-13 20:43:07] [safety_warp] [INFO] Layer 14 (ffn_up) [Two-Mask]:
+[2026-04-13 20:43:07] [safety_warp] [INFO]   preserve_mask: 2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:07] [safety_warp] [INFO]   adapt_mask:    2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:07] [safety_warp] [INFO]   overlap (both): 1307604/25165824 (5.20%) → unfrozen in final
+[2026-04-13 20:43:07] [safety_warp] [INFO]   final_mask:    1208980.0/25165824 frozen (4.80%)
+[2026-04-13 20:43:07] [safety_warp] [INFO] Layer 15 (attn_q) [Two-Mask]:
+[2026-04-13 20:43:07] [safety_warp] [INFO]   preserve_mask: 943720/9437184 frozen (10.00%)
+[2026-04-13 20:43:07] [safety_warp] [INFO]   adapt_mask:    943720/9437184 frozen (10.00%)
+[2026-04-13 20:43:07] [safety_warp] [INFO]   overlap (both): 510031/9437184 (5.40%) → unfrozen in final
+[2026-04-13 20:43:07] [safety_warp] [INFO]   final_mask:    433689.0/9437184 frozen (4.60%)
+[2026-04-13 20:43:07] [safety_warp] [INFO] Layer 15 (attn_k) [Two-Mask]:
+[2026-04-13 20:43:07] [safety_warp] [INFO]   preserve_mask: 314575/3145728 frozen (10.00%)
+[2026-04-13 20:43:07] [safety_warp] [INFO]   adapt_mask:    314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:07] [safety_warp] [INFO]   overlap (both): 184177/3145728 (5.85%) → unfrozen in final
+[2026-04-13 20:43:07] [safety_warp] [INFO]   final_mask:    130398.0/3145728 frozen (4.15%)
+[2026-04-13 20:43:07] [safety_warp] [INFO] Layer 15 (attn_v) [Two-Mask]:
+[2026-04-13 20:43:07] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:07] [safety_warp] [INFO]   adapt_mask:    314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:07] [safety_warp] [INFO]   overlap (both): 148572/3145728 (4.72%) → unfrozen in final
+[2026-04-13 20:43:07] [safety_warp] [INFO]   final_mask:    166001.0/3145728 frozen (5.28%)
+[2026-04-13 20:43:07] [safety_warp] [INFO] Layer 15 (ffn_down) [Two-Mask]:
+[2026-04-13 20:43:07] [safety_warp] [INFO]   preserve_mask: 2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:07] [safety_warp] [INFO]   adapt_mask:    2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:07] [safety_warp] [INFO]   overlap (both): 1550653/25165824 (6.16%) → unfrozen in final
+[2026-04-13 20:43:07] [safety_warp] [INFO]   final_mask:    965931.0/25165824 frozen (3.84%)
+[2026-04-13 20:43:08] [safety_warp] [INFO] Layer 15 (ffn_up) [Two-Mask]:
+[2026-04-13 20:43:08] [safety_warp] [INFO]   preserve_mask: 2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:08] [safety_warp] [INFO]   adapt_mask:    2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:08] [safety_warp] [INFO]   overlap (both): 1161256/25165824 (4.61%) → unfrozen in final
+[2026-04-13 20:43:08] [safety_warp] [INFO]   final_mask:    1355328.0/25165824 frozen (5.39%)
+[2026-04-13 20:43:08] [safety_warp] [INFO] Layer 16 (attn_q) [Two-Mask]:
+[2026-04-13 20:43:08] [safety_warp] [INFO]   preserve_mask: 943720/9437184 frozen (10.00%)
+[2026-04-13 20:43:08] [safety_warp] [INFO]   adapt_mask:    943720/9437184 frozen (10.00%)
+[2026-04-13 20:43:08] [safety_warp] [INFO]   overlap (both): 493871/9437184 (5.23%) → unfrozen in final
+[2026-04-13 20:43:08] [safety_warp] [INFO]   final_mask:    449849.0/9437184 frozen (4.77%)
+[2026-04-13 20:43:08] [safety_warp] [INFO] Layer 16 (attn_k) [Two-Mask]:
+[2026-04-13 20:43:08] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:08] [safety_warp] [INFO]   adapt_mask:    314574/3145728 frozen (10.00%)
+[2026-04-13 20:43:08] [safety_warp] [INFO]   overlap (both): 188112/3145728 (5.98%) → unfrozen in final
+[2026-04-13 20:43:08] [safety_warp] [INFO]   final_mask:    126461.0/3145728 frozen (4.02%)
+[2026-04-13 20:43:08] [safety_warp] [INFO] Layer 16 (attn_v) [Two-Mask]:
+[2026-04-13 20:43:08] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:08] [safety_warp] [INFO]   adapt_mask:    314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:08] [safety_warp] [INFO]   overlap (both): 149676/3145728 (4.76%) → unfrozen in final
+[2026-04-13 20:43:08] [safety_warp] [INFO]   final_mask:    164897.0/3145728 frozen (5.24%)
+[2026-04-13 20:43:08] [safety_warp] [INFO] Layer 16 (ffn_down) [Two-Mask]:
+[2026-04-13 20:43:08] [safety_warp] [INFO]   preserve_mask: 2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:08] [safety_warp] [INFO]   adapt_mask:    2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:08] [safety_warp] [INFO]   overlap (both): 1385776/25165824 (5.51%) → unfrozen in final
+[2026-04-13 20:43:08] [safety_warp] [INFO]   final_mask:    1130808.0/25165824 frozen (4.49%)
+[2026-04-13 20:43:09] [safety_warp] [INFO] Layer 16 (ffn_up) [Two-Mask]:
+[2026-04-13 20:43:09] [safety_warp] [INFO]   preserve_mask: 2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:09] [safety_warp] [INFO]   adapt_mask:    2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:09] [safety_warp] [INFO]   overlap (both): 1027621/25165824 (4.08%) → unfrozen in final
+[2026-04-13 20:43:09] [safety_warp] [INFO]   final_mask:    1488963.0/25165824 frozen (5.92%)
+[2026-04-13 20:43:09] [safety_warp] [INFO] Layer 17 (attn_q) [Two-Mask]:
+[2026-04-13 20:43:09] [safety_warp] [INFO]   preserve_mask: 943721/9437184 frozen (10.00%)
+[2026-04-13 20:43:09] [safety_warp] [INFO]   adapt_mask:    943720/9437184 frozen (10.00%)
+[2026-04-13 20:43:09] [safety_warp] [INFO]   overlap (both): 427650/9437184 (4.53%) → unfrozen in final
+[2026-04-13 20:43:09] [safety_warp] [INFO]   final_mask:    516071.0/9437184 frozen (5.47%)
+[2026-04-13 20:43:09] [safety_warp] [INFO] Layer 17 (attn_k) [Two-Mask]:
+[2026-04-13 20:43:09] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:09] [safety_warp] [INFO]   adapt_mask:    314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:09] [safety_warp] [INFO]   overlap (both): 139091/3145728 (4.42%) → unfrozen in final
+[2026-04-13 20:43:09] [safety_warp] [INFO]   final_mask:    175482.0/3145728 frozen (5.58%)
+[2026-04-13 20:43:09] [safety_warp] [INFO] Layer 17 (attn_v) [Two-Mask]:
+[2026-04-13 20:43:09] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:09] [safety_warp] [INFO]   adapt_mask:    314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:09] [safety_warp] [INFO]   overlap (both): 150957/3145728 (4.80%) → unfrozen in final
+[2026-04-13 20:43:09] [safety_warp] [INFO]   final_mask:    163616.0/3145728 frozen (5.20%)
+[2026-04-13 20:43:10] [safety_warp] [INFO] Layer 17 (ffn_down) [Two-Mask]:
+[2026-04-13 20:43:10] [safety_warp] [INFO]   preserve_mask: 2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:10] [safety_warp] [INFO]   adapt_mask:    2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:10] [safety_warp] [INFO]   overlap (both): 1646720/25165824 (6.54%) → unfrozen in final
+[2026-04-13 20:43:10] [safety_warp] [INFO]   final_mask:    869864.0/25165824 frozen (3.46%)
+[2026-04-13 20:43:10] [safety_warp] [INFO] Layer 17 (ffn_up) [Two-Mask]:
+[2026-04-13 20:43:10] [safety_warp] [INFO]   preserve_mask: 2516585/25165824 frozen (10.00%)
+[2026-04-13 20:43:10] [safety_warp] [INFO]   adapt_mask:    2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:10] [safety_warp] [INFO]   overlap (both): 990674/25165824 (3.94%) → unfrozen in final
+[2026-04-13 20:43:10] [safety_warp] [INFO]   final_mask:    1525911.0/25165824 frozen (6.06%)
+[2026-04-13 20:43:10] [safety_warp] [INFO] Layer 18 (attn_q) [Two-Mask]:
+[2026-04-13 20:43:10] [safety_warp] [INFO]   preserve_mask: 943720/9437184 frozen (10.00%)
+[2026-04-13 20:43:10] [safety_warp] [INFO]   adapt_mask:    943720/9437184 frozen (10.00%)
+[2026-04-13 20:43:10] [safety_warp] [INFO]   overlap (both): 558990/9437184 (5.92%) → unfrozen in final
+[2026-04-13 20:43:10] [safety_warp] [INFO]   final_mask:    384730.0/9437184 frozen (4.08%)
+[2026-04-13 20:43:10] [safety_warp] [INFO] Layer 18 (attn_k) [Two-Mask]:
+[2026-04-13 20:43:10] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:10] [safety_warp] [INFO]   adapt_mask:    314574/3145728 frozen (10.00%)
+[2026-04-13 20:43:10] [safety_warp] [INFO]   overlap (both): 187151/3145728 (5.95%) → unfrozen in final
+[2026-04-13 20:43:10] [safety_warp] [INFO]   final_mask:    127422.0/3145728 frozen (4.05%)
+[2026-04-13 20:43:10] [safety_warp] [INFO] Layer 18 (attn_v) [Two-Mask]:
+[2026-04-13 20:43:10] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:10] [safety_warp] [INFO]   adapt_mask:    314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:10] [safety_warp] [INFO]   overlap (both): 133733/3145728 (4.25%) → unfrozen in final
+[2026-04-13 20:43:10] [safety_warp] [INFO]   final_mask:    180840.0/3145728 frozen (5.75%)
+[2026-04-13 20:43:11] [safety_warp] [INFO] Layer 18 (ffn_down) [Two-Mask]:
+[2026-04-13 20:43:11] [safety_warp] [INFO]   preserve_mask: 2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:11] [safety_warp] [INFO]   adapt_mask:    2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:11] [safety_warp] [INFO]   overlap (both): 1485058/25165824 (5.90%) → unfrozen in final
+[2026-04-13 20:43:11] [safety_warp] [INFO]   final_mask:    1031526.0/25165824 frozen (4.10%)
+[2026-04-13 20:43:11] [safety_warp] [INFO] Layer 18 (ffn_up) [Two-Mask]:
+[2026-04-13 20:43:11] [safety_warp] [INFO]   preserve_mask: 2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:11] [safety_warp] [INFO]   adapt_mask:    2516585/25165824 frozen (10.00%)
+[2026-04-13 20:43:11] [safety_warp] [INFO]   overlap (both): 963638/25165824 (3.83%) → unfrozen in final
+[2026-04-13 20:43:11] [safety_warp] [INFO]   final_mask:    1552946.0/25165824 frozen (6.17%)
+[2026-04-13 20:43:11] [safety_warp] [INFO] Layer 19 (attn_q) [Two-Mask]:
+[2026-04-13 20:43:11] [safety_warp] [INFO]   preserve_mask: 943720/9437184 frozen (10.00%)
+[2026-04-13 20:43:11] [safety_warp] [INFO]   adapt_mask:    943720/9437184 frozen (10.00%)
+[2026-04-13 20:43:11] [safety_warp] [INFO]   overlap (both): 608919/9437184 (6.45%) → unfrozen in final
+[2026-04-13 20:43:11] [safety_warp] [INFO]   final_mask:    334801.0/9437184 frozen (3.55%)
+[2026-04-13 20:43:11] [safety_warp] [INFO] Layer 19 (attn_k) [Two-Mask]:
+[2026-04-13 20:43:11] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:11] [safety_warp] [INFO]   adapt_mask:    314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:11] [safety_warp] [INFO]   overlap (both): 205634/3145728 (6.54%) → unfrozen in final
+[2026-04-13 20:43:11] [safety_warp] [INFO]   final_mask:    108939.0/3145728 frozen (3.46%)
+[2026-04-13 20:43:12] [safety_warp] [INFO] Layer 19 (attn_v) [Two-Mask]:
+[2026-04-13 20:43:12] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:12] [safety_warp] [INFO]   adapt_mask:    314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:12] [safety_warp] [INFO]   overlap (both): 155581/3145728 (4.95%) → unfrozen in final
+[2026-04-13 20:43:12] [safety_warp] [INFO]   final_mask:    158992.0/3145728 frozen (5.05%)
+[2026-04-13 20:43:12] [safety_warp] [INFO] Layer 19 (ffn_down) [Two-Mask]:
+[2026-04-13 20:43:12] [safety_warp] [INFO]   preserve_mask: 2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:12] [safety_warp] [INFO]   adapt_mask:    2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:12] [safety_warp] [INFO]   overlap (both): 1530113/25165824 (6.08%) → unfrozen in final
+[2026-04-13 20:43:12] [safety_warp] [INFO]   final_mask:    986471.0/25165824 frozen (3.92%)
+[2026-04-13 20:43:12] [safety_warp] [INFO] Layer 19 (ffn_up) [Two-Mask]:
+[2026-04-13 20:43:12] [safety_warp] [INFO]   preserve_mask: 2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:12] [safety_warp] [INFO]   adapt_mask:    2516585/25165824 frozen (10.00%)
+[2026-04-13 20:43:12] [safety_warp] [INFO]   overlap (both): 1009231/25165824 (4.01%) → unfrozen in final
+[2026-04-13 20:43:12] [safety_warp] [INFO]   final_mask:    1507353.0/25165824 frozen (5.99%)
+[2026-04-13 20:43:12] [safety_warp] [INFO] Layer 20 (attn_q) [Two-Mask]:
+[2026-04-13 20:43:12] [safety_warp] [INFO]   preserve_mask: 943720/9437184 frozen (10.00%)
+[2026-04-13 20:43:12] [safety_warp] [INFO]   adapt_mask:    943720/9437184 frozen (10.00%)
+[2026-04-13 20:43:12] [safety_warp] [INFO]   overlap (both): 590581/9437184 (6.26%) → unfrozen in final
+[2026-04-13 20:43:12] [safety_warp] [INFO]   final_mask:    353139.0/9437184 frozen (3.74%)
+[2026-04-13 20:43:13] [safety_warp] [INFO] Layer 20 (attn_k) [Two-Mask]:
+[2026-04-13 20:43:13] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:13] [safety_warp] [INFO]   adapt_mask:    314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:13] [safety_warp] [INFO]   overlap (both): 202897/3145728 (6.45%) → unfrozen in final
+[2026-04-13 20:43:13] [safety_warp] [INFO]   final_mask:    111676.0/3145728 frozen (3.55%)
+[2026-04-13 20:43:13] [safety_warp] [INFO] Layer 20 (attn_v) [Two-Mask]:
+[2026-04-13 20:43:13] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:13] [safety_warp] [INFO]   adapt_mask:    314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:13] [safety_warp] [INFO]   overlap (both): 166851/3145728 (5.30%) → unfrozen in final
+[2026-04-13 20:43:13] [safety_warp] [INFO]   final_mask:    147722.0/3145728 frozen (4.70%)
+[2026-04-13 20:43:13] [safety_warp] [INFO] Layer 20 (ffn_down) [Two-Mask]:
+[2026-04-13 20:43:13] [safety_warp] [INFO]   preserve_mask: 2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:13] [safety_warp] [INFO]   adapt_mask:    2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:13] [safety_warp] [INFO]   overlap (both): 1384152/25165824 (5.50%) → unfrozen in final
+[2026-04-13 20:43:13] [safety_warp] [INFO]   final_mask:    1132432.0/25165824 frozen (4.50%)
+[2026-04-13 20:43:14] [safety_warp] [INFO] Layer 20 (ffn_up) [Two-Mask]:
+[2026-04-13 20:43:14] [safety_warp] [INFO]   preserve_mask: 2516585/25165824 frozen (10.00%)
+[2026-04-13 20:43:14] [safety_warp] [INFO]   adapt_mask:    2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:14] [safety_warp] [INFO]   overlap (both): 965597/25165824 (3.84%) → unfrozen in final
+[2026-04-13 20:43:14] [safety_warp] [INFO]   final_mask:    1550988.0/25165824 frozen (6.16%)
+[2026-04-13 20:43:14] [safety_warp] [INFO] Layer 21 (attn_q) [Two-Mask]:
+[2026-04-13 20:43:14] [safety_warp] [INFO]   preserve_mask: 943720/9437184 frozen (10.00%)
+[2026-04-13 20:43:14] [safety_warp] [INFO]   adapt_mask:    943720/9437184 frozen (10.00%)
+[2026-04-13 20:43:14] [safety_warp] [INFO]   overlap (both): 478894/9437184 (5.07%) → unfrozen in final
+[2026-04-13 20:43:14] [safety_warp] [INFO]   final_mask:    464826.0/9437184 frozen (4.93%)
+[2026-04-13 20:43:14] [safety_warp] [INFO] Layer 21 (attn_k) [Two-Mask]:
+[2026-04-13 20:43:14] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:14] [safety_warp] [INFO]   adapt_mask:    314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:14] [safety_warp] [INFO]   overlap (both): 163500/3145728 (5.20%) → unfrozen in final
+[2026-04-13 20:43:14] [safety_warp] [INFO]   final_mask:    151073.0/3145728 frozen (4.80%)
+[2026-04-13 20:43:14] [safety_warp] [INFO] Layer 21 (attn_v) [Two-Mask]:
+[2026-04-13 20:43:14] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:14] [safety_warp] [INFO]   adapt_mask:    314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:14] [safety_warp] [INFO]   overlap (both): 144005/3145728 (4.58%) → unfrozen in final
+[2026-04-13 20:43:14] [safety_warp] [INFO]   final_mask:    170568.0/3145728 frozen (5.42%)
+[2026-04-13 20:43:14] [safety_warp] [INFO] Layer 21 (ffn_down) [Two-Mask]:
+[2026-04-13 20:43:14] [safety_warp] [INFO]   preserve_mask: 2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:14] [safety_warp] [INFO]   adapt_mask:    2516585/25165824 frozen (10.00%)
+[2026-04-13 20:43:14] [safety_warp] [INFO]   overlap (both): 1472710/25165824 (5.85%) → unfrozen in final
+[2026-04-13 20:43:14] [safety_warp] [INFO]   final_mask:    1043874.0/25165824 frozen (4.15%)
+[2026-04-13 20:43:15] [safety_warp] [INFO] Layer 21 (ffn_up) [Two-Mask]:
+[2026-04-13 20:43:15] [safety_warp] [INFO]   preserve_mask: 2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:15] [safety_warp] [INFO]   adapt_mask:    2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:15] [safety_warp] [INFO]   overlap (both): 979388/25165824 (3.89%) → unfrozen in final
+[2026-04-13 20:43:15] [safety_warp] [INFO]   final_mask:    1537196.0/25165824 frozen (6.11%)
+[2026-04-13 20:43:15] [safety_warp] [INFO] Layer 22 (attn_q) [Two-Mask]:
+[2026-04-13 20:43:15] [safety_warp] [INFO]   preserve_mask: 943720/9437184 frozen (10.00%)
+[2026-04-13 20:43:15] [safety_warp] [INFO]   adapt_mask:    943720/9437184 frozen (10.00%)
+[2026-04-13 20:43:15] [safety_warp] [INFO]   overlap (both): 513550/9437184 (5.44%) → unfrozen in final
+[2026-04-13 20:43:15] [safety_warp] [INFO]   final_mask:    430170.0/9437184 frozen (4.56%)
+[2026-04-13 20:43:15] [safety_warp] [INFO] Layer 22 (attn_k) [Two-Mask]:
+[2026-04-13 20:43:15] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:15] [safety_warp] [INFO]   adapt_mask:    314574/3145728 frozen (10.00%)
+[2026-04-13 20:43:15] [safety_warp] [INFO]   overlap (both): 200529/3145728 (6.37%) → unfrozen in final
+[2026-04-13 20:43:15] [safety_warp] [INFO]   final_mask:    114044.0/3145728 frozen (3.63%)
+[2026-04-13 20:43:15] [safety_warp] [INFO] Layer 22 (attn_v) [Two-Mask]:
+[2026-04-13 20:43:15] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:15] [safety_warp] [INFO]   adapt_mask:    314574/3145728 frozen (10.00%)
+[2026-04-13 20:43:15] [safety_warp] [INFO]   overlap (both): 168499/3145728 (5.36%) → unfrozen in final
+[2026-04-13 20:43:15] [safety_warp] [INFO]   final_mask:    146074.0/3145728 frozen (4.64%)
+[2026-04-13 20:43:15] [safety_warp] [INFO] Layer 22 (ffn_down) [Two-Mask]:
+[2026-04-13 20:43:15] [safety_warp] [INFO]   preserve_mask: 2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:15] [safety_warp] [INFO]   adapt_mask:    2516585/25165824 frozen (10.00%)
+[2026-04-13 20:43:15] [safety_warp] [INFO]   overlap (both): 1536570/25165824 (6.11%) → unfrozen in final
+[2026-04-13 20:43:15] [safety_warp] [INFO]   final_mask:    980014.0/25165824 frozen (3.89%)
+[2026-04-13 20:43:16] [safety_warp] [INFO] Layer 22 (ffn_up) [Two-Mask]:
+[2026-04-13 20:43:16] [safety_warp] [INFO]   preserve_mask: 2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:16] [safety_warp] [INFO]   adapt_mask:    2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:16] [safety_warp] [INFO]   overlap (both): 976503/25165824 (3.88%) → unfrozen in final
+[2026-04-13 20:43:16] [safety_warp] [INFO]   final_mask:    1540081.0/25165824 frozen (6.12%)
+[2026-04-13 20:43:16] [safety_warp] [INFO] Layer 23 (attn_q) [Two-Mask]:
+[2026-04-13 20:43:16] [safety_warp] [INFO]   preserve_mask: 943720/9437184 frozen (10.00%)
+[2026-04-13 20:43:16] [safety_warp] [INFO]   adapt_mask:    943721/9437184 frozen (10.00%)
+[2026-04-13 20:43:16] [safety_warp] [INFO]   overlap (both): 567529/9437184 (6.01%) → unfrozen in final
+[2026-04-13 20:43:16] [safety_warp] [INFO]   final_mask:    376191.0/9437184 frozen (3.99%)
+[2026-04-13 20:43:16] [safety_warp] [INFO] Layer 23 (attn_k) [Two-Mask]:
+[2026-04-13 20:43:16] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:16] [safety_warp] [INFO]   adapt_mask:    314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:16] [safety_warp] [INFO]   overlap (both): 185838/3145728 (5.91%) → unfrozen in final
+[2026-04-13 20:43:16] [safety_warp] [INFO]   final_mask:    128735.0/3145728 frozen (4.09%)
+[2026-04-13 20:43:16] [safety_warp] [INFO] Layer 23 (attn_v) [Two-Mask]:
+[2026-04-13 20:43:16] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:16] [safety_warp] [INFO]   adapt_mask:    314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:16] [safety_warp] [INFO]   overlap (both): 153516/3145728 (4.88%) → unfrozen in final
+[2026-04-13 20:43:16] [safety_warp] [INFO]   final_mask:    161057.0/3145728 frozen (5.12%)
+[2026-04-13 20:43:16] [safety_warp] [INFO] Layer 23 (ffn_down) [Two-Mask]:
+[2026-04-13 20:43:16] [safety_warp] [INFO]   preserve_mask: 2516585/25165824 frozen (10.00%)
+[2026-04-13 20:43:16] [safety_warp] [INFO]   adapt_mask:    2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:16] [safety_warp] [INFO]   overlap (both): 1598600/25165824 (6.35%) → unfrozen in final
+[2026-04-13 20:43:16] [safety_warp] [INFO]   final_mask:    917985.0/25165824 frozen (3.65%)
+[2026-04-13 20:43:17] [safety_warp] [INFO] Layer 23 (ffn_up) [Two-Mask]:
+[2026-04-13 20:43:17] [safety_warp] [INFO]   preserve_mask: 2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:17] [safety_warp] [INFO]   adapt_mask:    2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:17] [safety_warp] [INFO]   overlap (both): 983430/25165824 (3.91%) → unfrozen in final
+[2026-04-13 20:43:17] [safety_warp] [INFO]   final_mask:    1533154.0/25165824 frozen (6.09%)
+[2026-04-13 20:43:17] [safety_warp] [INFO] Layer 24 (attn_q) [Two-Mask]:
+[2026-04-13 20:43:17] [safety_warp] [INFO]   preserve_mask: 943720/9437184 frozen (10.00%)
+[2026-04-13 20:43:17] [safety_warp] [INFO]   adapt_mask:    943720/9437184 frozen (10.00%)
+[2026-04-13 20:43:17] [safety_warp] [INFO]   overlap (both): 584340/9437184 (6.19%) → unfrozen in final
+[2026-04-13 20:43:17] [safety_warp] [INFO]   final_mask:    359380.0/9437184 frozen (3.81%)
+[2026-04-13 20:43:17] [safety_warp] [INFO] Layer 24 (attn_k) [Two-Mask]:
+[2026-04-13 20:43:17] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:17] [safety_warp] [INFO]   adapt_mask:    314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:17] [safety_warp] [INFO]   overlap (both): 212429/3145728 (6.75%) → unfrozen in final
+[2026-04-13 20:43:17] [safety_warp] [INFO]   final_mask:    102144.0/3145728 frozen (3.25%)
+[2026-04-13 20:43:17] [safety_warp] [INFO] Layer 24 (attn_v) [Two-Mask]:
+[2026-04-13 20:43:17] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:17] [safety_warp] [INFO]   adapt_mask:    314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:17] [safety_warp] [INFO]   overlap (both): 157354/3145728 (5.00%) → unfrozen in final
+[2026-04-13 20:43:17] [safety_warp] [INFO]   final_mask:    157219.0/3145728 frozen (5.00%)
+[2026-04-13 20:43:18] [safety_warp] [INFO] Layer 24 (ffn_down) [Two-Mask]:
+[2026-04-13 20:43:18] [safety_warp] [INFO]   preserve_mask: 2516585/25165824 frozen (10.00%)
+[2026-04-13 20:43:18] [safety_warp] [INFO]   adapt_mask:    2516587/25165824 frozen (10.00%)
+[2026-04-13 20:43:18] [safety_warp] [INFO]   overlap (both): 1799648/25165824 (7.15%) → unfrozen in final
+[2026-04-13 20:43:18] [safety_warp] [INFO]   final_mask:    716937.0/25165824 frozen (2.85%)
+[2026-04-13 20:43:18] [safety_warp] [INFO] Layer 24 (ffn_up) [Two-Mask]:
+[2026-04-13 20:43:18] [safety_warp] [INFO]   preserve_mask: 2516585/25165824 frozen (10.00%)
+[2026-04-13 20:43:18] [safety_warp] [INFO]   adapt_mask:    2516586/25165824 frozen (10.00%)
+[2026-04-13 20:43:18] [safety_warp] [INFO]   overlap (both): 1046328/25165824 (4.16%) → unfrozen in final
+[2026-04-13 20:43:18] [safety_warp] [INFO]   final_mask:    1470257.0/25165824 frozen (5.84%)
+[2026-04-13 20:43:18] [safety_warp] [INFO] Layer 25 (attn_q) [Two-Mask]:
+[2026-04-13 20:43:18] [safety_warp] [INFO]   preserve_mask: 943720/9437184 frozen (10.00%)
+[2026-04-13 20:43:18] [safety_warp] [INFO]   adapt_mask:    943720/9437184 frozen (10.00%)
+[2026-04-13 20:43:18] [safety_warp] [INFO]   overlap (both): 603001/9437184 (6.39%) → unfrozen in final
+[2026-04-13 20:43:18] [safety_warp] [INFO]   final_mask:    340719.0/9437184 frozen (3.61%)
+[2026-04-13 20:43:18] [safety_warp] [INFO] Layer 25 (attn_k) [Two-Mask]:
+[2026-04-13 20:43:18] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:18] [safety_warp] [INFO]   adapt_mask:    314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:18] [safety_warp] [INFO]   overlap (both): 221816/3145728 (7.05%) → unfrozen in final
+[2026-04-13 20:43:18] [safety_warp] [INFO]   final_mask:    92757.0/3145728 frozen (2.95%)
+[2026-04-13 20:43:18] [safety_warp] [INFO] Layer 25 (attn_v) [Two-Mask]:
+[2026-04-13 20:43:18] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:18] [safety_warp] [INFO]   adapt_mask:    314575/3145728 frozen (10.00%)
+[2026-04-13 20:43:18] [safety_warp] [INFO]   overlap (both): 146099/3145728 (4.64%) → unfrozen in final
+[2026-04-13 20:43:18] [safety_warp] [INFO]   final_mask:    168474.0/3145728 frozen (5.36%)
+[2026-04-13 20:43:19] [safety_warp] [INFO] Layer 25 (ffn_down) [Two-Mask]:
+[2026-04-13 20:43:19] [safety_warp] [INFO]   preserve_mask: 2516585/25165824 frozen (10.00%)
+[2026-04-13 20:43:19] [safety_warp] [INFO]   adapt_mask:    2516585/25165824 frozen (10.00%)
+[2026-04-13 20:43:19] [safety_warp] [INFO]   overlap (both): 1744332/25165824 (6.93%) → unfrozen in final
+[2026-04-13 20:43:19] [safety_warp] [INFO]   final_mask:    772253.0/25165824 frozen (3.07%)
+[2026-04-13 20:43:19] [safety_warp] [INFO] Layer 25 (ffn_up) [Two-Mask]:
+[2026-04-13 20:43:19] [safety_warp] [INFO]   preserve_mask: 2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:19] [safety_warp] [INFO]   adapt_mask:    2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:19] [safety_warp] [INFO]   overlap (both): 1117945/25165824 (4.44%) → unfrozen in final
+[2026-04-13 20:43:19] [safety_warp] [INFO]   final_mask:    1398639.0/25165824 frozen (5.56%)
+[2026-04-13 20:43:19] [safety_warp] [INFO] Layer 26 (attn_q) [Two-Mask]:
+[2026-04-13 20:43:19] [safety_warp] [INFO]   preserve_mask: 943720/9437184 frozen (10.00%)
+[2026-04-13 20:43:19] [safety_warp] [INFO]   adapt_mask:    943720/9437184 frozen (10.00%)
+[2026-04-13 20:43:19] [safety_warp] [INFO]   overlap (both): 577091/9437184 (6.12%) → unfrozen in final
+[2026-04-13 20:43:19] [safety_warp] [INFO]   final_mask:    366629.0/9437184 frozen (3.88%)
+[2026-04-13 20:43:19] [safety_warp] [INFO] Layer 26 (attn_k) [Two-Mask]:
+[2026-04-13 20:43:19] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:19] [safety_warp] [INFO]   adapt_mask:    314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:19] [safety_warp] [INFO]   overlap (both): 203848/3145728 (6.48%) → unfrozen in final
+[2026-04-13 20:43:19] [safety_warp] [INFO]   final_mask:    110725.0/3145728 frozen (3.52%)
+[2026-04-13 20:43:19] [safety_warp] [INFO] Layer 26 (attn_v) [Two-Mask]:
+[2026-04-13 20:43:19] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:19] [safety_warp] [INFO]   adapt_mask:    314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:19] [safety_warp] [INFO]   overlap (both): 169754/3145728 (5.40%) → unfrozen in final
+[2026-04-13 20:43:19] [safety_warp] [INFO]   final_mask:    144819.0/3145728 frozen (4.60%)
+[2026-04-13 20:43:20] [safety_warp] [INFO] Layer 26 (ffn_down) [Two-Mask]:
+[2026-04-13 20:43:20] [safety_warp] [INFO]   preserve_mask: 2516585/25165824 frozen (10.00%)
+[2026-04-13 20:43:20] [safety_warp] [INFO]   adapt_mask:    2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:20] [safety_warp] [INFO]   overlap (both): 1860426/25165824 (7.39%) → unfrozen in final
+[2026-04-13 20:43:20] [safety_warp] [INFO]   final_mask:    656159.0/25165824 frozen (2.61%)
+[2026-04-13 20:43:20] [safety_warp] [INFO] Layer 26 (ffn_up) [Two-Mask]:
+[2026-04-13 20:43:20] [safety_warp] [INFO]   preserve_mask: 2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:20] [safety_warp] [INFO]   adapt_mask:    2516585/25165824 frozen (10.00%)
+[2026-04-13 20:43:20] [safety_warp] [INFO]   overlap (both): 1081852/25165824 (4.30%) → unfrozen in final
+[2026-04-13 20:43:20] [safety_warp] [INFO]   final_mask:    1434732.0/25165824 frozen (5.70%)
+[2026-04-13 20:43:20] [safety_warp] [INFO] Layer 27 (attn_q) [Two-Mask]:
+[2026-04-13 20:43:20] [safety_warp] [INFO]   preserve_mask: 943720/9437184 frozen (10.00%)
+[2026-04-13 20:43:20] [safety_warp] [INFO]   adapt_mask:    943720/9437184 frozen (10.00%)
+[2026-04-13 20:43:20] [safety_warp] [INFO]   overlap (both): 598778/9437184 (6.34%) → unfrozen in final
+[2026-04-13 20:43:20] [safety_warp] [INFO]   final_mask:    344942.0/9437184 frozen (3.66%)
+[2026-04-13 20:43:20] [safety_warp] [INFO] Layer 27 (attn_k) [Two-Mask]:
+[2026-04-13 20:43:20] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:20] [safety_warp] [INFO]   adapt_mask:    314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:20] [safety_warp] [INFO]   overlap (both): 164612/3145728 (5.23%) → unfrozen in final
+[2026-04-13 20:43:20] [safety_warp] [INFO]   final_mask:    149961.0/3145728 frozen (4.77%)
+[2026-04-13 20:43:20] [safety_warp] [INFO] Layer 27 (attn_v) [Two-Mask]:
+[2026-04-13 20:43:20] [safety_warp] [INFO]   preserve_mask: 314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:20] [safety_warp] [INFO]   adapt_mask:    314573/3145728 frozen (10.00%)
+[2026-04-13 20:43:20] [safety_warp] [INFO]   overlap (both): 131831/3145728 (4.19%) → unfrozen in final
+[2026-04-13 20:43:20] [safety_warp] [INFO]   final_mask:    182742.0/3145728 frozen (5.81%)
+[2026-04-13 20:43:21] [safety_warp] [INFO] Layer 27 (ffn_down) [Two-Mask]:
+[2026-04-13 20:43:21] [safety_warp] [INFO]   preserve_mask: 2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:21] [safety_warp] [INFO]   adapt_mask:    2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:21] [safety_warp] [INFO]   overlap (both): 1973430/25165824 (7.84%) → unfrozen in final
+[2026-04-13 20:43:21] [safety_warp] [INFO]   final_mask:    543154.0/25165824 frozen (2.16%)
+[2026-04-13 20:43:21] [safety_warp] [INFO] Layer 27 (ffn_up) [Two-Mask]:
+[2026-04-13 20:43:21] [safety_warp] [INFO]   preserve_mask: 2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:21] [safety_warp] [INFO]   adapt_mask:    2516584/25165824 frozen (10.00%)
+[2026-04-13 20:43:21] [safety_warp] [INFO]   overlap (both): 1074058/25165824 (4.27%) → unfrozen in final
+[2026-04-13 20:43:21] [safety_warp] [INFO]   final_mask:    1442526.0/25165824 frozen (5.73%)
+[2026-04-13 20:43:21] [safety_warp] [INFO] ======================================================================
+[2026-04-13 20:43:21] [safety_warp] [INFO] ✓ Masks generated for 140 modules
+[2026-04-13 20:43:22] [safety_warp] [INFO]   [Two-Mask] Overall frozen ratio: 73902320.0/1849688064 (4.00%)
+[2026-04-13 20:43:38] [safety_warp] [INFO] ✓ Masks saved to: ./checkpoints/phase2_20260413_204322/checkpoints/masks
+[2026-04-13 20:43:38] [safety_warp] [INFO] ✓ Metadata saved to: ./checkpoints/phase2_20260413_204322/checkpoints/masks/metadata.json
+[2026-04-13 20:43:38] [safety_warp] [INFO]   [Two-Mask] adapt_dataset=safety
+[2026-04-13 20:43:38] [safety_warp] [INFO] ======================================================================
+[2026-04-13 20:43:38] [safety_warp] [INFO] Phase 2 Completed!
+[2026-04-13 20:43:38] [safety_warp] [INFO] Masks saved to: ./checkpoints/phase2_20260413_204322/checkpoints/masks
+[2026-04-13 20:43:38] [safety_warp] [INFO] ======================================================================
+[2026-04-13 20:43:38] [safety_warp] [INFO] Next step: Run Phase 3 with --masks_dir ./checkpoints/phase2_20260413_204322/checkpoints/masks
+[2026-04-13 20:43:38] [safety_warp] [INFO] ======================================================================
+[2026-04-13 20:43:38] [safety_warp] [INFO] ======================================================================
+[2026-04-13 20:43:38] [safety_warp] [INFO] All tasks completed successfully!
+[2026-04-13 20:43:38] [safety_warp] [INFO] ======================================================================

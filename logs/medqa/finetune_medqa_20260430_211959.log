@@ -1,0 +1,20 @@
+2026-04-30 21:19:59 - __main__ - INFO - ======================================================================
+2026-04-30 21:19:59 - __main__ - INFO - Full-parameter utility fine-tuning: MedQA (USMLE)
+2026-04-30 21:19:59 - __main__ - INFO - ======================================================================
+2026-04-30 21:19:59 - __main__ - INFO - Log file  : ./logs/medqa/finetune_medqa_20260430_211959.log
+2026-04-30 21:19:59 - __main__ - INFO - Model     : kmseong/llama2_7b-chat-Safety-FT-lr5e-5
+2026-04-30 21:19:59 - __main__ - INFO - Input fmt : chat template
+2026-04-30 21:19:59 - __main__ - INFO - Train     : /home/yonsei_jong/Safety-WaRP-LLM/data/medqa_train_10178.jsonl
+2026-04-30 21:19:59 - __main__ - INFO - Eval      : (none)
+2026-04-30 21:19:59 - __main__ - INFO - Safety mix: ratio=0.0, path=/home/yonsei_jong/Safety-WaRP-LLM/data/circuit_breakers_train.json
+2026-04-30 21:19:59 - __main__ - INFO - LR=3e-05, epochs=3, batch=4x4
+2026-04-30 21:19:59 - __main__ - INFO - Loading tokenizer...
+2026-04-30 21:19:59 - __main__ - INFO -   Tokenizer loaded from local files
+2026-04-30 21:19:59 - __main__ - INFO - Loading model...
+2026-04-30 21:20:01 - __main__ - INFO -   Model loaded from local files
+2026-04-30 21:20:01 - __main__ - INFO -   Params: total=6.74B, trainable=6.74B (100.00%)
+2026-04-30 21:20:02 - __main__ - INFO - Loaded MedQA train rows: 10,178
+2026-04-30 21:20:02 - __main__ - INFO - 
+[MedQA Sample #0]
+2026-04-30 21:20:02 - __main__ - INFO -   prompt (60c): Answer the following multiple-choice medical question by sel...
+2026-04-30 21:20:02 - __main__ - INFO -   response    : D. Nitrofurantoin

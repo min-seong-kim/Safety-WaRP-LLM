@@ -52,6 +52,9 @@ def parse_args():
                         help='Circuit breakers 샘플 수 (Phase 1 basis 구성용 - Safety Basis)')
     parser.add_argument('--wikipedia_samples_phase1', type=int, default=1000,
                         help='Wikipedia 샘플 수 (Phase 1 basis 구성용 - Utility Basis)')
+    parser.add_argument('--only_prompt', action='store_true',
+                        help='Phase 1에서 response 없이 prompt(harmful question)만 사용하여 basis 구성. '
+                             'instruct 모델은 user turn만, plain 모델은 question만 입력.')
     
     # Phase 2 설정
     parser.add_argument('--basis_dir', type=str, default=None,
@@ -93,8 +96,8 @@ def parse_args():
     parser.add_argument('--masks_dir', type=str, default=None,
                         help='Phase 2의 masks 디렉토리 경로 (Phase 3에서 사용)')
     parser.add_argument('--phase3_dataset', type=str, default='gsm8k',
-                        choices=['gsm8k', 'safety', 'metamath', 'math'],
-                        help='Phase 3 finetuning용 데이터셋 - gsm8k(Utility), safety(안전성 강화), metamath(고급 수학), math(Hendrycks MATH)')
+                        choices=['gsm8k', 'safety', 'metamath', 'math', 'swebench', 'agnews', 'medqa'],
+                        help='Phase 3 finetuning용 데이터셋 - gsm8k(Utility), safety(안전성 강화), metamath(고급 수학), math(Hendrycks MATH), swebench(소프트웨어 엔지니어링), agnews(뉴스 분류), medqa(의료 USMLE MCQ)')
     parser.add_argument('--gsm8k_samples', type=int, default=1000,
                         help='GSM8K 샘플 수 (Phase 3 - GSM8K 선택시만 사용)')
     parser.add_argument('--metamath_samples', type=int, default=0,
@@ -119,6 +122,24 @@ def parse_args():
     parser.add_argument('--math_system_prompt', type=str,
                         default='You are a careful competition math solver. Solve the problem step by step. On the last line, write exactly one final answer in the form: Final Answer: $<answer>$. Do not use additional dollar signs earlier in the response.',
                         help='MATH chat template 사용 시 시스템 프롬프트')
+    parser.add_argument('--agnews_dataset_path', type=str, default=None,
+                        help='AG News 데이터셋 경로 (Phase 3 - AG News 선택시 필수)')
+    parser.add_argument('--agnews_split', type=str, default='train',
+                        help='AG News split 이름 (default: train)')
+    parser.add_argument('--agnews_samples', type=int, default=8000,
+                        help='AG News 샘플 수 (0=전체)')
+    parser.add_argument('--swebench_dataset_path', type=str, default=None,
+                        help='SWE-bench 데이터셋 경로 (Phase 3 - SWE-bench 선택시 필수)')
+    parser.add_argument('--swebench_split', type=str, default='train',
+                        help='SWE-bench split 이름 (default: train)')
+    parser.add_argument('--swebench_samples', type=int, default=8000,
+                        help='SWE-bench 샘플 수 (0=전체)')
+    parser.add_argument('--medqa_dataset_path', type=str, default=None,
+                        help='MedQA JSONL 경로 (Phase 3 - medqa 선택시 필수, prepare_medqa_dataset.py 출력)')
+    parser.add_argument('--medqa_split', type=str, default='train',
+                        help='MedQA split 이름 (default: train, 현재 미사용)')
+    parser.add_argument('--medqa_samples', type=int, default=10000,
+                        help='MedQA 학습 샘플 수 (0=전체)')
     parser.add_argument('--circuit_breakers_samples_phase3', type=int, default=4994,
                         help='Circuit Breakers 샘플 수 (Phase 3 - Safety 선택시만 사용)')
     parser.add_argument('--epochs', type=int, default=20,
@@ -141,6 +162,10 @@ def parse_args():
                         help='WaRP monitor 샘플 수 (Phase 3 sanity check용)')
     parser.add_argument('--non_freeze', action='store_true',
                         help='Phase 3에서 WaRP 비적용 레이어를 포함해 나머지 파라미터도 학습')
+    parser.add_argument('--no_masks', action='store_true',
+                        help='Phase 3에서 Phase 2 마스크 없이 실행 (freeze 없음, 모든 파라미터 학습 가능)')
+    parser.add_argument('--safety_mix_ratio', type=float, default=0.0,
+                        help='Phase 3에서 safety dataset 혼합 비율 (0.0=미사용, 0.05=downstream 대비 5%)')
     parser.add_argument('--gradient_checkpointing', action='store_true',
                         help='Phase 3에서 gradient checkpointing 사용 (비교 실험 시 freeze/non-freeze 동일하게 설정 권장)')
 
@@ -337,8 +362,8 @@ def run_phase3(args, logger):
         logger.error("Phase 3 requires --basis_dir")
         raise ValueError("Missing --basis_dir")
     
-    if args.masks_dir is None:
-        logger.error("Phase 3 requires --masks_dir")
+    if args.masks_dir is None and not getattr(args, 'no_masks', False):
+        logger.error("Phase 3 requires --masks_dir (or use --no_masks to skip masking)")
         raise ValueError("Missing --masks_dir")
     
     if args.original_space_mask:

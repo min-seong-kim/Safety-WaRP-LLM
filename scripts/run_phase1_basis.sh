@@ -6,6 +6,7 @@
 # 두 가지 basis 구성 가능:
 # 1. Safety Basis: circuit_breakers 데이터셋 사용
 # 2. Utility Basis: wikipedia 데이터셋 사용
+CUDA_VISIBLE_DEVICES=1
 
 echo "========================================="
 echo "Phase 1: Basis Construction"
@@ -14,17 +15,17 @@ echo "========================================="
 # Phase 0 모델 경로 (로컬 디렉토리 또는 Hugging Face 모델 ID)
 # PHASE0_MODEL="./checkpoints/phase0_20260213_230047"  # 로컬 디렉토리 예시
 # PHASE0_MODEL="kmseong/Llama-3.2-3B-SSFT"
-PHASE0_MODEL="meta-llama/Llama-3.2-3B"
+PHASE0_MODEL="kmseong/llama2_7b-chat-Safety-FT-lr5e-5"
 # ========================================
 # Dataset 선택 (수정 필요)
 # ========================================
 # 옵션 1: Safety Basis (circuit_breakers 데이터셋)
-# DATASET="circuit_breakers"
-# SAMPLES=4994
+DATASET="circuit_breakers"
+SAMPLES=4994
 #
 # 옵션 2: Utility Basis (Wikipedia 데이터셋)
-DATASET="wikipedia"
-SAMPLES=1000
+# DATASET="wikipedia"
+# SAMPLES=1000
 # ========================================
 
 # 로컬 경로일 때만 디렉토리 존재 체크

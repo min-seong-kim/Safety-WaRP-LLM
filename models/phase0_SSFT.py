@@ -9,8 +9,11 @@ Goal:
   - Fine-tune all model parameters on the same safety dataset
 
 Usage:
-python models/phase0_SSFT.py --model_name meta-llama/Llama-3.1-8B-Instruct
-python models/phase0_SSFT.py --model_name meta-llama/Llama-2-7b-chat-hf
+python Safety-WaRP-LLM/models/phase0_SSFT.py --model_name meta-llama/Llama-3.2-3B-Instruct
+
+python Safety-WaRP-LLM/models/phase0_SSFT.py --model_name meta-llama/Llama-2-13b-chat-hf
+
+python Safety-WaRP-LLM/models/phase0_SSFT.py --model_name meta-llama/Llama-2-13b-chat-hf --lr 3e-5
 
 """
 
@@ -38,9 +41,9 @@ logger = logging.getLogger('safety_warp')
 # =====================================================================
 # Configuration (matched to sn_tune.py)
 # =====================================================================
-MODEL_NAME = "meta-llama/Llama-3.1-8B"  # Base 모델 (Phase 0) - WaRP 제거 전 모델 사용
+MODEL_NAME = "meta-llama/Llama-3.2-3B-Instruct"  # Base 모델 (Phase 0) - WaRP 제거 전 모델 사용
 
-LEARNING_RATE = 3e-5
+LEARNING_RATE = 5e-5
 NUM_EPOCHS = 3
 BATCH_SIZE = 4
 GRAD_ACCUM_STEPS = 4
@@ -232,7 +235,9 @@ def train_base_safety_ft(
     warmup_ratio=0.1,
     device=DEVICE,
 ):
-    model = model.to(device)
+    # device_map="auto"로 로드된 모델은 .to(device) 호출 불필요
+    # LoRA(PEFT) 모델에서 gradient checkpointing 사용 시 enable_input_require_grads() 필요
+    model.enable_input_require_grads()
     model.gradient_checkpointing_enable()
     model.train()
 
@@ -364,6 +369,12 @@ def parse_args(argv):
         help="Base model or instruct model to fine-tune",
     )
     parser.add_argument(
+        "--lr",
+        type=float,
+        default=LEARNING_RATE,
+        help=f"Learning rate (default: {LEARNING_RATE})",
+    )
+    parser.add_argument(
         "--output_dir",
         type=str,
         default=None,
@@ -400,6 +411,7 @@ def main(argv):
     args = parse_args(argv)
     safety_dataset_json = args.dataset_json
     model_name = args.model_name
+    learning_rate = args.lr
     output_dir = args.output_dir or build_output_dir(use_lora=args.lora)
 
     # 로그 파일 설정
@@ -436,7 +448,7 @@ def main(argv):
     logger.info(f"Safety dataset file: {safety_dataset_json}")
     logger.info(f"Output directory: {output_dir}")
     logger.info(
-        f"Training setup: LR={LEARNING_RATE}, Epochs={NUM_EPOCHS}, Batch={BATCH_SIZE}, "
+        f"Training setup: LR={learning_rate}, Epochs={NUM_EPOCHS}, Batch={BATCH_SIZE}, "
         f"GradAccum={GRAD_ACCUM_STEPS}, MaxSamples={MAX_SAMPLES}"
     )
     logger.info(f"{'=' * 70}\n")
@@ -451,7 +463,7 @@ def main(argv):
                 config={
                     'phase': 0,
                     'model_name': model_name,
-                    'learning_rate': LEARNING_RATE,
+                    'learning_rate': learning_rate,
                     'num_epochs': NUM_EPOCHS,
                     'batch_size': BATCH_SIZE,
                     'grad_accum_steps': GRAD_ACCUM_STEPS,
@@ -530,7 +542,7 @@ def main(argv):
     model = train_base_safety_ft(
         model,
         train_dataloader,
-        learning_rate=LEARNING_RATE,
+        learning_rate=learning_rate,
         num_epochs=NUM_EPOCHS,
         grad_accum_steps=GRAD_ACCUM_STEPS,
         device=DEVICE,

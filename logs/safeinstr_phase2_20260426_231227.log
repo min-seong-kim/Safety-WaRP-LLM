@@ -1,0 +1,935 @@
+[2026-04-26 23:12:28] [safety_warp] [INFO] ======================================================================
+[2026-04-26 23:12:28] [safety_warp] [INFO] Safety-WaRP-LLM (Fixed - 원본 FSCIL-WaRP 방식)
+[2026-04-26 23:12:28] [safety_warp] [INFO] ======================================================================
+[2026-04-26 23:12:28] [safety_warp] [INFO] Phase: 2
+[2026-04-26 23:12:28] [safety_warp] [INFO] Model: None
+[2026-04-26 23:12:28] [safety_warp] [INFO] Layer types: attn_q,attn_k,attn_v,attn_o,ffn_gate,ffn_down,ffn_up
+[2026-04-26 23:12:28] [safety_warp] [INFO] Target layers: all
+[2026-04-26 23:12:28] [safety_warp] [INFO] ======================================================================
+[2026-04-26 23:12:28] [safety_warp] [INFO] ======================================================================
+[2026-04-26 23:12:28] [safety_warp] [INFO] Starting Phase 2: Importance Scoring (Fixed)
+[2026-04-26 23:12:28] [safety_warp] [INFO] ======================================================================
+[2026-04-26 23:12:28] [safety_warp] [INFO] Loading basis from /home/yonsei_jong/Safety-WaRP-LLM/checkpoints/phase1_20260426_222011/basis...
+[2026-04-26 23:12:28] [safety_warp] [INFO] ✓ Metadata loaded:
+[2026-04-26 23:12:28] [safety_warp] [INFO]   - Layer types: ['attn_k', 'attn_o', 'attn_q', 'attn_v', 'ffn_down', 'ffn_gate', 'ffn_up']
+[2026-04-26 23:12:41] [safety_warp] [INFO] ✓ Basis loaded: 224 (layer, type) combinations
+[2026-04-26 23:12:42] [safety_warp] [INFO] Loading Phase 0 trained model from kmseong/llama2_7b-Safety-FT-lr3e-5...
+`torch_dtype` is deprecated! Use `dtype` instead!
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards:  33%|███▎      | 1/3 [00:00<00:00,  2.36it/s]Loading checkpoint shards:  67%|██████▋   | 2/3 [00:00<00:00,  2.60it/s]Loading checkpoint shards: 100%|██████████| 3/3 [00:01<00:00,  2.83it/s]Loading checkpoint shards: 100%|██████████| 3/3 [00:01<00:00,  2.73it/s]
+[2026-04-26 23:12:45] [safety_warp] [INFO] ✓ Phase 0 model loaded (안전 데이터로 학습된 모델)
+[2026-04-26 23:12:46] [safety_warp] [INFO] ✓ Tokenizer loaded
+[2026-04-26 23:12:46] [safety_warp] [INFO] Converting to WaRP modules...
+[2026-04-26 23:12:46] [safety_warp] [INFO] ✓ Conversion completed
+[2026-04-26 23:12:46] [safety_warp] [INFO] Reparameterizing weights to basis space...
+[2026-04-26 23:12:46] [safety_warp] [INFO] ======================================================================
+[2026-04-26 23:12:46] [safety_warp] [INFO] Layer 0 (attn_q):
+[2026-04-26 23:12:46] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:46] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:46] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:46] [safety_warp] [INFO] Layer 0 (attn_k):
+[2026-04-26 23:12:46] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:46] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:46] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:46] [safety_warp] [INFO] Layer 0 (attn_v):
+[2026-04-26 23:12:46] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:46] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:46] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:46] [safety_warp] [INFO] Layer 0 (attn_o):
+[2026-04-26 23:12:46] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:46] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:46] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:46] [safety_warp] [INFO] Layer 0 (ffn_gate):
+[2026-04-26 23:12:46] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:46] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:46] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:46] [safety_warp] [INFO] Layer 0 (ffn_down):
+[2026-04-26 23:12:46] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 11008])
+[2026-04-26 23:12:46] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 23:12:46] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([11008, 11008])
+[2026-04-26 23:12:46] [safety_warp] [INFO] Layer 0 (ffn_up):
+[2026-04-26 23:12:46] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:46] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:46] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:46] [safety_warp] [INFO] Layer 1 (attn_q):
+[2026-04-26 23:12:46] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:46] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:46] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:46] [safety_warp] [INFO] Layer 1 (attn_k):
+[2026-04-26 23:12:46] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:46] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:46] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:46] [safety_warp] [INFO] Layer 1 (attn_v):
+[2026-04-26 23:12:46] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:46] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:46] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:46] [safety_warp] [INFO] Layer 1 (attn_o):
+[2026-04-26 23:12:46] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:46] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:46] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:46] [safety_warp] [INFO] Layer 1 (ffn_gate):
+[2026-04-26 23:12:46] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:46] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:46] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:47] [safety_warp] [INFO] Layer 1 (ffn_down):
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 11008])
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([11008, 11008])
+[2026-04-26 23:12:47] [safety_warp] [INFO] Layer 1 (ffn_up):
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:47] [safety_warp] [INFO] Layer 2 (attn_q):
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:47] [safety_warp] [INFO] Layer 2 (attn_k):
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:47] [safety_warp] [INFO] Layer 2 (attn_v):
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:47] [safety_warp] [INFO] Layer 2 (attn_o):
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:47] [safety_warp] [INFO] Layer 2 (ffn_gate):
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:47] [safety_warp] [INFO] Layer 2 (ffn_down):
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 11008])
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([11008, 11008])
+[2026-04-26 23:12:47] [safety_warp] [INFO] Layer 2 (ffn_up):
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:47] [safety_warp] [INFO] Layer 3 (attn_q):
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:47] [safety_warp] [INFO] Layer 3 (attn_k):
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:47] [safety_warp] [INFO] Layer 3 (attn_v):
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:47] [safety_warp] [INFO] Layer 3 (attn_o):
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:47] [safety_warp] [INFO] Layer 3 (ffn_gate):
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:47] [safety_warp] [INFO] Layer 3 (ffn_down):
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 11008])
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([11008, 11008])
+[2026-04-26 23:12:47] [safety_warp] [INFO] Layer 3 (ffn_up):
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:47] [safety_warp] [INFO] Layer 4 (attn_q):
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:47] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:48] [safety_warp] [INFO] Layer 4 (attn_k):
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:48] [safety_warp] [INFO] Layer 4 (attn_v):
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:48] [safety_warp] [INFO] Layer 4 (attn_o):
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:48] [safety_warp] [INFO] Layer 4 (ffn_gate):
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:48] [safety_warp] [INFO] Layer 4 (ffn_down):
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 11008])
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([11008, 11008])
+[2026-04-26 23:12:48] [safety_warp] [INFO] Layer 4 (ffn_up):
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:48] [safety_warp] [INFO] Layer 5 (attn_q):
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:48] [safety_warp] [INFO] Layer 5 (attn_k):
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:48] [safety_warp] [INFO] Layer 5 (attn_v):
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:48] [safety_warp] [INFO] Layer 5 (attn_o):
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:48] [safety_warp] [INFO] Layer 5 (ffn_gate):
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:48] [safety_warp] [INFO] Layer 5 (ffn_down):
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 11008])
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([11008, 11008])
+[2026-04-26 23:12:48] [safety_warp] [INFO] Layer 5 (ffn_up):
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:48] [safety_warp] [INFO] Layer 6 (attn_q):
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:48] [safety_warp] [INFO] Layer 6 (attn_k):
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:48] [safety_warp] [INFO] Layer 6 (attn_v):
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:48] [safety_warp] [INFO] Layer 6 (attn_o):
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:48] [safety_warp] [INFO] Layer 6 (ffn_gate):
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:48] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO] Layer 6 (ffn_down):
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 11008])
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([11008, 11008])
+[2026-04-26 23:12:49] [safety_warp] [INFO] Layer 6 (ffn_up):
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO] Layer 7 (attn_q):
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO] Layer 7 (attn_k):
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO] Layer 7 (attn_v):
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO] Layer 7 (attn_o):
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO] Layer 7 (ffn_gate):
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO] Layer 7 (ffn_down):
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 11008])
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([11008, 11008])
+[2026-04-26 23:12:49] [safety_warp] [INFO] Layer 7 (ffn_up):
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO] Layer 8 (attn_q):
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO] Layer 8 (attn_k):
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO] Layer 8 (attn_v):
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO] Layer 8 (attn_o):
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO] Layer 8 (ffn_gate):
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO] Layer 8 (ffn_down):
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 11008])
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([11008, 11008])
+[2026-04-26 23:12:49] [safety_warp] [INFO] Layer 8 (ffn_up):
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO] Layer 9 (attn_q):
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO] Layer 9 (attn_k):
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO] Layer 9 (attn_v):
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO] Layer 9 (attn_o):
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO] Layer 9 (ffn_gate):
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:49] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:50] [safety_warp] [INFO] Layer 9 (ffn_down):
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 11008])
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([11008, 11008])
+[2026-04-26 23:12:50] [safety_warp] [INFO] Layer 9 (ffn_up):
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:50] [safety_warp] [INFO] Layer 10 (attn_q):
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:50] [safety_warp] [INFO] Layer 10 (attn_k):
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:50] [safety_warp] [INFO] Layer 10 (attn_v):
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:50] [safety_warp] [INFO] Layer 10 (attn_o):
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:50] [safety_warp] [INFO] Layer 10 (ffn_gate):
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:50] [safety_warp] [INFO] Layer 10 (ffn_down):
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 11008])
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([11008, 11008])
+[2026-04-26 23:12:50] [safety_warp] [INFO] Layer 10 (ffn_up):
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:50] [safety_warp] [INFO] Layer 11 (attn_q):
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:50] [safety_warp] [INFO] Layer 11 (attn_k):
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:50] [safety_warp] [INFO] Layer 11 (attn_v):
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:50] [safety_warp] [INFO] Layer 11 (attn_o):
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:50] [safety_warp] [INFO] Layer 11 (ffn_gate):
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:50] [safety_warp] [INFO] Layer 11 (ffn_down):
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 11008])
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([11008, 11008])
+[2026-04-26 23:12:50] [safety_warp] [INFO] Layer 11 (ffn_up):
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:50] [safety_warp] [INFO] Layer 12 (attn_q):
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:50] [safety_warp] [INFO] Layer 12 (attn_k):
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:50] [safety_warp] [INFO] Layer 12 (attn_v):
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:50] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:51] [safety_warp] [INFO] Layer 12 (attn_o):
+[2026-04-26 23:12:51] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:51] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:51] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:51] [safety_warp] [INFO] Layer 12 (ffn_gate):
+[2026-04-26 23:12:51] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:51] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:51] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:51] [safety_warp] [INFO] Layer 12 (ffn_down):
+[2026-04-26 23:12:51] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 11008])
+[2026-04-26 23:12:51] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 23:12:51] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([11008, 11008])
+[2026-04-26 23:12:51] [safety_warp] [INFO] Layer 12 (ffn_up):
+[2026-04-26 23:12:51] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:51] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:51] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:51] [safety_warp] [INFO] Layer 13 (attn_q):
+[2026-04-26 23:12:51] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:51] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:51] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:51] [safety_warp] [INFO] Layer 13 (attn_k):
+[2026-04-26 23:12:51] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:51] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:51] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:51] [safety_warp] [INFO] Layer 13 (attn_v):
+[2026-04-26 23:12:51] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:51] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:51] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:51] [safety_warp] [INFO] Layer 13 (attn_o):
+[2026-04-26 23:12:51] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:51] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:51] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:51] [safety_warp] [INFO] Layer 13 (ffn_gate):
+[2026-04-26 23:12:51] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:51] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:51] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:51] [safety_warp] [INFO] Layer 13 (ffn_down):
+[2026-04-26 23:12:51] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 11008])
+[2026-04-26 23:12:51] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 23:12:51] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([11008, 11008])
+[2026-04-26 23:12:51] [safety_warp] [INFO] Layer 13 (ffn_up):
+[2026-04-26 23:12:51] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:51] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:51] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:51] [safety_warp] [INFO] Layer 14 (attn_q):
+[2026-04-26 23:12:51] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:51] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:51] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:51] [safety_warp] [INFO] Layer 14 (attn_k):
+[2026-04-26 23:12:51] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:51] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:51] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:51] [safety_warp] [INFO] Layer 14 (attn_v):
+[2026-04-26 23:12:51] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:51] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:51] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:51] [safety_warp] [INFO] Layer 14 (attn_o):
+[2026-04-26 23:12:51] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:51] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:51] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:51] [safety_warp] [INFO] Layer 14 (ffn_gate):
+[2026-04-26 23:12:51] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:51] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:51] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:52] [safety_warp] [INFO] Layer 14 (ffn_down):
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 11008])
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([11008, 11008])
+[2026-04-26 23:12:52] [safety_warp] [INFO] Layer 14 (ffn_up):
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:52] [safety_warp] [INFO] Layer 15 (attn_q):
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:52] [safety_warp] [INFO] Layer 15 (attn_k):
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:52] [safety_warp] [INFO] Layer 15 (attn_v):
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:52] [safety_warp] [INFO] Layer 15 (attn_o):
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:52] [safety_warp] [INFO] Layer 15 (ffn_gate):
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:52] [safety_warp] [INFO] Layer 15 (ffn_down):
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 11008])
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([11008, 11008])
+[2026-04-26 23:12:52] [safety_warp] [INFO] Layer 15 (ffn_up):
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:52] [safety_warp] [INFO] Layer 16 (attn_q):
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:52] [safety_warp] [INFO] Layer 16 (attn_k):
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:52] [safety_warp] [INFO] Layer 16 (attn_v):
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:52] [safety_warp] [INFO] Layer 16 (attn_o):
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:52] [safety_warp] [INFO] Layer 16 (ffn_gate):
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:52] [safety_warp] [INFO] Layer 16 (ffn_down):
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 11008])
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([11008, 11008])
+[2026-04-26 23:12:52] [safety_warp] [INFO] Layer 16 (ffn_up):
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:52] [safety_warp] [INFO] Layer 17 (attn_q):
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:52] [safety_warp] [INFO] Layer 17 (attn_k):
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:52] [safety_warp] [INFO] Layer 17 (attn_v):
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:52] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:53] [safety_warp] [INFO] Layer 17 (attn_o):
+[2026-04-26 23:12:53] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:53] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:53] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:53] [safety_warp] [INFO] Layer 17 (ffn_gate):
+[2026-04-26 23:12:53] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:53] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:53] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:53] [safety_warp] [INFO] Layer 17 (ffn_down):
+[2026-04-26 23:12:53] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 11008])
+[2026-04-26 23:12:53] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 23:12:53] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([11008, 11008])
+[2026-04-26 23:12:53] [safety_warp] [INFO] Layer 17 (ffn_up):
+[2026-04-26 23:12:53] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:53] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:53] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:53] [safety_warp] [INFO] Layer 18 (attn_q):
+[2026-04-26 23:12:53] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:53] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:53] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:53] [safety_warp] [INFO] Layer 18 (attn_k):
+[2026-04-26 23:12:53] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:53] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:53] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:53] [safety_warp] [INFO] Layer 18 (attn_v):
+[2026-04-26 23:12:53] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:53] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:53] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:53] [safety_warp] [INFO] Layer 18 (attn_o):
+[2026-04-26 23:12:53] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:53] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:53] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:53] [safety_warp] [INFO] Layer 18 (ffn_gate):
+[2026-04-26 23:12:53] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:53] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:53] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:53] [safety_warp] [INFO] Layer 18 (ffn_down):
+[2026-04-26 23:12:53] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 11008])
+[2026-04-26 23:12:53] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 23:12:53] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([11008, 11008])
+[2026-04-26 23:12:53] [safety_warp] [INFO] Layer 18 (ffn_up):
+[2026-04-26 23:12:53] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:53] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:53] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:53] [safety_warp] [INFO] Layer 19 (attn_q):
+[2026-04-26 23:12:53] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:53] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:53] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:53] [safety_warp] [INFO] Layer 19 (attn_k):
+[2026-04-26 23:12:53] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:53] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:53] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:53] [safety_warp] [INFO] Layer 19 (attn_v):
+[2026-04-26 23:12:53] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:53] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:53] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:53] [safety_warp] [INFO] Layer 19 (attn_o):
+[2026-04-26 23:12:53] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:53] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:53] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:53] [safety_warp] [INFO] Layer 19 (ffn_gate):
+[2026-04-26 23:12:53] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:53] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:53] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO] Layer 19 (ffn_down):
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 11008])
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([11008, 11008])
+[2026-04-26 23:12:54] [safety_warp] [INFO] Layer 19 (ffn_up):
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO] Layer 20 (attn_q):
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO] Layer 20 (attn_k):
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO] Layer 20 (attn_v):
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO] Layer 20 (attn_o):
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO] Layer 20 (ffn_gate):
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO] Layer 20 (ffn_down):
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 11008])
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([11008, 11008])
+[2026-04-26 23:12:54] [safety_warp] [INFO] Layer 20 (ffn_up):
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO] Layer 21 (attn_q):
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO] Layer 21 (attn_k):
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO] Layer 21 (attn_v):
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO] Layer 21 (attn_o):
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO] Layer 21 (ffn_gate):
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO] Layer 21 (ffn_down):
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 11008])
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([11008, 11008])
+[2026-04-26 23:12:54] [safety_warp] [INFO] Layer 21 (ffn_up):
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO] Layer 22 (attn_q):
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO] Layer 22 (attn_k):
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO] Layer 22 (attn_v):
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO] Layer 22 (attn_o):
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:54] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:55] [safety_warp] [INFO] Layer 22 (ffn_gate):
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:55] [safety_warp] [INFO] Layer 22 (ffn_down):
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 11008])
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([11008, 11008])
+[2026-04-26 23:12:55] [safety_warp] [INFO] Layer 22 (ffn_up):
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:55] [safety_warp] [INFO] Layer 23 (attn_q):
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:55] [safety_warp] [INFO] Layer 23 (attn_k):
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:55] [safety_warp] [INFO] Layer 23 (attn_v):
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:55] [safety_warp] [INFO] Layer 23 (attn_o):
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:55] [safety_warp] [INFO] Layer 23 (ffn_gate):
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:55] [safety_warp] [INFO] Layer 23 (ffn_down):
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 11008])
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([11008, 11008])
+[2026-04-26 23:12:55] [safety_warp] [INFO] Layer 23 (ffn_up):
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:55] [safety_warp] [INFO] Layer 24 (attn_q):
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:55] [safety_warp] [INFO] Layer 24 (attn_k):
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:55] [safety_warp] [INFO] Layer 24 (attn_v):
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:55] [safety_warp] [INFO] Layer 24 (attn_o):
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:55] [safety_warp] [INFO] Layer 24 (ffn_gate):
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:55] [safety_warp] [INFO] Layer 24 (ffn_down):
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 11008])
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([11008, 11008])
+[2026-04-26 23:12:55] [safety_warp] [INFO] Layer 24 (ffn_up):
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:55] [safety_warp] [INFO] Layer 25 (attn_q):
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:55] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:56] [safety_warp] [INFO] Layer 25 (attn_k):
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:56] [safety_warp] [INFO] Layer 25 (attn_v):
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:56] [safety_warp] [INFO] Layer 25 (attn_o):
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:56] [safety_warp] [INFO] Layer 25 (ffn_gate):
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:56] [safety_warp] [INFO] Layer 25 (ffn_down):
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 11008])
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([11008, 11008])
+[2026-04-26 23:12:56] [safety_warp] [INFO] Layer 25 (ffn_up):
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:56] [safety_warp] [INFO] Layer 26 (attn_q):
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:56] [safety_warp] [INFO] Layer 26 (attn_k):
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:56] [safety_warp] [INFO] Layer 26 (attn_v):
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:56] [safety_warp] [INFO] Layer 26 (attn_o):
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:56] [safety_warp] [INFO] Layer 26 (ffn_gate):
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:56] [safety_warp] [INFO] Layer 26 (ffn_down):
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 11008])
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([11008, 11008])
+[2026-04-26 23:12:56] [safety_warp] [INFO] Layer 26 (ffn_up):
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:56] [safety_warp] [INFO] Layer 27 (attn_q):
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:56] [safety_warp] [INFO] Layer 27 (attn_k):
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:56] [safety_warp] [INFO] Layer 27 (attn_v):
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:56] [safety_warp] [INFO] Layer 27 (attn_o):
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:56] [safety_warp] [INFO] Layer 27 (ffn_gate):
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:56] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:57] [safety_warp] [INFO] Layer 27 (ffn_down):
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 11008])
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([11008, 11008])
+[2026-04-26 23:12:57] [safety_warp] [INFO] Layer 27 (ffn_up):
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:57] [safety_warp] [INFO] Layer 28 (attn_q):
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:57] [safety_warp] [INFO] Layer 28 (attn_k):
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:57] [safety_warp] [INFO] Layer 28 (attn_v):
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:57] [safety_warp] [INFO] Layer 28 (attn_o):
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:57] [safety_warp] [INFO] Layer 28 (ffn_gate):
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:57] [safety_warp] [INFO] Layer 28 (ffn_down):
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 11008])
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([11008, 11008])
+[2026-04-26 23:12:57] [safety_warp] [INFO] Layer 28 (ffn_up):
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:57] [safety_warp] [INFO] Layer 29 (attn_q):
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:57] [safety_warp] [INFO] Layer 29 (attn_k):
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:57] [safety_warp] [INFO] Layer 29 (attn_v):
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:57] [safety_warp] [INFO] Layer 29 (attn_o):
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:57] [safety_warp] [INFO] Layer 29 (ffn_gate):
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:57] [safety_warp] [INFO] Layer 29 (ffn_down):
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 11008])
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([11008, 11008])
+[2026-04-26 23:12:57] [safety_warp] [INFO] Layer 29 (ffn_up):
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:57] [safety_warp] [INFO] Layer 30 (attn_q):
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:57] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:58] [safety_warp] [INFO] Layer 30 (attn_k):
+[2026-04-26 23:12:58] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:58] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:58] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:58] [safety_warp] [INFO] Layer 30 (attn_v):
+[2026-04-26 23:12:58] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:58] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:58] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:58] [safety_warp] [INFO] Layer 30 (attn_o):
+[2026-04-26 23:12:58] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:58] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:58] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:58] [safety_warp] [INFO] Layer 30 (ffn_gate):
+[2026-04-26 23:12:58] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:58] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:58] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:58] [safety_warp] [INFO] Layer 30 (ffn_down):
+[2026-04-26 23:12:58] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 11008])
+[2026-04-26 23:12:58] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 23:12:58] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([11008, 11008])
+[2026-04-26 23:12:58] [safety_warp] [INFO] Layer 30 (ffn_up):
+[2026-04-26 23:12:58] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:58] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:58] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:58] [safety_warp] [INFO] Layer 31 (attn_q):
+[2026-04-26 23:12:58] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:58] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:58] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:58] [safety_warp] [INFO] Layer 31 (attn_k):
+[2026-04-26 23:12:58] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:58] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:58] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:58] [safety_warp] [INFO] Layer 31 (attn_v):
+[2026-04-26 23:12:58] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:58] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:58] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:58] [safety_warp] [INFO] Layer 31 (attn_o):
+[2026-04-26 23:12:58] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 4096])
+[2026-04-26 23:12:58] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 23:12:58] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:58] [safety_warp] [INFO] Layer 31 (ffn_gate):
+[2026-04-26 23:12:58] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:58] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:58] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:58] [safety_warp] [INFO] Layer 31 (ffn_down):
+[2026-04-26 23:12:58] [safety_warp] [INFO]   ✓ W_original: torch.Size([4096, 11008])
+[2026-04-26 23:12:58] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 23:12:58] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([11008, 11008])
+[2026-04-26 23:12:58] [safety_warp] [INFO] Layer 31 (ffn_up):
+[2026-04-26 23:12:58] [safety_warp] [INFO]   ✓ W_original: torch.Size([11008, 4096])
+[2026-04-26 23:12:58] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 23:12:58] [safety_warp] [INFO]   ✓ UT_forward (U): torch.Size([4096, 4096])
+[2026-04-26 23:12:58] [safety_warp] [INFO] ======================================================================
+[2026-04-26 23:12:58] [safety_warp] [INFO] ✓ Reparameterization completed: 224 modules
+[2026-04-26 23:12:58] [safety_warp] [INFO] Loading circuit_breakers data from ./data/circuit_breakers_train.json...
+[2026-04-26 23:12:58] [safety_warp] [INFO] ✓ Loaded 4994 samples
+[2026-04-26 23:12:58] [safety_warp] [INFO] ✓ Dataloader created (1249 batches)
+[2026-04-26 23:12:58] [safety_warp] [INFO] ======================================================================
+[2026-04-26 23:12:58] [safety_warp] [INFO] Phase 2: Importance Scoring (원본 WaRP 방식)
+[2026-04-26 23:12:58] [safety_warp] [INFO] ======================================================================
+[2026-04-26 23:12:58] [safety_warp] [INFO] ✅ model.eval() 모드 - 파라미터 업데이트 없음
+[2026-04-26 23:12:58] [safety_warp] [INFO] ✅ Gradient만 계산하여 importance 측정
+[2026-04-26 23:12:58] [safety_warp] [INFO] ======================================================================
+[2026-04-26 23:12:58] [safety_warp] [INFO] ✓ Model set to eval mode (파라미터 변경 없음)
+[2026-04-26 23:12:58] [safety_warp] [INFO] ✓ Found 224 WaRP modules
+[2026-04-26 23:12:58] [safety_warp] [INFO] ✓ Trainable params in Phase 2: 6,476,005,376/6,738,415,616 (96.11%)
+Computing importance (eval mode):   0%|          | 0/1249 [00:00<?, ?it/s]Computing importance (eval mode):   0%|          | 1/1249 [00:11<3:50:31, 11.08s/it]Computing importance (eval mode):   0%|          | 2/1249 [00:24<4:24:08, 12.71s/it]Computing importance (eval mode):   0%|          | 3/1249 [00:41<5:00:24, 14.47s/it]Computing importance (eval mode):   0%|          | 4/1249 [01:00<5:39:02, 16.34s/it]Computing importance (eval mode):   0%|          | 5/1249 [01:17<5:42:28, 16.52s/it]Computing importance (eval mode):   0%|          | 6/1249 [01:31<5:22:15, 15.56s/it]Computing importance (eval mode):   1%|          | 7/1249 [01:49<5:41:40, 16.51s/it]Computing importance (eval mode):   1%|          | 8/1249 [02:06<5:41:22, 16.50s/it]Computing importance (eval mode):   1%|          | 9/1249 [02:22<5:41:06, 16.51s/it]Computing importance (eval mode):   1%|          | 10/1249 [02:39<5:44:09, 16.67s/it]Computing importance (eval mode):   1%|          | 11/1249 [02:54<5:29:47, 15.98s/it]Computing importance (eval mode):   1%|          | 12/1249 [03:11<5:36:33, 16.32s/it]Computing importance (eval mode):   1%|          | 13/1249 [03:37<6:37:47, 19.31s/it]Computing importance (eval mode):   1%|          | 14/1249 [03:56<6:36:51, 19.28s/it]Computing importance (eval mode):   1%|          | 15/1249 [04:14<6:29:35, 18.94s/it]Computing importance (eval mode):   1%|▏         | 16/1249 [04:31<6:18:19, 18.41s/it]Computing importance (eval mode):   1%|▏         | 17/1249 [04:48<6:03:32, 17.70s/it]Computing importance (eval mode):   1%|▏         | 18/1249 [05:06<6:04:57, 17.79s/it]Computing importance (eval mode):   2%|▏         | 19/1249 [05:23<5:59:37, 17.54s/it]Computing importance (eval mode):   2%|▏         | 20/1249 [05:41<6:07:27, 17.94s/it]Computing importance (eval mode):   2%|▏         | 21/1249 [05:59<6:02:51, 17.73s/it]Computing importance (eval mode):   2%|▏         | 22/1249 [06:13<5:42:21, 16.74s/it]Computing importance (eval mode):   2%|▏         | 23/1249 [06:27<5:24:29, 15.88s/it]Computing importance (eval mode):   2%|▏         | 24/1249 [06:41<5:11:24, 15.25s/it]Computing importance (eval mode):   2%|▏         | 25/1249 [06:59<5:30:12, 16.19s/it]Computing importance (eval mode):   2%|▏         | 26/1249 [07:16<5:35:26, 16.46s/it]Computing importance (eval mode):   2%|▏         | 27/1249 [07:33<5:39:05, 16.65s/it]Computing importance (eval mode):   2%|▏         | 28/1249 [07:50<5:42:14, 16.82s/it]

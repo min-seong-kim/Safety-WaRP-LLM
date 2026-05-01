@@ -25,16 +25,20 @@ PHASE0_MODEL="kmseong/llama2_7b-Safety-FT-lr3e-5"
 PHASE2_DATASET="circuit_breakers"   # circuit_breakers | wikipedia
 PHASE2_SAMPLES=4994
 PHASE2_WIKIPEDIA_SAMPLES=4994
-KEEP_RATIO_LIST=("0.1" "0.9")   # 두 모델: 10% freeze vs 90% freeze
+KEEP_RATIO_LIST=("0.31" "0.62")   # 두 모델: 10% freeze vs 90% freeze
 
 # Phase 3 (downstream)
-PHASE3_DATASET="gsm8k"              # safety | gsm8k | metamath | math
+PHASE3_DATASET="gsm8k"              # safety | gsm8k | metamath | math | agnews
 GSM8K_SAMPLES=0
 METAMATH_SAMPLES=0
 MATH_SAMPLES=0
 MATH_SUBJECTS="all"
 MATH_LEVELS="all"
 CIRCUIT_BREAKERS_SAMPLES_PHASE3=4994
+AGNEWS_DATASET_PATH=""              # --agnews_dataset_path 필수 (agnews 선택 시)
+AGNEWS_SAMPLES=8000
+MEDQA_DATASET_PATH="/home/yonsei_jong/Safety-WaRP-LLM/data/medqa_train_10178.jsonl"   # --medqa_dataset_path 필수 (medqa 선택 시)
+MEDQA_SAMPLES=10000
 
 # Common training
 EPOCHS=3
@@ -88,6 +92,18 @@ elif [ "$PHASE3_DATASET" = "metamath" ]; then
     PHASE3_DATASET_ARG="--phase3_dataset metamath --metamath_samples $METAMATH_SAMPLES"
 elif [ "$PHASE3_DATASET" = "math" ]; then
     PHASE3_DATASET_ARG="--phase3_dataset math --math_samples $MATH_SAMPLES --math_subjects $MATH_SUBJECTS --math_levels $MATH_LEVELS"
+elif [ "$PHASE3_DATASET" = "agnews" ]; then
+    if [ -z "$AGNEWS_DATASET_PATH" ]; then
+        echo "ERROR: AGNEWS_DATASET_PATH must be set when PHASE3_DATASET=agnews"
+        exit 1
+    fi
+    PHASE3_DATASET_ARG="--phase3_dataset agnews --agnews_dataset_path $AGNEWS_DATASET_PATH --agnews_samples $AGNEWS_SAMPLES"
+elif [ "$PHASE3_DATASET" = "medqa" ]; then
+    if [ -z "$MEDQA_DATASET_PATH" ]; then
+        echo "ERROR: MEDQA_DATASET_PATH must be set when PHASE3_DATASET=medqa"
+        exit 1
+    fi
+    PHASE3_DATASET_ARG="--phase3_dataset medqa --medqa_dataset_path $MEDQA_DATASET_PATH --medqa_samples $MEDQA_SAMPLES"
 else
     echo "ERROR: Unknown PHASE3_DATASET: $PHASE3_DATASET"
     exit 1
@@ -119,6 +135,7 @@ for KEEP_RATIO in "${KEEP_RATIO_LIST[@]}"; do
         --log_dir "$LOG_DIR" \
         --device $DEVICE \
         --dtype $DTYPE \
+        --perlayer \
         --seed $SEED \
         2>&1 | tee "$LOG_DIR/phase2_original_space_kr${KR_SAFE}_${TIMESTAMP}.log"
 

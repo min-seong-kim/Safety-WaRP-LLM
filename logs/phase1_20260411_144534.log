@@ -1,0 +1,21 @@
+[2026-04-11 14:45:34] [safety_warp] [INFO] ======================================================================
+[2026-04-11 14:45:34] [safety_warp] [INFO] Safety-WaRP-LLM (Fixed - 원본 FSCIL-WaRP 방식)
+[2026-04-11 14:45:34] [safety_warp] [INFO] ======================================================================
+[2026-04-11 14:45:34] [safety_warp] [INFO] Phase: 1
+[2026-04-11 14:45:34] [safety_warp] [INFO] Model: None
+[2026-04-11 14:45:34] [safety_warp] [INFO] Layer types: attn_q,attn_k,attn_v,ffn_down,ffn_up
+[2026-04-11 14:45:34] [safety_warp] [INFO] Target layers: all
+[2026-04-11 14:45:34] [safety_warp] [INFO] ======================================================================
+[2026-04-11 14:45:34] [safety_warp] [INFO] ======================================================================
+[2026-04-11 14:45:34] [safety_warp] [INFO] Starting Phase 1: Basis Construction
+[2026-04-11 14:45:34] [safety_warp] [INFO] ======================================================================
+Traceback (most recent call last):
+  File "/home/yonsei_jong/Safety-WaRP-LLM/train.py", line 399, in <module>
+    main()
+  File "/home/yonsei_jong/Safety-WaRP-LLM/train.py", line 385, in main
+    run_phase1(args, logger)
+  File "/home/yonsei_jong/Safety-WaRP-LLM/train.py", line 199, in run_phase1
+    builder.load_model()
+  File "/home/yonsei_jong/Safety-WaRP-LLM/models/phase1_basis.py", line 176, in load_model
+    from transformers import AutoModelForCausalLM, AutoTokenizer
+ModuleNotFoundError: No module named 'transformers'

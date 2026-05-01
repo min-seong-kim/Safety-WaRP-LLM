@@ -140,7 +140,11 @@ class Phase1BasisBuilder:
 
     def _format_phase1_text(self, user_text: str, assistant_text: str = None) -> str:
         user_text = str(user_text).strip()
-        assistant_text = None if assistant_text is None else str(assistant_text).strip()
+        # --only_prompt 플래그가 설정되면 response를 무시
+        if getattr(self.args, 'only_prompt', False):
+            assistant_text = None
+        else:
+            assistant_text = None if assistant_text is None else str(assistant_text).strip()
 
         if not self._is_instruct_model():
             if assistant_text is None:
@@ -286,15 +290,17 @@ class Phase1BasisBuilder:
                 self.logger.info(f"✓ Subsampled to {len(dataset)} samples")
             
             # Prompt-response 쌍 추출 (Phase 0 SSFT와 동일한 포맷)
-            # harmful prompt만 사용하면 "위험 감지" subspace만 포착하지만,
-            # full sequence를 사용하면 safe response 생성 방향까지 basis에 반영됨
+            # --only_prompt: harmful prompt만 사용 → "위험 감지" subspace 포착
+            # default: full sequence → safe response 생성 방향까지 basis에 반영
+            only_prompt = getattr(self.args, 'only_prompt', False)
             texts = [
                 self._format_phase1_text(
                     item.get('prompt', ''),
-                    item.get('llama3_output', ''),
+                    None if only_prompt else item.get('llama3_output', ''),
                 )
                 for item in dataset
             ]
+            self.logger.info(f"  - Input mode: {'prompt-only (--only_prompt)' if only_prompt else 'prompt + response'}")
             
             # 데이터셋 클래스
             class CircuitBreakersDataset(torch.utils.data.Dataset):
@@ -364,10 +370,12 @@ class Phase1BasisBuilder:
             )
             
             self.logger.info(f"✓ Dataloader created")
-            self.logger.info(
-                "  - Input format: "
-                f"{'chat template user/assistant pairs' if self._is_instruct_model() else 'full prompt-response pairs (Phase 0 SSFT aligned)'}"
-            )
+            only_prompt = getattr(self.args, 'only_prompt', False)
+            if only_prompt:
+                input_fmt = 'chat template (user turn only prompt)' if self._is_instruct_model() else 'prompt only'
+            else:
+                input_fmt = 'chat template user/assistant pairs' if self._is_instruct_model() else 'full prompt-response pairs (Phase 0 SSFT aligned)'
+            self.logger.info(f"  - Input format: {input_fmt}")
             self.logger.info(f"  - Batch size: {self.args.batch_size}")
             self.logger.info(f"  - Total batches: {len(self.dataloader)}")
             self.logger.info(f"  - Sample text: {texts[0][:100]}...")
@@ -716,11 +724,34 @@ class Phase1BasisBuilder:
                 total_var = S.sum().item()
                 top_k_var = S[:min(10, len(S))].sum().item()
                 var_ratio = (top_k_var / total_var * 100) if total_var > 1e-10 else 0.0
-                
+
+                # 전체 rank의 10%가 설명하는 분산 비율
+                total_dim = len(S)
+                top10pct_k = max(1, int(total_dim * 0.1))
+                if total_var > 1e-10:
+                    top10pct_var_ratio = S[:top10pct_k].sum().item() / total_var * 100
+                    cumvar = torch.cumsum(S, dim=0) / total_var
+                    rank_90 = int((cumvar < 0.90).sum().item()) + 1
+                    rank_90 = min(rank_90, total_dim)
+                    ratio_at_rank90 = cumvar[rank_90 - 1].item() * 100
+                else:
+                    top10pct_var_ratio = 0.0
+                    rank_90 = total_dim
+                    ratio_at_rank90 = 0.0
+
                 self.logger.info(f"  - SVD singular values (top-10):")
                 for i, s in enumerate(S[:10].cpu()):
                     self.logger.info(f"    σ_{i}: {s:.6f}")
                 self.logger.info(f"  - Top-10 variance ratio: {var_ratio:.2f}%")
+                self.logger.info(
+                    f"  - Top-10% rank variance ratio: {top10pct_var_ratio:.2f}% "
+                    f"(top {top10pct_k} / {total_dim} dims)"
+                )
+                self.logger.info(
+                    f"  - Rank for 90% variance: {rank_90} / {len(S)} "
+                    f"({rank_90 / len(S) * 100:.1f}% of total dims, "
+                    f"actual coverage: {ratio_at_rank90:.2f}%)"
+                )
                 self.logger.info(f"  - ✓ Saved to disk")
                 
                 # GPU 메모리 정리

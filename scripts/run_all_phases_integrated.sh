@@ -21,7 +21,7 @@ echo ""
 # ========================================================================
 
 # Phase 0 모델
-PHASE0_MODEL="kmseong/llama2_7b-Safety-FT-lr3e-5"  
+PHASE0_MODEL="kmseong/llama2_7b-chat-Safety-FT-lr5e-5"  
 
 
 # Phase 1: Basis Construction
@@ -48,11 +48,19 @@ KEEP_RATIO_LIST=("0.1")
 # Phase 3: Incremental Learning
 # ==============================
 # Dataset 선택 (Utility 또는 Safety)
-PHASE3_DATASET="gsm8k" # Options: safety, gsm8k, metamath, math
+PHASE3_DATASET="medqa" # Options: safety, gsm8k, metamath, math, agnews, medqa
 
 # Phase3=MATH 설정
 MATH_SUBJECTS="all"  # 예: Algebra,Geometry
 MATH_LEVELS="all"    # 예: 1,2,3,4,5
+
+# Phase3=AGNEWS 설정
+AGNEWS_DATASET_PATH="/home/yonsei_jong/Safety-WaRP-LLM/data/agnews_train_8000.jsonl"   # --agnews_dataset_path 필수 (agnews 선택 시)
+AGNEWS_SAMPLES=8000      # 0=전체
+
+# Phase3=MEDQA 설정
+MEDQA_DATASET_PATH="/home/yonsei_jong/Safety-WaRP-LLM/data/medqa_train_10178.jsonl"   # --medqa_dataset_path 필수 (medqa 선택 시)
+MEDQA_SAMPLES=10000      # 0=전체
 
 if [ "$PHASE3_DATASET" = "safety" ]; then
     PHASE3_SAMPLES=4994
@@ -62,6 +70,10 @@ elif [ "$PHASE3_DATASET" = "metamath" ]; then
     PHASE3_SAMPLES=10000  # 0 = all samples
 elif [ "$PHASE3_DATASET" = "math" ]; then
     PHASE3_SAMPLES=0  # 0 = all samples
+elif [ "$PHASE3_DATASET" = "agnews" ]; then
+    PHASE3_SAMPLES=$AGNEWS_SAMPLES
+elif [ "$PHASE3_DATASET" = "medqa" ]; then
+    PHASE3_SAMPLES=$MEDQA_SAMPLES
 fi
 
 # 공통 설정
@@ -71,7 +83,7 @@ DTYPE="bfloat16"
 DEVICE="cuda"
 EPOCHS=3
 # LR_LIST=("1e-5" "3e-5" "5e-5")
-LR_LIST=("5e-5")  
+LR_LIST=("1e-5")  
 TARGET_LAYERS="all"
 LAYER_TYPE="attn_q,attn_k,attn_v,ffn_down,ffn_up"
 BASE_OUTPUT_DIR="./checkpoints"
@@ -93,9 +105,9 @@ echo "  Output Dir: $BASE_OUTPUT_DIR"
 echo ""
 
 # Phase 3 Dataset validation
-if [[ ! "$PHASE3_DATASET" =~ ^(safety|gsm8k|metamath|math)$ ]]; then
+if [[ ! "$PHASE3_DATASET" =~ ^(safety|gsm8k|metamath|math|agnews|medqa)$ ]]; then
     echo "❌ ERROR: Unknown Phase 3 dataset: $PHASE3_DATASET"
-    echo "Choose from: safety, gsm8k, metamath, math"
+    echo "Choose from: safety, gsm8k, metamath, math, agnews, medqa"
     exit 1
 fi
 
@@ -178,6 +190,18 @@ elif [ "$PHASE3_DATASET" = "metamath" ]; then
     PHASE3_DATASET_ARG="--phase3_dataset metamath --metamath_samples $PHASE3_SAMPLES"
 elif [ "$PHASE3_DATASET" = "math" ]; then
     PHASE3_DATASET_ARG="--phase3_dataset math --math_samples $PHASE3_SAMPLES --math_subjects $MATH_SUBJECTS --math_levels $MATH_LEVELS"
+elif [ "$PHASE3_DATASET" = "agnews" ]; then
+    if [ -z "$AGNEWS_DATASET_PATH" ]; then
+        echo "ERROR: AGNEWS_DATASET_PATH must be set when PHASE3_DATASET=agnews"
+        exit 1
+    fi
+    PHASE3_DATASET_ARG="--phase3_dataset agnews --agnews_dataset_path $AGNEWS_DATASET_PATH --agnews_samples $PHASE3_SAMPLES"
+elif [ "$PHASE3_DATASET" = "medqa" ]; then
+    if [ -z "$MEDQA_DATASET_PATH" ]; then
+        echo "ERROR: MEDQA_DATASET_PATH must be set when PHASE3_DATASET=medqa"
+        exit 1
+    fi
+    PHASE3_DATASET_ARG="--phase3_dataset medqa --medqa_dataset_path $MEDQA_DATASET_PATH --medqa_samples $PHASE3_SAMPLES"
 else
     echo "ERROR: Unknown Phase 3 dataset: $PHASE3_DATASET"
     exit 1
@@ -334,6 +358,18 @@ elif [ "$PHASE3_DATASET" = "math" ]; then
     echo "  - Using HuggingFace Trainer"
     echo "  - basis_coeff only training with WaRP masking"
     echo "  - Subject filter: $MATH_SUBJECTS, Level filter: $MATH_LEVELS"
+elif [ "$PHASE3_DATASET" = "agnews" ]; then
+    echo "📰 Utility Training Mode (AG News):"
+    echo "  - Using HuggingFace Trainer"
+    echo "  - basis_coeff only training with WaRP masking"
+    echo "  - News classification (AG News) learning"
+    echo "  - Dataset path: $AGNEWS_DATASET_PATH, Samples: $AGNEWS_SAMPLES"
+elif [ "$PHASE3_DATASET" = "medqa" ]; then
+    echo "🏥 Utility Training Mode (MedQA USMLE):"
+    echo "  - Using HuggingFace Trainer"
+    echo "  - basis_coeff only training with WaRP masking"
+    echo "  - Medical QA MCQ (MedQA) learning"
+    echo "  - Dataset path: $MEDQA_DATASET_PATH, Samples: $MEDQA_SAMPLES"
 fi
 
 echo ""

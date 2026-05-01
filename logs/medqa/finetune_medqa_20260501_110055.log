@@ -1,0 +1,26 @@
+2026-05-01 11:00:55 - __main__ - INFO - ======================================================================
+2026-05-01 11:00:55 - __main__ - INFO - Full-parameter utility fine-tuning: MedQA (USMLE)
+2026-05-01 11:00:55 - __main__ - INFO - ======================================================================
+2026-05-01 11:00:55 - __main__ - INFO - Log file  : ./logs/medqa/finetune_medqa_20260501_110055.log
+2026-05-01 11:00:55 - __main__ - INFO - Model     : kmseong/llama2_7b-chat-Safety-FT-lr5e-5
+2026-05-01 11:00:55 - __main__ - INFO - Input fmt : chat template
+2026-05-01 11:00:55 - __main__ - INFO - Train     : /home/yonsei_jong/Safety-WaRP-LLM/data/medqa_train_10178.jsonl
+2026-05-01 11:00:55 - __main__ - INFO - Eval      : (none)
+2026-05-01 11:00:55 - __main__ - INFO - Safety mix: ratio=0.1, path=/home/yonsei_jong/Safety-WaRP-LLM/data/circuit_breakers_train.json
+2026-05-01 11:00:55 - __main__ - INFO - LR=1e-05, epochs=3, batch=4x4
+2026-05-01 11:00:55 - __main__ - INFO - Loading tokenizer...
+2026-05-01 11:00:55 - __main__ - INFO -   Tokenizer loaded from local files
+2026-05-01 11:00:55 - __main__ - INFO - Loading model...
+2026-05-01 11:00:57 - __main__ - INFO -   Model loaded from local files
+2026-05-01 11:00:57 - __main__ - INFO -   Params: total=6.74B, trainable=6.74B (100.00%)
+2026-05-01 11:00:58 - __main__ - INFO - Loaded MedQA train rows: 10,178
+2026-05-01 11:01:00 - __main__ - INFO - Safety data mixed: 1017 samples (ratio=0.1)
+2026-05-01 11:01:00 - __main__ - INFO - Total training samples: 11195 (MedQA 10178 + Safety 1017)
+2026-05-01 11:01:02 - __main__ - INFO - Starting training...
+2026-05-01 11:20:02 - __main__ - INFO - Saving fine-tuned model...
+2026-05-01 11:20:11 - __main__ - INFO - Config saved to ./medqa_eval/llama2_7b_chat_SSFT_medqa_FT_safeInstr_lr1e-5/finetune_config.json
+2026-05-01 11:20:11 - __main__ - INFO - Uploading to HuggingFace: kmseong/llama2_7b_chat-SSFT-MEDQA-FT-safety-mix-0.1-lr1e-5
+2026-05-01 11:20:12 - __main__ - INFO - Repo created/found: kmseong/llama2_7b_chat-SSFT-MEDQA-FT-safety-mix-0.1-lr1e-5
+2026-05-01 11:20:12 - __main__ - INFO - Uploading ./medqa_eval/llama2_7b_chat_SSFT_medqa_FT_safeInstr_lr1e-5 → kmseong/llama2_7b_chat-SSFT-MEDQA-FT-safety-mix-0.1-lr1e-5 ...
+2026-05-01 11:23:40 - __main__ - INFO - Upload completed: https://huggingface.co/kmseong/llama2_7b_chat-SSFT-MEDQA-FT-safety-mix-0.1-lr1e-5
+2026-05-01 11:23:41 - __main__ - INFO - Fine-tuning complete

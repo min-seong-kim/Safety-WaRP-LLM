@@ -1,0 +1,18 @@
+2026-04-30 15:17:04 - __main__ - INFO - ======================================================================
+2026-04-30 15:17:04 - __main__ - INFO - Full-parameter utility fine-tuning: AG News
+2026-04-30 15:17:04 - __main__ - INFO - ======================================================================
+2026-04-30 15:17:04 - __main__ - INFO - Log file: ./logs/safety_neuron_agnews/finetune_agnews_20260430_151704.log
+2026-04-30 15:17:04 - __main__ - INFO - Model: kmseong/llama2_7b-chat-Safety-FT-lr5e-5
+2026-04-30 15:17:04 - __main__ - INFO - Input formatting: chat template
+2026-04-30 15:17:04 - __main__ - INFO - Loading tokenizer
+2026-04-30 15:17:04 - __main__ - INFO - Tokenizer loaded from local files
+2026-04-30 15:17:04 - __main__ - INFO - Loading model
+2026-04-30 15:17:07 - __main__ - INFO - Model loaded from local files
+2026-04-30 15:17:07 - __main__ - INFO - Model params: total=6.74B, trainable=6.74B (100.00%)
+2026-04-30 15:17:07 - __main__ - INFO - Loaded AG News train rows: 8000
+2026-04-30 15:17:10 - __main__ - INFO - Safety data mixed: 800 samples (ratio=0.1)
+2026-04-30 15:17:10 - __main__ - INFO - Total training samples: 8800 (AG News 8000 + Safety 800)
+2026-04-30 15:17:12 - __main__ - INFO - Starting training
+2026-04-30 15:26:26 - __main__ - INFO - Saving fine-tuned model
+2026-04-30 15:26:36 - __main__ - INFO - Config saved to ./agnews_eval/llama2_7b_chat_SSFT_agnews_FT_safety_mix_lr5e-5/finetune_config.json
+2026-04-30 15:26:37 - __main__ - INFO - Fine-tuning complete

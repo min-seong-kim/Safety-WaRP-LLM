@@ -1,0 +1,22 @@
+2026-04-30 20:19:40 - __main__ - INFO - ======================================================================
+2026-04-30 20:19:40 - __main__ - INFO - Full-parameter utility fine-tuning: MMLU
+2026-04-30 20:19:40 - __main__ - INFO - ======================================================================
+2026-04-30 20:19:40 - __main__ - INFO - Log file: ./logs/safety_neuron_mmlu/finetune_mmlu_20260430_201940.log
+2026-04-30 20:19:40 - __main__ - INFO - Model: kmseong/llama2_7b-chat-Safety-FT-lr5e-5
+2026-04-30 20:19:40 - __main__ - INFO - Input formatting: chat template
+2026-04-30 20:19:40 - __main__ - INFO - MMLU subject: all, split: auxiliary_train
+2026-04-30 20:19:40 - __main__ - INFO - Loading tokenizer
+2026-04-30 20:19:40 - __main__ - INFO - Tokenizer loaded from local files
+2026-04-30 20:19:40 - __main__ - INFO - Loading model
+2026-04-30 20:19:42 - __main__ - INFO - Model loaded from local files
+2026-04-30 20:19:42 - __main__ - INFO - Model params: total=6.74B, trainable=6.74B (100.00%)
+2026-04-30 20:19:42 - __main__ - INFO - Loading cais/mmlu 'all' auxiliary_train split
+2026-04-30 20:19:45 - __main__ - INFO - Loaded MMLU train rows: 7500
+2026-04-30 20:19:53 - __main__ - INFO - Mixed safety data: 750 samples
+2026-04-30 20:19:54 - __main__ - INFO - Starting training
+2026-04-30 20:38:07 - __main__ - INFO - Saving fine-tuned model
+2026-04-30 20:38:16 - __main__ - INFO - Config saved to ./llama2_7b_chat_SSFT_mmlu_FT_lr3e-5/finetune_config.json
+2026-04-30 20:38:16 - __main__ - INFO - Starting upload to Hugging Face: kmseong/llama2_7b_chat-SSFT-MMLU-FT-safety-mix-0.1-lr3e-5_2
+2026-04-30 20:38:16 - __main__ - ERROR - Upload failed: No module named 'upload_to_huggingface'
+2026-04-30 20:38:16 - __main__ - ERROR - Model was saved locally; upload manually if needed
+2026-04-30 20:38:17 - __main__ - INFO - Fine-tuning complete

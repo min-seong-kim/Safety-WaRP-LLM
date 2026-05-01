@@ -1,0 +1,920 @@
+[2026-04-26 18:14:19] [safety_warp] [INFO] ======================================================================
+[2026-04-26 18:14:19] [safety_warp] [INFO] Safety-WaRP-LLM (Fixed - 원본 FSCIL-WaRP 방식)
+[2026-04-26 18:14:19] [safety_warp] [INFO] ======================================================================
+[2026-04-26 18:14:19] [safety_warp] [INFO] Phase: 3
+[2026-04-26 18:14:19] [safety_warp] [INFO] Model: None
+[2026-04-26 18:14:19] [safety_warp] [INFO] Layer types: attn_q,attn_k,attn_v,attn_o,ffn_gate,ffn_down,ffn_up
+[2026-04-26 18:14:19] [safety_warp] [INFO] Target layers: all
+[2026-04-26 18:14:19] [safety_warp] [INFO] ======================================================================
+[2026-04-26 18:14:19] [safety_warp] [INFO] ======================================================================
+[2026-04-26 18:14:19] [safety_warp] [INFO] Starting Phase 3: Incremental Learning (Fixed)
+[2026-04-26 18:14:19] [safety_warp] [INFO] Mode: non_freeze_warp
+[2026-04-26 18:14:19] [safety_warp] [INFO] ======================================================================
+[2026-04-26 18:14:20] [safety_warp] [INFO] Loading basis from /home/yonsei_jong/Safety-WaRP-LLM/checkpoints/phase1_20260426_180014/basis...
+[2026-04-26 18:14:32] [safety_warp] [INFO] ✓ Basis loaded: 224 combinations
+[2026-04-26 18:14:32] [safety_warp] [INFO] --no_masks 활성화: 마스크 로드 건너눠 (freeze 없음, 모든 파라미터 학습 가능)
+[2026-04-26 18:14:33] [safety_warp] [INFO] Loading Phase 0 model from kmseong/llama2_7b-Safety-FT-lr3e-5...
+`torch_dtype` is deprecated! Use `dtype` instead!
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards:  33%|███▎      | 1/3 [00:00<00:00,  2.63it/s]Loading checkpoint shards:  67%|██████▋   | 2/3 [00:00<00:00,  2.92it/s]Loading checkpoint shards: 100%|██████████| 3/3 [00:00<00:00,  3.17it/s]Loading checkpoint shards: 100%|██████████| 3/3 [00:00<00:00,  3.06it/s]
+[2026-04-26 18:14:36] [safety_warp] [INFO] ✓ Model loaded
+[2026-04-26 18:14:36] [safety_warp] [INFO] Converting to WaRP modules...
+[2026-04-26 18:14:37] [safety_warp] [INFO] ✓ Tokenizer loaded
+[2026-04-26 18:14:37] [safety_warp] [INFO]   - Input formatting: Question/Answer plain text
+[2026-04-26 18:14:37] [safety_warp] [INFO] ======================================================================
+[2026-04-26 18:14:37] [safety_warp] [INFO] Setting up WaRP modules with basis and masks
+[2026-04-26 18:14:37] [safety_warp] [INFO] ======================================================================
+[2026-04-26 18:14:37] [safety_warp] [INFO] Layer 0 (attn_q):
+[2026-04-26 18:14:37] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:37] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:37] [safety_warp] [INFO] Layer 0 (attn_k):
+[2026-04-26 18:14:37] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:37] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:37] [safety_warp] [INFO] Layer 0 (attn_v):
+[2026-04-26 18:14:37] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:37] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:38] [safety_warp] [INFO] Layer 0 (attn_o):
+[2026-04-26 18:14:38] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:38] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:38] [safety_warp] [INFO] Layer 0 (ffn_gate):
+[2026-04-26 18:14:38] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:38] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:38] [safety_warp] [INFO] Layer 0 (ffn_down):
+[2026-04-26 18:14:38] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 18:14:38] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:38] [safety_warp] [INFO] Layer 0 (ffn_up):
+[2026-04-26 18:14:38] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:38] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:38] [safety_warp] [INFO] Layer 1 (attn_q):
+[2026-04-26 18:14:38] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:38] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:38] [safety_warp] [INFO] Layer 1 (attn_k):
+[2026-04-26 18:14:38] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:38] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:38] [safety_warp] [INFO] Layer 1 (attn_v):
+[2026-04-26 18:14:38] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:38] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:38] [safety_warp] [INFO] Layer 1 (attn_o):
+[2026-04-26 18:14:38] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:38] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:38] [safety_warp] [INFO] Layer 1 (ffn_gate):
+[2026-04-26 18:14:38] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:38] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:38] [safety_warp] [INFO] Layer 1 (ffn_down):
+[2026-04-26 18:14:38] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 18:14:38] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:38] [safety_warp] [INFO] Layer 1 (ffn_up):
+[2026-04-26 18:14:38] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:38] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:38] [safety_warp] [INFO] Layer 2 (attn_q):
+[2026-04-26 18:14:38] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:38] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:38] [safety_warp] [INFO] Layer 2 (attn_k):
+[2026-04-26 18:14:38] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:38] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:39] [safety_warp] [INFO] Layer 2 (attn_v):
+[2026-04-26 18:14:39] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:39] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:39] [safety_warp] [INFO] Layer 2 (attn_o):
+[2026-04-26 18:14:39] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:39] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:39] [safety_warp] [INFO] Layer 2 (ffn_gate):
+[2026-04-26 18:14:39] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:39] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:39] [safety_warp] [INFO] Layer 2 (ffn_down):
+[2026-04-26 18:14:39] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 18:14:39] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:39] [safety_warp] [INFO] Layer 2 (ffn_up):
+[2026-04-26 18:14:39] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:39] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:39] [safety_warp] [INFO] Layer 3 (attn_q):
+[2026-04-26 18:14:39] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:39] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:39] [safety_warp] [INFO] Layer 3 (attn_k):
+[2026-04-26 18:14:39] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:39] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:39] [safety_warp] [INFO] Layer 3 (attn_v):
+[2026-04-26 18:14:39] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:39] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:39] [safety_warp] [INFO] Layer 3 (attn_o):
+[2026-04-26 18:14:39] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:39] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:39] [safety_warp] [INFO] Layer 3 (ffn_gate):
+[2026-04-26 18:14:39] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:39] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:39] [safety_warp] [INFO] Layer 3 (ffn_down):
+[2026-04-26 18:14:39] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 18:14:39] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:39] [safety_warp] [INFO] Layer 3 (ffn_up):
+[2026-04-26 18:14:39] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:39] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:39] [safety_warp] [INFO] Layer 4 (attn_q):
+[2026-04-26 18:14:39] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:39] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:40] [safety_warp] [INFO] Layer 4 (attn_k):
+[2026-04-26 18:14:40] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:40] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:40] [safety_warp] [INFO] Layer 4 (attn_v):
+[2026-04-26 18:14:40] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:40] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:40] [safety_warp] [INFO] Layer 4 (attn_o):
+[2026-04-26 18:14:40] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:40] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:40] [safety_warp] [INFO] Layer 4 (ffn_gate):
+[2026-04-26 18:14:40] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:40] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:40] [safety_warp] [INFO] Layer 4 (ffn_down):
+[2026-04-26 18:14:40] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 18:14:40] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:40] [safety_warp] [INFO] Layer 4 (ffn_up):
+[2026-04-26 18:14:40] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:40] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:40] [safety_warp] [INFO] Layer 5 (attn_q):
+[2026-04-26 18:14:40] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:40] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:40] [safety_warp] [INFO] Layer 5 (attn_k):
+[2026-04-26 18:14:40] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:40] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:40] [safety_warp] [INFO] Layer 5 (attn_v):
+[2026-04-26 18:14:40] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:40] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:40] [safety_warp] [INFO] Layer 5 (attn_o):
+[2026-04-26 18:14:40] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:40] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:40] [safety_warp] [INFO] Layer 5 (ffn_gate):
+[2026-04-26 18:14:40] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:40] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:40] [safety_warp] [INFO] Layer 5 (ffn_down):
+[2026-04-26 18:14:40] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 18:14:40] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:40] [safety_warp] [INFO] Layer 5 (ffn_up):
+[2026-04-26 18:14:40] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:40] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:40] [safety_warp] [INFO] Layer 6 (attn_q):
+[2026-04-26 18:14:40] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:40] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:41] [safety_warp] [INFO] Layer 6 (attn_k):
+[2026-04-26 18:14:41] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:41] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:41] [safety_warp] [INFO] Layer 6 (attn_v):
+[2026-04-26 18:14:41] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:41] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:41] [safety_warp] [INFO] Layer 6 (attn_o):
+[2026-04-26 18:14:41] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:41] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:41] [safety_warp] [INFO] Layer 6 (ffn_gate):
+[2026-04-26 18:14:41] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:41] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:41] [safety_warp] [INFO] Layer 6 (ffn_down):
+[2026-04-26 18:14:41] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 18:14:41] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:41] [safety_warp] [INFO] Layer 6 (ffn_up):
+[2026-04-26 18:14:41] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:41] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:41] [safety_warp] [INFO] Layer 7 (attn_q):
+[2026-04-26 18:14:41] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:41] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:41] [safety_warp] [INFO] Layer 7 (attn_k):
+[2026-04-26 18:14:41] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:41] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:41] [safety_warp] [INFO] Layer 7 (attn_v):
+[2026-04-26 18:14:41] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:41] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:41] [safety_warp] [INFO] Layer 7 (attn_o):
+[2026-04-26 18:14:41] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:41] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:41] [safety_warp] [INFO] Layer 7 (ffn_gate):
+[2026-04-26 18:14:41] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:41] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:41] [safety_warp] [INFO] Layer 7 (ffn_down):
+[2026-04-26 18:14:41] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 18:14:41] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:41] [safety_warp] [INFO] Layer 7 (ffn_up):
+[2026-04-26 18:14:41] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:41] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:41] [safety_warp] [INFO] Layer 8 (attn_q):
+[2026-04-26 18:14:41] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:41] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:42] [safety_warp] [INFO] Layer 8 (attn_k):
+[2026-04-26 18:14:42] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:42] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:42] [safety_warp] [INFO] Layer 8 (attn_v):
+[2026-04-26 18:14:42] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:42] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:42] [safety_warp] [INFO] Layer 8 (attn_o):
+[2026-04-26 18:14:42] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:42] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:42] [safety_warp] [INFO] Layer 8 (ffn_gate):
+[2026-04-26 18:14:42] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:42] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:42] [safety_warp] [INFO] Layer 8 (ffn_down):
+[2026-04-26 18:14:42] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 18:14:42] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:42] [safety_warp] [INFO] Layer 8 (ffn_up):
+[2026-04-26 18:14:42] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:42] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:42] [safety_warp] [INFO] Layer 9 (attn_q):
+[2026-04-26 18:14:42] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:42] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:42] [safety_warp] [INFO] Layer 9 (attn_k):
+[2026-04-26 18:14:42] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:42] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:42] [safety_warp] [INFO] Layer 9 (attn_v):
+[2026-04-26 18:14:42] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:42] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:42] [safety_warp] [INFO] Layer 9 (attn_o):
+[2026-04-26 18:14:42] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:42] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:42] [safety_warp] [INFO] Layer 9 (ffn_gate):
+[2026-04-26 18:14:42] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:42] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:42] [safety_warp] [INFO] Layer 9 (ffn_down):
+[2026-04-26 18:14:42] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 18:14:42] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:42] [safety_warp] [INFO] Layer 9 (ffn_up):
+[2026-04-26 18:14:42] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:42] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:42] [safety_warp] [INFO] Layer 10 (attn_q):
+[2026-04-26 18:14:42] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:42] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:43] [safety_warp] [INFO] Layer 10 (attn_k):
+[2026-04-26 18:14:43] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:43] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:43] [safety_warp] [INFO] Layer 10 (attn_v):
+[2026-04-26 18:14:43] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:43] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:43] [safety_warp] [INFO] Layer 10 (attn_o):
+[2026-04-26 18:14:43] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:43] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:43] [safety_warp] [INFO] Layer 10 (ffn_gate):
+[2026-04-26 18:14:43] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:43] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:43] [safety_warp] [INFO] Layer 10 (ffn_down):
+[2026-04-26 18:14:43] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 18:14:43] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:43] [safety_warp] [INFO] Layer 10 (ffn_up):
+[2026-04-26 18:14:43] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:43] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:43] [safety_warp] [INFO] Layer 11 (attn_q):
+[2026-04-26 18:14:43] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:43] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:43] [safety_warp] [INFO] Layer 11 (attn_k):
+[2026-04-26 18:14:43] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:43] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:43] [safety_warp] [INFO] Layer 11 (attn_v):
+[2026-04-26 18:14:43] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:43] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:43] [safety_warp] [INFO] Layer 11 (attn_o):
+[2026-04-26 18:14:43] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:43] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:43] [safety_warp] [INFO] Layer 11 (ffn_gate):
+[2026-04-26 18:14:43] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:43] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:43] [safety_warp] [INFO] Layer 11 (ffn_down):
+[2026-04-26 18:14:43] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 18:14:43] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:43] [safety_warp] [INFO] Layer 11 (ffn_up):
+[2026-04-26 18:14:43] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:43] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:44] [safety_warp] [INFO] Layer 12 (attn_q):
+[2026-04-26 18:14:44] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:44] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:44] [safety_warp] [INFO] Layer 12 (attn_k):
+[2026-04-26 18:14:44] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:44] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:44] [safety_warp] [INFO] Layer 12 (attn_v):
+[2026-04-26 18:14:44] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:44] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:44] [safety_warp] [INFO] Layer 12 (attn_o):
+[2026-04-26 18:14:44] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:44] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:44] [safety_warp] [INFO] Layer 12 (ffn_gate):
+[2026-04-26 18:14:44] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:44] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:44] [safety_warp] [INFO] Layer 12 (ffn_down):
+[2026-04-26 18:14:44] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 18:14:44] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:44] [safety_warp] [INFO] Layer 12 (ffn_up):
+[2026-04-26 18:14:44] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:44] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:44] [safety_warp] [INFO] Layer 13 (attn_q):
+[2026-04-26 18:14:44] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:44] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:44] [safety_warp] [INFO] Layer 13 (attn_k):
+[2026-04-26 18:14:44] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:44] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:44] [safety_warp] [INFO] Layer 13 (attn_v):
+[2026-04-26 18:14:44] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:44] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:44] [safety_warp] [INFO] Layer 13 (attn_o):
+[2026-04-26 18:14:44] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:44] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:44] [safety_warp] [INFO] Layer 13 (ffn_gate):
+[2026-04-26 18:14:44] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:44] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:44] [safety_warp] [INFO] Layer 13 (ffn_down):
+[2026-04-26 18:14:44] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 18:14:44] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:45] [safety_warp] [INFO] Layer 13 (ffn_up):
+[2026-04-26 18:14:45] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:45] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:45] [safety_warp] [INFO] Layer 14 (attn_q):
+[2026-04-26 18:14:45] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:45] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:45] [safety_warp] [INFO] Layer 14 (attn_k):
+[2026-04-26 18:14:45] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:45] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:45] [safety_warp] [INFO] Layer 14 (attn_v):
+[2026-04-26 18:14:45] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:45] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:45] [safety_warp] [INFO] Layer 14 (attn_o):
+[2026-04-26 18:14:45] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:45] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:45] [safety_warp] [INFO] Layer 14 (ffn_gate):
+[2026-04-26 18:14:45] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:45] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:45] [safety_warp] [INFO] Layer 14 (ffn_down):
+[2026-04-26 18:14:45] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 18:14:45] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:45] [safety_warp] [INFO] Layer 14 (ffn_up):
+[2026-04-26 18:14:45] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:45] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:45] [safety_warp] [INFO] Layer 15 (attn_q):
+[2026-04-26 18:14:45] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:45] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:45] [safety_warp] [INFO] Layer 15 (attn_k):
+[2026-04-26 18:14:45] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:45] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:45] [safety_warp] [INFO] Layer 15 (attn_v):
+[2026-04-26 18:14:45] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:45] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:45] [safety_warp] [INFO] Layer 15 (attn_o):
+[2026-04-26 18:14:45] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:45] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:45] [safety_warp] [INFO] Layer 15 (ffn_gate):
+[2026-04-26 18:14:45] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:45] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:45] [safety_warp] [INFO] Layer 15 (ffn_down):
+[2026-04-26 18:14:45] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 18:14:45] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:46] [safety_warp] [INFO] Layer 15 (ffn_up):
+[2026-04-26 18:14:46] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:46] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:46] [safety_warp] [INFO] Layer 16 (attn_q):
+[2026-04-26 18:14:46] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:46] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:46] [safety_warp] [INFO] Layer 16 (attn_k):
+[2026-04-26 18:14:46] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:46] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:46] [safety_warp] [INFO] Layer 16 (attn_v):
+[2026-04-26 18:14:46] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:46] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:46] [safety_warp] [INFO] Layer 16 (attn_o):
+[2026-04-26 18:14:46] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:46] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:46] [safety_warp] [INFO] Layer 16 (ffn_gate):
+[2026-04-26 18:14:46] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:46] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:46] [safety_warp] [INFO] Layer 16 (ffn_down):
+[2026-04-26 18:14:46] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 18:14:46] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:46] [safety_warp] [INFO] Layer 16 (ffn_up):
+[2026-04-26 18:14:46] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:46] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:46] [safety_warp] [INFO] Layer 17 (attn_q):
+[2026-04-26 18:14:46] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:46] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:46] [safety_warp] [INFO] Layer 17 (attn_k):
+[2026-04-26 18:14:46] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:46] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:46] [safety_warp] [INFO] Layer 17 (attn_v):
+[2026-04-26 18:14:46] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:46] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:46] [safety_warp] [INFO] Layer 17 (attn_o):
+[2026-04-26 18:14:46] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:46] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:46] [safety_warp] [INFO] Layer 17 (ffn_gate):
+[2026-04-26 18:14:46] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:46] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:47] [safety_warp] [INFO] Layer 17 (ffn_down):
+[2026-04-26 18:14:47] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 18:14:47] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:47] [safety_warp] [INFO] Layer 17 (ffn_up):
+[2026-04-26 18:14:47] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:47] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:47] [safety_warp] [INFO] Layer 18 (attn_q):
+[2026-04-26 18:14:47] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:47] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:47] [safety_warp] [INFO] Layer 18 (attn_k):
+[2026-04-26 18:14:47] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:47] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:47] [safety_warp] [INFO] Layer 18 (attn_v):
+[2026-04-26 18:14:47] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:47] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:47] [safety_warp] [INFO] Layer 18 (attn_o):
+[2026-04-26 18:14:47] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:47] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:47] [safety_warp] [INFO] Layer 18 (ffn_gate):
+[2026-04-26 18:14:47] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:47] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:47] [safety_warp] [INFO] Layer 18 (ffn_down):
+[2026-04-26 18:14:47] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 18:14:47] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:47] [safety_warp] [INFO] Layer 18 (ffn_up):
+[2026-04-26 18:14:47] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:47] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:47] [safety_warp] [INFO] Layer 19 (attn_q):
+[2026-04-26 18:14:47] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:47] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:47] [safety_warp] [INFO] Layer 19 (attn_k):
+[2026-04-26 18:14:47] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:47] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:47] [safety_warp] [INFO] Layer 19 (attn_v):
+[2026-04-26 18:14:47] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:47] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:47] [safety_warp] [INFO] Layer 19 (attn_o):
+[2026-04-26 18:14:47] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:47] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:47] [safety_warp] [INFO] Layer 19 (ffn_gate):
+[2026-04-26 18:14:47] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:47] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:48] [safety_warp] [INFO] Layer 19 (ffn_down):
+[2026-04-26 18:14:48] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 18:14:48] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:48] [safety_warp] [INFO] Layer 19 (ffn_up):
+[2026-04-26 18:14:48] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:48] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:48] [safety_warp] [INFO] Layer 20 (attn_q):
+[2026-04-26 18:14:48] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:48] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:48] [safety_warp] [INFO] Layer 20 (attn_k):
+[2026-04-26 18:14:48] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:48] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:48] [safety_warp] [INFO] Layer 20 (attn_v):
+[2026-04-26 18:14:48] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:48] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:48] [safety_warp] [INFO] Layer 20 (attn_o):
+[2026-04-26 18:14:48] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:48] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:48] [safety_warp] [INFO] Layer 20 (ffn_gate):
+[2026-04-26 18:14:48] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:48] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:48] [safety_warp] [INFO] Layer 20 (ffn_down):
+[2026-04-26 18:14:48] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 18:14:48] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:48] [safety_warp] [INFO] Layer 20 (ffn_up):
+[2026-04-26 18:14:48] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:48] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:48] [safety_warp] [INFO] Layer 21 (attn_q):
+[2026-04-26 18:14:48] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:48] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:48] [safety_warp] [INFO] Layer 21 (attn_k):
+[2026-04-26 18:14:48] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:48] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:48] [safety_warp] [INFO] Layer 21 (attn_v):
+[2026-04-26 18:14:48] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:48] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:48] [safety_warp] [INFO] Layer 21 (attn_o):
+[2026-04-26 18:14:48] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:48] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:49] [safety_warp] [INFO] Layer 21 (ffn_gate):
+[2026-04-26 18:14:49] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:49] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:49] [safety_warp] [INFO] Layer 21 (ffn_down):
+[2026-04-26 18:14:49] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 18:14:49] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:49] [safety_warp] [INFO] Layer 21 (ffn_up):
+[2026-04-26 18:14:49] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:49] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:49] [safety_warp] [INFO] Layer 22 (attn_q):
+[2026-04-26 18:14:49] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:49] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:49] [safety_warp] [INFO] Layer 22 (attn_k):
+[2026-04-26 18:14:49] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:49] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:49] [safety_warp] [INFO] Layer 22 (attn_v):
+[2026-04-26 18:14:49] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:49] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:49] [safety_warp] [INFO] Layer 22 (attn_o):
+[2026-04-26 18:14:49] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:49] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:49] [safety_warp] [INFO] Layer 22 (ffn_gate):
+[2026-04-26 18:14:49] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:49] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:49] [safety_warp] [INFO] Layer 22 (ffn_down):
+[2026-04-26 18:14:49] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 18:14:49] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:49] [safety_warp] [INFO] Layer 22 (ffn_up):
+[2026-04-26 18:14:49] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:49] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:49] [safety_warp] [INFO] Layer 23 (attn_q):
+[2026-04-26 18:14:49] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:49] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:49] [safety_warp] [INFO] Layer 23 (attn_k):
+[2026-04-26 18:14:49] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:49] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:50] [safety_warp] [INFO] Layer 23 (attn_v):
+[2026-04-26 18:14:50] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:50] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:50] [safety_warp] [INFO] Layer 23 (attn_o):
+[2026-04-26 18:14:50] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:50] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:50] [safety_warp] [INFO] Layer 23 (ffn_gate):
+[2026-04-26 18:14:50] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:50] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:50] [safety_warp] [INFO] Layer 23 (ffn_down):
+[2026-04-26 18:14:50] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 18:14:50] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:50] [safety_warp] [INFO] Layer 23 (ffn_up):
+[2026-04-26 18:14:50] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:50] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:50] [safety_warp] [INFO] Layer 24 (attn_q):
+[2026-04-26 18:14:50] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:50] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:50] [safety_warp] [INFO] Layer 24 (attn_k):
+[2026-04-26 18:14:50] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:50] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:50] [safety_warp] [INFO] Layer 24 (attn_v):
+[2026-04-26 18:14:50] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:50] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:50] [safety_warp] [INFO] Layer 24 (attn_o):
+[2026-04-26 18:14:50] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:50] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:50] [safety_warp] [INFO] Layer 24 (ffn_gate):
+[2026-04-26 18:14:50] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:50] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:50] [safety_warp] [INFO] Layer 24 (ffn_down):
+[2026-04-26 18:14:50] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 18:14:50] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:50] [safety_warp] [INFO] Layer 24 (ffn_up):
+[2026-04-26 18:14:50] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:50] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:51] [safety_warp] [INFO] Layer 25 (attn_q):
+[2026-04-26 18:14:51] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:51] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:51] [safety_warp] [INFO] Layer 25 (attn_k):
+[2026-04-26 18:14:51] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:51] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:51] [safety_warp] [INFO] Layer 25 (attn_v):
+[2026-04-26 18:14:51] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:51] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:51] [safety_warp] [INFO] Layer 25 (attn_o):
+[2026-04-26 18:14:51] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:51] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:51] [safety_warp] [INFO] Layer 25 (ffn_gate):
+[2026-04-26 18:14:51] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:51] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:51] [safety_warp] [INFO] Layer 25 (ffn_down):
+[2026-04-26 18:14:51] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 18:14:51] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:51] [safety_warp] [INFO] Layer 25 (ffn_up):
+[2026-04-26 18:14:51] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:51] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:51] [safety_warp] [INFO] Layer 26 (attn_q):
+[2026-04-26 18:14:51] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:51] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:51] [safety_warp] [INFO] Layer 26 (attn_k):
+[2026-04-26 18:14:51] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:51] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:51] [safety_warp] [INFO] Layer 26 (attn_v):
+[2026-04-26 18:14:51] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:51] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:51] [safety_warp] [INFO] Layer 26 (attn_o):
+[2026-04-26 18:14:51] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:51] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:51] [safety_warp] [INFO] Layer 26 (ffn_gate):
+[2026-04-26 18:14:51] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:51] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:52] [safety_warp] [INFO] Layer 26 (ffn_down):
+[2026-04-26 18:14:52] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 18:14:52] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:52] [safety_warp] [INFO] Layer 26 (ffn_up):
+[2026-04-26 18:14:52] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:52] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:52] [safety_warp] [INFO] Layer 27 (attn_q):
+[2026-04-26 18:14:52] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:52] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:52] [safety_warp] [INFO] Layer 27 (attn_k):
+[2026-04-26 18:14:52] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:52] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:52] [safety_warp] [INFO] Layer 27 (attn_v):
+[2026-04-26 18:14:52] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:52] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:52] [safety_warp] [INFO] Layer 27 (attn_o):
+[2026-04-26 18:14:52] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:52] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:52] [safety_warp] [INFO] Layer 27 (ffn_gate):
+[2026-04-26 18:14:52] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:52] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:52] [safety_warp] [INFO] Layer 27 (ffn_down):
+[2026-04-26 18:14:52] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 18:14:52] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:52] [safety_warp] [INFO] Layer 27 (ffn_up):
+[2026-04-26 18:14:52] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:52] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:52] [safety_warp] [INFO] Layer 28 (attn_q):
+[2026-04-26 18:14:52] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:52] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:52] [safety_warp] [INFO] Layer 28 (attn_k):
+[2026-04-26 18:14:52] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:52] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:52] [safety_warp] [INFO] Layer 28 (attn_v):
+[2026-04-26 18:14:52] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:52] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:52] [safety_warp] [INFO] Layer 28 (attn_o):
+[2026-04-26 18:14:52] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:52] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:52] [safety_warp] [INFO] Layer 28 (ffn_gate):
+[2026-04-26 18:14:52] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:52] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:53] [safety_warp] [INFO] Layer 28 (ffn_down):
+[2026-04-26 18:14:53] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 18:14:53] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:53] [safety_warp] [INFO] Layer 28 (ffn_up):
+[2026-04-26 18:14:53] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:53] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:53] [safety_warp] [INFO] Layer 29 (attn_q):
+[2026-04-26 18:14:53] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:53] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:53] [safety_warp] [INFO] Layer 29 (attn_k):
+[2026-04-26 18:14:53] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:53] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:53] [safety_warp] [INFO] Layer 29 (attn_v):
+[2026-04-26 18:14:53] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:53] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:53] [safety_warp] [INFO] Layer 29 (attn_o):
+[2026-04-26 18:14:53] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:53] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:53] [safety_warp] [INFO] Layer 29 (ffn_gate):
+[2026-04-26 18:14:53] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:53] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:53] [safety_warp] [INFO] Layer 29 (ffn_down):
+[2026-04-26 18:14:53] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 18:14:53] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:53] [safety_warp] [INFO] Layer 29 (ffn_up):
+[2026-04-26 18:14:53] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:53] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:53] [safety_warp] [INFO] Layer 30 (attn_q):
+[2026-04-26 18:14:53] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:53] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:53] [safety_warp] [INFO] Layer 30 (attn_k):
+[2026-04-26 18:14:53] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:53] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:53] [safety_warp] [INFO] Layer 30 (attn_v):
+[2026-04-26 18:14:53] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:53] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:53] [safety_warp] [INFO] Layer 30 (attn_o):
+[2026-04-26 18:14:53] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:53] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:54] [safety_warp] [INFO] Layer 30 (ffn_gate):
+[2026-04-26 18:14:54] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:54] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:54] [safety_warp] [INFO] Layer 30 (ffn_down):
+[2026-04-26 18:14:54] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 18:14:54] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:54] [safety_warp] [INFO] Layer 30 (ffn_up):
+[2026-04-26 18:14:54] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:54] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:54] [safety_warp] [INFO] Layer 31 (attn_q):
+[2026-04-26 18:14:54] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:54] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:54] [safety_warp] [INFO] Layer 31 (attn_k):
+[2026-04-26 18:14:54] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:54] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:54] [safety_warp] [INFO] Layer 31 (attn_v):
+[2026-04-26 18:14:54] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:54] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:54] [safety_warp] [INFO] Layer 31 (attn_o):
+[2026-04-26 18:14:54] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-04-26 18:14:54] [safety_warp] [INFO]   ✓ mask: Frozen 0/16777216 (0.0%)
+[2026-04-26 18:14:54] [safety_warp] [INFO] Layer 31 (ffn_gate):
+[2026-04-26 18:14:54] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:54] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:54] [safety_warp] [INFO] Layer 31 (ffn_down):
+[2026-04-26 18:14:54] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-04-26 18:14:54] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:54] [safety_warp] [INFO] Layer 31 (ffn_up):
+[2026-04-26 18:14:54] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-04-26 18:14:54] [safety_warp] [INFO]   ✓ mask: Frozen 0/45088768 (0.0%)
+[2026-04-26 18:14:54] [safety_warp] [INFO] ======================================================================
+[2026-04-26 18:14:54] [safety_warp] [INFO] ✓ Setup completed: 224 WaRP modules
+[2026-04-26 18:14:54] [safety_warp] [INFO] ======================================================================
+[2026-04-26 18:14:54] [safety_warp] [INFO] Forward에서 자동으로 마스킹 적용:
+[2026-04-26 18:14:54] [safety_warp] [INFO]   W = V @ (basis_coeff * mask).detach() + basis_coeff * (1-mask) @ U
+[2026-04-26 18:14:54] [safety_warp] [INFO]   mask=1: gradient 차단 (동결)
+[2026-04-26 18:14:54] [safety_warp] [INFO]   mask=0: gradient 흐름 (학습 가능)
+[2026-04-26 18:14:54] [safety_warp] [INFO] ======================================================================
+[2026-04-26 18:14:54] [safety_warp] [INFO] [WaRP-Monitor] verification probes registered
+[2026-04-26 18:14:54] [safety_warp] [INFO]   - modules: 224
+[2026-04-26 18:14:54] [safety_warp] [INFO]   - masked probes: 0
+[2026-04-26 18:14:54] [safety_warp] [INFO]   - trainable probes: 896
+[2026-04-26 18:14:54] [safety_warp] [INFO] Loading GSM8K dataset...
+[2026-04-26 18:14:57] [safety_warp] [INFO] ✓ Using all 7473 samples (gsm8k_samples=0 or not specified)
+[2026-04-26 18:14:59] [safety_warp] [INFO] ✓ Dataset created (7473 samples)
+[2026-04-26 18:14:59] [safety_warp] [INFO] [safeInstr] Mixing safety data: 5.0% of main (7473) = 374 safety samples from ./data/circuit_breakers_train.json
+[2026-04-26 18:14:59] [safety_warp] [INFO] [safeInstr] ✓ Mixed dataset: 7473 utility + 374 safety = 7847 total
+[2026-04-26 18:14:59] [safety_warp] [INFO] ======================================================================
+[2026-04-26 18:14:59] [safety_warp] [INFO] Phase 3: Incremental Learning with GSM8K (Non-Freeze)
+[2026-04-26 18:14:59] [safety_warp] [INFO] ======================================================================
+[2026-04-26 18:14:59] [safety_warp] [INFO] Non-Freeze 모드: weight_decay=0.01 적용 (WaRPMaskRestoreCallback으로 mask=1 basis_coeff drift 완전 차단)
+[2026-04-26 18:14:59] [safety_warp] [INFO] Parameter freeze status (Non-Freeze mode):
+[2026-04-26 18:14:59] [safety_warp] [INFO]   - Total params: 6,738,415,616
+[2026-04-26 18:14:59] [safety_warp] [INFO]   - Trainable params: 6,738,415,616
+[2026-04-26 18:14:59] [safety_warp] [INFO]   - basis_coeff params: 6,476,005,376
+[2026-04-26 18:14:59] [safety_warp] [INFO]   - Frozen params (requires_grad=False): 0
+[2026-04-26 18:14:59] [safety_warp] [INFO]   - Trainable ratio: 100.00%
+[2026-04-26 18:14:59] [safety_warp] [INFO]   - WaRP masked frozen coeff elems: 0/6,476,005,376
+[2026-04-26 18:14:59] [safety_warp] [INFO]   - WaRP masked trainable coeff elems: 6,476,005,376 (100.00%)
+[2026-04-26 18:14:59] [safety_warp] [INFO] Training configuration:
+[2026-04-26 18:14:59] [safety_warp] [INFO]   - Epochs: 3
+[2026-04-26 18:14:59] [safety_warp] [INFO]   - Learning rate: 3e-05
+[2026-04-26 18:14:59] [safety_warp] [INFO]   - Weight decay (requested): 0.01
+[2026-04-26 18:14:59] [safety_warp] [INFO]   - Weight decay (effective): 0.01
+[2026-04-26 18:14:59] [safety_warp] [INFO]   - Warmup ratio: 0.1
+[2026-04-26 18:14:59] [safety_warp] [INFO]   - Batch size: 4
+[2026-04-26 18:14:59] [safety_warp] [INFO]   - Gradient accumulation steps: 4
+[2026-04-26 18:14:59] [safety_warp] [INFO]   - Effective batch size: 16
+[2026-04-26 18:14:59] [safety_warp] [INFO]   - Max gradient norm: 1.0
+[2026-04-26 18:14:59] [safety_warp] [INFO]   - Optimizer: adamw_torch
+[2026-04-26 18:14:59] [safety_warp] [INFO]   - LR scheduler: linear
+[2026-04-26 18:14:59] [safety_warp] [INFO]   - Input formatting: Question/Answer plain text
+[2026-04-26 18:14:59] [safety_warp] [INFO]   - Checkpoint directory: /home/yonsei_jong/Safety-WaRP-LLM/checkpoints/safeinstr_warp_20260426_181419/phase3_non_freeze_20260426_181459
+[2026-04-26 18:14:59] [safety_warp] [INFO] ======================================================================
+[2026-04-26 18:15:00] [safety_warp] [INFO] [WaRP-GradCheck] one-batch gradient sanity
+[2026-04-26 18:15:00] [safety_warp] [INFO]   - loss: 1.306507
+[2026-04-26 18:15:00] [safety_warp] [INFO]   - masked(=1) grad |mean|: 0.000000e+00, nonzero ratio: 0.00%
+[2026-04-26 18:15:00] [safety_warp] [INFO]   - trainable(=0) grad |mean|: 1.240898e-04, nonzero ratio: 100.00%
+[2026-04-26 18:15:00] [safety_warp] [INFO] [WaRPMaskRestoreCallback] registered 0 modules for post-step weight-decay restore
+/home/yonsei_jong/Safety-WaRP-LLM/models/phase3_extra_learning_non_freeze.py:246: FutureWarning: `tokenizer` is deprecated and will be removed in version 5.0.0 for `Trainer.__init__`. Use `processing_class` instead.
+  trainer = Trainer(
+[2026-04-26 18:15:00] [safety_warp] [INFO] ✓ Trainer initialized
+[2026-04-26 18:15:00] [safety_warp] [INFO] Starting training (Non-Freeze mode)...
+[2026-04-26 18:15:00] [safety_warp] [INFO]   WaRP forward still applies masking:
+[2026-04-26 18:15:00] [safety_warp] [INFO]     W = V @ (basis_coeff * mask).detach() + basis_coeff * (1-mask) @ U
+[2026-04-26 18:15:00] [safety_warp] [INFO]     mask=1: gradient 차단 (frozen)
+[2026-04-26 18:15:00] [safety_warp] [INFO]     mask=0: gradient 흐름 (trainable)
+The tokenizer has new PAD/BOS/EOS tokens that differ from the model config and generation config. The model config and generation config were aligned accordingly, being updated with the tokenizer's values. Updated tokens: {'pad_token_id': 2}.
+  0%|          | 0/1473 [00:00<?, ?it/s]  0%|          | 1/1473 [00:01<35:52,  1.46s/it]  0%|          | 2/1473 [00:02<29:54,  1.22s/it]  0%|          | 3/1473 [00:03<26:24,  1.08s/it]  0%|          | 4/1473 [00:04<23:58,  1.02it/s]  0%|          | 5/1473 [00:05<23:15,  1.05it/s]  0%|          | 6/1473 [00:06<22:42,  1.08it/s]  0%|          | 7/1473 [00:06<22:10,  1.10it/s]  1%|          | 8/1473 [00:07<21:53,  1.12it/s]  1%|          | 9/1473 [00:08<21:50,  1.12it/s]  1%|          | 10/1473 [00:09<21:38,  1.13it/s]                                                   1%|          | 10/1473 [00:09<21:38,  1.13it/s]  1%|          | 11/1473 [00:10<21:37,  1.13it/s]  1%|          | 12/1473 [00:11<21:24,  1.14it/s]  1%|          | 13/1473 [00:12<21:20,  1.14it/s]  1%|          | 14/1473 [00:13<21:36,  1.12it/s]  1%|          | 15/1473 [00:13<21:37,  1.12it/s]  1%|          | 16/1473 [00:14<21:22,  1.14it/s]  1%|          | 17/1473 [00:15<21:22,  1.14it/s]  1%|          | 18/1473 [00:16<21:22,  1.13it/s]  1%|▏         | 19/1473 [00:17<21:06,  1.15it/s]  1%|▏         | 20/1473 [00:18<20:48,  1.16it/s]                                                   1%|▏         | 20/1473 [00:18<20:48,  1.16it/s]  1%|▏         | 21/1473 [00:19<20:53,  1.16it/s]  1%|▏         | 22/1473 [00:20<21:39,  1.12it/s]  2%|▏         | 23/1473 [00:21<21:43,  1.11it/s]  2%|▏         | 24/1473 [00:21<21:21,  1.13it/s]  2%|▏         | 25/1473 [00:22<21:24,  1.13it/s]  2%|▏         | 26/1473 [00:23<21:36,  1.12it/s]  2%|▏         | 27/1473 [00:24<21:28,  1.12it/s]  2%|▏         | 28/1473 [00:25<20:59,  1.15it/s]  2%|▏         | 29/1473 [00:26<20:46,  1.16it/s]  2%|▏         | 30/1473 [00:27<20:44,  1.16it/s]                                                   2%|▏         | 30/1473 [00:27<20:44,  1.16it/s]  2%|▏         | 31/1473 [00:27<20:40,  1.16it/s]  2%|▏         | 32/1473 [00:28<20:20,  1.18it/s]  2%|▏         | 33/1473 [00:29<20:57,  1.14it/s]  2%|▏         | 34/1473 [00:30<21:16,  1.13it/s]  2%|▏         | 35/1473 [00:31<20:57,  1.14it/s]  2%|▏         | 36/1473 [00:32<20:55,  1.14it/s]  3%|▎         | 37/1473 [00:33<21:09,  1.13it/s]  3%|▎         | 38/1473 [00:34<20:56,  1.14it/s]  3%|▎         | 39/1473 [00:34<20:41,  1.16it/s]  3%|▎         | 40/1473 [00:35<20:33,  1.16it/s]                                                   3%|▎         | 40/1473 [00:35<20:33,  1.16it/s]  3%|▎         | 41/1473 [00:36<20:39,  1.16it/s]  3%|▎         | 42/1473 [00:37<20:27,  1.17it/s]  3%|▎         | 43/1473 [00:38<20:20,  1.17it/s]  3%|▎         | 44/1473 [00:39<20:45,  1.15it/s]  3%|▎         | 45/1473 [00:40<21:25,  1.11it/s]  3%|▎         | 46/1473 [00:41<21:29,  1.11it/s]  3%|▎         | 47/1473 [00:41<21:04,  1.13it/s]  3%|▎         | 48/1473 [00:42<20:41,  1.15it/s]  3%|▎         | 49/1473 [00:43<20:40,  1.15it/s]  3%|▎         | 50/1473 [00:44<20:43,  1.14it/s]                                                   3%|▎         | 50/1473 [00:44<20:43,  1.14it/s]  3%|▎         | 51/1473 [00:45<20:45,  1.14it/s]  4%|▎         | 52/1473 [00:46<20:39,  1.15it/s]  4%|▎         | 53/1473 [00:47<20:23,  1.16it/s]  4%|▎         | 54/1473 [00:48<20:39,  1.14it/s]  4%|▎         | 55/1473 [00:48<20:40,  1.14it/s]  4%|▍         | 56/1473 [00:49<20:20,  1.16it/s]  4%|▍         | 57/1473 [00:50<20:58,  1.13it/s]  4%|▍         | 58/1473 [00:51<20:48,  1.13it/s]  4%|▍         | 59/1473 [00:52<20:48,  1.13it/s]  4%|▍         | 60/1473 [00:53<20:31,  1.15it/s]                                                   4%|▍         | 60/1473 [00:53<20:31,  1.15it/s]  4%|▍         | 61/1473 [00:54<20:29,  1.15it/s]  4%|▍         | 62/1473 [00:55<20:43,  1.13it/s]  4%|▍         | 63/1473 [00:55<20:39,  1.14it/s]  4%|▍         | 64/1473 [00:56<20:29,  1.15it/s]  4%|▍         | 65/1473 [00:57<20:29,  1.14it/s]  4%|▍         | 66/1473 [00:58<20:37,  1.14it/s]  5%|▍         | 67/1473 [00:59<20:21,  1.15it/s]  5%|▍         | 68/1473 [01:00<19:59,  1.17it/s]  5%|▍         | 69/1473 [01:01<19:53,  1.18it/s]  5%|▍         | 70/1473 [01:01<19:46,  1.18it/s]                                                   5%|▍         | 70/1473 [01:01<19:46,  1.18it/s]  5%|▍         | 71/1473 [01:02<20:19,  1.15it/s]  5%|▍         | 72/1473 [01:03<20:22,  1.15it/s]  5%|▍         | 73/1473 [01:04<20:35,  1.13it/s]  5%|▌         | 74/1473 [01:05<20:34,  1.13it/s]  5%|▌         | 75/1473 [01:06<20:33,  1.13it/s]  5%|▌         | 76/1473 [01:07<20:53,  1.11it/s]  5%|▌         | 77/1473 [01:08<20:31,  1.13it/s]  5%|▌         | 78/1473 [01:09<20:15,  1.15it/s]  5%|▌         | 79/1473 [01:09<20:21,  1.14it/s]  5%|▌         | 80/1473 [01:10<20:00,  1.16it/s]                                                   5%|▌         | 80/1473 [01:10<20:00,  1.16it/s]  5%|▌         | 81/1473 [01:11<20:10,  1.15it/s]  6%|▌         | 82/1473 [01:12<20:06,  1.15it/s]  6%|▌         | 83/1473 [01:13<20:17,  1.14it/s]  6%|▌         | 84/1473 [01:14<20:15,  1.14it/s]  6%|▌         | 85/1473 [01:15<20:42,  1.12it/s]  6%|▌         | 86/1473 [01:16<20:36,  1.12it/s]  6%|▌         | 87/1473 [01:17<21:02,  1.10it/s]  6%|▌         | 88/1473 [01:17<20:46,  1.11it/s]  6%|▌         | 89/1473 [01:18<20:40,  1.12it/s]  6%|▌         | 90/1473 [01:19<20:27,  1.13it/s]                                                   6%|▌         | 90/1473 [01:19<20:27,  1.13it/s]  6%|▌         | 91/1473 [01:20<20:10,  1.14it/s]  6%|▌         | 92/1473 [01:21<20:14,  1.14it/s]  6%|▋         | 93/1473 [01:22<20:07,  1.14it/s]  6%|▋         | 94/1473 [01:23<19:49,  1.16it/s]  6%|▋         | 95/1473 [01:23<19:58,  1.15it/s]  7%|▋         | 96/1473 [01:24<20:03,  1.14it/s]  7%|▋         | 97/1473 [01:25<20:14,  1.13it/s]  7%|▋         | 98/1473 [01:26<19:55,  1.15it/s]  7%|▋         | 99/1473 [01:27<20:53,  1.10it/s]  7%|▋         | 100/1473 [01:28<20:23,  1.12it/s]                                                    7%|▋         | 100/1473 [01:28<20:23,  1.12it/s]  7%|▋         | 101/1473 [01:29<19:59,  1.14it/s]  7%|▋         | 102/1473 [01:30<19:45,  1.16it/s]  7%|▋         | 103/1473 [01:31<19:50,  1.15it/s]  7%|▋         | 104/1473 [01:31<19:32,  1.17it/s]  7%|▋         | 105/1473 [01:32<19:13,  1.19it/s]  7%|▋         | 106/1473 [01:33<19:55,  1.14it/s]  7%|▋         | 107/1473 [01:34<19:37,  1.16it/s]  7%|▋         | 108/1473 [01:35<20:05,  1.13it/s]  7%|▋         | 109/1473 [01:36<20:07,  1.13it/s]  7%|▋         | 110/1473 [01:37<19:53,  1.14it/s]                                                    7%|▋         | 110/1473 [01:37<19:53,  1.14it/s]  8%|▊         | 111/1473 [01:37<19:49,  1.14it/s]  8%|▊         | 112/1473 [01:38<19:31,  1.16it/s]  8%|▊         | 113/1473 [01:39<19:34,  1.16it/s]  8%|▊         | 114/1473 [01:40<19:19,  1.17it/s]  8%|▊         | 115/1473 [01:41<19:13,  1.18it/s]  8%|▊         | 116/1473 [01:42<19:15,  1.17it/s]  8%|▊         | 117/1473 [01:43<19:12,  1.18it/s]  8%|▊         | 118/1473 [01:43<19:19,  1.17it/s]  8%|▊         | 119/1473 [01:44<19:19,  1.17it/s]  8%|▊         | 120/1473 [01:45<19:26,  1.16it/s]                                                    8%|▊         | 120/1473 [01:45<19:26,  1.16it/s]  8%|▊         | 121/1473 [01:46<19:26,  1.16it/s]  8%|▊         | 122/1473 [01:47<19:39,  1.14it/s]  8%|▊         | 123/1473 [01:48<19:24,  1.16it/s]  8%|▊         | 124/1473 [01:49<19:18,  1.16it/s]  8%|▊         | 125/1473 [01:49<19:26,  1.16it/s]  9%|▊         | 126/1473 [01:50<19:32,  1.15it/s]  9%|▊         | 127/1473 [01:51<19:18,  1.16it/s]  9%|▊         | 128/1473 [01:52<19:08,  1.17it/s]  9%|▉         | 129/1473 [01:53<19:14,  1.16it/s]  9%|▉         | 130/1473 [01:54<19:20,  1.16it/s]                                                    9%|▉         | 130/1473 [01:54<19:20,  1.16it/s]  9%|▉         | 131/1473 [01:55<19:35,  1.14it/s]  9%|▉         | 132/1473 [01:56<19:17,  1.16it/s]  9%|▉         | 133/1473 [01:56<19:14,  1.16it/s]  9%|▉         | 134/1473 [01:57<19:44,  1.13it/s]  9%|▉         | 135/1473 [01:58<19:31,  1.14it/s]  9%|▉         | 136/1473 [01:59<19:22,  1.15it/s]  9%|▉         | 137/1473 [02:00<19:29,  1.14it/s]  9%|▉         | 138/1473 [02:01<19:05,  1.17it/s]  9%|▉         | 139/1473 [02:02<19:03,  1.17it/s] 10%|▉         | 140/1473 [02:02<18:49,  1.18it/s]                                                   10%|▉         | 140/1473 [02:02<18:49,  1.18it/s] 10%|▉         | 141/1473 [02:03<18:33,  1.20it/s] 10%|▉         | 142/1473 [02:04<19:00,  1.17it/s] 10%|▉         | 143/1473 [02:05<19:32,  1.13it/s] 10%|▉         | 144/1473 [02:06<19:19,  1.15it/s] 10%|▉         | 145/1473 [02:07<18:58,  1.17it/s] 10%|▉         | 146/1473 [02:08<19:00,  1.16it/s] 10%|▉         | 147/1473 [02:09<19:13,  1.15it/s] 10%|█         | 148/1473 [02:09<19:00,  1.16it/s] 10%|█         | 149/1473 [02:10<19:00,  1.16it/s] 10%|█         | 150/1473 [02:11<18:40,  1.18it/s]                                                   10%|█         | 150/1473 [02:11<18:40,  1.18it/s] 10%|█         | 151/1473 [02:12<18:38,  1.18it/s] 10%|█         | 152/1473 [02:13<18:53,  1.17it/s] 10%|█         | 153/1473 [02:14<18:56,  1.16it/s] 10%|█         | 154/1473 [02:14<18:48,  1.17it/s] 11%|█         | 155/1473 [02:15<18:47,  1.17it/s] 11%|█         | 156/1473 [02:16<18:51,  1.16it/s] 11%|█         | 157/1473 [02:17<19:02,  1.15it/s] 11%|█         | 158/1473 [02:18<18:59,  1.15it/s] 11%|█         | 159/1473 [02:19<18:52,  1.16it/s] 11%|█         | 160/1473 [02:20<18:50,  1.16it/s]                                                   11%|█         | 160/1473 [02:20<18:50,  1.16it/s] 11%|█         | 161/1473 [02:21<18:47,  1.16it/s] 11%|█         | 162/1473 [02:21<18:53,  1.16it/s] 11%|█         | 163/1473 [02:22<19:05,  1.14it/s] 11%|█         | 164/1473 [02:23<19:14,  1.13it/s] 11%|█         | 165/1473 [02:24<18:54,  1.15it/s] 11%|█▏        | 166/1473 [02:25<18:35,  1.17it/s] 11%|█▏        | 167/1473 [02:26<18:39,  1.17it/s] 11%|█▏        | 168/1473 [02:27<18:23,  1.18it/s] 11%|█▏        | 169/1473 [02:27<18:39,  1.17it/s] 12%|█▏        | 170/1473 [02:28<18:40,  1.16it/s]                                                   12%|█▏        | 170/1473 [02:28<18:40,  1.16it/s] 12%|█▏        | 171/1473 [02:29<18:51,  1.15it/s] 12%|█▏        | 172/1473 [02:30<18:48,  1.15it/s] 12%|█▏        | 173/1473 [02:31<18:55,  1.15it/s] 12%|█▏        | 174/1473 [02:32<18:58,  1.14it/s] 12%|█▏        | 175/1473 [02:33<18:57,  1.14it/s] 12%|█▏        | 176/1473 [02:33<18:34,  1.16it/s] 12%|█▏        | 177/1473 [02:34<18:37,  1.16it/s] 12%|█▏        | 178/1473 [02:35<18:26,  1.17it/s] 12%|█▏        | 179/1473 [02:36<18:31,  1.16it/s] 12%|█▏        | 180/1473 [02:37<18:17,  1.18it/s]                                                   12%|█▏        | 180/1473 [02:37<18:17,  1.18it/s] 12%|█▏        | 181/1473 [02:38<18:13,  1.18it/s] 12%|█▏        | 182/1473 [02:39<18:03,  1.19it/s] 12%|█▏        | 183/1473 [02:39<18:21,  1.17it/s] 12%|█▏        | 184/1473 [02:40<18:26,  1.17it/s] 13%|█▎        | 185/1473 [02:41<18:21,  1.17it/s] 13%|█▎        | 186/1473 [02:42<18:08,  1.18it/s] 13%|█▎        | 187/1473 [02:43<18:12,  1.18it/s] 13%|█▎        | 188/1473 [02:44<18:32,  1.15it/s] 13%|█▎        | 189/1473 [02:45<18:17,  1.17it/s] 13%|█▎        | 190/1473 [02:45<18:03,  1.18it/s]                                                   13%|█▎        | 190/1473 [02:45<18:03,  1.18it/s] 13%|█▎        | 191/1473 [02:46<17:57,  1.19it/s] 13%|█▎        | 192/1473 [02:47<18:13,  1.17it/s] 13%|█▎        | 193/1473 [02:48<18:26,  1.16it/s] 13%|█▎        | 194/1473 [02:49<18:34,  1.15it/s] 13%|█▎        | 195/1473 [02:50<18:42,  1.14it/s] 13%|█▎        | 196/1473 [02:51<18:08,  1.17it/s] 13%|█▎        | 197/1473 [02:51<18:00,  1.18it/s] 13%|█▎        | 198/1473 [02:52<17:44,  1.20it/s] 14%|█▎        | 199/1473 [02:53<18:24,  1.15it/s] 14%|█▎        | 200/1473 [02:54<18:02,  1.18it/s]                                                   14%|█▎        | 200/1473 [02:54<18:02,  1.18it/s] 14%|█▎        | 201/1473 [02:55<17:39,  1.20it/s] 14%|█▎        | 202/1473 [02:56<17:34,  1.20it/s] 14%|█▍        | 203/1473 [02:56<17:50,  1.19it/s] 14%|█▍        | 204/1473 [02:57<18:00,  1.17it/s] 14%|█▍        | 205/1473 [02:58<18:22,  1.15it/s] 14%|█▍        | 206/1473 [02:59<18:29,  1.14it/s] 14%|█▍        | 207/1473 [03:00<18:29,  1.14it/s] 14%|█▍        | 208/1473 [03:01<18:14,  1.16it/s] 14%|█▍        | 209/1473 [03:02<18:16,  1.15it/s] 14%|█▍        | 210/1473 [03:03<18:09,  1.16it/s]                                                   14%|█▍        | 210/1473 [03:03<18:09,  1.16it/s] 14%|█▍        | 211/1473 [03:03<18:10,  1.16it/s] 14%|█▍        | 212/1473 [03:04<18:02,  1.17it/s] 14%|█▍        | 213/1473 [03:05<17:58,  1.17it/s] 15%|█▍        | 214/1473 [03:06<18:17,  1.15it/s] 15%|█▍        | 215/1473 [03:07<18:06,  1.16it/s] 15%|█▍        | 216/1473 [03:08<17:59,  1.16it/s] 15%|█▍        | 217/1473 [03:09<17:59,  1.16it/s] 15%|█▍        | 218/1473 [03:09<17:50,  1.17it/s] 15%|█▍        | 219/1473 [03:10<17:53,  1.17it/s] 15%|█▍        | 220/1473 [03:11<17:44,  1.18it/s]                                                   15%|█▍        | 220/1473 [03:11<17:44,  1.18it/s] 15%|█▌        | 221/1473 [03:12<17:39,  1.18it/s] 15%|█▌        | 222/1473 [03:13<17:46,  1.17it/s] 15%|█▌        | 223/1473 [03:14<18:04,  1.15it/s] 15%|█▌        | 224/1473 [03:15<18:00,  1.16it/s] 15%|█▌        | 225/1473 [03:15<17:50,  1.17it/s] 15%|█▌        | 226/1473 [03:16<17:48,  1.17it/s] 15%|█▌        | 227/1473 [03:17<17:54,  1.16it/s] 15%|█▌        | 228/1473 [03:18<18:05,  1.15it/s] 16%|█▌        | 229/1473 [03:19<18:05,  1.15it/s] 16%|█▌        | 230/1473 [03:20<17:46,  1.17it/s]                                                   16%|█▌        | 230/1473 [03:20<17:46,  1.17it/s] 16%|█▌        | 231/1473 [03:21<17:46,  1.16it/s] 16%|█▌        | 232/1473 [03:22<17:50,  1.16it/s] 16%|█▌        | 233/1473 [03:22<17:42,  1.17it/s] 16%|█▌        | 234/1473 [03:23<17:40,  1.17it/s] 16%|█▌        | 235/1473 [03:24<17:51,  1.16it/s] 16%|█▌        | 236/1473 [03:25<18:07,  1.14it/s] 16%|█▌        | 237/1473 [03:26<18:06,  1.14it/s] 16%|█▌        | 238/1473 [03:27<17:45,  1.16it/s] 16%|█▌        | 239/1473 [03:28<18:52,  1.09it/s] 16%|█▋        | 240/1473 [03:29<18:21,  1.12it/s]                                                   16%|█▋        | 240/1473 [03:29<18:21,  1.12it/s] 16%|█▋        | 241/1473 [03:29<17:52,  1.15it/s] 16%|█▋        | 242/1473 [03:30<17:55,  1.14it/s] 16%|█▋        | 243/1473 [03:31<17:40,  1.16it/s] 17%|█▋        | 244/1473 [03:32<17:27,  1.17it/s] 17%|█▋        | 245/1473 [03:33<17:31,  1.17it/s] 17%|█▋        | 246/1473 [03:34<17:34,  1.16it/s] 17%|█▋        | 247/1473 [03:35<17:22,  1.18it/s] 17%|█▋        | 248/1473 [03:35<17:29,  1.17it/s] 17%|█▋        | 249/1473 [03:36<17:25,  1.17it/s] 17%|█▋        | 250/1473 [03:37<17:18,  1.18it/s]                                                   17%|█▋        | 250/1473 [03:37<17:18,  1.18it/s] 17%|█▋        | 251/1473 [03:38<17:15,  1.18it/s] 17%|█▋        | 252/1473 [03:39<16:54,  1.20it/s] 17%|█▋        | 253/1473 [03:40<16:53,  1.20it/s] 17%|█▋        | 254/1473 [03:40<16:52,  1.20it/s] 17%|█▋        | 255/1473 [03:41<16:38,  1.22it/s] 17%|█▋        | 256/1473 [03:42<17:04,  1.19it/s] 17%|█▋        | 257/1473 [03:43<16:57,  1.19it/s] 18%|█▊        | 258/1473 [03:44<17:01,  1.19it/s] 18%|█▊        | 259/1473 [03:45<17:10,  1.18it/s] 18%|█▊        | 260/1473 [03:45<17:23,  1.16it/s]                                                   18%|█▊        | 260/1473 [03:46<17:23,  1.16it/s] 18%|█▊        | 261/1473 [03:46<17:22,  1.16it/s] 18%|█▊        | 262/1473 [03:47<17:32,  1.15it/s] 18%|█▊        | 263/1473 [03:48<17:33,  1.15it/s] 18%|█▊        | 264/1473 [03:49<17:09,  1.17it/s] 18%|█▊        | 265/1473 [03:50<17:02,  1.18it/s] 18%|█▊        | 266/1473 [03:51<17:06,  1.18it/s] 18%|█▊        | 267/1473 [03:51<17:14,  1.17it/s] 18%|█▊        | 268/1473 [03:52<17:08,  1.17it/s] 18%|█▊        | 269/1473 [03:53<17:21,  1.16it/s] 18%|█▊        | 270/1473 [03:54<17:18,  1.16it/s]                                                   18%|█▊        | 270/1473 [03:54<17:18,  1.16it/s] 18%|█▊        | 271/1473 [03:55<17:06,  1.17it/s] 18%|█▊        | 272/1473 [03:56<17:07,  1.17it/s] 19%|█▊        | 273/1473 [03:57<16:59,  1.18it/s] 19%|█▊        | 274/1473 [03:58<17:21,  1.15it/s] 19%|█▊        | 275/1473 [03:58<17:17,  1.16it/s] 19%|█▊        | 276/1473 [03:59<17:09,  1.16it/s] 19%|█▉        | 277/1473 [04:00<17:07,  1.16it/s] 19%|█▉        | 278/1473 [04:01<17:07,  1.16it/s] 19%|█▉        | 279/1473 [04:02<17:08,  1.16it/s] 19%|█▉        | 280/1473 [04:03<16:56,  1.17it/s]                                                   19%|█▉        | 280/1473 [04:03<16:56,  1.17it/s] 19%|█▉        | 281/1473 [04:03<16:59,  1.17it/s] 19%|█▉        | 282/1473 [04:04<17:14,  1.15it/s] 19%|█▉        | 283/1473 [04:05<17:27,  1.14it/s] 19%|█▉        | 284/1473 [04:06<17:20,  1.14it/s] 19%|█▉        | 285/1473 [04:07<17:18,  1.14it/s] 19%|█▉        | 286/1473 [04:08<17:03,  1.16it/s] 19%|█▉        | 287/1473 [04:09<17:01,  1.16it/s] 20%|█▉        | 288/1473 [04:10<17:03,  1.16it/s] 20%|█▉        | 289/1473 [04:10<16:50,  1.17it/s] 20%|█▉        | 290/1473 [04:11<16:29,  1.19it/s]                                                   20%|█▉        | 290/1473 [04:11<16:29,  1.19it/s] 20%|█▉        | 291/1473 [04:12<16:34,  1.19it/s] 20%|█▉        | 292/1473 [04:13<16:47,  1.17it/s] 20%|█▉        | 293/1473 [04:14<16:59,  1.16it/s] 20%|█▉        | 294/1473 [04:15<16:45,  1.17it/s] 20%|██        | 295/1473 [04:16<16:41,  1.18it/s] 20%|██        | 296/1473 [04:16<16:36,  1.18it/s] 20%|██        | 297/1473 [04:17<16:28,  1.19it/s] 20%|██        | 298/1473 [04:18<16:36,  1.18it/s] 20%|██        | 299/1473 [04:19<16:46,  1.17it/s] 20%|██        | 300/1473 [04:20<16:29,  1.19it/s]                                                   20%|██        | 300/1473 [04:20<16:29,  1.19it/s] 20%|██        | 301/1473 [04:21<16:47,  1.16it/s] 21%|██        | 302/1473 [04:21<16:40,  1.17it/s] 21%|██        | 303/1473 [04:22<16:43,  1.17it/s] 21%|██        | 304/1473 [04:23<16:54,  1.15it/s] 21%|██        | 305/1473 [04:24<16:58,  1.15it/s] 21%|██        | 306/1473 [04:25<16:52,  1.15it/s] 21%|██        | 307/1473 [04:26<16:43,  1.16it/s] 21%|██        | 308/1473 [04:27<16:37,  1.17it/s] 21%|██        | 309/1473 [04:28<16:36,  1.17it/s] 21%|██        | 310/1473 [04:28<16:22,  1.18it/s]                                                   21%|██        | 310/1473 [04:28<16:22,  1.18it/s] 21%|██        | 311/1473 [04:29<16:35,  1.17it/s] 21%|██        | 312/1473 [04:30<16:34,  1.17it/s] 21%|██        | 313/1473 [04:31<16:31,  1.17it/s] 21%|██▏       | 314/1473 [04:32<16:30,  1.17it/s] 21%|██▏       | 315/1473 [04:33<16:22,  1.18it/s] 21%|██▏       | 316/1473 [04:33<16:19,  1.18it/s] 22%|██▏       | 317/1473 [04:34<16:43,  1.15it/s] 22%|██▏       | 318/1473 [04:35<16:34,  1.16it/s] 22%|██▏       | 319/1473 [04:36<16:32,  1.16it/s] 22%|██▏       | 320/1473 [04:37<16:22,  1.17it/s]                                                   22%|██▏       | 320/1473 [04:37<16:22,  1.17it/s] 22%|██▏       | 321/1473 [04:38<16:29,  1.16it/s] 22%|██▏       | 322/1473 [04:39<16:51,  1.14it/s] 22%|██▏       | 323/1473 [04:40<16:53,  1.14it/s] 22%|██▏       | 324/1473 [04:40<16:44,  1.14it/s] 22%|██▏       | 325/1473 [04:41<16:41,  1.15it/s] 22%|██▏       | 326/1473 [04:42<16:49,  1.14it/s] 22%|██▏       | 327/1473 [04:43<16:32,  1.16it/s] 22%|██▏       | 328/1473 [04:44<16:28,  1.16it/s] 22%|██▏       | 329/1473 [04:45<16:24,  1.16it/s] 22%|██▏       | 330/1473 [04:46<16:17,  1.17it/s]                                                   22%|██▏       | 330/1473 [04:46<16:17,  1.17it/s] 22%|██▏       | 331/1473 [04:46<16:07,  1.18it/s] 23%|██▎       | 332/1473 [04:47<16:22,  1.16it/s] 23%|██▎       | 333/1473 [04:48<16:08,  1.18it/s] 23%|██▎       | 334/1473 [04:49<16:16,  1.17it/s] 23%|██▎       | 335/1473 [04:50<16:08,  1.17it/s] 23%|██▎       | 336/1473 [04:51<16:14,  1.17it/s] 23%|██▎       | 337/1473 [04:52<16:28,  1.15it/s] 23%|██▎       | 338/1473 [04:53<16:26,  1.15it/s] 23%|██▎       | 339/1473 [04:53<16:28,  1.15it/s] 23%|██▎       | 340/1473 [04:54<16:35,  1.14it/s]                                                   23%|██▎       | 340/1473 [04:54<16:35,  1.14it/s] 23%|██▎       | 341/1473 [04:55<16:38,  1.13it/s] 23%|██▎       | 342/1473 [04:56<16:30,  1.14it/s] 23%|██▎       | 343/1473 [04:57<16:33,  1.14it/s] 23%|██▎       | 344/1473 [04:58<16:19,  1.15it/s] 23%|██▎       | 345/1473 [04:59<16:40,  1.13it/s] 23%|██▎       | 346/1473 [05:00<16:32,  1.14it/s] 24%|██▎       | 347/1473 [05:00<16:19,  1.15it/s] 24%|██▎       | 348/1473 [05:01<16:08,  1.16it/s] 24%|██▎       | 349/1473 [05:02<16:15,  1.15it/s] 24%|██▍       | 350/1473 [05:03<15:57,  1.17it/s]                                                   24%|██▍       | 350/1473 [05:03<15:57,  1.17it/s] 24%|██▍       | 351/1473 [05:04<15:59,  1.17it/s] 24%|██▍       | 352/1473 [05:05<15:43,  1.19it/s] 24%|██▍       | 353/1473 [05:05<15:46,  1.18it/s] 24%|██▍       | 354/1473 [05:06<15:39,  1.19it/s] 24%|██▍       | 355/1473 [05:07<15:52,  1.17it/s] 24%|██▍       | 356/1473 [05:08<15:40,  1.19it/s] 24%|██▍       | 357/1473 [05:09<15:49,  1.17it/s] 24%|██▍       | 358/1473 [05:10<15:51,  1.17it/s] 24%|██▍       | 359/1473 [05:11<15:39,  1.19it/s] 24%|██▍       | 360/1473 [05:11<15:32,  1.19it/s]                                                   24%|██▍       | 360/1473 [05:11<15:32,  1.19it/s] 25%|██▍       | 361/1473 [05:12<15:29,  1.20it/s] 25%|██▍       | 362/1473 [05:13<15:38,  1.18it/s] 25%|██▍       | 363/1473 [05:14<15:50,  1.17it/s] 25%|██▍       | 364/1473 [05:15<15:46,  1.17it/s] 25%|██▍       | 365/1473 [05:16<15:34,  1.19it/s] 25%|██▍       | 366/1473 [05:16<15:33,  1.19it/s] 25%|██▍       | 367/1473 [05:17<15:42,  1.17it/s] 25%|██▍       | 368/1473 [05:18<15:36,  1.18it/s] 25%|██▌       | 369/1473 [05:19<15:43,  1.17it/s] 25%|██▌       | 370/1473 [05:20<15:27,  1.19it/s]                                                   25%|██▌       | 370/1473 [05:20<15:27,  1.19it/s] 25%|██▌       | 371/1473 [05:21<15:30,  1.18it/s] 25%|██▌       | 372/1473 [05:22<15:39,  1.17it/s] 25%|██▌       | 373/1473 [05:22<15:40,  1.17it/s] 25%|██▌       | 374/1473 [05:23<15:39,  1.17it/s] 25%|██▌       | 375/1473 [05:24<15:40,  1.17it/s] 26%|██▌       | 376/1473 [05:25<15:42,  1.16it/s] 26%|██▌       | 377/1473 [05:26<15:26,  1.18it/s] 26%|██▌       | 378/1473 [05:27<15:23,  1.19it/s] 26%|██▌       | 379/1473 [05:28<15:21,  1.19it/s] 26%|██▌       | 380/1473 [05:28<15:14,  1.19it/s]                                                   26%|██▌       | 380/1473 [05:28<15:14,  1.19it/s] 26%|██▌       | 381/1473 [05:29<15:19,  1.19it/s] 26%|██▌       | 382/1473 [05:30<15:25,  1.18it/s] 26%|██▌       | 383/1473 [05:31<16:11,  1.12it/s] 26%|██▌       | 384/1473 [05:32<16:10,  1.12it/s] 26%|██▌       | 385/1473 [05:33<15:50,  1.15it/s] 26%|██▌       | 386/1473 [05:34<15:33,  1.16it/s] 26%|██▋       | 387/1473 [05:34<15:31,  1.17it/s] 26%|██▋       | 388/1473 [05:35<15:41,  1.15it/s] 26%|██▋       | 389/1473 [05:36<15:52,  1.14it/s] 26%|██▋       | 390/1473 [05:37<16:20,  1.10it/s]                                                   26%|██▋       | 390/1473 [05:37<16:20,  1.10it/s] 27%|██▋       | 391/1473 [05:38<15:57,  1.13it/s] 27%|██▋       | 392/1473 [05:39<15:44,  1.14it/s] 27%|██▋       | 393/1473 [05:40<15:44,  1.14it/s] 27%|██▋       | 394/1473 [05:41<15:37,  1.15it/s] 27%|██▋       | 395/1473 [05:42<15:38,  1.15it/s] 27%|██▋       | 396/1473 [05:42<15:36,  1.15it/s] 27%|██▋       | 397/1473 [05:43<15:30,  1.16it/s] 27%|██▋       | 398/1473 [05:44<15:28,  1.16it/s] 27%|██▋       | 399/1473 [05:45<15:33,  1.15it/s] 27%|██▋       | 400/1473 [05:46<15:35,  1.15it/s]                                                   27%|██▋       | 400/1473 [05:46<15:35,  1.15it/s] 27%|██▋       | 401/1473 [05:47<15:26,  1.16it/s] 27%|██▋       | 402/1473 [05:48<15:16,  1.17it/s] 27%|██▋       | 403/1473 [05:48<15:02,  1.19it/s] 27%|██▋       | 404/1473 [05:49<15:15,  1.17it/s] 27%|██▋       | 405/1473 [05:50<15:16,  1.17it/s] 28%|██▊       | 406/1473 [05:51<15:07,  1.18it/s] 28%|██▊       | 407/1473 [05:52<14:59,  1.18it/s] 28%|██▊       | 408/1473 [05:53<15:19,  1.16it/s] 28%|██▊       | 409/1473 [05:54<15:11,  1.17it/s] 28%|██▊       | 410/1473 [05:54<15:02,  1.18it/s]                                                   28%|██▊       | 410/1473 [05:54<15:02,  1.18it/s] 28%|██▊       | 411/1473 [05:55<15:09,  1.17it/s] 28%|██▊       | 412/1473 [05:56<15:05,  1.17it/s] 28%|██▊       | 413/1473 [05:57<15:06,  1.17it/s] 28%|██▊       | 414/1473 [05:58<14:54,  1.18it/s] 28%|██▊       | 415/1473 [05:59<15:01,  1.17it/s] 28%|██▊       | 416/1473 [05:59<15:02,  1.17it/s] 28%|██▊       | 417/1473 [06:00<14:57,  1.18it/s] 28%|██▊       | 418/1473 [06:01<15:06,  1.16it/s] 28%|██▊       | 419/1473 [06:02<15:07,  1.16it/s] 29%|██▊       | 420/1473 [06:03<15:09,  1.16it/s]                                                   29%|██▊       | 420/1473 [06:03<15:09,  1.16it/s] 29%|██▊       | 421/1473 [06:04<15:01,  1.17it/s] 29%|██▊       | 422/1473 [06:05<14:58,  1.17it/s] 29%|██▊       | 423/1473 [06:05<15:06,  1.16it/s] 29%|██▉       | 424/1473 [06:06<15:02,  1.16it/s] 29%|██▉       | 425/1473 [06:07<14:59,  1.16it/s] 29%|██▉       | 426/1473 [06:08<14:42,  1.19it/s] 29%|██▉       | 427/1473 [06:09<14:52,  1.17it/s] 29%|██▉       | 428/1473 [06:10<15:13,  1.14it/s] 29%|██▉       | 429/1473 [06:11<15:07,  1.15it/s] 29%|██▉       | 430/1473 [06:12<14:59,  1.16it/s]                                                   29%|██▉       | 430/1473 [06:12<14:59,  1.16it/s] 29%|██▉       | 431/1473 [06:12<15:00,  1.16it/s] 29%|██▉       | 432/1473 [06:13<14:48,  1.17it/s] 29%|██▉       | 433/1473 [06:14<14:58,  1.16it/s] 29%|██▉       | 434/1473 [06:15<14:55,  1.16it/s] 30%|██▉       | 435/1473 [06:16<14:56,  1.16it/s] 30%|██▉       | 436/1473 [06:17<14:50,  1.16it/s] 30%|██▉       | 437/1473 [06:18<14:48,  1.17it/s] 30%|██▉       | 438/1473 [06:18<14:35,  1.18it/s] 30%|██▉       | 439/1473 [06:19<14:24,  1.20it/s] 30%|██▉       | 440/1473 [06:20<14:33,  1.18it/s]                                                   30%|██▉       | 440/1473 [06:20<14:33,  1.18it/s] 30%|██▉       | 441/1473 [06:21<14:43,  1.17it/s] 30%|███       | 442/1473 [06:22<15:00,  1.14it/s] 30%|███       | 443/1473 [06:23<15:07,  1.13it/s] 30%|███       | 444/1473 [06:24<15:18,  1.12it/s] 30%|███       | 445/1473 [06:25<15:21,  1.12it/s] 30%|███       | 446/1473 [06:25<15:21,  1.11it/s] 30%|███       | 447/1473 [06:26<15:13,  1.12it/s] 30%|███       | 448/1473 [06:27<15:01,  1.14it/s] 30%|███       | 449/1473 [06:28<14:46,  1.15it/s] 31%|███       | 450/1473 [06:29<14:49,  1.15it/s]                                                   31%|███       | 450/1473 [06:29<14:49,  1.15it/s] 31%|███       | 451/1473 [06:30<14:45,  1.15it/s] 31%|███       | 452/1473 [06:31<14:37,  1.16it/s] 31%|███       | 453/1473 [06:31<14:26,  1.18it/s] 31%|███       | 454/1473 [06:32<14:38,  1.16it/s] 31%|███       | 455/1473 [06:33<14:52,  1.14it/s] 31%|███       | 456/1473 [06:34<14:44,  1.15it/s] 31%|███       | 457/1473 [06:35<14:46,  1.15it/s] 31%|███       | 458/1473 [06:36<14:39,  1.15it/s] 31%|███       | 459/1473 [06:37<14:45,  1.15it/s] 31%|███       | 460/1473 [06:38<14:36,  1.16it/s]                                                   31%|███       | 460/1473 [06:38<14:36,  1.16it/s] 31%|███▏      | 461/1473 [06:38<14:35,  1.16it/s] 31%|███▏      | 462/1473 [06:39<14:32,  1.16it/s] 31%|███▏      | 463/1473 [06:40<14:30,  1.16it/s] 32%|███▏      | 464/1473 [06:41<14:06,  1.19it/s] 32%|███▏      | 465/1473 [06:42<14:13,  1.18it/s] 32%|███▏      | 466/1473 [06:43<14:04,  1.19it/s] 32%|███▏      | 467/1473 [06:43<14:08,  1.19it/s] 32%|███▏      | 468/1473 [06:44<14:27,  1.16it/s] 32%|███▏      | 469/1473 [06:45<14:32,  1.15it/s] 32%|███▏      | 470/1473 [06:46<14:50,  1.13it/s]                                                   32%|███▏      | 470/1473 [06:46<14:50,  1.13it/s] 32%|███▏      | 471/1473 [06:47<14:42,  1.14it/s] 32%|███▏      | 472/1473 [06:48<14:23,  1.16it/s] 32%|███▏      | 473/1473 [06:49<14:25,  1.16it/s] 32%|███▏      | 474/1473 [06:50<14:10,  1.17it/s] 32%|███▏      | 475/1473 [06:50<14:29,  1.15it/s] 32%|███▏      | 476/1473 [06:51<14:36,  1.14it/s] 32%|███▏      | 477/1473 [06:52<14:28,  1.15it/s] 32%|███▏      | 478/1473 [06:53<14:11,  1.17it/s] 33%|███▎      | 479/1473 [06:54<14:00,  1.18it/s] 33%|███▎      | 480/1473 [06:55<13:58,  1.18it/s]                                                   33%|███▎      | 480/1473 [06:55<13:58,  1.18it/s] 33%|███▎      | 481/1473 [06:56<14:11,  1.16it/s] 33%|███▎      | 482/1473 [06:57<15:17,  1.08it/s] 33%|███▎      | 483/1473 [06:58<14:59,  1.10it/s] 33%|███▎      | 484/1473 [06:58<14:44,  1.12it/s] 33%|███▎      | 485/1473 [06:59<14:28,  1.14it/s] 33%|███▎      | 486/1473 [07:00<14:22,  1.14it/s] 33%|███▎      | 487/1473 [07:01<14:11,  1.16it/s] 33%|███▎      | 488/1473 [07:02<14:04,  1.17it/s] 33%|███▎      | 489/1473 [07:03<13:56,  1.18it/s] 33%|███▎      | 490/1473 [07:03<14:02,  1.17it/s]                                                   33%|███▎      | 490/1473 [07:04<14:02,  1.17it/s] 33%|███▎      | 491/1473 [07:04<12:04,  1.36it/s] 33%|███▎      | 492/1473 [07:05<12:37,  1.29it/s] 33%|███▎      | 493/1473 [07:06<13:11,  1.24it/s] 34%|███▎      | 494/1473 [07:07<13:26,  1.21it/s] 34%|███▎      | 495/1473 [07:07<13:45,  1.19it/s] 34%|███▎      | 496/1473 [07:08<13:41,  1.19it/s] 34%|███▎      | 497/1473 [07:09<13:49,  1.18it/s] 34%|███▍      | 498/1473 [07:10<13:45,  1.18it/s] 34%|███▍      | 499/1473 [07:11<13:42,  1.18it/s] 34%|███▍      | 500/1473 [07:12<14:00,  1.16it/s]                                                   34%|███▍      | 500/1473 [07:12<14:00,  1.16it/s] 34%|███▍      | 501/1473 [07:13<14:06,  1.15it/s] 34%|███▍      | 502/1473 [07:14<14:14,  1.14it/s] 34%|███▍      | 503/1473 [07:14<13:57,  1.16it/s] 34%|███▍      | 504/1473 [07:15<14:10,  1.14it/s] 34%|███▍      | 505/1473 [07:16<14:02,  1.15it/s] 34%|███▍      | 506/1473 [07:17<14:04,  1.14it/s] 34%|███▍      | 507/1473 [07:18<13:45,  1.17it/s] 34%|███▍      | 508/1473 [07:19<13:41,  1.17it/s] 35%|███▍      | 509/1473 [07:20<13:51,  1.16it/s] 35%|███▍      | 510/1473 [07:20<13:46,  1.17it/s]                                                   35%|███▍      | 510/1473 [07:20<13:46,  1.17it/s] 35%|███▍      | 511/1473 [07:21<13:36,  1.18it/s] 35%|███▍      | 512/1473 [07:22<13:38,  1.17it/s] 35%|███▍      | 513/1473 [07:23<13:51,  1.15it/s] 35%|███▍      | 514/1473 [07:24<13:40,  1.17it/s] 35%|███▍      | 515/1473 [07:25<13:40,  1.17it/s] 35%|███▌      | 516/1473 [07:26<13:40,  1.17it/s] 35%|███▌      | 517/1473 [07:26<13:44,  1.16it/s] 35%|███▌      | 518/1473 [07:27<13:42,  1.16it/s] 35%|███▌      | 519/1473 [07:28<13:26,  1.18it/s] 35%|███▌      | 520/1473 [07:29<13:30,  1.18it/s]                                                   35%|███▌      | 520/1473 [07:29<13:30,  1.18it/s] 35%|███▌      | 521/1473 [07:30<13:30,  1.18it/s] 35%|███▌      | 522/1473 [07:31<13:25,  1.18it/s] 36%|███▌      | 523/1473 [07:31<13:19,  1.19it/s] 36%|███▌      | 524/1473 [07:32<13:33,  1.17it/s] 36%|███▌      | 525/1473 [07:33<13:45,  1.15it/s] 36%|███▌      | 526/1473 [07:34<13:46,  1.15it/s] 36%|███▌      | 527/1473 [07:35<13:41,  1.15it/s] 36%|███▌      | 528/1473 [07:36<13:34,  1.16it/s] 36%|███▌      | 529/1473 [07:37<13:21,  1.18it/s] 36%|███▌      | 530/1473 [07:37<13:24,  1.17it/s]                                                   36%|███▌      | 530/1473 [07:38<13:24,  1.17it/s] 36%|███▌      | 531/1473 [07:38<13:30,  1.16it/s] 36%|███▌      | 532/1473 [07:39<13:20,  1.18it/s] 36%|███▌      | 533/1473 [07:40<13:13,  1.18it/s] 36%|███▋      | 534/1473 [07:41<13:23,  1.17it/s] 36%|███▋      | 535/1473 [07:42<13:22,  1.17it/s] 36%|███▋      | 536/1473 [07:43<13:20,  1.17it/s] 36%|███▋      | 537/1473 [07:44<13:30,  1.15it/s] 37%|███▋      | 538/1473 [07:44<13:32,  1.15it/s] 37%|███▋      | 539/1473 [07:45<13:29,  1.15it/s] 37%|███▋      | 540/1473 [07:46<13:18,  1.17it/s]                                                   37%|███▋      | 540/1473 [07:46<13:18,  1.17it/s] 37%|███▋      | 541/1473 [07:47<13:15,  1.17it/s] 37%|███▋      | 542/1473 [07:48<13:15,  1.17it/s] 37%|███▋      | 543/1473 [07:49<13:15,  1.17it/s] 37%|███▋      | 544/1473 [07:50<13:38,  1.14it/s] 37%|███▋      | 545/1473 [07:51<13:48,  1.12it/s] 37%|███▋      | 546/1473 [07:51<13:42,  1.13it/s] 37%|███▋      | 547/1473 [07:52<13:26,  1.15it/s] 37%|███▋      | 548/1473 [07:53<13:35,  1.13it/s] 37%|███▋      | 549/1473 [07:54<13:29,  1.14it/s] 37%|███▋      | 550/1473 [07:55<13:10,  1.17it/s]                                                   37%|███▋      | 550/1473 [07:55<13:10,  1.17it/s] 37%|███▋      | 551/1473 [07:56<13:10,  1.17it/s] 37%|███▋      | 552/1473 [07:57<13:09,  1.17it/s] 38%|███▊      | 553/1473 [07:57<13:06,  1.17it/s] 38%|███▊      | 554/1473 [07:58<13:08,  1.17it/s] 38%|███▊      | 555/1473 [07:59<12:56,  1.18it/s] 38%|███▊      | 556/1473 [08:00<13:04,  1.17it/s] 38%|███▊      | 557/1473 [08:01<13:08,  1.16it/s] 38%|███▊      | 558/1473 [08:02<13:14,  1.15it/s] 38%|███▊      | 559/1473 [08:03<13:14,  1.15it/s] 38%|███▊      | 560/1473 [08:03<13:07,  1.16it/s]                                                   38%|███▊      | 560/1473 [08:03<13:07,  1.16it/s] 38%|███▊      | 561/1473 [08:04<13:05,  1.16it/s] 38%|███▊      | 562/1473 [08:05<13:28,  1.13it/s] 38%|███▊      | 563/1473 [08:06<13:48,  1.10it/s] 38%|███▊      | 564/1473 [08:07<13:37,  1.11it/s] 38%|███▊      | 565/1473 [08:08<13:31,  1.12it/s] 38%|███▊      | 566/1473 [08:09<13:17,  1.14it/s] 38%|███▊      | 567/1473 [08:10<13:09,  1.15it/s] 39%|███▊      | 568/1473 [08:10<13:10,  1.15it/s] 39%|███▊      | 569/1473 [08:11<13:05,  1.15it/s] 39%|███▊      | 570/1473 [08:12<13:04,  1.15it/s]                                                   39%|███▊      | 570/1473 [08:12<13:04,  1.15it/s] 39%|███▉      | 571/1473 [08:13<13:12,  1.14it/s] 39%|███▉      | 572/1473 [08:14<13:01,  1.15it/s] 39%|███▉      | 573/1473 [08:15<12:52,  1.17it/s] 39%|███▉      | 574/1473 [08:16<12:52,  1.16it/s] 39%|███▉      | 575/1473 [08:17<12:50,  1.16it/s] 39%|███▉      | 576/1473 [08:17<12:50,  1.16it/s] 39%|███▉      | 577/1473 [08:18<12:47,  1.17it/s] 39%|███▉      | 578/1473 [08:19<12:49,  1.16it/s] 39%|███▉      | 579/1473 [08:20<12:50,  1.16it/s] 39%|███▉      | 580/1473 [08:21<12:36,  1.18it/s]                                                   39%|███▉      | 580/1473 [08:21<12:36,  1.18it/s] 39%|███▉      | 581/1473 [08:22<12:49,  1.16it/s] 40%|███▉      | 582/1473 [08:23<13:05,  1.13it/s] 40%|███▉      | 583/1473 [08:23<12:51,  1.15it/s] 40%|███▉      | 584/1473 [08:24<12:53,  1.15it/s] 40%|███▉      | 585/1473 [08:25<12:47,  1.16it/s] 40%|███▉      | 586/1473 [08:26<12:45,  1.16it/s] 40%|███▉      | 587/1473 [08:27<12:39,  1.17it/s] 40%|███▉      | 588/1473 [08:28<12:32,  1.18it/s] 40%|███▉      | 589/1473 [08:29<12:46,  1.15it/s] 40%|████      | 590/1473 [08:29<12:36,  1.17it/s]                                                   40%|████      | 590/1473 [08:29<12:36,  1.17it/s] 40%|████      | 591/1473 [08:30<12:25,  1.18it/s] 40%|████      | 592/1473 [08:31<12:32,  1.17it/s] 40%|████      | 593/1473 [08:32<12:42,  1.15it/s] 40%|████      | 594/1473 [08:33<12:38,  1.16it/s] 40%|████      | 595/1473 [08:34<12:23,  1.18it/s] 40%|████      | 596/1473 [08:35<12:22,  1.18it/s] 41%|████      | 597/1473 [08:35<12:27,  1.17it/s] 41%|████      | 598/1473 [08:36<12:45,  1.14it/s] 41%|████      | 599/1473 [08:37<12:39,  1.15it/s] 41%|████      | 600/1473 [08:38<12:42,  1.14it/s]                                                   41%|████      | 600/1473 [08:38<12:42,  1.14it/s] 41%|████      | 601/1473 [08:39<12:40,  1.15it/s] 41%|████      | 602/1473 [08:40<12:38,  1.15it/s] 41%|████      | 603/1473 [08:41<12:21,  1.17it/s] 41%|████      | 604/1473 [08:41<12:07,  1.19it/s] 41%|████      | 605/1473 [08:42<12:12,  1.18it/s] 41%|████      | 606/1473 [08:43<12:09,  1.19it/s] 41%|████      | 607/1473 [08:44<12:15,  1.18it/s] 41%|████▏     | 608/1473 [08:45<12:23,  1.16it/s] 41%|████▏     | 609/1473 [08:46<12:19,  1.17it/s] 41%|████▏     | 610/1473 [08:47<12:21,  1.16it/s]                                                   41%|████▏     | 610/1473 [08:47<12:21,  1.16it/s] 41%|████▏     | 611/1473 [08:47<12:17,  1.17it/s] 42%|████▏     | 612/1473 [08:48<12:18,  1.17it/s] 42%|████▏     | 613/1473 [08:49<12:19,  1.16it/s] 42%|████▏     | 614/1473 [08:50<12:11,  1.17it/s] 42%|████▏     | 615/1473 [08:51<12:30,  1.14it/s] 42%|████▏     | 616/1473 [08:52<12:48,  1.12it/s] 42%|████▏     | 617/1473 [08:53<12:32,  1.14it/s] 42%|████▏     | 618/1473 [08:54<12:35,  1.13it/s] 42%|████▏     | 619/1473 [08:54<12:25,  1.15it/s] 42%|████▏     | 620/1473 [08:55<12:18,  1.15it/s]                                                   42%|████▏     | 620/1473 [08:55<12:18,  1.15it/s] 42%|████▏     | 621/1473 [08:56<12:16,  1.16it/s] 42%|████▏     | 622/1473 [08:57<12:15,  1.16it/s] 42%|████▏     | 623/1473 [08:58<12:19,  1.15it/s] 42%|████▏     | 624/1473 [08:59<12:16,  1.15it/s] 42%|████▏     | 625/1473 [09:00<12:16,  1.15it/s] 42%|████▏     | 626/1473 [09:01<12:18,  1.15it/s] 43%|████▎     | 627/1473 [09:01<12:10,  1.16it/s] 43%|████▎     | 628/1473 [09:02<12:09,  1.16it/s] 43%|████▎     | 629/1473 [09:03<12:17,  1.14it/s] 43%|████▎     | 630/1473 [09:04<12:15,  1.15it/s]                                                   43%|████▎     | 630/1473 [09:04<12:15,  1.15it/s] 43%|████▎     | 631/1473 [09:05<12:14,  1.15it/s] 43%|████▎     | 632/1473 [09:06<12:03,  1.16it/s] 43%|████▎     | 633/1473 [09:07<12:02,  1.16it/s] 43%|████▎     | 634/1473 [09:07<12:05,  1.16it/s] 43%|████▎     | 635/1473 [09:08<12:09,  1.15it/s] 43%|████▎     | 636/1473 [09:09<12:16,  1.14it/s] 43%|████▎     | 637/1473 [09:10<12:05,  1.15it/s] 43%|████▎     | 638/1473 [09:11<12:08,  1.15it/s] 43%|████▎     | 639/1473 [09:12<11:55,  1.17it/s] 43%|████▎     | 640/1473 [09:13<11:58,  1.16it/s]                                                   43%|████▎     | 640/1473 [09:13<11:58,  1.16it/s] 44%|████▎     | 641/1473 [09:13<11:55,  1.16it/s] 44%|████▎     | 642/1473 [09:14<12:01,  1.15it/s] 44%|████▎     | 643/1473 [09:15<12:08,  1.14it/s] 44%|████▎     | 644/1473 [09:16<12:05,  1.14it/s] 44%|████▍     | 645/1473 [09:17<12:05,  1.14it/s] 44%|████▍     | 646/1473 [09:18<11:57,  1.15it/s] 44%|████▍     | 647/1473 [09:19<12:04,  1.14it/s] 44%|████▍     | 648/1473 [09:20<11:50,  1.16it/s] 44%|████▍     | 649/1473 [09:20<11:50,  1.16it/s] 44%|████▍     | 650/1473 [09:21<11:52,  1.15it/s]                                                   44%|████▍     | 650/1473 [09:21<11:52,  1.15it/s] 44%|████▍     | 651/1473 [09:22<11:46,  1.16it/s] 44%|████▍     | 652/1473 [09:23<11:40,  1.17it/s] 44%|████▍     | 653/1473 [09:24<11:47,  1.16it/s] 44%|████▍     | 654/1473 [09:25<11:50,  1.15it/s] 44%|████▍     | 655/1473 [09:26<11:44,  1.16it/s] 45%|████▍     | 656/1473 [09:26<11:41,  1.16it/s] 45%|████▍     | 657/1473 [09:27<11:39,  1.17it/s] 45%|████▍     | 658/1473 [09:28<11:28,  1.18it/s] 45%|████▍     | 659/1473 [09:29<11:20,  1.20it/s] 45%|████▍     | 660/1473 [09:30<11:23,  1.19it/s]                                                   45%|████▍     | 660/1473 [09:30<11:23,  1.19it/s] 45%|████▍     | 661/1473 [09:31<11:50,  1.14it/s] 45%|████▍     | 662/1473 [09:32<11:52,  1.14it/s] 45%|████▌     | 663/1473 [09:33<11:45,  1.15it/s] 45%|████▌     | 664/1473 [09:33<11:26,  1.18it/s] 45%|████▌     | 665/1473 [09:34<11:28,  1.17it/s] 45%|████▌     | 666/1473 [09:35<11:33,  1.16it/s] 45%|████▌     | 667/1473 [09:36<11:35,  1.16it/s] 45%|████▌     | 668/1473 [09:37<11:38,  1.15it/s] 45%|████▌     | 669/1473 [09:38<11:42,  1.15it/s] 45%|████▌     | 670/1473 [09:39<11:38,  1.15it/s]                                                   45%|████▌     | 670/1473 [09:39<11:38,  1.15it/s] 46%|████▌     | 671/1473 [09:39<11:41,  1.14it/s] 46%|████▌     | 672/1473 [09:40<11:30,  1.16it/s] 46%|████▌     | 673/1473 [09:41<11:14,  1.19it/s] 46%|████▌     | 674/1473 [09:42<11:21,  1.17it/s] 46%|████▌     | 675/1473 [09:43<11:26,  1.16it/s] 46%|████▌     | 676/1473 [09:44<11:16,  1.18it/s] 46%|████▌     | 677/1473 [09:45<11:27,  1.16it/s] 46%|████▌     | 678/1473 [09:45<11:25,  1.16it/s] 46%|████▌     | 679/1473 [09:46<11:23,  1.16it/s] 46%|████▌     | 680/1473 [09:47<11:40,  1.13it/s]                                                   46%|████▌     | 680/1473 [09:47<11:40,  1.13it/s] 46%|████▌     | 681/1473 [09:48<11:37,  1.14it/s] 46%|████▋     | 682/1473 [09:49<11:42,  1.13it/s] 46%|████▋     | 683/1473 [09:50<11:25,  1.15it/s] 46%|████▋     | 684/1473 [09:51<11:17,  1.17it/s] 47%|████▋     | 685/1473 [09:52<11:22,  1.15it/s] 47%|████▋     | 686/1473 [09:52<11:30,  1.14it/s] 47%|████▋     | 687/1473 [09:53<11:28,  1.14it/s] 47%|████▋     | 688/1473 [09:54<11:28,  1.14it/s] 47%|████▋     | 689/1473 [09:55<11:18,  1.15it/s] 47%|████▋     | 690/1473 [09:56<11:21,  1.15it/s]                                                   47%|████▋     | 690/1473 [09:56<11:21,  1.15it/s] 47%|████▋     | 691/1473 [09:57<11:09,  1.17it/s] 47%|████▋     | 692/1473 [09:58<11:19,  1.15it/s] 47%|████▋     | 693/1473 [09:58<11:14,  1.16it/s] 47%|████▋     | 694/1473 [09:59<11:19,  1.15it/s] 47%|████▋     | 695/1473 [10:00<11:08,  1.16it/s] 47%|████▋     | 696/1473 [10:01<11:19,  1.14it/s] 47%|████▋     | 697/1473 [10:02<11:14,  1.15it/s] 47%|████▋     | 698/1473 [10:03<11:04,  1.17it/s] 47%|████▋     | 699/1473 [10:04<10:56,  1.18it/s] 48%|████▊     | 700/1473 [10:04<10:52,  1.18it/s]                                                   48%|████▊     | 700/1473 [10:04<10:52,  1.18it/s] 48%|████▊     | 701/1473 [10:05<10:52,  1.18it/s] 48%|████▊     | 702/1473 [10:06<11:10,  1.15it/s] 48%|████▊     | 703/1473 [10:07<11:08,  1.15it/s] 48%|████▊     | 704/1473 [10:08<11:04,  1.16it/s] 48%|████▊     | 705/1473 [10:09<10:59,  1.16it/s] 48%|████▊     | 706/1473 [10:10<11:04,  1.15it/s] 48%|████▊     | 707/1473 [10:11<11:08,  1.15it/s] 48%|████▊     | 708/1473 [10:11<11:04,  1.15it/s] 48%|████▊     | 709/1473 [10:12<11:00,  1.16it/s] 48%|████▊     | 710/1473 [10:13<10:46,  1.18it/s]                                                   48%|████▊     | 710/1473 [10:13<10:46,  1.18it/s] 48%|████▊     | 711/1473 [10:14<10:50,  1.17it/s] 48%|████▊     | 712/1473 [10:15<10:48,  1.17it/s] 48%|████▊     | 713/1473 [10:16<10:49,  1.17it/s] 48%|████▊     | 714/1473 [10:17<10:56,  1.16it/s] 49%|████▊     | 715/1473 [10:17<10:51,  1.16it/s] 49%|████▊     | 716/1473 [10:18<10:50,  1.16it/s] 49%|████▊     | 717/1473 [10:19<10:44,  1.17it/s] 49%|████▊     | 718/1473 [10:20<10:47,  1.17it/s] 49%|████▉     | 719/1473 [10:21<10:58,  1.14it/s] 49%|████▉     | 720/1473 [10:22<10:56,  1.15it/s]                                                   49%|████▉     | 720/1473 [10:22<10:56,  1.15it/s] 49%|████▉     | 721/1473 [10:23<10:49,  1.16it/s] 49%|████▉     | 722/1473 [10:23<10:50,  1.15it/s] 49%|████▉     | 723/1473 [10:24<10:59,  1.14it/s] 49%|████▉     | 724/1473 [10:25<10:45,  1.16it/s] 49%|████▉     | 725/1473 [10:26<11:35,  1.08it/s] 49%|████▉     | 726/1473 [10:27<11:32,  1.08it/s] 49%|████▉     | 727/1473 [10:28<11:21,  1.09it/s] 49%|████▉     | 728/1473 [10:29<11:06,  1.12it/s] 49%|████▉     | 729/1473 [10:30<10:51,  1.14it/s] 50%|████▉     | 730/1473 [10:31<10:58,  1.13it/s]                                                   50%|████▉     | 730/1473 [10:31<10:58,  1.13it/s] 50%|████▉     | 731/1473 [10:32<11:00,  1.12it/s] 50%|████▉     | 732/1473 [10:32<10:49,  1.14it/s] 50%|████▉     | 733/1473 [10:33<10:52,  1.13it/s] 50%|████▉     | 734/1473 [10:34<10:36,  1.16it/s] 50%|████▉     | 735/1473 [10:35<10:27,  1.18it/s] 50%|████▉     | 736/1473 [10:36<10:31,  1.17it/s] 50%|█████     | 737/1473 [10:37<10:32,  1.16it/s] 50%|█████     | 738/1473 [10:38<10:39,  1.15it/s] 50%|█████     | 739/1473 [10:38<10:38,  1.15it/s] 50%|█████     | 740/1473 [10:39<10:31,  1.16it/s]                                                   50%|█████     | 740/1473 [10:39<10:31,  1.16it/s] 50%|█████     | 741/1473 [10:40<10:33,  1.16it/s] 50%|█████     | 742/1473 [10:41<10:26,  1.17it/s] 50%|█████     | 743/1473 [10:42<10:29,  1.16it/s] 51%|█████     | 744/1473 [10:43<10:16,  1.18it/s] 51%|█████     | 745/1473 [10:44<10:15,  1.18it/s] 51%|█████     | 746/1473 [10:44<10:18,  1.18it/s] 51%|█████     | 747/1473 [10:45<10:18,  1.17it/s] 51%|█████     | 748/1473 [10:46<10:20,  1.17it/s] 51%|█████     | 749/1473 [10:47<10:15,  1.18it/s] 51%|█████     | 750/1473 [10:48<10:19,  1.17it/s]                                                   51%|█████     | 750/1473 [10:48<10:19,  1.17it/s] 51%|█████     | 751/1473 [10:49<10:17,  1.17it/s] 51%|█████     | 752/1473 [10:50<10:36,  1.13it/s] 51%|█████     | 753/1473 [10:51<10:37,  1.13it/s] 51%|█████     | 754/1473 [10:51<10:27,  1.14it/s] 51%|█████▏    | 755/1473 [10:52<10:17,  1.16it/s] 51%|█████▏    | 756/1473 [10:53<10:21,  1.15it/s] 51%|█████▏    | 757/1473 [10:54<10:16,  1.16it/s] 51%|█████▏    | 758/1473 [10:55<10:24,  1.15it/s] 52%|█████▏    | 759/1473 [10:56<10:33,  1.13it/s] 52%|█████▏    | 760/1473 [10:57<10:39,  1.12it/s]                                                   52%|█████▏    | 760/1473 [10:57<10:39,  1.12it/s] 52%|█████▏    | 761/1473 [10:57<10:21,  1.15it/s] 52%|█████▏    | 762/1473 [10:58<10:09,  1.17it/s] 52%|█████▏    | 763/1473 [10:59<09:59,  1.18it/s] 52%|█████▏    | 764/1473 [11:00<10:10,  1.16it/s] 52%|█████▏    | 765/1473 [11:01<10:21,  1.14it/s] 52%|█████▏    | 766/1473 [11:02<10:30,  1.12it/s] 52%|█████▏    | 767/1473 [11:03<10:15,  1.15it/s] 52%|█████▏    | 768/1473 [11:04<10:06,  1.16it/s] 52%|█████▏    | 769/1473 [11:04<10:07,  1.16it/s] 52%|█████▏    | 770/1473 [11:05<10:03,  1.17it/s]                                                   52%|█████▏    | 770/1473 [11:05<10:03,  1.17it/s] 52%|█████▏    | 771/1473 [11:06<10:03,  1.16it/s] 52%|█████▏    | 772/1473 [11:07<10:00,  1.17it/s] 52%|█████▏    | 773/1473 [11:08<10:06,  1.15it/s] 53%|█████▎    | 774/1473 [11:09<09:50,  1.18it/s] 53%|█████▎    | 775/1473 [11:09<09:56,  1.17it/s] 53%|█████▎    | 776/1473 [11:10<09:54,  1.17it/s] 53%|█████▎    | 777/1473 [11:11<09:51,  1.18it/s] 53%|█████▎    | 778/1473 [11:12<09:49,  1.18it/s] 53%|█████▎    | 779/1473 [11:13<09:45,  1.19it/s] 53%|█████▎    | 780/1473 [11:14<09:46,  1.18it/s]                                                   53%|█████▎    | 780/1473 [11:14<09:46,  1.18it/s] 53%|█████▎    | 781/1473 [11:15<09:47,  1.18it/s] 53%|█████▎    | 782/1473 [11:15<09:41,  1.19it/s] 53%|█████▎    | 783/1473 [11:16<09:42,  1.19it/s] 53%|█████▎    | 784/1473 [11:17<09:43,  1.18it/s] 53%|█████▎    | 785/1473 [11:18<10:09,  1.13it/s] 53%|█████▎    | 786/1473 [11:19<10:05,  1.13it/s] 53%|█████▎    | 787/1473 [11:20<09:59,  1.14it/s] 53%|█████▎    | 788/1473 [11:21<09:51,  1.16it/s] 54%|█████▎    | 789/1473 [11:22<09:50,  1.16it/s] 54%|█████▎    | 790/1473 [11:22<09:50,  1.16it/s]                                                   54%|█████▎    | 790/1473 [11:22<09:50,  1.16it/s] 54%|█████▎    | 791/1473 [11:23<09:48,  1.16it/s] 54%|█████▍    | 792/1473 [11:24<09:45,  1.16it/s] 54%|█████▍    | 793/1473 [11:25<09:38,  1.18it/s] 54%|█████▍    | 794/1473 [11:26<09:33,  1.18it/s] 54%|█████▍    | 795/1473 [11:27<09:28,  1.19it/s] 54%|█████▍    | 796/1473 [11:27<09:38,  1.17it/s] 54%|█████▍    | 797/1473 [11:28<09:31,  1.18it/s] 54%|█████▍    | 798/1473 [11:29<09:27,  1.19it/s] 54%|█████▍    | 799/1473 [11:30<09:32,  1.18it/s] 54%|█████▍    | 800/1473 [11:31<09:31,  1.18it/s]                                                   54%|█████▍    | 800/1473 [11:31<09:31,  1.18it/s] 54%|█████▍    | 801/1473 [11:32<09:46,  1.15it/s] 54%|█████▍    | 802/1473 [11:33<09:34,  1.17it/s] 55%|█████▍    | 803/1473 [11:33<09:41,  1.15it/s] 55%|█████▍    | 804/1473 [11:34<09:33,  1.17it/s] 55%|█████▍    | 805/1473 [11:35<09:33,  1.16it/s] 55%|█████▍    | 806/1473 [11:36<09:37,  1.16it/s] 55%|█████▍    | 807/1473 [11:37<09:35,  1.16it/s] 55%|█████▍    | 808/1473 [11:38<09:35,  1.16it/s] 55%|█████▍    | 809/1473 [11:39<09:27,  1.17it/s] 55%|█████▍    | 810/1473 [11:39<09:26,  1.17it/s]                                                   55%|█████▍    | 810/1473 [11:39<09:26,  1.17it/s] 55%|█████▌    | 811/1473 [11:40<09:25,  1.17it/s] 55%|█████▌    | 812/1473 [11:41<09:33,  1.15it/s] 55%|█████▌    | 813/1473 [11:42<09:32,  1.15it/s] 55%|█████▌    | 814/1473 [11:43<09:26,  1.16it/s] 55%|█████▌    | 815/1473 [11:44<09:21,  1.17it/s] 55%|█████▌    | 816/1473 [11:45<09:20,  1.17it/s] 55%|█████▌    | 817/1473 [11:45<09:13,  1.19it/s] 56%|█████▌    | 818/1473 [11:46<09:12,  1.19it/s] 56%|█████▌    | 819/1473 [11:47<09:10,  1.19it/s] 56%|█████▌    | 820/1473 [11:48<09:07,  1.19it/s]                                                   56%|█████▌    | 820/1473 [11:48<09:07,  1.19it/s] 56%|█████▌    | 821/1473 [11:49<09:09,  1.19it/s] 56%|█████▌    | 822/1473 [11:50<09:10,  1.18it/s] 56%|█████▌    | 823/1473 [11:51<09:14,  1.17it/s] 56%|█████▌    | 824/1473 [11:51<09:20,  1.16it/s] 56%|█████▌    | 825/1473 [11:52<09:14,  1.17it/s] 56%|█████▌    | 826/1473 [11:53<09:09,  1.18it/s] 56%|█████▌    | 827/1473 [11:54<09:12,  1.17it/s] 56%|█████▌    | 828/1473 [11:55<09:02,  1.19it/s] 56%|█████▋    | 829/1473 [11:56<08:59,  1.19it/s] 56%|█████▋    | 830/1473 [11:56<08:56,  1.20it/s]                                                   56%|█████▋    | 830/1473 [11:56<08:56,  1.20it/s] 56%|█████▋    | 831/1473 [11:57<09:04,  1.18it/s] 56%|█████▋    | 832/1473 [11:58<09:10,  1.16it/s] 57%|█████▋    | 833/1473 [11:59<09:05,  1.17it/s] 57%|█████▋    | 834/1473 [12:00<09:04,  1.17it/s] 57%|█████▋    | 835/1473 [12:01<09:05,  1.17it/s] 57%|█████▋    | 836/1473 [12:02<09:00,  1.18it/s] 57%|█████▋    | 837/1473 [12:02<08:57,  1.18it/s] 57%|█████▋    | 838/1473 [12:03<09:04,  1.17it/s] 57%|█████▋    | 839/1473 [12:04<09:01,  1.17it/s] 57%|█████▋    | 840/1473 [12:05<09:10,  1.15it/s]                                                   57%|█████▋    | 840/1473 [12:05<09:10,  1.15it/s] 57%|█████▋    | 841/1473 [12:06<09:12,  1.14it/s] 57%|█████▋    | 842/1473 [12:07<09:09,  1.15it/s] 57%|█████▋    | 843/1473 [12:08<09:05,  1.15it/s] 57%|█████▋    | 844/1473 [12:08<08:55,  1.17it/s] 57%|█████▋    | 845/1473 [12:09<08:56,  1.17it/s] 57%|█████▋    | 846/1473 [12:10<08:45,  1.19it/s] 58%|█████▊    | 847/1473 [12:11<08:46,  1.19it/s] 58%|█████▊    | 848/1473 [12:12<08:43,  1.19it/s] 58%|█████▊    | 849/1473 [12:13<08:39,  1.20it/s] 58%|█████▊    | 850/1473 [12:13<08:38,  1.20it/s]                                                   58%|█████▊    | 850/1473 [12:13<08:38,  1.20it/s] 58%|█████▊    | 851/1473 [12:14<08:42,  1.19it/s] 58%|█████▊    | 852/1473 [12:15<08:47,  1.18it/s] 58%|█████▊    | 853/1473 [12:16<08:48,  1.17it/s] 58%|█████▊    | 854/1473 [12:17<08:43,  1.18it/s] 58%|█████▊    | 855/1473 [12:18<08:42,  1.18it/s] 58%|█████▊    | 856/1473 [12:19<08:46,  1.17it/s] 58%|█████▊    | 857/1473 [12:19<08:50,  1.16it/s] 58%|█████▊    | 858/1473 [12:20<08:48,  1.16it/s] 58%|█████▊    | 859/1473 [12:21<08:41,  1.18it/s] 58%|█████▊    | 860/1473 [12:22<08:41,  1.18it/s]                                                   58%|█████▊    | 860/1473 [12:22<08:41,  1.18it/s] 58%|█████▊    | 861/1473 [12:23<08:42,  1.17it/s] 59%|█████▊    | 862/1473 [12:24<08:45,  1.16it/s] 59%|█████▊    | 863/1473 [12:25<08:52,  1.15it/s] 59%|█████▊    | 864/1473 [12:26<08:54,  1.14it/s] 59%|█████▊    | 865/1473 [12:26<08:50,  1.15it/s] 59%|█████▉    | 866/1473 [12:27<08:49,  1.15it/s] 59%|█████▉    | 867/1473 [12:28<08:49,  1.14it/s] 59%|█████▉    | 868/1473 [12:29<08:45,  1.15it/s] 59%|█████▉    | 869/1473 [12:30<08:47,  1.14it/s] 59%|█████▉    | 870/1473 [12:31<08:45,  1.15it/s]                                                  {'loss': 1.3314, 'grad_norm': 18.875, 'learning_rate': 1.8243243243243245e-06, 'epoch': 0.02}
+{'loss': 1.1684, 'grad_norm': 11.8125, 'learning_rate': 3.851351351351351e-06, 'epoch': 0.04}
+{'loss': 0.8261, 'grad_norm': 4.46875, 'learning_rate': 5.8783783783783786e-06, 'epoch': 0.06}
+{'loss': 0.6049, 'grad_norm': 3.796875, 'learning_rate': 7.905405405405404e-06, 'epoch': 0.08}
+{'loss': 0.5428, 'grad_norm': 2.828125, 'learning_rate': 9.932432432432433e-06, 'epoch': 0.1}
+{'loss': 0.4916, 'grad_norm': 2.765625, 'learning_rate': 1.1959459459459459e-05, 'epoch': 0.12}
+{'loss': 0.486, 'grad_norm': 2.734375, 'learning_rate': 1.3986486486486488e-05, 'epoch': 0.14}
+{'loss': 0.4803, 'grad_norm': 2.96875, 'learning_rate': 1.6013513513513515e-05, 'epoch': 0.16}
+{'loss': 0.4656, 'grad_norm': 3.03125, 'learning_rate': 1.804054054054054e-05, 'epoch': 0.18}
+{'loss': 0.4518, 'grad_norm': 2.796875, 'learning_rate': 2.006756756756757e-05, 'epoch': 0.2}
+{'loss': 0.432, 'grad_norm': 2.78125, 'learning_rate': 2.2094594594594595e-05, 'epoch': 0.22}
+{'loss': 0.4382, 'grad_norm': 2.703125, 'learning_rate': 2.4121621621621624e-05, 'epoch': 0.24}
+{'loss': 0.4588, 'grad_norm': 2.78125, 'learning_rate': 2.614864864864865e-05, 'epoch': 0.27}
+{'loss': 0.454, 'grad_norm': 2.875, 'learning_rate': 2.8175675675675675e-05, 'epoch': 0.29}
+{'loss': 0.4477, 'grad_norm': 2.515625, 'learning_rate': 2.9999957837238404e-05, 'epoch': 0.31}
+{'loss': 0.4153, 'grad_norm': 2.6875, 'learning_rate': 2.999489859264236e-05, 'epoch': 0.33}
+{'loss': 0.4428, 'grad_norm': 2.6875, 'learning_rate': 2.998141005453928e-05, 'epoch': 0.35}
+{'loss': 0.4325, 'grad_norm': 2.625, 'learning_rate': 2.9959499805431033e-05, 'epoch': 0.37}
+{'loss': 0.4355, 'grad_norm': 2.578125, 'learning_rate': 2.99291801620345e-05, 'epoch': 0.39}
+{'loss': 0.4293, 'grad_norm': 2.65625, 'learning_rate': 2.9890468168357787e-05, 'epoch': 0.41}
+{'loss': 0.4143, 'grad_norm': 2.625, 'learning_rate': 2.9843385586119046e-05, 'epoch': 0.43}
+{'loss': 0.4183, 'grad_norm': 2.0625, 'learning_rate': 2.9787958882513262e-05, 'epoch': 0.45}
+{'loss': 0.4369, 'grad_norm': 2.671875, 'learning_rate': 2.9724219215333862e-05, 'epoch': 0.47}
+{'loss': 0.4177, 'grad_norm': 2.328125, 'learning_rate': 2.965220241545755e-05, 'epoch': 0.49}
+{'loss': 0.4157, 'grad_norm': 2.046875, 'learning_rate': 2.95719489667022e-05, 'epoch': 0.51}
+{'loss': 0.4112, 'grad_norm': 2.390625, 'learning_rate': 2.9483503983069103e-05, 'epoch': 0.53}
+{'loss': 0.4623, 'grad_norm': 2.3125, 'learning_rate': 2.9386917183382404e-05, 'epoch': 0.55}
+{'loss': 0.4233, 'grad_norm': 2.65625, 'learning_rate': 2.9282242863339972e-05, 'epoch': 0.57}
+{'loss': 0.4221, 'grad_norm': 2.15625, 'learning_rate': 2.9169539864991376e-05, 'epoch': 0.59}
+{'loss': 0.3764, 'grad_norm': 2.359375, 'learning_rate': 2.9048871543660186e-05, 'epoch': 0.61}
+{'loss': 0.4314, 'grad_norm': 2.671875, 'learning_rate': 2.892030573232914e-05, 'epoch': 0.63}
+{'loss': 0.4244, 'grad_norm': 2.609375, 'learning_rate': 2.8783914703508258e-05, 'epoch': 0.65}
+{'loss': 0.4026, 'grad_norm': 2.40625, 'learning_rate': 2.863977512860725e-05, 'epoch': 0.67}
+{'loss': 0.4151, 'grad_norm': 1.8671875, 'learning_rate': 2.8487968034835167e-05, 'epoch': 0.69}
+{'loss': 0.3737, 'grad_norm': 2.375, 'learning_rate': 2.8328578759651404e-05, 'epoch': 0.71}
+{'loss': 0.3949, 'grad_norm': 2.234375, 'learning_rate': 2.8161696902793764e-05, 'epoch': 0.73}
+{'loss': 0.4137, 'grad_norm': 2.203125, 'learning_rate': 2.798741627591052e-05, 'epoch': 0.75}
+{'loss': 0.3899, 'grad_norm': 1.984375, 'learning_rate': 2.7805834849824704e-05, 'epoch': 0.77}
+{'loss': 0.3805, 'grad_norm': 2.640625, 'learning_rate': 2.761705469946044e-05, 'epoch': 0.8}
+{'loss': 0.4019, 'grad_norm': 2.3125, 'learning_rate': 2.7421181946462075e-05, 'epoch': 0.82}
+{'loss': 0.3995, 'grad_norm': 2.359375, 'learning_rate': 2.721832669953859e-05, 'epoch': 0.84}
+{'loss': 0.4109, 'grad_norm': 1.96875, 'learning_rate': 2.7008602992566577e-05, 'epoch': 0.86}
+{'loss': 0.418, 'grad_norm': 2.1875, 'learning_rate': 2.6792128720486805e-05, 'epoch': 0.88}
+{'loss': 0.3621, 'grad_norm': 1.8359375, 'learning_rate': 2.656902557303027e-05, 'epoch': 0.9}
+{'loss': 0.4036, 'grad_norm': 2.109375, 'learning_rate': 2.6339418966311046e-05, 'epoch': 0.92}
+{'loss': 0.3783, 'grad_norm': 1.671875, 'learning_rate': 2.6103437972324325e-05, 'epoch': 0.94}
+{'loss': 0.3697, 'grad_norm': 1.7578125, 'learning_rate': 2.5861215246389392e-05, 'epoch': 0.96}
+{'loss': 0.4064, 'grad_norm': 2.21875, 'learning_rate': 2.5612886952578208e-05, 'epoch': 0.98}
+{'loss': 0.3911, 'grad_norm': 1.78125, 'learning_rate': 2.5358592687171575e-05, 'epoch': 1.0}
+{'loss': 0.2735, 'grad_norm': 1.953125, 'learning_rate': 2.5098475400185932e-05, 'epoch': 1.02}
+{'loss': 0.263, 'grad_norm': 1.984375, 'learning_rate': 2.4832681315014834e-05, 'epoch': 1.04}
+{'loss': 0.2584, 'grad_norm': 2.3125, 'learning_rate': 2.4561359846230346e-05, 'epoch': 1.06}
+{'loss': 0.2797, 'grad_norm': 2.03125, 'learning_rate': 2.428466351559052e-05, 'epoch': 1.08}
+{'loss': 0.2725, 'grad_norm': 2.109375, 'learning_rate': 2.400274786630019e-05, 'epoch': 1.1}
+{'loss': 0.2515, 'grad_norm': 2.3125, 'learning_rate': 2.3715771375573282e-05, 'epoch': 1.12}
+{'loss': 0.2873, 'grad_norm': 5.21875, 'learning_rate': 2.342389536554579e-05, 'epoch': 1.14}
+{'loss': 0.2463, 'grad_norm': 1.8203125, 'learning_rate': 2.312728391258949e-05, 'epoch': 1.16}
+{'loss': 0.2569, 'grad_norm': 2.15625, 'learning_rate': 2.282610375507737e-05, 'epoch': 1.18}
+{'loss': 0.2584, 'grad_norm': 2.34375, 'learning_rate': 2.252052419965265e-05, 'epoch': 1.2}
+{'loss': 0.251, 'grad_norm': 1.8203125, 'learning_rate': 2.2210717026054063e-05, 'epoch': 1.22}
+{'loss': 0.2537, 'grad_norm': 1.96875, 'learning_rate': 2.189685639055086e-05, 'epoch': 1.24}
+{'loss': 0.2542, 'grad_norm': 1.7890625, 'learning_rate': 2.1579118728041926e-05, 'epoch': 1.26}
+{'loss': 0.266, 'grad_norm': 1.9921875, 'learning_rate': 2.1257682652873933e-05, 'epoch': 1.28}
+{'loss': 0.2606, 'grad_norm': 2.0625, 'learning_rate': 2.093272885843435e-05, 'epoch': 1.3}
+{'loss': 0.2597, 'grad_norm': 1.734375, 'learning_rate': 2.0604440015575697e-05, 'epoch': 1.32}
+{'loss': 0.2791, 'grad_norm': 2.09375, 'learning_rate': 2.0273000669928252e-05, 'epoch': 1.34}
+{'loss': 0.2526, 'grad_norm': 2.0625, 'learning_rate': 1.9938597138158762e-05, 'epoch': 1.36}
+{'loss': 0.276, 'grad_norm': 2.125, 'learning_rate': 1.9601417403233695e-05, 'epoch': 1.39}
+{'loss': 0.2443, 'grad_norm': 1.96875, 'learning_rate': 1.926165100874567e-05, 'epoch': 1.41}
+{'loss': 0.2513, 'grad_norm': 2.15625, 'learning_rate': 1.891948895236268e-05, 'epoch': 1.43}
+{'loss': 0.2516, 'grad_norm': 2.140625, 'learning_rate': 1.8575123578459864e-05, 'epoch': 1.45}
+{'loss': 0.2764, 'grad_norm': 2.375, 'learning_rate': 1.822874846999429e-05, 'epoch': 1.47}
+{'loss': 0.2606, 'grad_norm': 3.234375, 'learning_rate': 1.78805583396834e-05, 'epoch': 1.49}
+{'loss': 0.2319, 'grad_norm': 1.890625, 'learning_rate': 1.7530748920548423e-05, 'epoch': 1.51}
+{'loss': 0.2545, 'grad_norm': 2.328125, 'learning_rate': 1.7179516855884226e-05, 'epoch': 1.53}
+{'loss': 0.2422, 'grad_norm': 1.84375, 'learning_rate': 1.682705958871744e-05, 'epoch': 1.55}
+{'loss': 0.2438, 'grad_norm': 2.359375, 'learning_rate': 1.647357525081503e-05, 'epoch': 1.57}
+{'loss': 0.2407, 'grad_norm': 1.734375, 'learning_rate': 1.6119262551305698e-05, 'epoch': 1.59}
+{'loss': 0.2229, 'grad_norm': 1.5859375, 'learning_rate': 1.5764320664976726e-05, 'epoch': 1.61}
+{'loss': 0.2498, 'grad_norm': 2.875, 'learning_rate': 1.5408949120309028e-05, 'epoch': 1.63}
+{'loss': 0.2432, 'grad_norm': 2.484375, 'learning_rate': 1.5053347687313434e-05, 'epoch': 1.65}
+{'loss': 0.2558, 'grad_norm': 2.15625, 'learning_rate': 1.4697716265231112e-05, 'epoch': 1.67}
+{'loss': 0.2769, 'grad_norm': 1.890625, 'learning_rate': 1.4342254770161438e-05, 'epoch': 1.69}
+{'loss': 0.2618, 'grad_norm': 2.15625, 'learning_rate': 1.3987163022680314e-05, 'epoch': 1.71}
+{'loss': 0.2672, 'grad_norm': 1.9375, 'learning_rate': 1.3632640635512224e-05, 'epoch': 1.73}
+{'loss': 0.2409, 'grad_norm': 2.03125, 'learning_rate': 1.3278886901319115e-05, 'epoch': 1.75}
+ 59%|█████▉    | 870/1473 [12:31<08:45,  1.15it/s] 59%|█████▉    | 871/1473 [12:32<08:35,  1.17it/s] 59%|█████▉    | 872/1473 [12:32<08:46,  1.14it/s] 59%|█████▉    | 873/1473 [12:33<08:40,  1.15it/s] 59%|█████▉    | 874/1473 [12:34<08:38,  1.15it/s] 59%|█████▉    | 875/1473 [12:35<08:40,  1.15it/s] 59%|█████▉    | 876/1473 [12:36<08:34,  1.16it/s] 60%|█████▉    | 877/1473 [12:37<08:44,  1.14it/s] 60%|█████▉    | 878/1473 [12:38<08:31,  1.16it/s] 60%|█████▉    | 879/1473 [12:39<08:36,  1.15it/s] 60%|█████▉    | 880/1473 [12:39<08:38,  1.14it/s]                                                   60%|█████▉    | 880/1473 [12:39<08:38,  1.14it/s] 60%|█████▉    | 881/1473 [12:40<08:34,  1.15it/s] 60%|█████▉    | 882/1473 [12:41<08:33,  1.15it/s] 60%|█████▉    | 883/1473 [12:42<08:31,  1.15it/s] 60%|██████    | 884/1473 [12:43<08:26,  1.16it/s] 60%|██████    | 885/1473 [12:44<08:25,  1.16it/s] 60%|██████    | 886/1473 [12:45<08:21,  1.17it/s] 60%|██████    | 887/1473 [12:45<08:23,  1.16it/s] 60%|██████    | 888/1473 [12:46<08:25,  1.16it/s] 60%|██████    | 889/1473 [12:47<08:31,  1.14it/s] 60%|██████    | 890/1473 [12:48<08:26,  1.15it/s]                                                   60%|██████    | 890/1473 [12:48<08:26,  1.15it/s] 60%|██████    | 891/1473 [12:49<08:25,  1.15it/s] 61%|██████    | 892/1473 [12:50<08:14,  1.17it/s] 61%|██████    | 893/1473 [12:51<08:16,  1.17it/s] 61%|██████    | 894/1473 [12:51<08:18,  1.16it/s] 61%|██████    | 895/1473 [12:52<08:15,  1.17it/s] 61%|██████    | 896/1473 [12:53<08:20,  1.15it/s] 61%|██████    | 897/1473 [12:54<08:16,  1.16it/s] 61%|██████    | 898/1473 [12:55<08:07,  1.18it/s] 61%|██████    | 899/1473 [12:56<08:04,  1.18it/s] 61%|██████    | 900/1473 [12:57<08:08,  1.17it/s]                                                   61%|██████    | 900/1473 [12:57<08:08,  1.17it/s] 61%|██████    | 901/1473 [12:57<08:10,  1.17it/s] 61%|██████    | 902/1473 [12:58<08:12,  1.16it/s] 61%|██████▏   | 903/1473 [12:59<08:13,  1.15it/s] 61%|██████▏   | 904/1473 [13:00<08:10,  1.16it/s] 61%|██████▏   | 905/1473 [13:01<08:07,  1.17it/s] 62%|██████▏   | 906/1473 [13:02<08:05,  1.17it/s] 62%|██████▏   | 907/1473 [13:03<08:03,  1.17it/s] 62%|██████▏   | 908/1473 [13:03<08:03,  1.17it/s] 62%|██████▏   | 909/1473 [13:04<08:10,  1.15it/s] 62%|██████▏   | 910/1473 [13:05<08:10,  1.15it/s]                                                   62%|██████▏   | 910/1473 [13:05<08:10,  1.15it/s] 62%|██████▏   | 911/1473 [13:06<08:15,  1.14it/s] 62%|██████▏   | 912/1473 [13:07<08:21,  1.12it/s] 62%|██████▏   | 913/1473 [13:08<08:11,  1.14it/s] 62%|██████▏   | 914/1473 [13:09<08:03,  1.16it/s] 62%|██████▏   | 915/1473 [13:10<08:07,  1.15it/s] 62%|██████▏   | 916/1473 [13:11<08:08,  1.14it/s] 62%|██████▏   | 917/1473 [13:11<08:11,  1.13it/s] 62%|██████▏   | 918/1473 [13:12<08:01,  1.15it/s] 62%|██████▏   | 919/1473 [13:13<08:00,  1.15it/s] 62%|██████▏   | 920/1473 [13:14<07:51,  1.17it/s]                                                   62%|██████▏   | 920/1473 [13:14<07:51,  1.17it/s] 63%|██████▎   | 921/1473 [13:15<07:45,  1.18it/s] 63%|██████▎   | 922/1473 [13:16<08:01,  1.14it/s] 63%|██████▎   | 923/1473 [13:17<08:01,  1.14it/s] 63%|██████▎   | 924/1473 [13:18<08:14,  1.11it/s] 63%|██████▎   | 925/1473 [13:18<08:05,  1.13it/s] 63%|██████▎   | 926/1473 [13:19<08:01,  1.14it/s] 63%|██████▎   | 927/1473 [13:20<07:57,  1.14it/s] 63%|██████▎   | 928/1473 [13:21<07:59,  1.14it/s] 63%|██████▎   | 929/1473 [13:22<07:54,  1.15it/s] 63%|██████▎   | 930/1473 [13:23<08:04,  1.12it/s]                                                   63%|██████▎   | 930/1473 [13:23<08:04,  1.12it/s] 63%|██████▎   | 931/1473 [13:24<08:00,  1.13it/s] 63%|██████▎   | 932/1473 [13:25<08:07,  1.11it/s] 63%|██████▎   | 933/1473 [13:25<08:00,  1.12it/s] 63%|██████▎   | 934/1473 [13:26<07:55,  1.13it/s] 63%|██████▎   | 935/1473 [13:27<07:45,  1.15it/s] 64%|██████▎   | 936/1473 [13:28<07:39,  1.17it/s] 64%|██████▎   | 937/1473 [13:29<07:39,  1.17it/s] 64%|██████▎   | 938/1473 [13:30<07:36,  1.17it/s] 64%|██████▎   | 939/1473 [13:31<07:33,  1.18it/s] 64%|██████▍   | 940/1473 [13:31<07:28,  1.19it/s]                                                   64%|██████▍   | 940/1473 [13:31<07:28,  1.19it/s] 64%|██████▍   | 941/1473 [13:32<07:28,  1.19it/s] 64%|██████▍   | 942/1473 [13:33<07:26,  1.19it/s] 64%|██████▍   | 943/1473 [13:34<07:29,  1.18it/s] 64%|██████▍   | 944/1473 [13:35<07:30,  1.17it/s] 64%|██████▍   | 945/1473 [13:36<07:29,  1.17it/s] 64%|██████▍   | 946/1473 [13:37<07:32,  1.16it/s] 64%|██████▍   | 947/1473 [13:37<07:28,  1.17it/s] 64%|██████▍   | 948/1473 [13:38<07:26,  1.18it/s] 64%|██████▍   | 949/1473 [13:39<07:25,  1.18it/s] 64%|██████▍   | 950/1473 [13:40<07:24,  1.18it/s]                                                   64%|██████▍   | 950/1473 [13:40<07:24,  1.18it/s] 65%|██████▍   | 951/1473 [13:41<07:13,  1.20it/s] 65%|██████▍   | 952/1473 [13:42<07:17,  1.19it/s] 65%|██████▍   | 953/1473 [13:42<07:23,  1.17it/s] 65%|██████▍   | 954/1473 [13:43<07:39,  1.13it/s] 65%|██████▍   | 955/1473 [13:44<07:31,  1.15it/s] 65%|██████▍   | 956/1473 [13:45<07:26,  1.16it/s] 65%|██████▍   | 957/1473 [13:46<07:29,  1.15it/s] 65%|██████▌   | 958/1473 [13:47<07:24,  1.16it/s] 65%|██████▌   | 959/1473 [13:48<07:19,  1.17it/s] 65%|██████▌   | 960/1473 [13:48<07:17,  1.17it/s]                                                   65%|██████▌   | 960/1473 [13:49<07:17,  1.17it/s] 65%|██████▌   | 961/1473 [13:49<07:13,  1.18it/s] 65%|██████▌   | 962/1473 [13:50<07:20,  1.16it/s] 65%|██████▌   | 963/1473 [13:51<07:22,  1.15it/s] 65%|██████▌   | 964/1473 [13:52<07:25,  1.14it/s] 66%|██████▌   | 965/1473 [13:53<07:17,  1.16it/s] 66%|██████▌   | 966/1473 [13:54<07:15,  1.16it/s] 66%|██████▌   | 967/1473 [13:55<07:12,  1.17it/s] 66%|██████▌   | 968/1473 [13:56<07:46,  1.08it/s] 66%|██████▌   | 969/1473 [13:56<07:30,  1.12it/s] 66%|██████▌   | 970/1473 [13:57<07:26,  1.13it/s]                                                   66%|██████▌   | 970/1473 [13:57<07:26,  1.13it/s] 66%|██████▌   | 971/1473 [13:58<07:28,  1.12it/s] 66%|██████▌   | 972/1473 [13:59<07:23,  1.13it/s] 66%|██████▌   | 973/1473 [14:00<07:10,  1.16it/s] 66%|██████▌   | 974/1473 [14:01<07:12,  1.15it/s] 66%|██████▌   | 975/1473 [14:02<07:07,  1.17it/s] 66%|██████▋   | 976/1473 [14:02<06:59,  1.19it/s] 66%|██████▋   | 977/1473 [14:03<07:04,  1.17it/s] 66%|██████▋   | 978/1473 [14:04<07:01,  1.18it/s] 66%|██████▋   | 979/1473 [14:05<06:58,  1.18it/s] 67%|██████▋   | 980/1473 [14:06<07:00,  1.17it/s]                                                   67%|██████▋   | 980/1473 [14:06<07:00,  1.17it/s] 67%|██████▋   | 981/1473 [14:07<06:57,  1.18it/s] 67%|██████▋   | 982/1473 [14:07<05:54,  1.38it/s] 67%|██████▋   | 983/1473 [14:08<06:13,  1.31it/s] 67%|██████▋   | 984/1473 [14:09<06:29,  1.25it/s] 67%|██████▋   | 985/1473 [14:10<06:34,  1.24it/s] 67%|██████▋   | 986/1473 [14:11<06:46,  1.20it/s] 67%|██████▋   | 987/1473 [14:11<06:53,  1.17it/s] 67%|██████▋   | 988/1473 [14:12<06:53,  1.17it/s] 67%|██████▋   | 989/1473 [14:13<06:58,  1.16it/s] 67%|██████▋   | 990/1473 [14:14<06:57,  1.16it/s]                                                   67%|██████▋   | 990/1473 [14:14<06:57,  1.16it/s] 67%|██████▋   | 991/1473 [14:15<07:00,  1.15it/s] 67%|██████▋   | 992/1473 [14:16<06:51,  1.17it/s] 67%|██████▋   | 993/1473 [14:17<06:45,  1.18it/s] 67%|██████▋   | 994/1473 [14:18<06:56,  1.15it/s] 68%|██████▊   | 995/1473 [14:18<06:49,  1.17it/s] 68%|██████▊   | 996/1473 [14:19<06:56,  1.14it/s] 68%|██████▊   | 997/1473 [14:20<06:55,  1.15it/s] 68%|██████▊   | 998/1473 [14:21<06:53,  1.15it/s] 68%|██████▊   | 999/1473 [14:22<06:50,  1.16it/s] 68%|██████▊   | 1000/1473 [14:23<06:45,  1.17it/s]                                                    68%|██████▊   | 1000/1473 [14:23<06:45,  1.17it/s] 68%|██████▊   | 1001/1473 [14:24<06:45,  1.17it/s] 68%|██████▊   | 1002/1473 [14:24<06:48,  1.15it/s] 68%|██████▊   | 1003/1473 [14:25<06:40,  1.17it/s] 68%|██████▊   | 1004/1473 [14:26<06:38,  1.18it/s] 68%|██████▊   | 1005/1473 [14:27<06:34,  1.19it/s] 68%|██████▊   | 1006/1473 [14:28<06:32,  1.19it/s] 68%|██████▊   | 1007/1473 [14:29<06:34,  1.18it/s] 68%|██████▊   | 1008/1473 [14:29<06:29,  1.19it/s] 68%|██████▊   | 1009/1473 [14:30<06:27,  1.20it/s] 69%|██████▊   | 1010/1473 [14:31<06:29,  1.19it/s]                                                    69%|██████▊   | 1010/1473 [14:31<06:29,  1.19it/s] 69%|██████▊   | 1011/1473 [14:32<06:29,  1.19it/s] 69%|██████▊   | 1012/1473 [14:33<06:32,  1.17it/s] 69%|██████▉   | 1013/1473 [14:34<06:40,  1.15it/s] 69%|██████▉   | 1014/1473 [14:35<06:35,  1.16it/s] 69%|██████▉   | 1015/1473 [14:35<06:29,  1.17it/s] 69%|██████▉   | 1016/1473 [14:36<06:28,  1.18it/s] 69%|██████▉   | 1017/1473 [14:37<06:27,  1.18it/s] 69%|██████▉   | 1018/1473 [14:38<06:31,  1.16it/s] 69%|██████▉   | 1019/1473 [14:39<06:33,  1.15it/s] 69%|██████▉   | 1020/1473 [14:40<06:37,  1.14it/s]                                                    69%|██████▉   | 1020/1473 [14:40<06:37,  1.14it/s] 69%|██████▉   | 1021/1473 [14:41<06:32,  1.15it/s] 69%|██████▉   | 1022/1473 [14:42<06:33,  1.15it/s] 69%|██████▉   | 1023/1473 [14:42<06:31,  1.15it/s] 70%|██████▉   | 1024/1473 [14:43<06:33,  1.14it/s] 70%|██████▉   | 1025/1473 [14:44<06:35,  1.13it/s] 70%|██████▉   | 1026/1473 [14:45<06:32,  1.14it/s] 70%|██████▉   | 1027/1473 [14:46<06:30,  1.14it/s] 70%|██████▉   | 1028/1473 [14:47<06:23,  1.16it/s] 70%|██████▉   | 1029/1473 [14:48<06:19,  1.17it/s] 70%|██████▉   | 1030/1473 [14:48<06:12,  1.19it/s]                                                    70%|██████▉   | 1030/1473 [14:48<06:12,  1.19it/s] 70%|██████▉   | 1031/1473 [14:49<06:08,  1.20it/s] 70%|███████   | 1032/1473 [14:50<06:07,  1.20it/s] 70%|███████   | 1033/1473 [14:51<06:11,  1.19it/s] 70%|███████   | 1034/1473 [14:52<06:08,  1.19it/s] 70%|███████   | 1035/1473 [14:53<06:08,  1.19it/s] 70%|███████   | 1036/1473 [14:53<06:10,  1.18it/s] 70%|███████   | 1037/1473 [14:54<06:05,  1.19it/s] 70%|███████   | 1038/1473 [14:55<06:17,  1.15it/s] 71%|███████   | 1039/1473 [14:56<06:10,  1.17it/s] 71%|███████   | 1040/1473 [14:57<06:09,  1.17it/s]                                                    71%|███████   | 1040/1473 [14:57<06:09,  1.17it/s] 71%|███████   | 1041/1473 [14:58<06:00,  1.20it/s] 71%|███████   | 1042/1473 [14:58<05:54,  1.22it/s] 71%|███████   | 1043/1473 [14:59<05:54,  1.21it/s] 71%|███████   | 1044/1473 [15:00<05:56,  1.20it/s] 71%|███████   | 1045/1473 [15:01<06:06,  1.17it/s] 71%|███████   | 1046/1473 [15:02<06:01,  1.18it/s] 71%|███████   | 1047/1473 [15:03<05:55,  1.20it/s] 71%|███████   | 1048/1473 [15:04<05:58,  1.19it/s] 71%|███████   | 1049/1473 [15:04<05:55,  1.19it/s] 71%|███████▏  | 1050/1473 [15:05<05:56,  1.19it/s]                                                    71%|███████▏  | 1050/1473 [15:05<05:56,  1.19it/s] 71%|███████▏  | 1051/1473 [15:06<06:05,  1.16it/s] 71%|███████▏  | 1052/1473 [15:07<06:08,  1.14it/s] 71%|███████▏  | 1053/1473 [15:08<05:59,  1.17it/s] 72%|███████▏  | 1054/1473 [15:09<05:55,  1.18it/s] 72%|███████▏  | 1055/1473 [15:10<05:58,  1.16it/s] 72%|███████▏  | 1056/1473 [15:10<05:58,  1.16it/s] 72%|███████▏  | 1057/1473 [15:11<06:00,  1.15it/s] 72%|███████▏  | 1058/1473 [15:12<05:57,  1.16it/s] 72%|███████▏  | 1059/1473 [15:13<06:02,  1.14it/s] 72%|███████▏  | 1060/1473 [15:14<05:59,  1.15it/s]                                                    72%|███████▏  | 1060/1473 [15:14<05:59,  1.15it/s] 72%|███████▏  | 1061/1473 [15:15<05:57,  1.15it/s] 72%|███████▏  | 1062/1473 [15:16<06:01,  1.14it/s] 72%|███████▏  | 1063/1473 [15:17<05:56,  1.15it/s] 72%|███████▏  | 1064/1473 [15:17<05:50,  1.17it/s] 72%|███████▏  | 1065/1473 [15:18<05:48,  1.17it/s] 72%|███████▏  | 1066/1473 [15:19<05:49,  1.17it/s] 72%|███████▏  | 1067/1473 [15:20<05:45,  1.17it/s] 73%|███████▎  | 1068/1473 [15:21<05:45,  1.17it/s] 73%|███████▎  | 1069/1473 [15:22<05:42,  1.18it/s] 73%|███████▎  | 1070/1473 [15:23<05:48,  1.15it/s]                                                    73%|███████▎  | 1070/1473 [15:23<05:48,  1.15it/s] 73%|███████▎  | 1071/1473 [15:23<05:41,  1.18it/s] 73%|███████▎  | 1072/1473 [15:24<05:43,  1.17it/s] 73%|███████▎  | 1073/1473 [15:25<05:49,  1.14it/s] 73%|███████▎  | 1074/1473 [15:26<05:49,  1.14it/s] 73%|███████▎  | 1075/1473 [15:27<05:45,  1.15it/s] 73%|███████▎  | 1076/1473 [15:28<05:45,  1.15it/s] 73%|███████▎  | 1077/1473 [15:29<05:43,  1.15it/s] 73%|███████▎  | 1078/1473 [15:30<05:49,  1.13it/s] 73%|███████▎  | 1079/1473 [15:30<05:45,  1.14it/s] 73%|███████▎  | 1080/1473 [15:31<05:41,  1.15it/s]                                                    73%|███████▎  | 1080/1473 [15:31<05:41,  1.15it/s] 73%|███████▎  | 1081/1473 [15:32<05:38,  1.16it/s] 73%|███████▎  | 1082/1473 [15:33<05:34,  1.17it/s] 74%|███████▎  | 1083/1473 [15:34<05:29,  1.18it/s] 74%|███████▎  | 1084/1473 [15:35<05:29,  1.18it/s] 74%|███████▎  | 1085/1473 [15:35<05:30,  1.17it/s] 74%|███████▎  | 1086/1473 [15:36<05:36,  1.15it/s] 74%|███████▍  | 1087/1473 [15:37<05:35,  1.15it/s] 74%|███████▍  | 1088/1473 [15:38<05:37,  1.14it/s] 74%|███████▍  | 1089/1473 [15:39<05:35,  1.14it/s] 74%|███████▍  | 1090/1473 [15:40<05:31,  1.16it/s]                                                    74%|███████▍  | 1090/1473 [15:40<05:31,  1.16it/s] 74%|███████▍  | 1091/1473 [15:41<05:33,  1.15it/s] 74%|███████▍  | 1092/1473 [15:42<05:29,  1.15it/s] 74%|███████▍  | 1093/1473 [15:42<05:32,  1.14it/s] 74%|███████▍  | 1094/1473 [15:43<05:32,  1.14it/s] 74%|███████▍  | 1095/1473 [15:44<05:37,  1.12it/s] 74%|███████▍  | 1096/1473 [15:45<05:27,  1.15it/s] 74%|███████▍  | 1097/1473 [15:46<05:32,  1.13it/s] 75%|███████▍  | 1098/1473 [15:47<05:29,  1.14it/s] 75%|███████▍  | 1099/1473 [15:48<05:28,  1.14it/s] 75%|███████▍  | 1100/1473 [15:49<05:23,  1.15it/s]                                                    75%|███████▍  | 1100/1473 [15:49<05:23,  1.15it/s] 75%|███████▍  | 1101/1473 [15:49<05:22,  1.15it/s] 75%|███████▍  | 1102/1473 [15:50<05:25,  1.14it/s] 75%|███████▍  | 1103/1473 [15:51<05:27,  1.13it/s] 75%|███████▍  | 1104/1473 [15:52<05:22,  1.14it/s] 75%|███████▌  | 1105/1473 [15:53<05:25,  1.13it/s] 75%|███████▌  | 1106/1473 [15:54<05:19,  1.15it/s] 75%|███████▌  | 1107/1473 [15:55<05:19,  1.14it/s] 75%|███████▌  | 1108/1473 [15:56<05:20,  1.14it/s] 75%|███████▌  | 1109/1473 [15:57<05:21,  1.13it/s] 75%|███████▌  | 1110/1473 [15:57<05:18,  1.14it/s]                                                    75%|███████▌  | 1110/1473 [15:57<05:18,  1.14it/s] 75%|███████▌  | 1111/1473 [15:58<05:15,  1.15it/s] 75%|███████▌  | 1112/1473 [15:59<05:13,  1.15it/s] 76%|███████▌  | 1113/1473 [16:00<05:12,  1.15it/s] 76%|███████▌  | 1114/1473 [16:01<05:10,  1.16it/s] 76%|███████▌  | 1115/1473 [16:02<05:06,  1.17it/s] 76%|███████▌  | 1116/1473 [16:03<05:10,  1.15it/s] 76%|███████▌  | 1117/1473 [16:03<05:08,  1.15it/s] 76%|███████▌  | 1118/1473 [16:04<05:02,  1.17it/s] 76%|███████▌  | 1119/1473 [16:05<05:02,  1.17it/s] 76%|███████▌  | 1120/1473 [16:06<05:06,  1.15it/s]                                                    76%|███████▌  | 1120/1473 [16:06<05:06,  1.15it/s] 76%|███████▌  | 1121/1473 [16:07<05:12,  1.13it/s] 76%|███████▌  | 1122/1473 [16:08<05:10,  1.13it/s] 76%|███████▌  | 1123/1473 [16:09<05:08,  1.13it/s] 76%|███████▋  | 1124/1473 [16:10<05:04,  1.14it/s] 76%|███████▋  | 1125/1473 [16:10<05:02,  1.15it/s] 76%|███████▋  | 1126/1473 [16:11<05:00,  1.16it/s] 77%|███████▋  | 1127/1473 [16:12<04:53,  1.18it/s] 77%|███████▋  | 1128/1473 [16:13<04:56,  1.17it/s] 77%|███████▋  | 1129/1473 [16:14<05:02,  1.14it/s] 77%|███████▋  | 1130/1473 [16:15<05:00,  1.14it/s]                                                    77%|███████▋  | 1130/1473 [16:15<05:00,  1.14it/s] 77%|███████▋  | 1131/1473 [16:16<04:58,  1.15it/s] 77%|███████▋  | 1132/1473 [16:16<04:54,  1.16it/s] 77%|███████▋  | 1133/1473 [16:17<04:53,  1.16it/s] 77%|███████▋  | 1134/1473 [16:18<04:56,  1.14it/s] 77%|███████▋  | 1135/1473 [16:19<04:53,  1.15it/s] 77%|███████▋  | 1136/1473 [16:20<04:53,  1.15it/s] 77%|███████▋  | 1137/1473 [16:21<04:50,  1.16it/s] 77%|███████▋  | 1138/1473 [16:22<04:47,  1.17it/s] 77%|███████▋  | 1139/1473 [16:22<04:46,  1.17it/s] 77%|███████▋  | 1140/1473 [16:23<04:44,  1.17it/s]                                                    77%|███████▋  | 1140/1473 [16:23<04:44,  1.17it/s] 77%|███████▋  | 1141/1473 [16:24<04:42,  1.18it/s] 78%|███████▊  | 1142/1473 [16:25<04:37,  1.19it/s] 78%|███████▊  | 1143/1473 [16:26<04:39,  1.18it/s] 78%|███████▊  | 1144/1473 [16:27<04:34,  1.20it/s] 78%|███████▊  | 1145/1473 [16:28<04:35,  1.19it/s] 78%|███████▊  | 1146/1473 [16:28<04:32,  1.20it/s] 78%|███████▊  | 1147/1473 [16:29<04:33,  1.19it/s] 78%|███████▊  | 1148/1473 [16:30<04:39,  1.16it/s] 78%|███████▊  | 1149/1473 [16:31<04:37,  1.17it/s] 78%|███████▊  | 1150/1473 [16:32<04:43,  1.14it/s]                                                    78%|███████▊  | 1150/1473 [16:32<04:43,  1.14it/s] 78%|███████▊  | 1151/1473 [16:33<04:46,  1.12it/s] 78%|███████▊  | 1152/1473 [16:34<04:45,  1.12it/s] 78%|███████▊  | 1153/1473 [16:35<04:39,  1.15it/s] 78%|███████▊  | 1154/1473 [16:35<04:37,  1.15it/s] 78%|███████▊  | 1155/1473 [16:36<04:36,  1.15it/s] 78%|███████▊  | 1156/1473 [16:37<04:33,  1.16it/s] 79%|███████▊  | 1157/1473 [16:38<04:32,  1.16it/s] 79%|███████▊  | 1158/1473 [16:39<04:32,  1.15it/s] 79%|███████▊  | 1159/1473 [16:40<04:33,  1.15it/s] 79%|███████▉  | 1160/1473 [16:41<04:27,  1.17it/s]                                                    79%|███████▉  | 1160/1473 [16:41<04:27,  1.17it/s] 79%|███████▉  | 1161/1473 [16:41<04:29,  1.16it/s] 79%|███████▉  | 1162/1473 [16:42<04:29,  1.16it/s] 79%|███████▉  | 1163/1473 [16:43<04:26,  1.16it/s] 79%|███████▉  | 1164/1473 [16:44<04:22,  1.18it/s] 79%|███████▉  | 1165/1473 [16:45<04:22,  1.17it/s] 79%|███████▉  | 1166/1473 [16:46<04:21,  1.17it/s] 79%|███████▉  | 1167/1473 [16:47<04:20,  1.17it/s] 79%|███████▉  | 1168/1473 [16:47<04:18,  1.18it/s] 79%|███████▉  | 1169/1473 [16:48<04:16,  1.19it/s] 79%|███████▉  | 1170/1473 [16:49<04:22,  1.15it/s]                                                    79%|███████▉  | 1170/1473 [16:49<04:22,  1.15it/s] 79%|███████▉  | 1171/1473 [16:50<04:20,  1.16it/s] 80%|███████▉  | 1172/1473 [16:51<04:19,  1.16it/s] 80%|███████▉  | 1173/1473 [16:52<04:19,  1.16it/s] 80%|███████▉  | 1174/1473 [16:53<04:19,  1.15it/s] 80%|███████▉  | 1175/1473 [16:53<04:16,  1.16it/s] 80%|███████▉  | 1176/1473 [16:54<04:18,  1.15it/s] 80%|███████▉  | 1177/1473 [16:55<04:16,  1.15it/s] 80%|███████▉  | 1178/1473 [16:56<04:13,  1.16it/s] 80%|████████  | 1179/1473 [16:57<04:12,  1.16it/s] 80%|████████  | 1180/1473 [16:58<04:11,  1.16it/s]                                                    80%|████████  | 1180/1473 [16:58<04:11,  1.16it/s] 80%|████████  | 1181/1473 [16:59<04:13,  1.15it/s] 80%|████████  | 1182/1473 [16:59<04:09,  1.16it/s] 80%|████████  | 1183/1473 [17:00<04:07,  1.17it/s] 80%|████████  | 1184/1473 [17:01<04:05,  1.18it/s] 80%|████████  | 1185/1473 [17:02<04:06,  1.17it/s] 81%|████████  | 1186/1473 [17:03<04:10,  1.15it/s] 81%|████████  | 1187/1473 [17:04<04:03,  1.18it/s] 81%|████████  | 1188/1473 [17:05<04:03,  1.17it/s] 81%|████████  | 1189/1473 [17:05<04:01,  1.18it/s] 81%|████████  | 1190/1473 [17:06<04:00,  1.18it/s]                                                    81%|████████  | 1190/1473 [17:06<04:00,  1.18it/s] 81%|████████  | 1191/1473 [17:07<04:04,  1.15it/s] 81%|████████  | 1192/1473 [17:08<04:03,  1.15it/s] 81%|████████  | 1193/1473 [17:09<04:04,  1.15it/s] 81%|████████  | 1194/1473 [17:10<03:58,  1.17it/s] 81%|████████  | 1195/1473 [17:11<03:58,  1.17it/s] 81%|████████  | 1196/1473 [17:11<03:58,  1.16it/s] 81%|████████▏ | 1197/1473 [17:12<03:58,  1.16it/s] 81%|████████▏ | 1198/1473 [17:13<03:55,  1.17it/s] 81%|████████▏ | 1199/1473 [17:14<03:55,  1.16it/s] 81%|████████▏ | 1200/1473 [17:15<03:54,  1.16it/s]                                                    81%|████████▏ | 1200/1473 [17:15<03:54,  1.16it/s] 82%|████████▏ | 1201/1473 [17:16<03:54,  1.16it/s] 82%|████████▏ | 1202/1473 [17:17<03:53,  1.16it/s] 82%|████████▏ | 1203/1473 [17:17<03:51,  1.17it/s] 82%|████████▏ | 1204/1473 [17:18<03:48,  1.18it/s] 82%|████████▏ | 1205/1473 [17:19<03:52,  1.15it/s] 82%|████████▏ | 1206/1473 [17:20<03:52,  1.15it/s] 82%|████████▏ | 1207/1473 [17:21<03:49,  1.16it/s] 82%|████████▏ | 1208/1473 [17:22<03:45,  1.18it/s] 82%|████████▏ | 1209/1473 [17:23<03:43,  1.18it/s] 82%|████████▏ | 1210/1473 [17:23<03:45,  1.16it/s]                                                    82%|████████▏ | 1210/1473 [17:24<03:45,  1.16it/s] 82%|████████▏ | 1211/1473 [17:24<03:44,  1.16it/s] 82%|████████▏ | 1212/1473 [17:25<04:00,  1.08it/s] 82%|████████▏ | 1213/1473 [17:26<03:55,  1.10it/s] 82%|████████▏ | 1214/1473 [17:27<03:51,  1.12it/s] 82%|████████▏ | 1215/1473 [17:28<03:50,  1.12it/s] 83%|████████▎ | 1216/1473 [17:29<03:50,  1.12it/s] 83%|████████▎ | 1217/1473 [17:30<03:44,  1.14it/s] 83%|████████▎ | 1218/1473 [17:31<03:42,  1.15it/s] 83%|████████▎ | 1219/1473 [17:31<03:39,  1.16it/s] 83%|████████▎ | 1220/1473 [17:32<03:39,  1.15it/s]                                                    83%|████████▎ | 1220/1473 [17:32<03:39,  1.15it/s] 83%|████████▎ | 1221/1473 [17:33<03:39,  1.15it/s] 83%|████████▎ | 1222/1473 [17:34<03:39,  1.14it/s] 83%|████████▎ | 1223/1473 [17:35<03:41,  1.13it/s] 83%|████████▎ | 1224/1473 [17:36<03:36,  1.15it/s] 83%|████████▎ | 1225/1473 [17:37<03:31,  1.17it/s] 83%|████████▎ | 1226/1473 [17:38<03:29,  1.18it/s] 83%|████████▎ | 1227/1473 [17:38<03:32,  1.16it/s] 83%|████████▎ | 1228/1473 [17:39<03:30,  1.17it/s] 83%|████████▎ | 1229/1473 [17:40<03:26,  1.18it/s] 84%|████████▎ | 1230/1473 [17:41<03:29,  1.16it/s]                                                    84%|████████▎ | 1230/1473 [17:41<03:29,  1.16it/s] 84%|████████▎ | 1231/1473 [17:42<03:26,  1.17it/s] 84%|████████▎ | 1232/1473 [17:43<03:31,  1.14it/s] 84%|████████▎ | 1233/1473 [17:44<03:29,  1.15it/s] 84%|████████▍ | 1234/1473 [17:45<03:31,  1.13it/s] 84%|████████▍ | 1235/1473 [17:45<03:28,  1.14it/s] 84%|████████▍ | 1236/1473 [17:46<03:29,  1.13it/s] 84%|████████▍ | 1237/1473 [17:47<03:27,  1.14it/s] 84%|████████▍ | 1238/1473 [17:48<03:27,  1.13it/s] 84%|████████▍ | 1239/1473 [17:49<03:28,  1.12it/s] 84%|████████▍ | 1240/1473 [17:50<03:24,  1.14it/s]                                                    84%|████████▍ | 1240/1473 [17:50<03:24,  1.14it/s] 84%|████████▍ | 1241/1473 [17:51<03:23,  1.14it/s] 84%|████████▍ | 1242/1473 [17:52<03:23,  1.13it/s] 84%|████████▍ | 1243/1473 [17:52<03:22,  1.14it/s] 84%|████████▍ | 1244/1473 [17:53<03:19,  1.15it/s] 85%|████████▍ | 1245/1473 [17:54<03:19,  1.14it/s] 85%|████████▍ | 1246/1473 [17:55<03:16,  1.16it/s] 85%|████████▍ | 1247/1473 [17:56<03:15,  1.15it/s] 85%|████████▍ | 1248/1473 [17:57<03:15,  1.15it/s] 85%|████████▍ | 1249/1473 [17:58<03:15,  1.14it/s] 85%|████████▍ | 1250/1473 [17:59<03:15,  1.14it/s]                                                    85%|████████▍ | 1250/1473 [17:59<03:15,  1.14it/s] 85%|████████▍ | 1251/1473 [17:59<03:13,  1.15it/s] 85%|████████▍ | 1252/1473 [18:00<03:11,  1.16it/s] 85%|████████▌ | 1253/1473 [18:01<03:07,  1.17it/s] 85%|████████▌ | 1254/1473 [18:02<03:07,  1.16it/s] 85%|████████▌ | 1255/1473 [18:03<03:08,  1.16it/s] 85%|████████▌ | 1256/1473 [18:04<03:12,  1.13it/s] 85%|████████▌ | 1257/1473 [18:05<03:09,  1.14it/s] 85%|████████▌ | 1258/1473 [18:05<03:05,  1.16it/s] 85%|████████▌ | 1259/1473 [18:06<03:02,  1.18it/s] 86%|████████▌ | 1260/1473 [18:07<03:04,  1.15it/s]                                                    86%|████████▌ | 1260/1473 [18:07<03:04,  1.15it/s] 86%|████████▌ | 1261/1473 [18:08<03:01,  1.17it/s] 86%|████████▌ | 1262/1473 [18:09<03:01,  1.17it/s] 86%|████████▌ | 1263/1473 [18:10<03:01,  1.15it/s] 86%|████████▌ | 1264/1473 [18:11<03:01,  1.15it/s] 86%|████████▌ | 1265/1473 [18:11<02:58,  1.16it/s] 86%|████████▌ | 1266/1473 [18:12<02:57,  1.17it/s] 86%|████████▌ | 1267/1473 [18:13<02:56,  1.17it/s] 86%|████████▌ | 1268/1473 [18:14<02:55,  1.17it/s] 86%|████████▌ | 1269/1473 [18:15<02:53,  1.17it/s] 86%|████████▌ | 1270/1473 [18:16<02:56,  1.15it/s]                                                    86%|████████▌ | 1270/1473 [18:16<02:56,  1.15it/s] 86%|████████▋ | 1271/1473 [18:17<02:55,  1.15it/s] 86%|████████▋ | 1272/1473 [18:18<02:54,  1.15it/s] 86%|████████▋ | 1273/1473 [18:18<02:53,  1.15it/s] 86%|████████▋ | 1274/1473 [18:19<02:52,  1.15it/s] 87%|████████▋ | 1275/1473 [18:20<02:50,  1.16it/s] 87%|████████▋ | 1276/1473 [18:21<02:49,  1.16it/s] 87%|████████▋ | 1277/1473 [18:22<02:46,  1.18it/s] 87%|████████▋ | 1278/1473 [18:23<02:46,  1.17it/s] 87%|████████▋ | 1279/1473 [18:24<02:47,  1.16it/s] 87%|████████▋ | 1280/1473 [18:24<02:44,  1.18it/s]                                                    87%|████████▋ | 1280/1473 [18:24<02:44,  1.18it/s] 87%|████████▋ | 1281/1473 [18:25<02:42,  1.18it/s] 87%|████████▋ | 1282/1473 [18:26<02:39,  1.20it/s] 87%|████████▋ | 1283/1473 [18:27<02:41,  1.18it/s] 87%|████████▋ | 1284/1473 [18:28<02:39,  1.18it/s] 87%|████████▋ | 1285/1473 [18:29<02:38,  1.19it/s] 87%|████████▋ | 1286/1473 [18:29<02:37,  1.19it/s] 87%|████████▋ | 1287/1473 [18:30<02:36,  1.19it/s] 87%|████████▋ | 1288/1473 [18:31<02:35,  1.19it/s] 88%|████████▊ | 1289/1473 [18:32<02:40,  1.15it/s] 88%|████████▊ | 1290/1473 [18:33<02:39,  1.15it/s]                                                    88%|████████▊ | 1290/1473 [18:33<02:39,  1.15it/s] 88%|████████▊ | 1291/1473 [18:34<02:37,  1.16it/s] 88%|████████▊ | 1292/1473 [18:35<02:35,  1.17it/s] 88%|████████▊ | 1293/1473 [18:35<02:35,  1.16it/s] 88%|████████▊ | 1294/1473 [18:36<02:33,  1.17it/s] 88%|████████▊ | 1295/1473 [18:37<02:30,  1.18it/s] 88%|████████▊ | 1296/1473 [18:38<02:32,  1.16it/s] 88%|████████▊ | 1297/1473 [18:39<02:30,  1.17it/s] 88%|████████▊ | 1298/1473 [18:40<02:32,  1.14it/s] 88%|████████▊ | 1299/1473 [18:41<02:30,  1.15it/s] 88%|████████▊ | 1300/1473 [18:41<02:28,  1.16it/s]                                                    88%|████████▊ | 1300/1473 [18:41<02:28,  1.16it/s] 88%|████████▊ | 1301/1473 [18:42<02:27,  1.17it/s] 88%|████████▊ | 1302/1473 [18:43<02:31,  1.13it/s] 88%|████████▊ | 1303/1473 [18:44<02:29,  1.13it/s] 89%|████████▊ | 1304/1473 [18:45<02:28,  1.14it/s] 89%|████████▊ | 1305/1473 [18:46<02:27,  1.14it/s] 89%|████████▊ | 1306/1473 [18:47<02:24,  1.16it/s] 89%|████████▊ | 1307/1473 [18:47<02:19,  1.19it/s] 89%|████████▉ | 1308/1473 [18:48<02:18,  1.19it/s] 89%|████████▉ | 1309/1473 [18:49<02:17,  1.19it/s] 89%|████████▉ | 1310/1473 [18:50<02:16,  1.19it/s]                                                    89%|████████▉ | 1310/1473 [18:50<02:16,  1.19it/s] 89%|████████▉ | 1311/1473 [18:51<02:15,  1.20it/s] 89%|████████▉ | 1312/1473 [18:52<02:14,  1.20it/s] 89%|████████▉ | 1313/1473 [18:52<02:12,  1.21it/s] 89%|████████▉ | 1314/1473 [18:53<02:11,  1.21it/s] 89%|████████▉ | 1315/1473 [18:54<02:15,  1.17it/s] 89%|████████▉ | 1316/1473 [18:55<02:13,  1.18it/s] 89%|████████▉ | 1317/1473 [18:56<02:12,  1.18it/s] 89%|████████▉ | 1318/1473 [18:57<02:11,  1.18it/s] 90%|████████▉ | 1319/1473 [18:58<02:10,  1.18it/s] 90%|████████▉ | 1320/1473 [18:58<02:09,  1.18it/s]                                                    90%|████████▉ | 1320/1473 [18:58<02:09,  1.18it/s] 90%|████████▉ | 1321/1473 [18:59<02:08,  1.19it/s] 90%|████████▉ | 1322/1473 [19:00<02:07,  1.19it/s] 90%|████████▉ | 1323/1473 [19:01<02:11,  1.14it/s] 90%|████████▉ | 1324/1473 [19:02<02:09,  1.15it/s] 90%|████████▉ | 1325/1473 [19:03<02:06,  1.17it/s] 90%|█████████ | 1326/1473 [19:04<02:05,  1.17it/s] 90%|█████████ | 1327/1473 [19:04<02:04,  1.17it/s] 90%|█████████ | 1328/1473 [19:05<02:03,  1.17it/s] 90%|█████████ | 1329/1473 [19:06<02:04,  1.16it/s] 90%|█████████ | 1330/1473 [19:07<02:03,  1.15it/s]                                                    90%|█████████ | 1330/1473 [19:07<02:03,  1.15it/s] 90%|█████████ | 1331/1473 [19:08<02:02,  1.16it/s] 90%|█████████ | 1332/1473 [19:09<02:01,  1.16it/s] 90%|█████████ | 1333/1473 [19:10<01:59,  1.18it/s] 91%|█████████ | 1334/1473 [19:10<01:57,  1.19it/s] 91%|█████████ | 1335/1473 [19:11<01:56,  1.19it/s] 91%|█████████ | 1336/1473 [19:12<01:54,  1.20it/s] 91%|█████████ | 1337/1473 [19:13<01:54,  1.19it/s] 91%|█████████ | 1338/1473 [19:14<01:55,  1.16it/s] 91%|█████████ | 1339/1473 [19:15<01:56,  1.15it/s] 91%|█████████ | 1340/1473 [19:16<01:54,  1.17it/s]                                                    91%|█████████ | 1340/1473 [19:16<01:54,  1.17it/s] 91%|█████████ | 1341/1473 [19:16<01:52,  1.17it/s] 91%|█████████ | 1342/1473 [19:17<01:53,  1.15it/s] 91%|█████████ | 1343/1473 [19:18<01:52,  1.15it/s] 91%|█████████ | 1344/1473 [19:19<01:51,  1.15it/s] 91%|█████████▏| 1345/1473 [19:20<01:51,  1.15it/s] 91%|█████████▏| 1346/1473 [19:21<01:49,  1.16it/s] 91%|█████████▏| 1347/1473 [19:22<01:49,  1.16it/s] 92%|█████████▏| 1348/1473 [19:23<01:48,  1.15it/s] 92%|█████████▏| 1349/1473 [19:23<01:46,  1.16it/s] 92%|█████████▏| 1350/1473 [19:24<01:44,  1.18it/s]                                                    92%|█████████▏| 1350/1473 [19:24<01:44,  1.18it/s] 92%|█████████▏| 1351/1473 [19:25<01:43,  1.18it/s] 92%|█████████▏| 1352/1473 [19:26<01:42,  1.18it/s] 92%|█████████▏| 1353/1473 [19:27<01:43,  1.16it/s] 92%|█████████▏| 1354/1473 [19:28<01:42,  1.16it/s] 92%|█████████▏| 1355/1473 [19:29<01:42,  1.15it/s] 92%|█████████▏| 1356/1473 [19:29<01:40,  1.17it/s] 92%|█████████▏| 1357/1473 [19:30<01:38,  1.17it/s] 92%|█████████▏| 1358/1473 [19:31<01:36,  1.19it/s] 92%|█████████▏| 1359/1473 [19:32<01:37,  1.17it/s] 92%|█████████▏| 1360/1473 [19:33<01:38,  1.15it/s]                                                    92%|█████████▏| 1360/1473 [19:33<01:38,  1.15it/s] 92%|█████████▏| 1361/1473 [19:34<01:36,  1.17it/s] 92%|█████████▏| 1362/1473 [19:34<01:34,  1.18it/s] 93%|█████████▎| 1363/1473 [19:35<01:34,  1.16it/s] 93%|█████████▎| 1364/1473 [19:36<01:34,  1.15it/s] 93%|█████████▎| 1365/1473 [19:37<01:34,  1.15it/s] 93%|█████████▎| 1366/1473 [19:38<01:32,  1.15it/s] 93%|█████████▎| 1367/1473 [19:39<01:31,  1.16it/s] 93%|█████████▎| 1368/1473 [19:40<01:30,  1.16it/s] 93%|█████████▎| 1369/1473 [19:41<01:30,  1.15it/s] 93%|█████████▎| 1370/1473 [19:41<01:30,  1.14it/s]                                                    93%|█████████▎| 1370/1473 [19:41<01:30,  1.14it/s] 93%|█████████▎| 1371/1473 [19:42<01:28,  1.15it/s] 93%|█████████▎| 1372/1473 [19:43<01:27,  1.16it/s] 93%|█████████▎| 1373/1473 [19:44<01:26,  1.15it/s] 93%|█████████▎| 1374/1473 [19:45<01:27,  1.13it/s] 93%|█████████▎| 1375/1473 [19:46<01:28,  1.11it/s] 93%|█████████▎| 1376/1473 [19:47<01:25,  1.14it/s] 93%|█████████▎| 1377/1473 [19:48<01:25,  1.12it/s] 94%|█████████▎| 1378/1473 [19:49<01:24,  1.12it/s] 94%|█████████▎| 1379/1473 [19:49<01:21,  1.15it/s] 94%|█████████▎| 1380/1473 [19:50<01:21,  1.14it/s]                                                    94%|█████████▎| 1380/1473 [19:50<01:21,  1.14it/s] 94%|█████████▍| 1381/1473 [19:51<01:19,  1.16it/s] 94%|█████████▍| 1382/1473 [19:52<01:17,  1.17it/s] 94%|█████████▍| 1383/1473 [19:53<01:16,  1.17it/s] 94%|█████████▍| 1384/1473 [19:54<01:14,  1.19it/s] 94%|█████████▍| 1385/1473 [19:54<01:14,  1.18it/s] 94%|█████████▍| 1386/1473 [19:55<01:13,  1.19it/s] 94%|█████████▍| 1387/1473 [19:56<01:12,  1.19it/s] 94%|█████████▍| 1388/1473 [19:57<01:10,  1.20it/s] 94%|█████████▍| 1389/1473 [19:58<01:11,  1.18it/s] 94%|█████████▍| 1390/1473 [19:59<01:09,  1.19it/s]                                                    94%|█████████▍| 1390/1473 [19:59<01:09,  1.19it/s] 94%|█████████▍| 1391/1473 [20:00<01:10,  1.17it/s] 95%|█████████▍| 1392/1473 [20:00<01:09,  1.17it/s] 95%|█████████▍| 1393/1473 [20:01<01:10,  1.14it/s] 95%|█████████▍| 1394/1473 [20:02<01:09,  1.14it/s] 95%|█████████▍| 1395/1473 [20:03<01:07,  1.15it/s] 95%|█████████▍| 1396/1473 [20:04<01:07,  1.15it/s] 95%|█████████▍| 1397/1473 [20:05<01:05,  1.17it/s] 95%|█████████▍| 1398/1473 [20:06<01:06,  1.14it/s] 95%|█████████▍| 1399/1473 [20:06<01:04,  1.15it/s] 95%|█████████▌| 1400/1473 [20:07<01:03,  1.15it/s]                                                    95%|█████████▌| 1400/1473 [20:07<01:03,  1.15it/s] 95%|█████████▌| 1401/1473 [20:08<01:01,  1.16it/s] 95%|█████████▌| 1402/1473 [20:09<01:01,  1.16it/s] 95%|█████████▌| 1403/1473 [20:10<01:00,  1.15it/s] 95%|█████████▌| 1404/1473 [20:11<00:58,  1.18it/s] 95%|█████████▌| 1405/1473 [20:12<00:58,  1.16it/s] 95%|█████████▌| 1406/1473 [20:12<00:57,  1.17it/s] 96%|█████████▌| 1407/1473 [20:13<00:55,  1.18it/s] 96%|█████████▌| 1408/1473 [20:14<00:55,  1.16it/s] 96%|█████████▌| 1409/1473 [20:15<00:54,  1.17it/s] 96%|█████████▌| 1410/1473 [20:16<00:54,  1.16it/s]                                                    96%|█████████▌| 1410/1473 [20:16<00:54,  1.16it/s] 96%|█████████▌| 1411/1473 [20:17<00:53,  1.16it/s] 96%|█████████▌| 1412/1473 [20:18<00:53,  1.14it/s] 96%|█████████▌| 1413/1473 [20:19<00:52,  1.15it/s] 96%|█████████▌| 1414/1473 [20:19<00:51,  1.15it/s] 96%|█████████▌| 1415/1473 [20:20<00:50,  1.15it/s] 96%|█████████▌| 1416/1473 [20:21<00:49,  1.14it/s] 96%|█████████▌| 1417/1473 [20:22<00:49,  1.14it/s] 96%|█████████▋| 1418/1473 [20:23<00:48,  1.14it/s] 96%|█████████▋| 1419/1473 [20:24<00:47,  1.13it/s] 96%|█████████▋| 1420/1473 [20:25<00:46,  1.15it/s]                                                    96%|█████████▋| 1420/1473 [20:25<00:46,  1.15it/s] 96%|█████████▋| 1421/1473 [20:26<00:45,  1.13it/s] 97%|█████████▋| 1422/1473 [20:26<00:44,  1.14it/s] 97%|█████████▋| 1423/1473 [20:27<00:43,  1.14it/s] 97%|█████████▋| 1424/1473 [20:28<00:42,  1.16it/s] 97%|█████████▋| 1425/1473 [20:29<00:40,  1.18it/s] 97%|█████████▋| 1426/1473 [20:30<00:40,  1.15it/s] 97%|█████████▋| 1427/1473 [20:31<00:39,  1.17it/s] 97%|█████████▋| 1428/1473 [20:32<00:38,  1.18it/s] 97%|█████████▋| 1429/1473 [20:33<00:38,  1.13it/s] 97%|█████████▋| 1430/1473 [20:33<00:37,  1.14it/s]                                                    97%|█████████▋| 1430/1473 [20:33<00:37,  1.14it/s] 97%|█████████▋| 1431/1473 [20:34<00:36,  1.14it/s] 97%|█████████▋| 1432/1473 [20:35<00:35,  1.14it/s] 97%|█████████▋| 1433/1473 [20:36<00:35,  1.13it/s] 97%|█████████▋| 1434/1473 [20:37<00:34,  1.13it/s] 97%|█████████▋| 1435/1473 [20:38<00:32,  1.15it/s] 97%|█████████▋| 1436/1473 [20:39<00:32,  1.15it/s] 98%|█████████▊| 1437/1473 [20:39<00:31,  1.15it/s] 98%|█████████▊| 1438/1473 [20:40<00:31,  1.11it/s] 98%|█████████▊| 1439/1473 [20:41<00:30,  1.12it/s] 98%|█████████▊| 1440/1473 [20:42<00:29,  1.12it/s]                                                    98%|█████████▊| 1440/1473 [20:42<00:29,  1.12it/s] 98%|█████████▊| 1441/1473 [20:43<00:28,  1.12it/s] 98%|█████████▊| 1442/1473 [20:44<00:26,  1.15it/s] 98%|█████████▊| 1443/1473 [20:45<00:26,  1.15it/s] 98%|█████████▊| 1444/1473 [20:46<00:25,  1.14it/s] 98%|█████████▊| 1445/1473 [20:47<00:24,  1.14it/s] 98%|█████████▊| 1446/1473 [20:47<00:23,  1.15it/s] 98%|█████████▊| 1447/1473 [20:48<00:22,  1.15it/s] 98%|█████████▊| 1448/1473 [20:49<00:21,  1.16it/s] 98%|█████████▊| 1449/1473 [20:50<00:21,  1.14it/s] 98%|█████████▊| 1450/1473 [20:51<00:20,  1.13it/s]                                                    98%|█████████▊| 1450/1473 [20:51<00:20,  1.13it/s] 99%|█████████▊| 1451/1473 [20:52<00:19,  1.13it/s] 99%|█████████▊| 1452/1473 [20:53<00:18,  1.15it/s] 99%|█████████▊| 1453/1473 [20:54<00:17,  1.13it/s] 99%|█████████▊| 1454/1473 [20:54<00:16,  1.13it/s] 99%|█████████▉| 1455/1473 [20:56<00:17,  1.06it/s] 99%|█████████▉| 1456/1473 [20:56<00:15,  1.08it/s] 99%|█████████▉| 1457/1473 [20:57<00:14,  1.11it/s] 99%|█████████▉| 1458/1473 [20:58<00:13,  1.13it/s] 99%|█████████▉| 1459/1473 [20:59<00:12,  1.13it/s] 99%|█████████▉| 1460/1473 [21:00<00:11,  1.14it/s]                                                    99%|█████████▉| 1460/1473 [21:00<00:11,  1.14it/s] 99%|█████████▉| 1461/1473 [21:01<00:10,  1.16it/s] 99%|█████████▉| 1462/1473 [21:02<00:09,  1.16it/s] 99%|█████████▉| 1463/1473 [21:02<00:08,  1.15it/s] 99%|█████████▉| 1464/1473 [21:03<00:07,  1.15it/s] 99%|█████████▉| 1465/1473 [21:04<00:06,  1.16it/s]100%|█████████▉| 1466/1473 [21:05<00:06,  1.15it/s]100%|█████████▉| 1467/1473 [21:06<00:05,  1.16it/s]100%|█████████▉| 1468/1473 [21:07<00:04,  1.16it/s]100%|█████████▉| 1469/1473 [21:08<00:03,  1.17it/s]100%|█████████▉| 1470/1473 [21:08<00:02,  1.17it/s]                                                   100%|█████████▉| 1470/1473 [21:08<00:02,  1.17it/s]100%|█████████▉| 1471/1473 [21:09<00:01,  1.17it/s]100%|█████████▉| 1472/1473 [21:10<00:00,  1.18it/s]100%|██████████| 1473/1473 [21:11<00:00,  1.36it/s]                                                   100%|██████████| 1473/1473 [21:11<00:00,  1.36it/s]100%|██████████| 1473/1473 [21:11<00:00,  1.16it/s]
+[2026-04-26 18:36:11] [safety_warp] [INFO] ✓ Training completed
+[2026-04-26 18:36:11] [safety_warp] [INFO] [WaRP-ParamCheck] post-train sampled delta
+[2026-04-26 18:36:11] [safety_warp] [INFO]   - masked(=1) delta |mean|: 0.000000e+00, changed ratio: 0.00%
+[2026-04-26 18:36:11] [safety_warp] [INFO]   - trainable(=0) delta |mean|: 1.134677e-04, changed ratio: 33.04%
+[2026-04-26 18:36:21] [safety_warp] [INFO] ======================================================================
+[2026-04-26 18:36:21] [safety_warp] [INFO] Phase 3 (Non-Freeze) Completed
+[2026-04-26 18:36:21] [safety_warp] [INFO]   - Final model: /home/yonsei_jong/Safety-WaRP-LLM/checkpoints/safeinstr_warp_20260426_181419/phase3_non_freeze_20260426_181459/final_model
+[2026-04-26 18:36:21] [safety_warp] [INFO] ======================================================================
+[2026-04-26 18:36:21] [safety_warp] [INFO] ✓ Metadata saved to: /home/yonsei_jong/Safety-WaRP-LLM/checkpoints/safeinstr_warp_20260426_181419/phase3_non_freeze_20260426_181459/metadata.json
+[2026-04-26 18:36:21] [safety_warp] [INFO] ======================================================================
+[2026-04-26 18:36:21] [safety_warp] [INFO] Phase 3 Completed!
+[2026-04-26 18:36:21] [safety_warp] [INFO] Final model saved to: /home/yonsei_jong/Safety-WaRP-LLM/checkpoints/safeinstr_warp_20260426_181419/phase3_non_freeze_20260426_181459/final_model
+[2026-04-26 18:36:21] [safety_warp] [INFO] ======================================================================
+[2026-04-26 18:36:23] [safety_warp] [INFO] ======================================================================
+[2026-04-26 18:36:23] [safety_warp] [INFO] All tasks completed successfully!
+[2026-04-26 18:36:23] [safety_warp] [INFO] ======================================================================
+{'loss': 0.2417, 'grad_norm': 1.7109375, 'learning_rate': 1.292610068066923e-05, 'epoch': 1.77}
+{'loss': 0.2304, 'grad_norm': 2.109375, 'learning_rate': 1.2574480290248787e-05, 'epoch': 1.79}
+{'loss': 0.2437, 'grad_norm': 2.59375, 'learning_rate': 1.2224223391379437e-05, 'epoch': 1.81}
+{'loss': 0.2621, 'grad_norm': 2.078125, 'learning_rate': 1.1875526878904128e-05, 'epoch': 1.83}
+{'loss': 0.2449, 'grad_norm': 2.109375, 'learning_rate': 1.152858677050384e-05, 'epoch': 1.85}
+{'loss': 0.2412, 'grad_norm': 2.609375, 'learning_rate': 1.1183598096507382e-05, 'epoch': 1.87}
+{'loss': 0.2481, 'grad_norm': 1.8203125, 'learning_rate': 1.0840754790256267e-05, 'epoch': 1.9}
+{'loss': 0.2258, 'grad_norm': 2.25, 'learning_rate': 1.0500249579086225e-05, 'epoch': 1.92}
+{'loss': 0.2271, 'grad_norm': 2.28125, 'learning_rate': 1.0162273875986677e-05, 'epoch': 1.94}
+{'loss': 0.2587, 'grad_norm': 1.9921875, 'learning_rate': 9.827017671999044e-06, 'epoch': 1.96}
+{'loss': 0.2473, 'grad_norm': 1.8515625, 'learning_rate': 9.494669429414423e-06, 'epoch': 1.98}
+{'loss': 0.2405, 'grad_norm': 1.921875, 'learning_rate': 9.165415975830605e-06, 'epoch': 2.0}
+{'loss': 0.153, 'grad_norm': 1.3125, 'learning_rate': 8.839442399128075e-06, 'epoch': 2.02}
+{'loss': 0.1426, 'grad_norm': 2.21875, 'learning_rate': 8.51693194342392e-06, 'epoch': 2.04}
+{'loss': 0.1493, 'grad_norm': 2.109375, 'learning_rate': 8.198065906062275e-06, 'epoch': 2.06}
+{'loss': 0.1484, 'grad_norm': 1.890625, 'learning_rate': 7.883023535699034e-06, 'epoch': 2.08}
+{'loss': 0.1194, 'grad_norm': 1.828125, 'learning_rate': 7.5719819315383685e-06, 'epoch': 2.1}
+{'loss': 0.141, 'grad_norm': 2.046875, 'learning_rate': 7.265115943777355e-06, 'epoch': 2.12}
+{'loss': 0.1347, 'grad_norm': 2.125, 'learning_rate': 6.962598075315047e-06, 'epoch': 2.14}
+{'loss': 0.1495, 'grad_norm': 2.078125, 'learning_rate': 6.664598384780966e-06, 'epoch': 2.16}
+{'loss': 0.1533, 'grad_norm': 2.59375, 'learning_rate': 6.371284390937634e-06, 'epoch': 2.18}
+{'loss': 0.1454, 'grad_norm': 1.984375, 'learning_rate': 6.082820978510924e-06, 'epoch': 2.2}
+{'loss': 0.1237, 'grad_norm': 2.421875, 'learning_rate': 5.799370305501054e-06, 'epoch': 2.22}
+{'loss': 0.1359, 'grad_norm': 2.109375, 'learning_rate': 5.521091712026456e-06, 'epoch': 2.24}
+{'loss': 0.151, 'grad_norm': 2.265625, 'learning_rate': 5.2481416307516615e-06, 'epoch': 2.26}
+{'loss': 0.1535, 'grad_norm': 2.15625, 'learning_rate': 4.980673498949583e-06, 'epoch': 2.28}
+{'loss': 0.129, 'grad_norm': 1.65625, 'learning_rate': 4.718837672247699e-06, 'epoch': 2.3}
+{'loss': 0.1468, 'grad_norm': 2.3125, 'learning_rate': 4.462781340106496e-06, 'epoch': 2.32}
+{'loss': 0.1452, 'grad_norm': 1.8828125, 'learning_rate': 4.212648443077794e-06, 'epoch': 2.34}
+{'loss': 0.154, 'grad_norm': 2.65625, 'learning_rate': 3.968579591889425e-06, 'epoch': 2.36}
+{'loss': 0.1385, 'grad_norm': 2.96875, 'learning_rate': 3.73071198840173e-06, 'epoch': 2.38}
+{'loss': 0.142, 'grad_norm': 2.140625, 'learning_rate': 3.4991793484803566e-06, 'epoch': 2.4}
+{'loss': 0.1375, 'grad_norm': 2.25, 'learning_rate': 3.2741118268286795e-06, 'epoch': 2.42}
+{'loss': 0.122, 'grad_norm': 2.0, 'learning_rate': 3.055635943822081e-06, 'epoch': 2.44}
+{'loss': 0.137, 'grad_norm': 1.8828125, 'learning_rate': 2.8438745143853005e-06, 'epoch': 2.46}
+{'loss': 0.1395, 'grad_norm': 2.59375, 'learning_rate': 2.63894657895274e-06, 'epoch': 2.49}
+{'loss': 0.1209, 'grad_norm': 2.40625, 'learning_rate': 2.4409673365505707e-06, 'epoch': 2.51}
+{'loss': 0.1418, 'grad_norm': 3.59375, 'learning_rate': 2.2500480800383113e-06, 'epoch': 2.53}
+{'loss': 0.1326, 'grad_norm': 1.9921875, 'learning_rate': 2.066296133546192e-06, 'epoch': 2.55}
+{'loss': 0.1357, 'grad_norm': 2.453125, 'learning_rate': 1.889814792143519e-06, 'epoch': 2.57}
+{'loss': 0.1455, 'grad_norm': 1.796875, 'learning_rate': 1.7207032637719877e-06, 'epoch': 2.59}
+{'loss': 0.1384, 'grad_norm': 2.796875, 'learning_rate': 1.5590566134764966e-06, 'epoch': 2.61}
+{'loss': 0.1324, 'grad_norm': 1.75, 'learning_rate': 1.4049657099649204e-06, 'epoch': 2.63}
+{'loss': 0.1274, 'grad_norm': 2.234375, 'learning_rate': 1.2585171745267905e-06, 'epoch': 2.65}
+{'loss': 0.1351, 'grad_norm': 1.984375, 'learning_rate': 1.1197933323396465e-06, 'epoch': 2.67}
+{'loss': 0.1445, 'grad_norm': 2.234375, 'learning_rate': 9.888721661904365e-07, 'epoch': 2.69}
+{'loss': 0.1292, 'grad_norm': 2.28125, 'learning_rate': 8.658272726379462e-07, 'epoch': 2.71}
+{'loss': 0.1467, 'grad_norm': 1.96875, 'learning_rate': 7.507278206409296e-07, 'epoch': 2.73}
+{'loss': 0.1268, 'grad_norm': 2.5, 'learning_rate': 6.436385126751937e-07, 'epoch': 2.75}
+{'loss': 0.1413, 'grad_norm': 2.15625, 'learning_rate': 5.446195483614736e-07, 'epoch': 2.77}
+{'loss': 0.1401, 'grad_norm': 2.125, 'learning_rate': 4.537265906245869e-07, 'epoch': 2.79}
+{'loss': 0.1295, 'grad_norm': 1.9921875, 'learning_rate': 3.710107344028407e-07, 'epoch': 2.81}
+{'loss': 0.1333, 'grad_norm': 2.453125, 'learning_rate': 2.9651847792530884e-07, 'epoch': 2.83}
+{'loss': 0.1383, 'grad_norm': 1.984375, 'learning_rate': 2.3029169657314552e-07, 'epoch': 2.85}
+{'loss': 0.1389, 'grad_norm': 2.09375, 'learning_rate': 1.7236761933956902e-07, 'epoch': 2.87}
+{'loss': 0.1437, 'grad_norm': 2.375, 'learning_rate': 1.2277880790181052e-07, 'epoch': 2.89}
+{'loss': 0.1393, 'grad_norm': 2.0625, 'learning_rate': 8.155313831676781e-08, 'epoch': 2.91}
+{'loss': 0.1263, 'grad_norm': 2.53125, 'learning_rate': 4.871378535062865e-08, 'epoch': 2.93}
+{'loss': 0.1403, 'grad_norm': 2.09375, 'learning_rate': 2.4279209451328333e-08, 'epoch': 2.95}
+{'loss': 0.1324, 'grad_norm': 2.0, 'learning_rate': 8.263146371109143e-09, 'epoch': 2.97}
+{'loss': 0.1363, 'grad_norm': 2.140625, 'learning_rate': 6.745994450518823e-10, 'epoch': 2.99}
+{'train_runtime': 1271.1379, 'train_samples_per_second': 18.52, 'train_steps_per_second': 1.159, 'train_loss': 0.2869146328674881, 'epoch': 3.0}

@@ -1,0 +1,958 @@
+"""
+Phase 1: Basis Construction
+FFN down_proj 레이어에서 활성화를 수집하고 SVD를 통해 basis를 계산
+
+python train.py \
+    --phase 1 \
+    --phase0_model_dir "$PHASE0_MODEL" \
+    --safety_dataset circuit_breakers \
+    --circuit_breakers_samples_phase1 4994 \
+    --batch_size 4 \
+    --layer_type attn_q,attn_k,attn_v,ffn_down,ffn_up \
+    --target_layers all \
+    --output_dir ./checkpoints \
+    --log_dir ./logs \
+    --device cuda \
+    --dtype bfloat16 \
+    --seed 42
+"""
+
+import torch
+import torch.nn as nn
+import numpy as np
+from collections import defaultdict
+import os
+import json
+from tqdm import tqdm
+import logging
+import random
+from typing import List
+
+try:
+    from datasets import load_dataset
+except ImportError:
+    load_dataset = None
+
+logger = logging.getLogger(__name__)
+
+
+class Phase1BasisBuilder:
+    """
+    Phase 1: Basis Construction Builder
+    
+    절차:
+    1. 모델 로드 
+    2. 안전 데이터 로드 
+    3. Forward hook을 통해 각 layer의 입력값 수집
+    4. 수집된 활성화로부터 공분산 행렬 계산
+    5. SVD를 통해 직교 기저(orthonormal basis) 계산
+    6. Basis 저장
+    """
+    
+    def __init__(self, args, logger):
+        """
+        Args:
+            args: 커맨드라인 인자
+            logger: 로거 객체
+        """
+        self.args = args
+        self.logger = logger
+        
+        # 모델 및 데이터
+        self.model = None
+        self.tokenizer = None
+        self.dataloader = None
+        
+        # 활성화 수집을 위한 저장소
+        # ✅ Incremental Gram matrix accumulation 방식
+        # Activation을 저장하지 않고 즉시 Gram matrix에 누적
+        self.gram_matrices = {}  # (layer_idx, layer_type) -> Gram matrix (GPU)
+        self.num_samples = {}  # (layer_idx, layer_type) -> sample count
+        
+        # Checkpoint 디렉토리 설정
+        from datetime import datetime
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        checkpoint_base = os.path.join(
+            getattr(args, 'output_dir', './checkpoints'),
+            f'phase1_{timestamp}'
+        )
+        os.makedirs(checkpoint_base, exist_ok=True)
+        self.checkpoint_dir = os.path.join(checkpoint_base, 'basis')
+        os.makedirs(self.checkpoint_dir, exist_ok=True)
+        
+        # Hook 핸들 저장소
+        self.hooks = []
+        
+        # 통계
+        self.stats = {
+            'total_samples': 0,
+            'total_tokens': 0,
+            'layers_processed': 0,
+        }
+    
+    def _parse_target_layers(self, num_layers):
+        """
+        타겟 레이어 범위를 파싱하는 헬퍼 함수
+        
+        지원 형식:
+        - 'all': 모든 레이어 
+        - '31': 특정 레이어 (31번)
+        - '30-31': 범위 (30-31)
+        
+        Returns:
+            list: 레이어 인덱스 리스트
+        """
+        target = self.args.target_layers.strip()
+        
+        # 사전정의 범위
+        if target == 'all':
+            return list(range(num_layers))
+        
+        # 범위 파싱: "0-5" 또는 "30-31" 형식
+        if '-' in target:
+            try:
+                start, end = target.split('-')
+                start, end = int(start.strip()), int(end.strip())
+                return list(range(start, min(end + 1, num_layers)))
+            except ValueError:
+                self.logger.error(f"Invalid range format: {target}. Use format like '0-5' or '30-31'")
+                raise
+        
+        # 단일 레이어: "31" 형식
+        try:
+            layer_idx = int(target)
+            if 0 <= layer_idx < num_layers:
+                return [layer_idx]
+            else:
+                self.logger.error(f"Layer index {layer_idx} out of range [0, {num_layers-1}]")
+                raise ValueError(f"Invalid layer index: {layer_idx}")
+        except ValueError:
+            self.logger.error(f"Invalid target_layers format: {target}")
+            raise
+
+    def _is_instruct_model(self):
+        model_ref = str(
+            getattr(self.args, 'model_name', None)
+            or getattr(self.args, 'phase0_model_dir', '')
+        )
+        model_ref = model_ref.lower()
+        return any(tag in model_ref for tag in ('instruct', 'chat'))
+
+    def _format_phase1_text(self, user_text: str, assistant_text: str = None) -> str:
+        user_text = str(user_text).strip()
+        assistant_text = None if assistant_text is None else str(assistant_text).strip()
+
+        if not self._is_instruct_model():
+            if assistant_text is None:
+                return user_text
+            return f"Question: {user_text}\nAnswer: {assistant_text}"
+
+        messages = [{"role": "user", "content": user_text}]
+        if assistant_text is not None:
+            messages.append({"role": "assistant", "content": assistant_text})
+
+        try:
+            return self.tokenizer.apply_chat_template(
+                messages,
+                tokenize=False,
+                add_generation_prompt=False,
+            )
+        except Exception as e:
+            self.logger.warning(
+                f"Failed to apply chat template for instruct model; falling back to plain format. Error: {e}"
+            )
+            if assistant_text is None:
+                return user_text
+            return f"Question: {user_text}\nAnswer: {assistant_text}"
+    
+    def load_model(self):
+        """
+        LLaMA 모델 로드
+        
+        Log:
+        - 모델 로드 시작/완료
+        - 모델 파라미터 수
+        - 레이어 구조 확인
+        """
+        from transformers import AutoModelForCausalLM, AutoTokenizer
+        
+        try:
+            self.logger.info(f"Loading model: {self.args.model_name}")
+            
+            # 데이터 타입 설정
+            dtype_map = {
+                'float32': torch.float32,
+                'float16': torch.float16,
+                'bfloat16': torch.bfloat16
+            }
+            torch_dtype = dtype_map.get(self.args.dtype, torch.bfloat16)
+            
+            # 모델 로드
+            self.model = AutoModelForCausalLM.from_pretrained(
+                self.args.model_name,
+                torch_dtype=torch_dtype,
+                device_map=self.args.device,
+                trust_remote_code=True
+            )
+            self.logger.info(f"✓ Model loaded successfully")
+            
+            # 모델 정보 로깅
+            total_params = sum(p.numel() for p in self.model.parameters())
+            self.logger.info(f"  - Total parameters: {total_params:,}")
+            self.logger.info(f"  - Model device: {self.model.device}")
+            self.logger.info(f"  - Model dtype: {self.model.dtype}")
+            
+            # 레이어 구조 확인
+            num_layers = len(self.model.model.layers)
+            self.logger.info(f"  - Number of layers: {num_layers}")
+            
+            # 샘플 레이어 구조 확인
+            sample_layer = self.model.model.layers[0]
+            self.logger.info(f"  - Sample layer structure:")
+            self.logger.info(f"    - MLPdown_proj: {sample_layer.mlp.down_proj}")
+            self.logger.info(f"    - MLPup_proj: {sample_layer.mlp.up_proj}")
+            self.logger.info(f"    - Self-Attention q_proj: {sample_layer.self_attn.q_proj}")
+            self.logger.info(f"    - Self-Attention k_proj: {sample_layer.self_attn.k_proj}")
+            self.logger.info(f"    - Self-Attention v_proj: {sample_layer.self_attn.v_proj}")
+            
+            # 토크나이저 로드
+            self.tokenizer = AutoTokenizer.from_pretrained(
+                self.args.model_name,
+                trust_remote_code=True
+            )
+            if self.tokenizer.pad_token is None:
+                self.tokenizer.pad_token = self.tokenizer.eos_token
+            self.logger.info(f"✓ Tokenizer loaded successfully")
+            self.logger.info(
+                f"  - Input formatting: {'chat template' if self._is_instruct_model() else 'plain text'}"
+            )
+            
+            # 모델을 evaluation 모드로 설정
+            self.model.eval()
+            
+        except Exception as e:
+            self.logger.error(f"Failed to load model: {str(e)}", exc_info=True)
+            raise
+    
+    def load_safety_data(self):
+        """
+        안전/유틸리티 데이터 로드
+        
+        지원 데이터셋:
+        - circuit_breakers: 안전 데이터 (Safety Basis)
+        - wikipedia: 위키피디아 데이터 (Utility Basis)
+        
+        Log:
+        - 데이터셋 로드 상태
+        - 필터링 결과
+        - 최종 샘플 수
+        """
+        try:
+            # safety_dataset 인자에 따라 로더 선택
+            dataset_type = getattr(self.args, 'safety_dataset', 'circuit_breakers')
+            
+            if dataset_type == 'circuit_breakers':
+                self._load_circuit_breakers()
+            elif dataset_type == 'wikipedia':
+                self._load_wikipedia()
+            else:
+                raise ValueError(f"Unknown dataset type: {dataset_type}. Choose from 'circuit_breakers', 'wikipedia'")
+  
+        except Exception as e:
+            self.logger.error(f"Failed to load data: {str(e)}", exc_info=True)
+            raise
+    
+    def _load_circuit_breakers(self):
+        """
+        Circuit Breakers dataset 로드 (circuit_breakers_train.json)
+        
+        Prompt만 사용 (Phase 1 basis 구성용)
+        """
+        import json
+        
+        circuit_breakers_path = './data/circuit_breakers_train.json'
+        self.logger.info(f"Loading circuit_breakers from {circuit_breakers_path}...")
+        
+        try:
+            with open(circuit_breakers_path, 'r', encoding='utf-8') as f:
+                dataset = json.load(f)
+            
+            self.logger.info(f"✓ Dataset loaded: {len(dataset)} samples")
+            
+            # 샘플 수 제한
+            max_samples = getattr(self.args, 'circuit_breakers_samples_phase1', 200)
+            if max_samples and len(dataset) > max_samples:
+                dataset = dataset[:max_samples]
+                self.logger.info(f"✓ Subsampled to {len(dataset)} samples")
+            
+            # Prompt-response 쌍 추출 (Phase 0 SSFT와 동일한 포맷)
+            # harmful prompt만 사용하면 "위험 감지" subspace만 포착하지만,
+            # full sequence를 사용하면 safe response 생성 방향까지 basis에 반영됨
+            texts = [
+                self._format_phase1_text(
+                    item.get('prompt', ''),
+                    item.get('llama3_output', ''),
+                )
+                for item in dataset
+            ]
+            
+            # 데이터셋 클래스
+            class CircuitBreakersDataset(torch.utils.data.Dataset):
+                def __init__(self, prompts, tokenizer, max_length=1024):
+                    self.prompts = prompts
+                    self.tokenizer = tokenizer
+                    self.max_length = max_length
+                
+                def __len__(self):
+                    return len(self.prompts)
+                
+                def __getitem__(self, idx):
+                    prompt = self.prompts[idx]
+                    
+                    encoding = self.tokenizer(
+                        prompt,
+                        truncation=True,
+                        max_length=self.max_length,
+                        return_tensors='pt'
+                    )
+                    
+                    return {
+                        'input_ids': encoding['input_ids'].squeeze(),
+                        'attention_mask': encoding['attention_mask'].squeeze(),
+                    }
+            
+            dataset_wrapper = CircuitBreakersDataset(texts, self.tokenizer, max_length=1024)
+            
+            # Custom collate function
+            def collate_fn(batch):
+                max_len = max(len(item['input_ids']) for item in batch)
+                
+                input_ids_list = []
+                attention_masks_list = []
+                
+                for item in batch:
+                    input_ids = item['input_ids']
+                    attn_mask = item['attention_mask']
+                    
+                    pad_len = max_len - len(input_ids)
+                    if pad_len > 0:
+                        input_ids = torch.nn.functional.pad(
+                            input_ids.unsqueeze(0),
+                            (0, pad_len),
+                            value=self.tokenizer.pad_token_id
+                        ).squeeze(0)
+                        attn_mask = torch.nn.functional.pad(
+                            attn_mask.unsqueeze(0),
+                            (0, pad_len),
+                            value=0
+                        ).squeeze(0)
+                    
+                    input_ids_list.append(input_ids)
+                    attention_masks_list.append(attn_mask)
+                
+                return {
+                    'input_ids': torch.stack(input_ids_list),
+                    'attention_mask': torch.stack(attention_masks_list),
+                }
+            
+            self.dataloader = torch.utils.data.DataLoader(
+                dataset_wrapper,
+                batch_size=self.args.batch_size,
+                shuffle=False,
+                collate_fn=collate_fn,
+                generator=torch.Generator().manual_seed(112),
+            )
+            
+            self.logger.info(f"✓ Dataloader created")
+            self.logger.info(
+                "  - Input format: "
+                f"{'chat template user/assistant pairs' if self._is_instruct_model() else 'full prompt-response pairs (Phase 0 SSFT aligned)'}"
+            )
+            self.logger.info(f"  - Batch size: {self.args.batch_size}")
+            self.logger.info(f"  - Total batches: {len(self.dataloader)}")
+            self.logger.info(f"  - Sample text: {texts[0][:100]}...")
+        
+        except Exception as e:
+            self.logger.error(f"Failed to load circuit_breakers dataset: {str(e)}", exc_info=True)
+            raise
+    
+    def _load_wikipedia(self):
+        """
+        Wikipedia 데이터셋 로드 (유틸리티 데이터용)
+        
+        Prompt만 사용 (Phase 1 basis 구성용)
+        """
+        if load_dataset is None:
+            self.logger.error("datasets library not found! Install with: pip install datasets")
+            raise ImportError("datasets library is required for Wikipedia data loading")
+        
+        try:
+            num_samples = getattr(self.args, 'wikipedia_samples_phase1', 1000)
+            self.logger.info(f"Loading Wikipedia dataset (samples={num_samples})...")
+            
+            # Wikipedia 데이터셋 로드
+            dataset = load_dataset(
+                "wikimedia/wikipedia",
+                "20231101.en",
+                split="train",
+                streaming=False,
+                cache_dir=os.path.join(os.getcwd(), "wikipedia_cache")
+            )
+            
+            self.logger.info(f"✓ Dataset loaded: {len(dataset)} total documents")
+            
+            # 샘플 추출
+            texts = []
+            total_size = len(dataset)
+            random.seed(112)
+            random_indices = random.sample(range(total_size), min(num_samples, total_size))
+            
+            self.logger.info(f"Sampling {len(random_indices)} documents from Wikipedia...")
+            
+            for idx in tqdm(random_indices, desc="Loading Wikipedia docs", disable=not self.args.debug):
+                try:
+                    text = dataset[idx]['text']
+                    if text.strip():
+                        texts.append(
+                            self._format_phase1_text(
+                                "Please read and internalize the following reference text.",
+                                text,
+                            )
+                        )
+                except Exception as e:
+                    if self.args.debug:
+                        self.logger.debug(f"Error processing sample {idx}: {e}")
+                    continue
+            
+            self.logger.info(f"✓ Loaded {len(texts)} Wikipedia samples")
+            
+            # 데이터셋 클래스
+            class WikipediaDataset(torch.utils.data.Dataset):
+                def __init__(self, texts, tokenizer, max_length=1024):
+                    self.texts = texts
+                    self.tokenizer = tokenizer
+                    self.max_length = max_length
+                
+                def __len__(self):
+                    return len(self.texts)
+                
+                def __getitem__(self, idx):
+                    text = self.texts[idx]
+                    
+                    encoding = self.tokenizer(
+                        text,
+                        truncation=True,
+                        max_length=self.max_length,
+                        return_tensors='pt'
+                    )
+                    
+                    return {
+                        'input_ids': encoding['input_ids'].squeeze(),
+                        'attention_mask': encoding['attention_mask'].squeeze(),
+                    }
+            
+            dataset_wrapper = WikipediaDataset(texts, self.tokenizer, max_length=1024)
+            
+            # Custom collate function
+            def collate_fn(batch):
+                max_len = max(len(item['input_ids']) for item in batch)
+                
+                input_ids_list = []
+                attention_masks_list = []
+                
+                for item in batch:
+                    input_ids = item['input_ids']
+                    attn_mask = item['attention_mask']
+                    
+                    pad_len = max_len - len(input_ids)
+                    if pad_len > 0:
+                        input_ids = torch.nn.functional.pad(
+                            input_ids.unsqueeze(0),
+                            (0, pad_len),
+                            value=self.tokenizer.pad_token_id
+                        ).squeeze(0)
+                        attn_mask = torch.nn.functional.pad(
+                            attn_mask.unsqueeze(0),
+                            (0, pad_len),
+                            value=0
+                        ).squeeze(0)
+                    
+                    input_ids_list.append(input_ids)
+                    attention_masks_list.append(attn_mask)
+                
+                return {
+                    'input_ids': torch.stack(input_ids_list),
+                    'attention_mask': torch.stack(attention_masks_list),
+                }
+            
+            self.dataloader = torch.utils.data.DataLoader(
+                dataset_wrapper,
+                batch_size=self.args.batch_size,
+                shuffle=True,
+                collate_fn=collate_fn,
+                generator=torch.Generator().manual_seed(112),
+            )
+            
+            self.logger.info(f"✓ Dataloader created")
+            self.logger.info(f"  - Dataset type: Wikipedia (Utility)")
+            self.logger.info(
+                "  - Input format: "
+                f"{'chat template user/assistant pairs' if self._is_instruct_model() else 'plain Wikipedia text'}"
+            )
+            self.logger.info(f"  - Batch size: {self.args.batch_size}")
+            self.logger.info(f"  - Total batches: {len(self.dataloader)}")
+            self.logger.info(f"  - Sample text: {texts[0][:100]}...")
+        
+        except Exception as e:
+            self.logger.error(f"Failed to load Wikipedia dataset: {str(e)}", exc_info=True)
+            raise
+    
+    def collect_activations_and_accumulate_gram(self):
+        """
+        ✅ Incremental Gram Matrix Accumulation
+        
+        배치별로 forward pass를 수행하면서 Gram matrix를 즉시 누적
+        - Activation을 저장하지 않음 (메모리 효율적)
+        - GPU에서 계산 (빠름)
+        - 패딩/special token 마스킹 적용
+        - 샘플별 mean-pooled activation으로 Gram matrix 누적
+        
+        수식: Gram = Σ(P_batch^T @ P_batch) for all batches
+              where P_batch[b] = mean(valid token activations in sample b)
+        """
+        try:
+            self.logger.info("Collecting activations and accumulating Gram matrices (GPU)...")
+            self.logger.info("✅ Incremental accumulation: No activation storage, fast GPU computation")
+            
+            # 타겟 레이어 및 타입 결정
+            num_layers = len(self.model.model.layers)
+            layer_indices = self._parse_target_layers(num_layers)
+            layer_types = [lt.strip() for lt in self.args.layer_type.split(',')]
+            
+            self.logger.info(f"Target layers: {layer_indices}")
+            self.logger.info(f"Layer types: {layer_types}")
+            
+            # Gram matrices 초기화
+            for layer_idx in layer_indices:
+                for layer_type in layer_types:
+                    self.gram_matrices[(layer_idx, layer_type)] = None
+                    self.num_samples[(layer_idx, layer_type)] = 0
+            
+            # 현재 배치의 content-token mask를 hook과 공유하기 위한 컨테이너
+            current_mask = {'val': None}
+            special_token_ids = set(getattr(self.tokenizer, 'all_special_ids', []) or [])
+            if getattr(self.tokenizer, 'pad_token_id', None) is not None:
+                special_token_ids.add(self.tokenizer.pad_token_id)
+            special_token_ids = sorted(int(tok_id) for tok_id in special_token_ids if tok_id is not None)
+            self.logger.info(
+                "Sample-level pooling: padding and special tokens excluded "
+                f"({len(special_token_ids)} special token ids)"
+            )
+
+            # Forward hook 등록 (Gram matrix 누적용)
+            hooks = []
+            
+            def get_accumulation_hook(layer_idx, layer_type):
+                """Gram matrix를 누적하는 hook (sample-level mean pooling 적용)"""
+                def hook(module, input, output):
+                    # input[0]: (batch_size, seq_len, hidden_dim)
+                    act = input[0]  # GPU에 유지
+                    batch_size, seq_len, hidden_dim = act.shape
+
+                    # content-token mask: attention_mask에서 padding/special token 제외
+                    mask = current_mask['val']  # (batch, seq)
+                    if mask is None:
+                        mask = torch.ones((batch_size, seq_len), device=act.device, dtype=torch.bool)
+                    elif mask.shape != (batch_size, seq_len):
+                        raise ValueError(
+                            f"Mask shape {tuple(mask.shape)} does not match activation shape "
+                            f"{(batch_size, seq_len)} for layer {layer_idx} ({layer_type})"
+                        )
+                    else:
+                        mask = mask.to(device=act.device, dtype=torch.bool)
+
+                    token_counts = mask.sum(dim=1)  # (batch,)
+                    nonempty_samples = token_counts > 0
+                    if not nonempty_samples.any().item():
+                        return
+
+                    # Sample-level mean pooling: (batch, hidden_dim)
+                    pooled = (act * mask.unsqueeze(-1).to(act.dtype)).sum(dim=1)
+                    pooled = pooled / token_counts.clamp_min(1).unsqueeze(-1).to(act.dtype)
+                    pooled = pooled[nonempty_samples]
+                    
+                    # Gram matrix 누적: P^T @ P, P=(valid samples, hidden_dim)
+                    gram_batch = pooled.t() @ pooled  # (hidden_dim, hidden_dim)
+                    
+                    key = (layer_idx, layer_type)
+                    if self.gram_matrices[key] is None:
+                        self.gram_matrices[key] = gram_batch
+                    else:
+                        self.gram_matrices[key] += gram_batch
+
+                    # Gram에 실제로 들어간 pooled sample 수
+                    self.num_samples[key] += int(nonempty_samples.sum().item())
+                
+                return hook
+            
+            # Hook 등록
+            for layer_idx in layer_indices:
+                layer = self.model.model.layers[layer_idx]
+                
+                for layer_type in layer_types:
+                    if layer_type == 'ffn_down':
+                        target_module = layer.mlp.down_proj
+                    elif layer_type == 'ffn_gate':
+                        target_module = layer.mlp.gate_proj
+                    elif layer_type == 'ffn_up':
+                        target_module = layer.mlp.up_proj
+                    elif layer_type == 'attn_q':
+                        target_module = layer.self_attn.q_proj
+                    elif layer_type == 'attn_k':
+                        target_module = layer.self_attn.k_proj
+                    elif layer_type == 'attn_v':
+                        target_module = layer.self_attn.v_proj
+                    elif layer_type == 'attn_o':
+                        target_module = layer.self_attn.o_proj
+                    else:
+                        raise ValueError(f"Unknown layer type: {layer_type}")
+                    
+                    hook_handle = target_module.register_forward_hook(
+                        get_accumulation_hook(layer_idx, layer_type)
+                    )
+                    hooks.append(hook_handle)
+            
+            self.logger.info(f"✓ {len(hooks)} accumulation hooks registered")
+            
+            # Forward pass (Gram matrix 누적)
+            with torch.no_grad():
+                progress_bar = tqdm(
+                    self.dataloader,
+                    desc="Accumulating Gram matrices",
+                    disable=not self.args.debug
+                )
+                
+                total_batches = 0
+                for batch_idx, batch in enumerate(progress_bar):
+                    input_ids = batch['input_ids'].to(self.model.device)
+                    attention_mask = batch['attention_mask'].to(self.model.device)
+
+                    # hook에서 sample-level pooling에 사용하도록 content-token mask 공유
+                    valid_token_mask = attention_mask.to(torch.bool)
+                    for special_token_id in special_token_ids:
+                        valid_token_mask = valid_token_mask & input_ids.ne(special_token_id)
+                    current_mask['val'] = valid_token_mask
+
+                    # Forward (hook에서 Gram matrix 누적)
+                    _ = self.model(input_ids=input_ids, attention_mask=attention_mask)
+                    
+                    total_batches += 1
+                    
+                    # 통계 업데이트
+                    valid_tokens = valid_token_mask.sum().item()
+                    self.stats['total_samples'] += input_ids.shape[0]
+                    self.stats['total_tokens'] += valid_tokens
+                    
+                    if self.args.debug and batch_idx < 2:
+                        self.logger.debug(f"Batch {batch_idx}: processed")
+            
+            # Hook 제거
+            for hook in hooks:
+                hook.remove()
+            
+            self.logger.info(f"✓ Gram matrix accumulation completed")
+            self.logger.info(f"  - Total batches: {total_batches}")
+            self.logger.info(f"  - Total samples: {self.stats['total_samples']}")
+            self.logger.info(f"  - Total content tokens: {self.stats['total_tokens']}")
+            self.logger.info(f"  - Gram matrices: {len(self.gram_matrices)}")
+            
+            # 통계 출력
+            for key in sorted(self.gram_matrices.keys())[:3]:
+                gram = self.gram_matrices[key]
+                num = self.num_samples[key]
+                self.logger.info(f"  - Layer {key}: Gram shape={gram.shape}, pooled_samples={num}")
+            
+            if len(self.gram_matrices) > 3:
+                self.logger.info(f"  - ... and {len(self.gram_matrices) - 3} more")
+            
+        except Exception as e:
+            self.logger.error(f"Failed to accumulate Gram matrices: {str(e)}", exc_info=True)
+            raise
+    
+    
+    def compute_svd(self):
+        """
+        ✅ Incremental Gram Matrix 방식의 SVD
+        
+        이미 누적된 Gram matrix로부터 직접 SVD 수행
+        - GPU에서 빠른 계산
+        - 메모리 효율적 (O(hidden_dim^2))
+        - Layer별 순차 처리 및 즉시 저장
+        
+        수식:
+        - P ∈ R^(num_samples x hidden_dim): sample-level mean-pooled activations
+        - Gram_sum = P^T @ P (이미 누적됨)
+        - Gram = Gram_sum / num_samples
+        - Gram = U @ S @ U^T (SVD)
+        """
+        try:
+            self.logger.info("Computing SVD from accumulated Gram matrices (GPU)...")
+            self.logger.info("✅ Fast GPU computation, incremental disk saving")
+            
+            layers_saved = 0
+            gram_keys = sorted(self.gram_matrices.keys())
+            
+            for layer_idx, layer_type in tqdm(gram_keys, desc="SVD Decomposition", disable=True):
+                gram_matrix = self.gram_matrices[(layer_idx, layer_type)]
+                
+                if gram_matrix is None:
+                    self.logger.warning(f"Layer {layer_idx} ({layer_type}): No Gram matrix accumulated, skipping")
+                    continue
+                
+                self.logger.info(f"Layer {layer_idx} ({layer_type}):")
+                self.logger.info(f"  - Gram matrix shape: {gram_matrix.shape}")
+                self.logger.info(f"  - Gram matrix device: {gram_matrix.device}")
+                sample_count = self.num_samples[(layer_idx, layer_type)]
+                self.logger.info(f"  - Pooled samples accumulated: {sample_count}")
+                
+                if sample_count <= 0:
+                    self.logger.warning(
+                        f"Layer {layer_idx} ({layer_type}): No pooled samples accumulated, skipping"
+                    )
+                    continue
+
+                # float32로 변환하고 sample 수로 평균화 (SVD 정확도 및 scale 안정화)
+                gram_matrix_float = gram_matrix.float() / float(sample_count)
+                
+                # 통계
+                trace = gram_matrix_float.trace().item()
+                self.logger.info(f"  - Mean Gram matrix trace: {trace:.4f}")
+                
+                # ✅ GPU에서 SVD 수행 (빠름!)
+                U, S, UT = torch.linalg.svd(gram_matrix_float, full_matrices=False)
+                
+                # Symmetry 검증
+                diff = (U - UT.t()).abs().max().item()
+                self.logger.info(f"  - Symmetry check: max|U - V^T| = {diff:.2e}")
+                
+                # V = UT.t() (Right singular vectors)
+                V = UT.t()
+                svd_result = {
+                    'U': V.cpu(),  # CPU로 이동하여 저장
+                    'S': S.cpu(),
+                    'UT': UT.cpu(),
+                }
+                
+                # 즉시 디스크 저장
+                self._save_svd_result(layer_idx, layer_type, svd_result)
+                layers_saved += 1
+                
+                # 통계
+                total_var = S.sum().item()
+                top_k_var = S[:min(10, len(S))].sum().item()
+                var_ratio = (top_k_var / total_var * 100) if total_var > 1e-10 else 0.0
+                
+                self.logger.info(f"  - SVD singular values (top-10):")
+                for i, s in enumerate(S[:10].cpu()):
+                    self.logger.info(f"    σ_{i}: {s:.6f}")
+                self.logger.info(f"  - Top-10 variance ratio: {var_ratio:.2f}%")
+                self.logger.info(f"  - ✓ Saved to disk")
+                
+                # GPU 메모리 정리
+                del gram_matrix_float, U, S, UT, V, svd_result
+            
+            # 모든 Gram matrix 삭제
+            self.gram_matrices.clear()
+            self.num_samples.clear()
+            torch.cuda.empty_cache()
+            
+            self.logger.info(f"✓ SVD computation completed")
+            self.logger.info(f"  - Total layers saved: {layers_saved}")
+            self.logger.info(f"  - GPU memory cleared")
+            
+        except Exception as e:
+            self.logger.error(f"Failed to compute SVD: {str(e)}", exc_info=True)
+            raise
+    
+    def _save_svd_result(self, layer_idx, layer_type, svd_result):
+        """
+        개별 layer의 SVD 결과를 즉시 디스크에 저장
+        
+        메모리 최적화: 메모리에 보관하지 않고 즉시 저장하므로 전체 메모리 사용량 대폭 감소
+        
+        Args:
+            layer_idx: 레이어 인덱스
+            layer_type: 레이어 타입 (attn_q, attn_k, etc)
+            svd_result: {'U': U, 'S': S, 'Vh': Vh, 'cov': cov_matrix}
+        """
+        # Layer type별 디렉토리 생성
+        layer_type_dir = os.path.join(self.checkpoint_dir, layer_type)
+        os.makedirs(layer_type_dir, exist_ok=True)
+        
+        # SVD 결과 저장
+        save_path = os.path.join(layer_type_dir, f'layer_{layer_idx:02d}_svd.pt')
+        
+        torch.save({
+            'U': svd_result['U'].cpu() if torch.is_tensor(svd_result['U']) else svd_result['U'],
+            'S': svd_result['S'].cpu() if torch.is_tensor(svd_result['S']) else svd_result['S'],
+            'UT': svd_result.get('UT', None),  # UT 저장 (있는 경우)
+        }, save_path)
+        
+        file_size_mb = os.path.getsize(save_path) / (1024 * 1024)
+        self.logger.debug(f"    - Saved: {save_path} ({file_size_mb:.2f} MB)")
+    
+    def save_basis(self):
+        """
+        메모리 최적화 버전:
+        
+        각 layer별 SVD 결과가 이미 디스크에 저장되어 있음
+        여기서는 메타데이터만 저장하면 됨
+        
+        파일 구조:
+        - basis/
+          - ffn_down/
+            - layer_00_svd.pt (이미 저장됨)
+            - layer_01_svd.pt
+            - ...
+          - ffn_up/
+          - attn_q/
+          - ...
+          - metadata.json ← 여기서 생성
+        """
+        try:
+            basis_dir = self.checkpoint_dir or os.path.join(self.args.checkpoint_dir, 'basis')
+            os.makedirs(basis_dir, exist_ok=True)
+            
+            self.logger.info(f"Saving basis metadata to {basis_dir}...")
+            
+            # 저장된 레이어 타입과 파일 개수 세기
+            layer_types_saved = set()
+            total_files = 0
+            
+            for layer_type in os.listdir(basis_dir):
+                layer_type_dir = os.path.join(basis_dir, layer_type)
+                if os.path.isdir(layer_type_dir):
+                    layer_types_saved.add(layer_type)
+                    files = [f for f in os.listdir(layer_type_dir) if f.endswith('.pt')]
+                    total_files += len(files)
+            
+            # 메타데이터 저장
+            metadata = {
+                'model_name': self.args.model_name,
+                'layer_types': sorted(list(layer_types_saved)),
+                'target_layers': self.args.target_layers,
+                'num_layers_saved': total_files,
+                'batch_size': self.args.batch_size,
+                'total_content_tokens': self.stats['total_tokens'],
+                'total_samples': self.stats['total_samples'],
+                'dtype': self.args.dtype,
+                'activation_pooling': 'sample_mean',
+                'token_filtering': 'attention_mask plus tokenizer all_special_ids',
+                'gram_normalization': 'divide_by_pooled_sample_count_before_svd',
+                'memory_optimization': 'Layer-wise incremental saving (each layer saved immediately after SVD)',
+                'notes': 'Phase 1: Per-sample mean-pooled activations are computed after excluding padding and special tokens. SVD results saved to disk immediately (not in memory).',
+            }
+            
+            metadata_path = os.path.join(basis_dir, 'metadata.json')
+            with open(metadata_path, 'w') as f:
+                json.dump(metadata, f, indent=4)
+            
+            self.logger.info(f"✓ Basis metadata saved successfully")
+            self.logger.info(f"  - Directory: {basis_dir}")
+            self.logger.info(f"  - Layer types: {sorted(list(layer_types_saved))}")
+            self.logger.info(f"  - Total SVD files: {total_files}")
+            self.logger.info(f"  - Metadata: {metadata_path}")
+            
+            # ✅ SVD 결과 검증 로그
+            self.logger.info("="*70)
+            self.logger.info("Verifying saved SVD results...")
+            self.logger.info("="*70)
+            
+            verification_stats = {
+                'total_files': 0,
+                'total_size_mb': 0.0,
+                'layer_type_counts': {},
+                'sample_checks': []
+            }
+            
+            for layer_type in sorted(list(layer_types_saved)):
+                layer_type_dir = os.path.join(basis_dir, layer_type)
+                files = sorted([f for f in os.listdir(layer_type_dir) if f.endswith('.pt')])
+                
+                self.logger.info(f"\n[{layer_type}] - {len(files)} files")
+                
+                layer_type_size = 0.0
+                for f in files:
+                    file_path = os.path.join(layer_type_dir, f)
+                    file_size = os.path.getsize(file_path) / (1024 * 1024)  # MB
+                    layer_type_size += file_size
+                
+                verification_stats['total_files'] += len(files)
+                verification_stats['total_size_mb'] += layer_type_size
+                verification_stats['layer_type_counts'][layer_type] = len(files)
+                
+                self.logger.info(f"  - Total size: {layer_type_size:.2f} MB")
+                
+                # 첫 번째와 마지막 파일 검증
+                if len(files) > 0:
+                    # 첫 번째 파일
+                    first_file = os.path.join(layer_type_dir, files[0])
+                    svd_data = torch.load(first_file, map_location='cpu')
+                    U = svd_data['U']
+                    S = svd_data['S']
+                    
+                    self.logger.info(f"  - Sample check (first): {files[0]}")
+                    self.logger.info(f"    - U shape: {U.shape}")
+                    self.logger.info(f"    - S shape: {S.shape}")
+                    self.logger.info(f"    - S range: [{S.min():.6f}, {S.max():.6f}]")
+                    self.logger.info(f"    - S top-5: {S[:5].tolist()}")
+                    
+                    verification_stats['sample_checks'].append({
+                        'layer_type': layer_type,
+                        'file': files[0],
+                        'U_shape': list(U.shape),
+                        'S_shape': list(S.shape),
+                        'S_max': S.max().item(),
+                        'S_min': S.min().item()
+                    })
+                    
+                    # 마지막 파일 (다른 경우만)
+                    if len(files) > 1:
+                        last_file = os.path.join(layer_type_dir, files[-1])
+                        svd_data_last = torch.load(last_file, map_location='cpu')
+                        U_last = svd_data_last['U']
+                        S_last = svd_data_last['S']
+                        
+                        self.logger.info(f"  - Sample check (last): {files[-1]}")
+                        self.logger.info(f"    - U shape: {U_last.shape}")
+                        self.logger.info(f"    - S shape: {S_last.shape}")
+                        self.logger.info(f"    - S range: [{S_last.min():.6f}, {S_last.max():.6f}]")
+            
+            # 전체 요약
+            self.logger.info("="*70)
+            self.logger.info("Verification Summary:")
+            self.logger.info(f"  - Total files verified: {verification_stats['total_files']}")
+            self.logger.info(f"  - Total storage: {verification_stats['total_size_mb']:.2f} MB")
+            self.logger.info(f"  - Files per layer type:")
+            for lt, count in verification_stats['layer_type_counts'].items():
+                self.logger.info(f"    - {lt}: {count} files")
+            
+            # 전체 통계
+            all_S_max = max(check['S_max'] for check in verification_stats['sample_checks'])
+            all_S_min = min(check['S_min'] for check in verification_stats['sample_checks'])
+            self.logger.info(f"  - Singular value range (global): [{all_S_min:.6f}, {all_S_max:.6f}]")
+            
+            self.logger.info("="*70)
+            self.logger.info("✓ All SVD results verified successfully!")
+            self.logger.info("="*70)
+            
+            return basis_dir
+            
+        except Exception as e:
+            self.logger.error(f"Failed to save basis: {str(e)}", exc_info=True)
+            raise
+        finally:
+            # 훅 제거
+            for hook in self.hooks:
+                hook.remove()
+            self.logger.info(f"✓ Forward hooks removed ({len(self.hooks)} hooks)")

@@ -1,0 +1,21 @@
+[2026-04-27 21:24:26] [safety_warp] [INFO] ======================================================================
+[2026-04-27 21:24:26] [safety_warp] [INFO] Safety-WaRP-LLM (Fixed - 원본 FSCIL-WaRP 방식)
+[2026-04-27 21:24:26] [safety_warp] [INFO] ======================================================================
+[2026-04-27 21:24:26] [safety_warp] [INFO] Phase: 1
+[2026-04-27 21:24:26] [safety_warp] [INFO] Model: None
+[2026-04-27 21:24:26] [safety_warp] [INFO] Layer types: attn_q,attn_k,attn_v,ffn_up,ffn_down
+[2026-04-27 21:24:26] [safety_warp] [INFO] Target layers: all
+[2026-04-27 21:24:26] [safety_warp] [INFO] ======================================================================
+wandb: Currently logged in as: gokms0509 (gokms0509-yonsei-university) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: WARNING Using a boolean value for 'reinit' is deprecated. Use 'return_previous' or 'finish_previous' instead.
+wandb: setting up run 07pc2ul5
+wandb: Tracking run with wandb version 0.23.0
+wandb: Run data is saved locally in /home/yonsei_jong/Safety-WaRP-LLM/wandb/run-20260427_212427-07pc2ul5
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run phase1_20260427_212426
+wandb: ⭐️ View project at https://wandb.ai/gokms0509-yonsei-university/Safety-WaRP-LLM
+wandb: 🚀 View run at https://wandb.ai/gokms0509-yonsei-university/Safety-WaRP-LLM/runs/07pc2ul5
+[2026-04-27 21:24:28] [safety_warp] [INFO] ✓ W&B initialized: project=Safety-WaRP-LLM, run=phase1_20260427_212426
+[2026-04-27 21:24:28] [safety_warp] [INFO] ======================================================================
+[2026-04-27 21:24:28] [safety_warp] [INFO] Starting Phase 1: Basis Construction
+[2026-04-27 21:24:28] [safety_warp] [INFO] ======================================================================

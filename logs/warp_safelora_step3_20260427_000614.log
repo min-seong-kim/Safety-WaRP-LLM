@@ -1,0 +1,558 @@
+2026-04-27 12:12:32 INFO ======================================================================
+2026-04-27 12:12:32 INFO WaRP-Rotated Safe LoRA — apply_warp_safe_lora.py
+2026-04-27 12:12:32 INFO ======================================================================
+2026-04-27 12:12:32 INFO   base_model        : meta-llama/Llama-2-7b-hf
+2026-04-27 12:12:32 INFO   aligned_model     : kmseong/llama2_7b-Safety-FT-lr3e-5
+2026-04-27 12:12:32 INFO   lora_adapter_path : /home/yonsei_jong/Safety-WaRP-LLM/checkpoints/lora_gsm8k_20260427_000614
+2026-04-27 12:12:32 INFO   basis_dir         : /home/yonsei_jong/Safety-WaRP-LLM/checkpoints/phase1_20260427_000617/basis
+2026-04-27 12:12:32 INFO   output_path       : ./checkpoints/warp_safelora_20260427_000614
+2026-04-27 12:12:32 INFO   top_k             : None  (ratio=0.50)
+2026-04-27 12:12:32 INFO   select_type       : number
+2026-04-27 12:12:32 INFO   threshold         : 0.500
+2026-04-27 12:12:32 INFO   num_proj_layers   : 20
+2026-04-27 12:12:32 INFO   use_approx        : True
+2026-04-27 12:12:32 INFO 
+2026-04-27 12:12:33 INFO [Step 1] Loading aligned model: kmseong/llama2_7b-Safety-FT-lr3e-5 ...
+`torch_dtype` is deprecated! Use `dtype` instead!
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards:  33%|███▎      | 1/3 [00:00<00:00,  2.42it/s]Loading checkpoint shards:  67%|██████▋   | 2/3 [00:00<00:00,  2.64it/s]Loading checkpoint shards: 100%|██████████| 3/3 [00:01<00:00,  2.84it/s]Loading checkpoint shards: 100%|██████████| 3/3 [00:01<00:00,  2.75it/s]
+2026-04-27 12:12:35 INFO [Step 1] Loading LoRA adapter: /home/yonsei_jong/Safety-WaRP-LLM/checkpoints/lora_gsm8k_20260427_000614 ...
+2026-04-27 12:13:01 INFO [Step 1] LoRA adapter loaded.
+2026-04-27 12:13:02 INFO [Step 2] Applying WaRP-Rotated Safe LoRA projection...
+2026-04-27 12:13:02 INFO ======================================================================
+2026-04-27 12:13:02 INFO [WaRPSafeLoRA] Loading WaRP basis from: /home/yonsei_jong/Safety-WaRP-LLM/checkpoints/phase1_20260427_000617/basis
+2026-04-27 12:13:02 INFO   Basis metadata: model=kmseong/llama2_7b-Safety-FT-lr3e-5, layer_types=['attn_k', 'attn_o', 'attn_q', 'attn_v', 'ffn_down', 'ffn_gate', 'ffn_up']
+2026-04-27 12:13:17 INFO   Loaded 224 basis matrices.
+2026-04-27 12:13:17 INFO   Collected 224 LoRA module pairs.
+2026-04-27 12:13:17 INFO 
+2026-04-27 12:13:17 INFO [WaRPSafeLoRA] Building alignment projectors...
+2026-04-27 12:13:17 INFO   Loading base model from meta-llama/Llama-2-7b-hf (cpu, torch.bfloat16)...
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:07<00:07,  7.25s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:09<00:00,  4.31s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:09<00:00,  4.75s/it]
+2026-04-27 12:13:27 INFO   Loading aligned model from kmseong/llama2_7b-Safety-FT-lr3e-5 (cpu, torch.bfloat16)...
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 3/3 [00:00<00:00, 173.42it/s]
+2026-04-27 12:13:28 INFO   Computing alignment deltas & projectors...
+2026-04-27 12:13:28 INFO   top_k=None, top_k_ratio=0.50, use_approximation=True
+2026-04-27 12:13:28 INFO 
+2026-04-27 12:13:28 INFO   Module                                                               in_dim         k     ‖V‖_F  ‖C_rot-C_orig‖_F
+2026-04-27 12:13:28 INFO   ---------------------------------------------------------------------------------------------------------
+2026-04-27 12:13:29 INFO   base_model.model.model.layers.0.mlp.down_proj                         11008      5504    1.4310    0.011478
+2026-04-27 12:13:31 INFO   base_model.model.model.layers.0.mlp.gate_proj                          4096      2048    1.4237    0.016777
+2026-04-27 12:13:33 INFO   base_model.model.model.layers.0.mlp.up_proj                            4096      2048    1.4075    0.016689
+2026-04-27 12:13:33 INFO   base_model.model.model.layers.0.self_attn.k_proj                       4096      2048    0.9111    0.015644
+2026-04-27 12:13:34 INFO   base_model.model.model.layers.0.self_attn.o_proj                       4096      2048    1.3347    0.099504
+2026-04-27 12:13:35 INFO   base_model.model.model.layers.0.self_attn.q_proj                       4096      2048    0.9341    0.023852
+2026-04-27 12:13:35 INFO   base_model.model.model.layers.0.self_attn.v_proj                       4096      2048    0.9767    0.013670
+2026-04-27 12:13:37 INFO   base_model.model.model.layers.1.mlp.down_proj                         11008      5504    1.4514    0.011695
+2026-04-27 12:13:38 INFO   base_model.model.model.layers.1.mlp.gate_proj                          4096      2048    1.3548    0.015581
+2026-04-27 12:13:40 INFO   base_model.model.model.layers.1.mlp.up_proj                            4096      2048    1.3852    0.015905
+2026-04-27 12:13:41 INFO   base_model.model.model.layers.1.self_attn.k_proj                       4096      2048    0.7805    0.011230
+2026-04-27 12:13:41 INFO   base_model.model.model.layers.1.self_attn.o_proj                       4096      2048    1.3051    0.121744
+2026-04-27 12:13:42 INFO   base_model.model.model.layers.1.self_attn.q_proj                       4096      2048    0.8306    0.010371
+2026-04-27 12:13:43 INFO   base_model.model.model.layers.1.self_attn.v_proj                       4096      2048    0.9597    0.015578
+2026-04-27 12:13:44 INFO   base_model.model.model.layers.10.mlp.down_proj                        11008      5504    1.3581    0.011462
+2026-04-27 12:13:46 INFO   base_model.model.model.layers.10.mlp.gate_proj                         4096      2048    1.3666    0.016417
+2026-04-27 12:13:47 INFO   base_model.model.model.layers.10.mlp.up_proj                           4096      2048    1.3505    0.016314
+2026-04-27 12:13:48 INFO   base_model.model.model.layers.10.self_attn.k_proj                      4096      2048    0.8098    0.010041
+2026-04-27 12:13:49 INFO   base_model.model.model.layers.10.self_attn.o_proj                      4096      2048    0.9116    0.011161
+2026-04-27 12:13:50 INFO   base_model.model.model.layers.10.self_attn.q_proj                      4096      2048    0.8046    0.010109
+2026-04-27 12:13:50 INFO   base_model.model.model.layers.10.self_attn.v_proj                      4096      2048    0.8827    0.011695
+2026-04-27 12:13:51 INFO   base_model.model.model.layers.11.mlp.down_proj                        11008      5504    1.3556    0.011430
+2026-04-27 12:13:53 INFO   base_model.model.model.layers.11.mlp.gate_proj                         4096      2048    1.3792    0.016636
+2026-04-27 12:13:55 INFO   base_model.model.model.layers.11.mlp.up_proj                           4096      2048    1.3529    0.016331
+2026-04-27 12:13:55 INFO   base_model.model.model.layers.11.self_attn.k_proj                      4096      2048    0.8410    0.010381
+2026-04-27 12:13:56 INFO   base_model.model.model.layers.11.self_attn.o_proj                      4096      2048    0.8937    0.010951
+2026-04-27 12:13:57 INFO   base_model.model.model.layers.11.self_attn.q_proj                      4096      2048    0.8317    0.010801
+2026-04-27 12:13:57 INFO   base_model.model.model.layers.11.self_attn.v_proj                      4096      2048    0.8728    0.011198
+2026-04-27 12:13:59 INFO   base_model.model.model.layers.12.mlp.down_proj                        11008      5504    1.3493    0.011418
+2026-04-27 12:14:01 INFO   base_model.model.model.layers.12.mlp.gate_proj                         4096      2048    1.3715    0.016823
+2026-04-27 12:14:02 INFO   base_model.model.model.layers.12.mlp.up_proj                           4096      2048    1.3374    0.016386
+2026-04-27 12:14:03 INFO   base_model.model.model.layers.12.self_attn.k_proj                      4096      2048    0.8454    0.010980
+2026-04-27 12:14:04 INFO   base_model.model.model.layers.12.self_attn.o_proj                      4096      2048    0.9200    0.011311
+2026-04-27 12:14:04 INFO   base_model.model.model.layers.12.self_attn.q_proj                      4096      2048    0.8347    0.011491
+2026-04-27 12:14:05 INFO   base_model.model.model.layers.12.self_attn.v_proj                      4096      2048    0.8732    0.011760
+2026-04-27 12:14:06 INFO   base_model.model.model.layers.13.mlp.down_proj                        11008      5504    1.3565    0.011420
+2026-04-27 12:14:08 INFO   base_model.model.model.layers.13.mlp.gate_proj                         4096      2048    1.3890    0.017136
+2026-04-27 12:14:10 INFO   base_model.model.model.layers.13.mlp.up_proj                           4096      2048    1.3498    0.016583
+2026-04-27 12:14:11 INFO   base_model.model.model.layers.13.self_attn.k_proj                      4096      2048    0.8144    0.010354
+2026-04-27 12:14:11 INFO   base_model.model.model.layers.13.self_attn.o_proj                      4096      2048    0.8807    0.010638
+2026-04-27 12:14:12 INFO   base_model.model.model.layers.13.self_attn.q_proj                      4096      2048    0.8074    0.010868
+2026-04-27 12:14:12 INFO   base_model.model.model.layers.13.self_attn.v_proj                      4096      2048    0.8564    0.011290
+2026-04-27 12:14:14 INFO   base_model.model.model.layers.14.mlp.down_proj                        11008      5504    1.3615    0.011419
+2026-04-27 12:14:15 INFO   base_model.model.model.layers.14.mlp.gate_proj                         4096      2048    1.3896    0.017255
+2026-04-27 12:14:17 INFO   base_model.model.model.layers.14.mlp.up_proj                           4096      2048    1.3488    0.016680
+2026-04-27 12:14:18 INFO   base_model.model.model.layers.14.self_attn.k_proj                      4096      2048    0.8513    0.010808
+2026-04-27 12:14:19 INFO   base_model.model.model.layers.14.self_attn.o_proj                      4096      2048    0.9245    0.011326
+2026-04-27 12:14:19 INFO   base_model.model.model.layers.14.self_attn.q_proj                      4096      2048    0.8373    0.012050
+2026-04-27 12:14:20 INFO   base_model.model.model.layers.14.self_attn.v_proj                      4096      2048    0.8714    0.011378
+2026-04-27 12:14:21 INFO   base_model.model.model.layers.15.mlp.down_proj                        11008      5504    1.3725    0.011493
+2026-04-27 12:14:23 INFO   base_model.model.model.layers.15.mlp.gate_proj                         4096      2048    1.3994    0.017354
+2026-04-27 12:14:25 INFO   base_model.model.model.layers.15.mlp.up_proj                           4096      2048    1.3695    0.016983
+2026-04-27 12:14:25 INFO   base_model.model.model.layers.15.self_attn.k_proj                      4096      2048    0.8479    0.010797
+2026-04-27 12:14:26 INFO   base_model.model.model.layers.15.self_attn.o_proj                      4096      2048    0.9233    0.011305
+2026-04-27 12:14:27 INFO   base_model.model.model.layers.15.self_attn.q_proj                      4096      2048    0.8438    0.011707
+2026-04-27 12:14:27 INFO   base_model.model.model.layers.15.self_attn.v_proj                      4096      2048    0.8854    0.011431
+2026-04-27 12:14:29 INFO   base_model.model.model.layers.16.mlp.down_proj                        11008      5504    1.3882    0.011444
+2026-04-27 12:14:30 INFO   base_model.model.model.layers.16.mlp.gate_proj                         4096      2048    1.4132    0.017675
+2026-04-27 12:14:32 INFO   base_model.model.model.layers.16.mlp.up_proj                           4096      2048    1.3826    0.017164
+2026-04-27 12:14:33 INFO   base_model.model.model.layers.16.self_attn.k_proj                      4096      2048    0.8727    0.010874
+2026-04-27 12:14:33 INFO   base_model.model.model.layers.16.self_attn.o_proj                      4096      2048    0.9210    0.011109
+2026-04-27 12:14:34 INFO   base_model.model.model.layers.16.self_attn.q_proj                      4096      2048    0.8729    0.012187
+2026-04-27 12:14:35 INFO   base_model.model.model.layers.16.self_attn.v_proj                      4096      2048    0.8904    0.011241
+2026-04-27 12:14:36 INFO   base_model.model.model.layers.17.mlp.down_proj                        11008      5504    1.3918    0.011462
+2026-04-27 12:14:38 INFO   base_model.model.model.layers.17.mlp.gate_proj                         4096      2048    1.4027    0.017406
+2026-04-27 12:14:40 INFO   base_model.model.model.layers.17.mlp.up_proj                           4096      2048    1.3822    0.017058
+2026-04-27 12:14:40 INFO   base_model.model.model.layers.17.self_attn.k_proj                      4096      2048    0.8909    0.011266
+2026-04-27 12:14:41 INFO   base_model.model.model.layers.17.self_attn.o_proj                      4096      2048    0.9304    0.011756
+2026-04-27 12:14:42 INFO   base_model.model.model.layers.17.self_attn.q_proj                      4096      2048    0.8845    0.012099
+2026-04-27 12:14:42 INFO   base_model.model.model.layers.17.self_attn.v_proj                      4096      2048    0.9051    0.011598
+2026-04-27 12:14:43 INFO   base_model.model.model.layers.18.mlp.down_proj                        11008      5504    1.3974    0.011480
+2026-04-27 12:14:45 INFO   base_model.model.model.layers.18.mlp.gate_proj                         4096      2048    1.3994    0.017154
+2026-04-27 12:14:47 INFO   base_model.model.model.layers.18.mlp.up_proj                           4096      2048    1.3943    0.017067
+2026-04-27 12:14:48 INFO   base_model.model.model.layers.18.self_attn.k_proj                      4096      2048    0.8658    0.010762
+2026-04-27 12:14:49 INFO   base_model.model.model.layers.18.self_attn.o_proj                      4096      2048    0.9114    0.010849
+2026-04-27 12:14:49 INFO   base_model.model.model.layers.18.self_attn.q_proj                      4096      2048    0.8669    0.011721
+2026-04-27 12:14:50 INFO   base_model.model.model.layers.18.self_attn.v_proj                      4096      2048    0.8949    0.011501
+2026-04-27 12:14:51 INFO   base_model.model.model.layers.19.mlp.down_proj                        11008      5504    1.3984    0.011519
+2026-04-27 12:14:53 INFO   base_model.model.model.layers.19.mlp.gate_proj                         4096      2048    1.3883    0.016799
+2026-04-27 12:14:55 INFO   base_model.model.model.layers.19.mlp.up_proj                           4096      2048    1.3967    0.016928
+2026-04-27 12:14:55 INFO   base_model.model.model.layers.19.self_attn.k_proj                      4096      2048    0.9058    0.011139
+2026-04-27 12:14:56 INFO   base_model.model.model.layers.19.self_attn.o_proj                      4096      2048    0.9420    0.011437
+2026-04-27 12:14:57 INFO   base_model.model.model.layers.19.self_attn.q_proj                      4096      2048    0.9045    0.012464
+2026-04-27 12:14:57 INFO   base_model.model.model.layers.19.self_attn.v_proj                      4096      2048    0.9166    0.011432
+2026-04-27 12:14:59 INFO   base_model.model.model.layers.2.mlp.down_proj                         11008      5504    1.3761    0.011381
+2026-04-27 12:15:00 INFO   base_model.model.model.layers.2.mlp.gate_proj                          4096      2048    1.2996    0.014887
+2026-04-27 12:15:02 INFO   base_model.model.model.layers.2.mlp.up_proj                            4096      2048    1.3496    0.015443
+2026-04-27 12:15:03 INFO   base_model.model.model.layers.2.self_attn.k_proj                       4096      2048    0.7821    0.009639
+2026-04-27 12:15:03 INFO   base_model.model.model.layers.2.self_attn.o_proj                       4096      2048    0.8950    0.011863
+2026-04-27 12:15:04 INFO   base_model.model.model.layers.2.self_attn.q_proj                       4096      2048    0.7764    0.009488
+2026-04-27 12:15:05 INFO   base_model.model.model.layers.2.self_attn.v_proj                       4096      2048    0.8682    0.011729
+2026-04-27 12:15:06 INFO   base_model.model.model.layers.20.mlp.down_proj                        11008      5504    1.4037    0.011479
+2026-04-27 12:15:08 INFO   base_model.model.model.layers.20.mlp.gate_proj                         4096      2048    1.3738    0.017000
+2026-04-27 12:15:10 INFO   base_model.model.model.layers.20.mlp.up_proj                           4096      2048    1.3858    0.017082
+2026-04-27 12:15:10 INFO   base_model.model.model.layers.20.self_attn.k_proj                      4096      2048    0.9466    0.011847
+2026-04-27 12:15:11 INFO   base_model.model.model.layers.20.self_attn.o_proj                      4096      2048    0.9591    0.011709
+2026-04-27 12:15:12 INFO   base_model.model.model.layers.20.self_attn.q_proj                      4096      2048    0.9354    0.013606
+2026-04-27 12:15:13 INFO   base_model.model.model.layers.20.self_attn.v_proj                      4096      2048    0.9261    0.011546
+2026-04-27 12:15:14 INFO   base_model.model.model.layers.21.mlp.down_proj                        11008      5504    1.4081    0.011498
+2026-04-27 12:15:16 INFO   base_model.model.model.layers.21.mlp.gate_proj                         4096      2048    1.3609    0.016621
+2026-04-27 12:15:17 INFO   base_model.model.model.layers.21.mlp.up_proj                           4096      2048    1.3824    0.016840
+2026-04-27 12:15:18 INFO   base_model.model.model.layers.21.self_attn.k_proj                      4096      2048    0.9177    0.011194
+2026-04-27 12:15:19 INFO   base_model.model.model.layers.21.self_attn.o_proj                      4096      2048    0.9259    0.011063
+2026-04-27 12:15:19 INFO   base_model.model.model.layers.21.self_attn.q_proj                      4096      2048    0.9087    0.012677
+2026-04-27 12:15:20 INFO   base_model.model.model.layers.21.self_attn.v_proj                      4096      2048    0.8961    0.011296
+2026-04-27 12:15:21 INFO   base_model.model.model.layers.22.mlp.down_proj                        11008      5504    1.4091    0.011443
+2026-04-27 12:15:23 INFO   base_model.model.model.layers.22.mlp.gate_proj                         4096      2048    1.3569    0.016467
+2026-04-27 12:15:25 INFO   base_model.model.model.layers.22.mlp.up_proj                           4096      2048    1.3804    0.016735
+2026-04-27 12:15:25 INFO   base_model.model.model.layers.22.self_attn.k_proj                      4096      2048    0.9008    0.010970
+2026-04-27 12:15:26 INFO   base_model.model.model.layers.22.self_attn.o_proj                      4096      2048    0.9032    0.010867
+2026-04-27 12:15:27 INFO   base_model.model.model.layers.22.self_attn.q_proj                      4096      2048    0.8929    0.012481
+2026-04-27 12:15:27 INFO   base_model.model.model.layers.22.self_attn.v_proj                      4096      2048    0.8826    0.011258
+2026-04-27 12:15:29 INFO   base_model.model.model.layers.23.mlp.down_proj                        11008      5504    1.4109    0.011476
+2026-04-27 12:15:30 INFO   base_model.model.model.layers.23.mlp.gate_proj                         4096      2048    1.3576    0.016396
+2026-04-27 12:15:32 INFO   base_model.model.model.layers.23.mlp.up_proj                           4096      2048    1.3797    0.016582
+2026-04-27 12:15:33 INFO   base_model.model.model.layers.23.self_attn.k_proj                      4096      2048    0.8936    0.011031
+2026-04-27 12:15:33 INFO   base_model.model.model.layers.23.self_attn.o_proj                      4096      2048    0.8856    0.010662
+2026-04-27 12:15:34 INFO   base_model.model.model.layers.23.self_attn.q_proj                      4096      2048    0.8942    0.012096
+2026-04-27 12:15:35 INFO   base_model.model.model.layers.23.self_attn.v_proj                      4096      2048    0.8537    0.010949
+2026-04-27 12:15:36 INFO   base_model.model.model.layers.24.mlp.down_proj                        11008      5504    1.4054    0.011432
+2026-04-27 12:15:38 INFO   base_model.model.model.layers.24.mlp.gate_proj                         4096      2048    1.3682    0.016639
+2026-04-27 12:15:39 INFO   base_model.model.model.layers.24.mlp.up_proj                           4096      2048    1.3890    0.016803
+2026-04-27 12:15:40 INFO   base_model.model.model.layers.24.self_attn.k_proj                      4096      2048    0.9530    0.011766
+2026-04-27 12:15:41 INFO   base_model.model.model.layers.24.self_attn.o_proj                      4096      2048    0.9067    0.010658
+2026-04-27 12:15:41 INFO   base_model.model.model.layers.24.self_attn.q_proj                      4096      2048    0.9378    0.013429
+2026-04-27 12:15:42 INFO   base_model.model.model.layers.24.self_attn.v_proj                      4096      2048    0.8691    0.010851
+2026-04-27 12:15:43 INFO   base_model.model.model.layers.25.mlp.down_proj                        11008      5504    1.3979    0.011432
+2026-04-27 12:15:45 INFO   base_model.model.model.layers.25.mlp.gate_proj                         4096      2048    1.3673    0.016589
+2026-04-27 12:15:47 INFO   base_model.model.model.layers.25.mlp.up_proj                           4096      2048    1.3857    0.016709
+2026-04-27 12:15:48 INFO   base_model.model.model.layers.25.self_attn.k_proj                      4096      2048    0.8783    0.010983
+2026-04-27 12:15:48 INFO   base_model.model.model.layers.25.self_attn.o_proj                      4096      2048    0.8554    0.010332
+2026-04-27 12:15:49 INFO   base_model.model.model.layers.25.self_attn.q_proj                      4096      2048    0.8787    0.011643
+2026-04-27 12:15:49 INFO   base_model.model.model.layers.25.self_attn.v_proj                      4096      2048    0.8396    0.011081
+2026-04-27 12:15:51 INFO   base_model.model.model.layers.26.mlp.down_proj                        11008      5504    1.3726    0.011393
+2026-04-27 12:15:52 INFO   base_model.model.model.layers.26.mlp.gate_proj                         4096      2048    1.3596    0.016746
+2026-04-27 12:15:54 INFO   base_model.model.model.layers.26.mlp.up_proj                           4096      2048    1.3684    0.016775
+2026-04-27 12:15:55 INFO   base_model.model.model.layers.26.self_attn.k_proj                      4096      2048    0.9404    0.011513
+2026-04-27 12:15:56 INFO   base_model.model.model.layers.26.self_attn.o_proj                      4096      2048    0.8538    0.010208
+2026-04-27 12:15:56 INFO   base_model.model.model.layers.26.self_attn.q_proj                      4096      2048    0.9254    0.012952
+2026-04-27 12:15:57 INFO   base_model.model.model.layers.26.self_attn.v_proj                      4096      2048    0.8433    0.010916
+2026-04-27 12:15:58 INFO   base_model.model.model.layers.27.mlp.down_proj                        11008      5504    1.3585    0.011410
+2026-04-27 12:16:00 INFO   base_model.model.model.layers.27.mlp.gate_proj                         4096      2048    1.3606    0.016754
+2026-04-27 12:16:02 INFO   base_model.model.model.layers.27.mlp.up_proj                           4096      2048    1.3669    0.016716
+2026-04-27 12:16:02 INFO   base_model.model.model.layers.27.self_attn.k_proj                      4096      2048    0.8298    0.010953
+2026-04-27 12:16:03 INFO   base_model.model.model.layers.27.self_attn.o_proj                      4096      2048    0.8127    0.010242
+2026-04-27 12:16:04 INFO   base_model.model.model.layers.27.self_attn.q_proj                      4096      2048    0.8346    0.011479
+2026-04-27 12:16:04 INFO   base_model.model.model.layers.27.self_attn.v_proj                      4096      2048    0.8180    0.011065
+2026-04-27 12:16:06 INFO   base_model.model.model.layers.28.mlp.down_proj                        11008      5504    1.3354    0.011408
+2026-04-27 12:16:08 INFO   base_model.model.model.layers.28.mlp.gate_proj                         4096      2048    1.3643    0.016881
+2026-04-27 12:16:10 INFO   base_model.model.model.layers.28.mlp.up_proj                           4096      2048    1.3600    0.016719
+2026-04-27 12:16:10 INFO   base_model.model.model.layers.28.self_attn.k_proj                      4096      2048    0.8144    0.010557
+2026-04-27 12:16:11 INFO   base_model.model.model.layers.28.self_attn.o_proj                      4096      2048    0.7702    0.009657
+2026-04-27 12:16:12 INFO   base_model.model.model.layers.28.self_attn.q_proj                      4096      2048    0.8236    0.011310
+2026-04-27 12:16:12 INFO   base_model.model.model.layers.28.self_attn.v_proj                      4096      2048    0.7826    0.010422
+2026-04-27 12:16:13 INFO   base_model.model.model.layers.29.mlp.down_proj                        11008      5504    1.3106    0.011508
+2026-04-27 12:16:15 INFO   base_model.model.model.layers.29.mlp.gate_proj                         4096      2048    1.3664    0.016910
+2026-04-27 12:16:17 INFO   base_model.model.model.layers.29.mlp.up_proj                           4096      2048    1.3568    0.016654
+2026-04-27 12:16:18 INFO   base_model.model.model.layers.29.self_attn.k_proj                      4096      2048    0.9147    0.011448
+2026-04-27 12:16:18 INFO   base_model.model.model.layers.29.self_attn.o_proj                      4096      2048    0.8105    0.010074
+2026-04-27 12:16:19 INFO   base_model.model.model.layers.29.self_attn.q_proj                      4096      2048    0.9087    0.012274
+2026-04-27 12:16:20 INFO   base_model.model.model.layers.29.self_attn.v_proj                      4096      2048    0.8041    0.010597
+2026-04-27 12:16:21 INFO   base_model.model.model.layers.3.mlp.down_proj                         11008      5504    1.3559    0.011057
+2026-04-27 12:16:23 INFO   base_model.model.model.layers.3.mlp.gate_proj                          4096      2048    1.2734    0.014695
+2026-04-27 12:16:25 INFO   base_model.model.model.layers.3.mlp.up_proj                            4096      2048    1.3211    0.015247
+2026-04-27 12:16:25 INFO   base_model.model.model.layers.3.self_attn.k_proj                       4096      2048    0.7650    0.009323
+2026-04-27 12:16:26 INFO   base_model.model.model.layers.3.self_attn.o_proj                       4096      2048    0.9281    0.011193
+2026-04-27 12:16:26 INFO   base_model.model.model.layers.3.self_attn.q_proj                       4096      2048    0.7655    0.009336
+2026-04-27 12:16:27 INFO   base_model.model.model.layers.3.self_attn.v_proj                       4096      2048    0.9065    0.011620
+2026-04-27 12:16:28 INFO   base_model.model.model.layers.30.mlp.down_proj                        11008      5504    1.2882    0.011835
+2026-04-27 12:16:30 INFO   base_model.model.model.layers.30.mlp.gate_proj                         4096      2048    1.3724    0.017229
+2026-04-27 12:16:32 INFO   base_model.model.model.layers.30.mlp.up_proj                           4096      2048    1.3701    0.017083
+2026-04-27 12:16:32 INFO   base_model.model.model.layers.30.self_attn.k_proj                      4096      2048    0.8800    0.011711
+2026-04-27 12:16:33 INFO   base_model.model.model.layers.30.self_attn.o_proj                      4096      2048    0.8023    0.009814
+2026-04-27 12:16:34 INFO   base_model.model.model.layers.30.self_attn.q_proj                      4096      2048    0.8854    0.012473
+2026-04-27 12:16:35 INFO   base_model.model.model.layers.30.self_attn.v_proj                      4096      2048    0.7920    0.010407
+2026-04-27 12:16:36 INFO   base_model.model.model.layers.31.mlp.down_proj                        11008      5504    1.2466    0.011901
+2026-04-27 12:16:38 INFO   base_model.model.model.layers.31.mlp.gate_proj                         4096      2048    1.3239    0.016518
+2026-04-27 12:16:40 INFO   base_model.model.model.layers.31.mlp.up_proj                           4096      2048    1.3359    0.016607
+2026-04-27 12:16:40 INFO   base_model.model.model.layers.31.self_attn.k_proj                      4096      2048    0.8825    0.011424
+2026-04-27 12:16:41 INFO   base_model.model.model.layers.31.self_attn.o_proj                      4096      2048    0.8497    0.010697
+2026-04-27 12:16:41 INFO   base_model.model.model.layers.31.self_attn.q_proj                      4096      2048    0.8863    0.012651
+2026-04-27 12:16:42 INFO   base_model.model.model.layers.31.self_attn.v_proj                      4096      2048    0.8535    0.011383
+2026-04-27 12:16:43 INFO   base_model.model.model.layers.4.mlp.down_proj                         11008      5504    1.3440    0.010946
+2026-04-27 12:16:45 INFO   base_model.model.model.layers.4.mlp.gate_proj                          4096      2048    1.2634    0.014596
+2026-04-27 12:16:47 INFO   base_model.model.model.layers.4.mlp.up_proj                            4096      2048    1.3106    0.015151
+2026-04-27 12:16:47 INFO   base_model.model.model.layers.4.self_attn.k_proj                       4096      2048    0.7483    0.009121
+2026-04-27 12:16:48 INFO   base_model.model.model.layers.4.self_attn.o_proj                       4096      2048    0.8872    0.010331
+2026-04-27 12:16:49 INFO   base_model.model.model.layers.4.self_attn.q_proj                       4096      2048    0.7399    0.008997
+2026-04-27 12:16:50 INFO   base_model.model.model.layers.4.self_attn.v_proj                       4096      2048    0.8602    0.010634
+2026-04-27 12:16:51 INFO   base_model.model.model.layers.5.mlp.down_proj                         11008      5504    1.3356    0.010914
+2026-04-27 12:16:53 INFO   base_model.model.model.layers.5.mlp.gate_proj                          4096      2048    1.2546    0.014481
+2026-04-27 12:16:54 INFO   base_model.model.model.layers.5.mlp.up_proj                            4096      2048    1.3010    0.015070
+2026-04-27 12:16:55 INFO   base_model.model.model.layers.5.self_attn.k_proj                       4096      2048    0.7192    0.008943
+2026-04-27 12:16:56 INFO   base_model.model.model.layers.5.self_attn.o_proj                       4096      2048    0.8673    0.010051
+2026-04-27 12:16:56 INFO   base_model.model.model.layers.5.self_attn.q_proj                       4096      2048    0.7197    0.008884
+2026-04-27 12:16:57 INFO   base_model.model.model.layers.5.self_attn.v_proj                       4096      2048    0.8440    0.010710
+2026-04-27 12:16:58 INFO   base_model.model.model.layers.6.mlp.down_proj                         11008      5504    1.3492    0.011033
+2026-04-27 12:17:00 INFO   base_model.model.model.layers.6.mlp.gate_proj                          4096      2048    1.2625    0.014649
+2026-04-27 12:17:02 INFO   base_model.model.model.layers.6.mlp.up_proj                            4096      2048    1.3186    0.015351
+2026-04-27 12:17:02 INFO   base_model.model.model.layers.6.self_attn.k_proj                       4096      2048    0.8105    0.009947
+2026-04-27 12:17:03 INFO   base_model.model.model.layers.6.self_attn.o_proj                       4096      2048    0.9661    0.011827
+2026-04-27 12:17:04 INFO   base_model.model.model.layers.6.self_attn.q_proj                       4096      2048    0.8126    0.009859
+2026-04-27 12:17:04 INFO   base_model.model.model.layers.6.self_attn.v_proj                       4096      2048    0.9403    0.011784
+2026-04-27 12:17:06 INFO   base_model.model.model.layers.7.mlp.down_proj                         11008      5504    1.3642    0.011130
+2026-04-27 12:17:08 INFO   base_model.model.model.layers.7.mlp.gate_proj                          4096      2048    1.2862    0.014931
+2026-04-27 12:17:09 INFO   base_model.model.model.layers.7.mlp.up_proj                            4096      2048    1.3378    0.015562
+2026-04-27 12:17:10 INFO   base_model.model.model.layers.7.self_attn.k_proj                       4096      2048    0.7870    0.009639
+2026-04-27 12:17:11 INFO   base_model.model.model.layers.7.self_attn.o_proj                       4096      2048    0.9410    0.012142
+2026-04-27 12:17:11 INFO   base_model.model.model.layers.7.self_attn.q_proj                       4096      2048    0.7865    0.009608
+2026-04-27 12:17:12 INFO   base_model.model.model.layers.7.self_attn.v_proj                       4096      2048    0.9080    0.011467
+2026-04-27 12:17:13 INFO   base_model.model.model.layers.8.mlp.down_proj                         11008      5504    1.3670    0.011347
+2026-04-27 12:17:15 INFO   base_model.model.model.layers.8.mlp.gate_proj                          4096      2048    1.3137    0.015391
+2026-04-27 12:17:17 INFO   base_model.model.model.layers.8.mlp.up_proj                            4096      2048    1.3479    0.015892
+2026-04-27 12:17:18 INFO   base_model.model.model.layers.8.self_attn.k_proj                       4096      2048    0.7749    0.009634
+2026-04-27 12:17:18 INFO   base_model.model.model.layers.8.self_attn.o_proj                       4096      2048    0.9063    0.010602
+2026-04-27 12:17:19 INFO   base_model.model.model.layers.8.self_attn.q_proj                       4096      2048    0.7758    0.009729
+2026-04-27 12:17:20 INFO   base_model.model.model.layers.8.self_attn.v_proj                       4096      2048    0.8926    0.011321
+2026-04-27 12:17:21 INFO   base_model.model.model.layers.9.mlp.down_proj                         11008      5504    1.3663    0.011458
+2026-04-27 12:17:23 INFO   base_model.model.model.layers.9.mlp.gate_proj                          4096      2048    1.3353    0.016040
+2026-04-27 12:17:24 INFO   base_model.model.model.layers.9.mlp.up_proj                            4096      2048    1.3478    0.016316
+2026-04-27 12:17:25 INFO   base_model.model.model.layers.9.self_attn.k_proj                       4096      2048    0.7682    0.009462
+2026-04-27 12:17:26 INFO   base_model.model.model.layers.9.self_attn.o_proj                       4096      2048    0.8986    0.010693
+2026-04-27 12:17:26 INFO   base_model.model.model.layers.9.self_attn.q_proj                       4096      2048    0.7618    0.009425
+2026-04-27 12:17:27 INFO   base_model.model.model.layers.9.self_attn.v_proj                       4096      2048    0.8814    0.011221
+2026-04-27 12:17:27 INFO   ---------------------------------------------------------------------------------------------------------
+2026-04-27 12:17:27 INFO   Projectors computed: 224 matched, 0 fallback (no basis).
+2026-04-27 12:17:28 INFO 
+2026-04-27 12:17:28 INFO [WaRPSafeLoRA] Computing per-layer metrics (rotated space)...
+2026-04-27 12:17:28 INFO   Module                                                               cos_orig     cos_rot        Δcos  delta_shift   A_space
+2026-04-27 12:17:28 INFO   ----------------------------------------------------------------------------------------------------------------------
+2026-04-27 12:17:29 INFO   base_model.model.model.layers.0.mlp.down_proj                        0.000000    0.000000   +0.000000      0.0000  orig→k5504
+2026-04-27 12:17:29 INFO   base_model.model.model.layers.0.mlp.gate_proj                        0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:29 INFO   base_model.model.model.layers.0.mlp.up_proj                          0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:29 INFO   base_model.model.model.layers.0.self_attn.k_proj                     0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:29 INFO   base_model.model.model.layers.0.self_attn.o_proj                     0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:29 INFO   base_model.model.model.layers.0.self_attn.q_proj                     0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:29 INFO   base_model.model.model.layers.0.self_attn.v_proj                     0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:30 INFO   base_model.model.model.layers.1.mlp.down_proj                        0.000000    0.000000   +0.000000      0.0000  orig→k5504
+2026-04-27 12:17:30 INFO   base_model.model.model.layers.1.mlp.gate_proj                        0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:30 INFO   base_model.model.model.layers.1.mlp.up_proj                          0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:30 INFO   base_model.model.model.layers.1.self_attn.k_proj                     0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:30 INFO   base_model.model.model.layers.1.self_attn.o_proj                     0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:30 INFO   base_model.model.model.layers.1.self_attn.q_proj                     0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:31 INFO   base_model.model.model.layers.1.self_attn.v_proj                     0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:31 INFO   base_model.model.model.layers.10.mlp.down_proj                       0.000000    0.000000   +0.000000      0.0000  orig→k5504
+2026-04-27 12:17:31 INFO   base_model.model.model.layers.10.mlp.gate_proj                       0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:31 INFO   base_model.model.model.layers.10.mlp.up_proj                         0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:31 INFO   base_model.model.model.layers.10.self_attn.k_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:31 INFO   base_model.model.model.layers.10.self_attn.o_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:31 INFO   base_model.model.model.layers.10.self_attn.q_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:31 INFO   base_model.model.model.layers.10.self_attn.v_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:31 INFO   base_model.model.model.layers.11.mlp.down_proj                       0.000000    0.000000   +0.000000      0.0000  orig→k5504
+2026-04-27 12:17:32 INFO   base_model.model.model.layers.11.mlp.gate_proj                       0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:32 INFO   base_model.model.model.layers.11.mlp.up_proj                         0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:32 INFO   base_model.model.model.layers.11.self_attn.k_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:32 INFO   base_model.model.model.layers.11.self_attn.o_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:32 INFO   base_model.model.model.layers.11.self_attn.q_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:33 INFO   base_model.model.model.layers.11.self_attn.v_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:33 INFO   base_model.model.model.layers.12.mlp.down_proj                       0.000000    0.000000   +0.000000      0.0000  orig→k5504
+2026-04-27 12:17:33 INFO   base_model.model.model.layers.12.mlp.gate_proj                       0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:33 INFO   base_model.model.model.layers.12.mlp.up_proj                         0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:33 INFO   base_model.model.model.layers.12.self_attn.k_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:33 INFO   base_model.model.model.layers.12.self_attn.o_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:33 INFO   base_model.model.model.layers.12.self_attn.q_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:33 INFO   base_model.model.model.layers.12.self_attn.v_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:33 INFO   base_model.model.model.layers.13.mlp.down_proj                       0.000000    0.000000   +0.000000      0.0000  orig→k5504
+2026-04-27 12:17:34 INFO   base_model.model.model.layers.13.mlp.gate_proj                       0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:34 INFO   base_model.model.model.layers.13.mlp.up_proj                         0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:34 INFO   base_model.model.model.layers.13.self_attn.k_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:34 INFO   base_model.model.model.layers.13.self_attn.o_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:34 INFO   base_model.model.model.layers.13.self_attn.q_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:34 INFO   base_model.model.model.layers.13.self_attn.v_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:34 INFO   base_model.model.model.layers.14.mlp.down_proj                       0.000000    0.000000   +0.000000      0.0000  orig→k5504
+2026-04-27 12:17:35 INFO   base_model.model.model.layers.14.mlp.gate_proj                       0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:35 INFO   base_model.model.model.layers.14.mlp.up_proj                         0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:35 INFO   base_model.model.model.layers.14.self_attn.k_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:35 INFO   base_model.model.model.layers.14.self_attn.o_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:35 INFO   base_model.model.model.layers.14.self_attn.q_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:35 INFO   base_model.model.model.layers.14.self_attn.v_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:35 INFO   base_model.model.model.layers.15.mlp.down_proj                       0.000000    0.000000   +0.000000      0.0000  orig→k5504
+2026-04-27 12:17:36 INFO   base_model.model.model.layers.15.mlp.gate_proj                       0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:36 INFO   base_model.model.model.layers.15.mlp.up_proj                         0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:36 INFO   base_model.model.model.layers.15.self_attn.k_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:36 INFO   base_model.model.model.layers.15.self_attn.o_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:36 INFO   base_model.model.model.layers.15.self_attn.q_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:36 INFO   base_model.model.model.layers.15.self_attn.v_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:36 INFO   base_model.model.model.layers.16.mlp.down_proj                       0.000000    0.000000   +0.000000      0.0000  orig→k5504
+2026-04-27 12:17:37 INFO   base_model.model.model.layers.16.mlp.gate_proj                       0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:37 INFO   base_model.model.model.layers.16.mlp.up_proj                         0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:37 INFO   base_model.model.model.layers.16.self_attn.k_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:37 INFO   base_model.model.model.layers.16.self_attn.o_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:37 INFO   base_model.model.model.layers.16.self_attn.q_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:37 INFO   base_model.model.model.layers.16.self_attn.v_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:37 INFO   base_model.model.model.layers.17.mlp.down_proj                       0.000000    0.000000   +0.000000      0.0000  orig→k5504
+2026-04-27 12:17:38 INFO   base_model.model.model.layers.17.mlp.gate_proj                       0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:38 INFO   base_model.model.model.layers.17.mlp.up_proj                         0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:38 INFO   base_model.model.model.layers.17.self_attn.k_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:38 INFO   base_model.model.model.layers.17.self_attn.o_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:38 INFO   base_model.model.model.layers.17.self_attn.q_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:38 INFO   base_model.model.model.layers.17.self_attn.v_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:38 INFO   base_model.model.model.layers.18.mlp.down_proj                       0.000000    0.000000   +0.000000      0.0000  orig→k5504
+2026-04-27 12:17:38 INFO   base_model.model.model.layers.18.mlp.gate_proj                       0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:39 INFO   base_model.model.model.layers.18.mlp.up_proj                         0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:39 INFO   base_model.model.model.layers.18.self_attn.k_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:39 INFO   base_model.model.model.layers.18.self_attn.o_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:39 INFO   base_model.model.model.layers.18.self_attn.q_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:39 INFO   base_model.model.model.layers.18.self_attn.v_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:39 INFO   base_model.model.model.layers.19.mlp.down_proj                       0.000000    0.000000   +0.000000      0.0000  orig→k5504
+2026-04-27 12:17:39 INFO   base_model.model.model.layers.19.mlp.gate_proj                       0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:40 INFO   base_model.model.model.layers.19.mlp.up_proj                         0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:40 INFO   base_model.model.model.layers.19.self_attn.k_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:40 INFO   base_model.model.model.layers.19.self_attn.o_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:40 INFO   base_model.model.model.layers.19.self_attn.q_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:40 INFO   base_model.model.model.layers.19.self_attn.v_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:40 INFO   base_model.model.model.layers.2.mlp.down_proj                        0.000000    0.000000   +0.000000      0.0000  orig→k5504
+2026-04-27 12:17:40 INFO   base_model.model.model.layers.2.mlp.gate_proj                        0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:40 INFO   base_model.model.model.layers.2.mlp.up_proj                          0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:41 INFO   base_model.model.model.layers.2.self_attn.k_proj                     0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:41 INFO   base_model.model.model.layers.2.self_attn.o_proj                     0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:41 INFO   base_model.model.model.layers.2.self_attn.q_proj                     0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:41 INFO   base_model.model.model.layers.2.self_attn.v_proj                     0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:41 INFO   base_model.model.model.layers.20.mlp.down_proj                       0.000000    0.000000   +0.000000      0.0000  orig→k5504
+2026-04-27 12:17:41 INFO   base_model.model.model.layers.20.mlp.gate_proj                       0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:41 INFO   base_model.model.model.layers.20.mlp.up_proj                         0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:42 INFO   base_model.model.model.layers.20.self_attn.k_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:42 INFO   base_model.model.model.layers.20.self_attn.o_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:42 INFO   base_model.model.model.layers.20.self_attn.q_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:42 INFO   base_model.model.model.layers.20.self_attn.v_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:42 INFO   base_model.model.model.layers.21.mlp.down_proj                       0.000000    0.000000   +0.000000      0.0000  orig→k5504
+2026-04-27 12:17:42 INFO   base_model.model.model.layers.21.mlp.gate_proj                       0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:42 INFO   base_model.model.model.layers.21.mlp.up_proj                         0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:42 INFO   base_model.model.model.layers.21.self_attn.k_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:42 INFO   base_model.model.model.layers.21.self_attn.o_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:43 INFO   base_model.model.model.layers.21.self_attn.q_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:43 INFO   base_model.model.model.layers.21.self_attn.v_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:43 INFO   base_model.model.model.layers.22.mlp.down_proj                       0.000000    0.000000   +0.000000      0.0000  orig→k5504
+2026-04-27 12:17:43 INFO   base_model.model.model.layers.22.mlp.gate_proj                       0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:43 INFO   base_model.model.model.layers.22.mlp.up_proj                         0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:43 INFO   base_model.model.model.layers.22.self_attn.k_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:43 INFO   base_model.model.model.layers.22.self_attn.o_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:43 INFO   base_model.model.model.layers.22.self_attn.q_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:43 INFO   base_model.model.model.layers.22.self_attn.v_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:44 INFO   base_model.model.model.layers.23.mlp.down_proj                       0.000000    0.000000   +0.000000      0.0000  orig→k5504
+2026-04-27 12:17:44 INFO   base_model.model.model.layers.23.mlp.gate_proj                       0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:44 INFO   base_model.model.model.layers.23.mlp.up_proj                         0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:44 INFO   base_model.model.model.layers.23.self_attn.k_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:44 INFO   base_model.model.model.layers.23.self_attn.o_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:44 INFO   base_model.model.model.layers.23.self_attn.q_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:44 INFO   base_model.model.model.layers.23.self_attn.v_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:45 INFO   base_model.model.model.layers.24.mlp.down_proj                       0.000000    0.000000   +0.000000      0.0000  orig→k5504
+2026-04-27 12:17:45 INFO   base_model.model.model.layers.24.mlp.gate_proj                       0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:45 INFO   base_model.model.model.layers.24.mlp.up_proj                         0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:45 INFO   base_model.model.model.layers.24.self_attn.k_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:45 INFO   base_model.model.model.layers.24.self_attn.o_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:45 INFO   base_model.model.model.layers.24.self_attn.q_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:45 INFO   base_model.model.model.layers.24.self_attn.v_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:46 INFO   base_model.model.model.layers.25.mlp.down_proj                       0.000000    0.000000   +0.000000      0.0000  orig→k5504
+2026-04-27 12:17:46 INFO   base_model.model.model.layers.25.mlp.gate_proj                       0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:46 INFO   base_model.model.model.layers.25.mlp.up_proj                         0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:46 INFO   base_model.model.model.layers.25.self_attn.k_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:46 INFO   base_model.model.model.layers.25.self_attn.o_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:46 INFO   base_model.model.model.layers.25.self_attn.q_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:46 INFO   base_model.model.model.layers.25.self_attn.v_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:46 INFO   base_model.model.model.layers.26.mlp.down_proj                       0.000000    0.000000   +0.000000      0.0000  orig→k5504
+2026-04-27 12:17:47 INFO   base_model.model.model.layers.26.mlp.gate_proj                       0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:47 INFO   base_model.model.model.layers.26.mlp.up_proj                         0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:47 INFO   base_model.model.model.layers.26.self_attn.k_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:47 INFO   base_model.model.model.layers.26.self_attn.o_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:47 INFO   base_model.model.model.layers.26.self_attn.q_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:47 INFO   base_model.model.model.layers.26.self_attn.v_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:47 INFO   base_model.model.model.layers.27.mlp.down_proj                       0.000000    0.000000   +0.000000      0.0000  orig→k5504
+2026-04-27 12:17:48 INFO   base_model.model.model.layers.27.mlp.gate_proj                       0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:48 INFO   base_model.model.model.layers.27.mlp.up_proj                         0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:48 INFO   base_model.model.model.layers.27.self_attn.k_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:48 INFO   base_model.model.model.layers.27.self_attn.o_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:48 INFO   base_model.model.model.layers.27.self_attn.q_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:48 INFO   base_model.model.model.layers.27.self_attn.v_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:48 INFO   base_model.model.model.layers.28.mlp.down_proj                       0.000000    0.000000   +0.000000      0.0000  orig→k5504
+2026-04-27 12:17:49 INFO   base_model.model.model.layers.28.mlp.gate_proj                       0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:49 INFO   base_model.model.model.layers.28.mlp.up_proj                         0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:50 INFO   base_model.model.model.layers.28.self_attn.k_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:50 INFO   base_model.model.model.layers.28.self_attn.o_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:50 INFO   base_model.model.model.layers.28.self_attn.q_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:50 INFO   base_model.model.model.layers.28.self_attn.v_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:50 INFO   base_model.model.model.layers.29.mlp.down_proj                       0.000000    0.000000   +0.000000      0.0000  orig→k5504
+2026-04-27 12:17:50 INFO   base_model.model.model.layers.29.mlp.gate_proj                       0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:51 INFO   base_model.model.model.layers.29.mlp.up_proj                         0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:51 INFO   base_model.model.model.layers.29.self_attn.k_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:51 INFO   base_model.model.model.layers.29.self_attn.o_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:51 INFO   base_model.model.model.layers.29.self_attn.q_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:51 INFO   base_model.model.model.layers.29.self_attn.v_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:51 INFO   base_model.model.model.layers.3.mlp.down_proj                        0.000000    0.000000   +0.000000      0.0000  orig→k5504
+2026-04-27 12:17:52 INFO   base_model.model.model.layers.3.mlp.gate_proj                        0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:52 INFO   base_model.model.model.layers.3.mlp.up_proj                          0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:52 INFO   base_model.model.model.layers.3.self_attn.k_proj                     0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:52 INFO   base_model.model.model.layers.3.self_attn.o_proj                     0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:52 INFO   base_model.model.model.layers.3.self_attn.q_proj                     0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:52 INFO   base_model.model.model.layers.3.self_attn.v_proj                     0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:52 INFO   base_model.model.model.layers.30.mlp.down_proj                       0.000000    0.000000   +0.000000      0.0000  orig→k5504
+2026-04-27 12:17:53 INFO   base_model.model.model.layers.30.mlp.gate_proj                       0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:53 INFO   base_model.model.model.layers.30.mlp.up_proj                         0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:53 INFO   base_model.model.model.layers.30.self_attn.k_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:53 INFO   base_model.model.model.layers.30.self_attn.o_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:53 INFO   base_model.model.model.layers.30.self_attn.q_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:53 INFO   base_model.model.model.layers.30.self_attn.v_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:53 INFO   base_model.model.model.layers.31.mlp.down_proj                       0.000000    0.000000   +0.000000      0.0000  orig→k5504
+2026-04-27 12:17:54 INFO   base_model.model.model.layers.31.mlp.gate_proj                       0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:54 INFO   base_model.model.model.layers.31.mlp.up_proj                         0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:54 INFO   base_model.model.model.layers.31.self_attn.k_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:54 INFO   base_model.model.model.layers.31.self_attn.o_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:54 INFO   base_model.model.model.layers.31.self_attn.q_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:54 INFO   base_model.model.model.layers.31.self_attn.v_proj                    0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:54 INFO   base_model.model.model.layers.4.mlp.down_proj                        0.000000    0.000000   +0.000000      0.0000  orig→k5504
+2026-04-27 12:17:55 INFO   base_model.model.model.layers.4.mlp.gate_proj                        0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:55 INFO   base_model.model.model.layers.4.mlp.up_proj                          0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:55 INFO   base_model.model.model.layers.4.self_attn.k_proj                     0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:55 INFO   base_model.model.model.layers.4.self_attn.o_proj                     0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:55 INFO   base_model.model.model.layers.4.self_attn.q_proj                     0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:55 INFO   base_model.model.model.layers.4.self_attn.v_proj                     0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:55 INFO   base_model.model.model.layers.5.mlp.down_proj                        0.000000    0.000000   +0.000000      0.0000  orig→k5504
+2026-04-27 12:17:55 INFO   base_model.model.model.layers.5.mlp.gate_proj                        0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:55 INFO   base_model.model.model.layers.5.mlp.up_proj                          0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:55 INFO   base_model.model.model.layers.5.self_attn.k_proj                     0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:55 INFO   base_model.model.model.layers.5.self_attn.o_proj                     0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:55 INFO   base_model.model.model.layers.5.self_attn.q_proj                     0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:55 INFO   base_model.model.model.layers.5.self_attn.v_proj                     0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:55 INFO   base_model.model.model.layers.6.mlp.down_proj                        0.000000    0.000000   +0.000000      0.0000  orig→k5504
+2026-04-27 12:17:55 INFO   base_model.model.model.layers.6.mlp.gate_proj                        0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:55 INFO   base_model.model.model.layers.6.mlp.up_proj                          0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:56 INFO   base_model.model.model.layers.6.self_attn.k_proj                     0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:56 INFO   base_model.model.model.layers.6.self_attn.o_proj                     0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:56 INFO   base_model.model.model.layers.6.self_attn.q_proj                     0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:56 INFO   base_model.model.model.layers.6.self_attn.v_proj                     0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:56 INFO   base_model.model.model.layers.7.mlp.down_proj                        0.000000    0.000000   +0.000000      0.0000  orig→k5504
+2026-04-27 12:17:56 INFO   base_model.model.model.layers.7.mlp.gate_proj                        0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:56 INFO   base_model.model.model.layers.7.mlp.up_proj                          0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:56 INFO   base_model.model.model.layers.7.self_attn.k_proj                     0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:56 INFO   base_model.model.model.layers.7.self_attn.o_proj                     0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:56 INFO   base_model.model.model.layers.7.self_attn.q_proj                     0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:56 INFO   base_model.model.model.layers.7.self_attn.v_proj                     0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:56 INFO   base_model.model.model.layers.8.mlp.down_proj                        0.000000    0.000000   +0.000000      0.0000  orig→k5504
+2026-04-27 12:17:56 INFO   base_model.model.model.layers.8.mlp.gate_proj                        0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:56 INFO   base_model.model.model.layers.8.mlp.up_proj                          0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:56 INFO   base_model.model.model.layers.8.self_attn.k_proj                     0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:56 INFO   base_model.model.model.layers.8.self_attn.o_proj                     0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:56 INFO   base_model.model.model.layers.8.self_attn.q_proj                     0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:56 INFO   base_model.model.model.layers.8.self_attn.v_proj                     0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:56 INFO   base_model.model.model.layers.9.mlp.down_proj                        0.000000    0.000000   +0.000000      0.0000  orig→k5504
+2026-04-27 12:17:56 INFO   base_model.model.model.layers.9.mlp.gate_proj                        0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:56 INFO   base_model.model.model.layers.9.mlp.up_proj                          0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:56 INFO   base_model.model.model.layers.9.self_attn.k_proj                     0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:56 INFO   base_model.model.model.layers.9.self_attn.o_proj                     0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:56 INFO   base_model.model.model.layers.9.self_attn.q_proj                     0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:56 INFO   base_model.model.model.layers.9.self_attn.v_proj                     0.000000    0.000000   +0.000000      0.0000  orig→k2048
+2026-04-27 12:17:56 INFO   ----------------------------------------------------------------------------------------------------------------------
+2026-04-27 12:17:56 INFO 
+2026-04-27 12:17:56 INFO [WaRPSafeLoRA] Layer selection: 20 / 224 selected  (mode=number, num_proj_layers=20)
+2026-04-27 12:17:56 INFO   Module                                                                cos_rot    cos_orig        Δcos
+2026-04-27 12:17:56 INFO   ------------------------------------------------------------------------------------------
+2026-04-27 12:17:56 INFO   base_model.model.model.layers.0.mlp.down_proj                        0.000000    0.000000   +0.000000  * SELECTED
+2026-04-27 12:17:56 INFO   base_model.model.model.layers.0.mlp.gate_proj                        0.000000    0.000000   +0.000000  * SELECTED
+2026-04-27 12:17:56 INFO   base_model.model.model.layers.0.mlp.up_proj                          0.000000    0.000000   +0.000000  * SELECTED
+2026-04-27 12:17:56 INFO   base_model.model.model.layers.0.self_attn.k_proj                     0.000000    0.000000   +0.000000  * SELECTED
+2026-04-27 12:17:56 INFO   base_model.model.model.layers.0.self_attn.o_proj                     0.000000    0.000000   +0.000000  * SELECTED
+2026-04-27 12:17:56 INFO   base_model.model.model.layers.0.self_attn.q_proj                     0.000000    0.000000   +0.000000  * SELECTED
+2026-04-27 12:17:56 INFO   base_model.model.model.layers.0.self_attn.v_proj                     0.000000    0.000000   +0.000000  * SELECTED
+2026-04-27 12:17:56 INFO   base_model.model.model.layers.1.mlp.down_proj                        0.000000    0.000000   +0.000000  * SELECTED
+2026-04-27 12:17:56 INFO   base_model.model.model.layers.1.mlp.gate_proj                        0.000000    0.000000   +0.000000  * SELECTED
+2026-04-27 12:17:56 INFO   base_model.model.model.layers.1.mlp.up_proj                          0.000000    0.000000   +0.000000  * SELECTED
+2026-04-27 12:17:56 INFO   ... (214 more layers)
+2026-04-27 12:17:56 INFO 
+2026-04-27 12:17:56 INFO [WaRPSafeLoRA] Applying WaRP-rotated projection to lora_B...
+2026-04-27 12:17:56 INFO   lora_B projected: 20, lora_A/others restored: 428
+2026-04-27 12:17:56 INFO 
+2026-04-27 12:17:56 INFO ======================================================================
+2026-04-27 12:17:56 INFO [WaRPSafeLoRA] ===== SUMMARY =====
+2026-04-27 12:17:56 INFO ======================================================================
+2026-04-27 12:17:56 INFO   Base model    : meta-llama/Llama-2-7b-hf
+2026-04-27 12:17:56 INFO   Aligned model : kmseong/llama2_7b-Safety-FT-lr3e-5
+2026-04-27 12:17:56 INFO   WaRP basis    : /home/yonsei_jong/Safety-WaRP-LLM/checkpoints/phase1_20260427_000617/basis
+2026-04-27 12:17:56 INFO   top_k         : None (ratio=0.50)
+2026-04-27 12:17:56 INFO   Selection     : number
+2026-04-27 12:17:56 INFO 
+2026-04-27 12:17:56 INFO   Cosine similarity (across all 224 layers):
+2026-04-27 12:17:56 INFO     original  — mean=0.0000  min=0.0000  max=0.0000
+2026-04-27 12:17:56 INFO     rotated   — mean=0.0000  min=0.0000  max=0.0000
+2026-04-27 12:17:56 INFO     Δ(rot−orig) mean=0.0000  (positive → rotated is more conservative)
+2026-04-27 12:17:56 INFO 
+2026-04-27 12:17:56 INFO   Projected layers : 20 / 224
+2026-04-27 12:17:56 INFO   Selected (lowest cos_rot first):
+2026-04-27 12:17:56 INFO     base_model.model.model.layers.0.mlp.down_proj  cos_rot=0.000000  cos_orig=0.000000  Δcos=+0.000000  shift=0.0000
+2026-04-27 12:17:56 INFO     base_model.model.model.layers.0.mlp.gate_proj  cos_rot=0.000000  cos_orig=0.000000  Δcos=+0.000000  shift=0.0000
+2026-04-27 12:17:56 INFO     base_model.model.model.layers.0.mlp.up_proj  cos_rot=0.000000  cos_orig=0.000000  Δcos=+0.000000  shift=0.0000
+2026-04-27 12:17:56 INFO     base_model.model.model.layers.0.self_attn.k_proj  cos_rot=0.000000  cos_orig=0.000000  Δcos=+0.000000  shift=0.0000
+2026-04-27 12:17:56 INFO     base_model.model.model.layers.0.self_attn.o_proj  cos_rot=0.000000  cos_orig=0.000000  Δcos=+0.000000  shift=0.0000
+2026-04-27 12:17:56 INFO     base_model.model.model.layers.0.self_attn.q_proj  cos_rot=0.000000  cos_orig=0.000000  Δcos=+0.000000  shift=0.0000
+2026-04-27 12:17:56 INFO     base_model.model.model.layers.0.self_attn.v_proj  cos_rot=0.000000  cos_orig=0.000000  Δcos=+0.000000  shift=0.0000
+2026-04-27 12:17:56 INFO     base_model.model.model.layers.1.mlp.down_proj  cos_rot=0.000000  cos_orig=0.000000  Δcos=+0.000000  shift=0.0000
+2026-04-27 12:17:56 INFO     base_model.model.model.layers.1.mlp.gate_proj  cos_rot=0.000000  cos_orig=0.000000  Δcos=+0.000000  shift=0.0000
+2026-04-27 12:17:56 INFO     base_model.model.model.layers.1.mlp.up_proj  cos_rot=0.000000  cos_orig=0.000000  Δcos=+0.000000  shift=0.0000
+2026-04-27 12:17:56 INFO     base_model.model.model.layers.1.self_attn.k_proj  cos_rot=0.000000  cos_orig=0.000000  Δcos=+0.000000  shift=0.0000
+2026-04-27 12:17:56 INFO     base_model.model.model.layers.1.self_attn.o_proj  cos_rot=0.000000  cos_orig=0.000000  Δcos=+0.000000  shift=0.0000
+2026-04-27 12:17:56 INFO     base_model.model.model.layers.1.self_attn.q_proj  cos_rot=0.000000  cos_orig=0.000000  Δcos=+0.000000  shift=0.0000
+2026-04-27 12:17:56 INFO     base_model.model.model.layers.1.self_attn.v_proj  cos_rot=0.000000  cos_orig=0.000000  Δcos=+0.000000  shift=0.0000
+2026-04-27 12:17:56 INFO     base_model.model.model.layers.10.mlp.down_proj  cos_rot=0.000000  cos_orig=0.000000  Δcos=+0.000000  shift=0.0000
+2026-04-27 12:17:56 INFO     base_model.model.model.layers.10.mlp.gate_proj  cos_rot=0.000000  cos_orig=0.000000  Δcos=+0.000000  shift=0.0000
+2026-04-27 12:17:56 INFO     base_model.model.model.layers.10.mlp.up_proj  cos_rot=0.000000  cos_orig=0.000000  Δcos=+0.000000  shift=0.0000
+2026-04-27 12:17:56 INFO     base_model.model.model.layers.10.self_attn.k_proj  cos_rot=0.000000  cos_orig=0.000000  Δcos=+0.000000  shift=0.0000
+2026-04-27 12:17:56 INFO     base_model.model.model.layers.10.self_attn.o_proj  cos_rot=0.000000  cos_orig=0.000000  Δcos=+0.000000  shift=0.0000
+2026-04-27 12:17:56 INFO     base_model.model.model.layers.10.self_attn.q_proj  cos_rot=0.000000  cos_orig=0.000000  Δcos=+0.000000  shift=0.0000
+2026-04-27 12:18:10 INFO 
+2026-04-27 12:18:10 INFO   ‖C_rot − C_orig‖_F  — mean=0.013604  max=0.121744  min=0.008884
+2026-04-27 12:18:10 INFO   Projectors significantly different (‖diff‖>1e-4): 224 / 224
+2026-04-27 12:18:10 INFO ======================================================================
+2026-04-27 12:18:10 INFO [Step 3] Stats saved to: ./checkpoints/warp_safelora_20260427_000614/warp_safelora_stats.json
+2026-04-27 12:18:11 INFO [Step 3] Projected LoRA adapter saved: ./checkpoints/warp_safelora_20260427_000614/lora_adapter
+2026-04-27 12:18:11 INFO [Step 4] Merging LoRA into base weights...
+2026-04-27 12:18:21 INFO [Step 4] Merged model saved: ./checkpoints/warp_safelora_20260427_000614/merged_model
+2026-04-27 12:18:21 INFO 
+2026-04-27 12:18:21 INFO ======================================================================
+2026-04-27 12:18:21 INFO Done!  Output: ./checkpoints/warp_safelora_20260427_000614
+2026-04-27 12:18:21 INFO ======================================================================

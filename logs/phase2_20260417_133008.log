@@ -1,0 +1,18 @@
+[2026-04-17 13:30:08] [safety_warp] [INFO] ======================================================================
+[2026-04-17 13:30:08] [safety_warp] [INFO] Safety-WaRP-LLM (Fixed - 원본 FSCIL-WaRP 방식)
+[2026-04-17 13:30:08] [safety_warp] [INFO] ======================================================================
+[2026-04-17 13:30:08] [safety_warp] [INFO] Phase: 2
+[2026-04-17 13:30:08] [safety_warp] [INFO] Model: None
+[2026-04-17 13:30:08] [safety_warp] [INFO] Layer types: attn_q,attn_k,attn_v,ffn_down,ffn_up
+[2026-04-17 13:30:08] [safety_warp] [INFO] Target layers: all
+[2026-04-17 13:30:08] [safety_warp] [INFO] ======================================================================
+[2026-04-17 13:30:10] [safety_warp] [INFO] ✓ W&B initialized: project=Safety-WaRP-LLM, run=phase2_20260417_133008
+[2026-04-17 13:30:10] [safety_warp] [INFO] ======================================================================
+[2026-04-17 13:30:10] [safety_warp] [INFO] Starting Phase 2: Importance Scoring (Fixed)
+[2026-04-17 13:30:10] [safety_warp] [INFO] ======================================================================
+[2026-04-17 13:30:11] [safety_warp] [INFO] Loading basis from ./checkpoints/phase1_20260417_130943/basis...
+[2026-04-17 13:30:11] [safety_warp] [ERROR] Failed to load basis: [Errno 2] No such file or directory: './checkpoints/phase1_20260417_130943/basis/metadata.json'
+Traceback (most recent call last):
+  File "/home/yonsei_jong/Safety-WaRP-LLM/models/phase2_importance_per_layer.py", line 141, in load_basis
+    with open(metadata_path, 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: './checkpoints/phase1_20260417_130943/basis/metadata.json'
