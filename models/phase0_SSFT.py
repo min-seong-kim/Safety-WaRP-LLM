@@ -9,7 +9,7 @@ Goal:
   - Fine-tune all model parameters on the same safety dataset
 
 Usage:
-python Safety-WaRP-LLM/models/phase0_SSFT.py --model_name meta-llama/Llama-3.2-3B-Instruct
+python models/phase0_SSFT.py --model_name meta-llama/Llama-3.1-8B-Instruct
 
 python Safety-WaRP-LLM/models/phase0_SSFT.py --model_name meta-llama/Llama-2-13b-chat-hf
 
@@ -30,7 +30,7 @@ from tqdm import tqdm
 import logging
 import math
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 # 로거는 main()에서 setup_logger로 초기화됨
 # 모듈 레벨 fallback (직접 import 시)
@@ -41,7 +41,7 @@ logger = logging.getLogger('safety_warp')
 # =====================================================================
 # Configuration (matched to sn_tune.py)
 # =====================================================================
-MODEL_NAME = "meta-llama/Llama-3.2-3B-Instruct"  # Base 모델 (Phase 0) - WaRP 제거 전 모델 사용
+MODEL_NAME = "meta-llama/Llama-3.1-8B-Instruct"  # Base 모델 (Phase 0) - WaRP 제거 전 모델 사용
 
 LEARNING_RATE = 5e-5
 NUM_EPOCHS = 3

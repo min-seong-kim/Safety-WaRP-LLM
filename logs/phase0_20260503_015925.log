@@ -1,0 +1,14 @@
+[2026-05-03 01:59:25] [safety_warp] [INFO] Log file: ./logs/phase0_20260503_015925.log
+[2026-05-03 01:59:25] [safety_warp] [INFO] 
+======================================================================
+[2026-05-03 01:59:25] [safety_warp] [INFO] Base Model Safety Fine-tuning (Full Parameter FT)
+[2026-05-03 01:59:25] [safety_warp] [INFO] ======================================================================
+[2026-05-03 01:59:25] [safety_warp] [INFO] Base model: meta-llama/Llama-3.1-8B-Instruct
+[2026-05-03 01:59:25] [safety_warp] [INFO] Input format: chat template
+[2026-05-03 01:59:25] [safety_warp] [INFO] Safety dataset file: ./data/circuit_breakers_train.json
+[2026-05-03 01:59:25] [safety_warp] [INFO] Output directory: ./checkpoints/phase0_20260503_015925
+[2026-05-03 01:59:25] [safety_warp] [INFO] Training setup: LR=5e-05, Epochs=3, Batch=4, GradAccum=4, MaxSamples=4994
+[2026-05-03 01:59:25] [safety_warp] [INFO] ======================================================================
+
+[2026-05-03 01:59:53] [safety_warp] [INFO] ✓ W&B initialized: project=Safety-WaRP-LLM, run=phase0_20260503_015925
+[2026-05-03 01:59:53] [safety_warp] [INFO] Loading model and tokenizer...

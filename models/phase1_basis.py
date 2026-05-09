@@ -196,7 +196,8 @@ class Phase1BasisBuilder:
                 self.args.model_name,
                 torch_dtype=torch_dtype,
                 device_map=self.args.device,
-                trust_remote_code=True
+                trust_remote_code=True,
+                attn_implementation="eager",
             )
             self.logger.info(f"✓ Model loaded successfully")
             

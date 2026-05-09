@@ -8,18 +8,20 @@ Usage:
 export HF_TOKEN=hf_xxx
 
 python upload_to_huggingface.py \
-    --model_path /home/yonsei_jong/Safety-WaRP-LLM/medqa_eval/llama2_7b_chat_SSFT_medqa_FT_lr3e-5 \
-    --hf_model_id kmseong/llama2_7b_chat-SSFT-MEDQA-FT-lr3e-5 \
-    --no_timestamp
+    --model_path /home/yonsei_jong/Safety-WaRP-LLM/checkpoints/phase3_non_freeze_20260504_173930/final_model \
+    --hf_model_id kmseong/llama2_7b_chat-WaRP-gsm8k-FT-lr5e-5 \
+    --no_timestamp \
+    --hf_token 
 
 python upload_to_huggingface.py \
-    --model_path ./checkpoints/warp_safelora_20260427_000614/merged_model \
-    --hf_model_id kmseong/llama2_7b_base-WaRP-safelora-freeze_lr2e-4
-    --no_timestamp
+    --model_path /home/yonsei_jong/Safety-WaRP-LLM/Llama-2-7b-chat-hf-rotated_model_for_sn_detection \
+    --hf_model_id kmseong/llama2_7b_chat-safety-rotation \
+    --no_timestamp \
+    --hf_token 
 
 python upload_to_huggingface.py \
-    --model_path ./checkpoints/phase3_non_freeze_20260501_150227/final_model \
-    --hf_model_id kmseong/llama2_7b-SSFT-WaRP_medqa_FT_lr1e-5_fix \
+    --model_path ./checkpoints/phase0_20260503_020026 \
+    --hf_model_id kmseong/llama3.1-8B-Instruct_SSFT_lr5e-5 \
     --no_timestamp
 
 

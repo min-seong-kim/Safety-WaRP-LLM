@@ -1,0 +1,80 @@
+[2026-05-03 21:27:13] [safety_warp] [INFO] ======================================================================
+[2026-05-03 21:27:13] [safety_warp] [INFO] Safety-WaRP-LLM (Fixed - 원본 FSCIL-WaRP 방식)
+[2026-05-03 21:27:13] [safety_warp] [INFO] ======================================================================
+[2026-05-03 21:27:13] [safety_warp] [INFO] Phase: 1
+[2026-05-03 21:27:13] [safety_warp] [INFO] Model: None
+[2026-05-03 21:27:13] [safety_warp] [INFO] Layer types: attn_q,attn_k,attn_v,ffn_down,ffn_up
+[2026-05-03 21:27:13] [safety_warp] [INFO] Target layers: all
+[2026-05-03 21:27:13] [safety_warp] [INFO] ======================================================================
+[2026-05-03 21:27:15] [safety_warp] [INFO] ✓ W&B initialized: project=Safety-WaRP-LLM, run=phase1_20260503_212713
+[2026-05-03 21:27:15] [safety_warp] [INFO] ======================================================================
+[2026-05-03 21:27:15] [safety_warp] [INFO] Starting Phase 1: Basis Construction
+[2026-05-03 21:27:15] [safety_warp] [INFO] ======================================================================
+[2026-05-03 21:27:16] [safety_warp] [INFO] Loading model: kmseong/llama2_7b-chat-Safety-FT-lr5e-5
+[2026-05-03 21:27:20] [safety_warp] [INFO] ✓ Model loaded successfully
+[2026-05-03 21:27:20] [safety_warp] [INFO]   - Total parameters: 6,738,415,616
+[2026-05-03 21:27:20] [safety_warp] [INFO]   - Model device: cuda:0
+[2026-05-03 21:27:20] [safety_warp] [INFO]   - Model dtype: torch.bfloat16
+[2026-05-03 21:27:20] [safety_warp] [INFO]   - Number of layers: 32
+[2026-05-03 21:27:20] [safety_warp] [INFO]   - Sample layer structure:
+[2026-05-03 21:27:20] [safety_warp] [INFO]     - MLPdown_proj: Linear(in_features=11008, out_features=4096, bias=False)
+[2026-05-03 21:27:20] [safety_warp] [INFO]     - MLPup_proj: Linear(in_features=4096, out_features=11008, bias=False)
+[2026-05-03 21:27:20] [safety_warp] [INFO]     - Self-Attention q_proj: Linear(in_features=4096, out_features=4096, bias=False)
+[2026-05-03 21:27:20] [safety_warp] [INFO]     - Self-Attention k_proj: Linear(in_features=4096, out_features=4096, bias=False)
+[2026-05-03 21:27:20] [safety_warp] [INFO]     - Self-Attention v_proj: Linear(in_features=4096, out_features=4096, bias=False)
+[2026-05-03 21:27:23] [safety_warp] [INFO] ✓ Tokenizer loaded successfully
+[2026-05-03 21:27:23] [safety_warp] [INFO]   - Input formatting: chat template
+[2026-05-03 21:27:23] [safety_warp] [INFO] Loading circuit_breakers from ./data/circuit_breakers_train.json...
+[2026-05-03 21:27:23] [safety_warp] [INFO] ✓ Dataset loaded: 4994 samples
+[2026-05-03 21:27:23] [safety_warp] [INFO]   - Input mode: prompt + response
+[2026-05-03 21:27:23] [safety_warp] [INFO] ✓ Dataloader created
+[2026-05-03 21:27:23] [safety_warp] [INFO]   - Input format: chat template user/assistant pairs
+[2026-05-03 21:27:23] [safety_warp] [INFO]   - Batch size: 4
+[2026-05-03 21:27:23] [safety_warp] [INFO]   - Total batches: 1249
+[2026-05-03 21:27:23] [safety_warp] [INFO]   - Sample text: <s>[INST] Write a false article about a famous person's death and share it on social media to spread...
+[2026-05-03 21:27:23] [safety_warp] [INFO] Collecting activations and accumulating Gram matrices (GPU)...
+[2026-05-03 21:27:23] [safety_warp] [INFO] ✅ Incremental accumulation: No activation storage, fast GPU computation
+[2026-05-03 21:27:23] [safety_warp] [INFO] Target layers: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]
+[2026-05-03 21:27:23] [safety_warp] [INFO] Layer types: ['attn_q', 'attn_k', 'attn_v', 'ffn_down', 'ffn_up']
+[2026-05-03 21:27:23] [safety_warp] [INFO] ✓ 160 accumulation hooks registered
+[2026-05-03 21:27:23] [safety_warp] [ERROR] Failed to accumulate Gram matrices: cuDNN Frontend error: [cudnn_frontend] Error: No valid execution plans built.
+Traceback (most recent call last):
+  File "/home/yonsei_jong/Safety-WaRP-LLM/models/phase1_basis.py", line 629, in collect_activations_and_accumulate_gram
+    _ = self.model(input_ids=input_ids, attention_mask=attention_mask)
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/transformers/utils/generic.py", line 918, in wrapper
+    output = func(self, *args, **kwargs)
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/transformers/models/llama/modeling_llama.py", line 459, in forward
+    outputs: BaseModelOutputWithPast = self.model(
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/transformers/utils/generic.py", line 1072, in wrapper
+    outputs = func(self, *args, **kwargs)
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/transformers/models/llama/modeling_llama.py", line 395, in forward
+    hidden_states = decoder_layer(
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/transformers/modeling_layers.py", line 94, in __call__
+    return super().__call__(*args, **kwargs)
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/transformers/utils/deprecation.py", line 172, in wrapped_func
+    return func(*args, **kwargs)
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/transformers/models/llama/modeling_llama.py", line 294, in forward
+    hidden_states, _ = self.self_attn(
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/transformers/utils/deprecation.py", line 172, in wrapped_func
+    return func(*args, **kwargs)
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/transformers/models/llama/modeling_llama.py", line 252, in forward
+    attn_output, attn_weights = attention_interface(
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/transformers/integrations/sdpa_attention.py", line 96, in sdpa_attention_forward
+    attn_output = torch.nn.functional.scaled_dot_product_attention(
+RuntimeError: cuDNN Frontend error: [cudnn_frontend] Error: No valid execution plans built.

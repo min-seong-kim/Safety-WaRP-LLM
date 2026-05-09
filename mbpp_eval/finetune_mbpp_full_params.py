@@ -1,33 +1,27 @@
 """
-Full-parameter or LoRA fine-tuning for MedQA (USMLE).
-
-데이터셋 준비:
-  python medqa_eval/prepare_medqa_dataset.py
+Full-parameter or LoRA fine-tuning for MBPP (Mostly Basic Python Problems).
 
 Example usage:
 
 Full-parameter:
-python medqa_eval/finetune_medqa_full_params.py \
-    --model_path wvnvwn/llama-2-13b-chat-hf-SSFT-lr5e-5 \
-    --medqa_train_path /home/yonsei_jong/Safety-WaRP-LLM/data/medqa_train_10178.jsonl \
-    --output_dir ./medqa_eval/llama2_13b_chat_SSFT_medqa_FT_lr5e-5 \
-    --learning_rate 5e-5 --epochs 3 \
-    --upload_name kmseong/llama2_13b_chat-SSFT-MEDQA-FT-lr5e-5
+python mbpp_eval/finetune_mbpp_full_params.py \
+    --model_path kmseong/llama2_7b-chat-Safety-FT-lr5e-5 \
+    --output_dir ./mbpp_eval/llama2_7b_chat_mbpp_FT_lr5e-5 \
+    --learning_rate 3e-5 --epochs 3 \
+    --upload_name kmseong/llama2_7b_chat-MBPP-FT-lr3e-5
 
 SafeInstr (safety mixing):
-python medqa_eval/finetune_medqa_full_params.py \
+python mbpp_eval/finetune_mbpp_full_params.py \
     --model_path kmseong/llama2_7b-chat-Safety-FT-lr5e-5 \
-    --medqa_train_path /home/yonsei_jong/Safety-WaRP-LLM/data/medqa_train_10178.jsonl \
-    --output_dir ./medqa_eval/llama2_7b_chat_SSFT_medqa_FT_safeInstr_lr1e-5 \
-    --learning_rate 1e-5 --epochs 3 \
-    --safety_mix_ratio 0.15 \
-    --upload_name kmseong/llama2_7b_chat-SSFT-MEDQA-FT-safety-mix-0.15-lr1e-5
+    --output_dir ./mbpp_eval/llama2_7b_chat_mbpp_FT_safeInstr_lr1e-5 \
+    --learning_rate 5e-5 --epochs 3 \
+    --safety_mix_ratio 0.1 \
+    --upload_name kmseong/llama2_7b_chat-MBPP-FT-safety-mix-0.1-lr5e-5
 
 LoRA:
-python medqa_eval/finetune_medqa_full_params.py \
-    --model_path kmseong/llama2_7b-Safety-FT-lr3e-5 \
-    --medqa_train_path /home/yonsei_jong/Safety-WaRP-LLM/data/medqa_train_10178.jsonl \
-    --output_dir ./medqa_eval/lora_medqa_llama2_7b \
+python mbpp_eval/finetune_mbpp_full_params.py \
+    --model_path meta-llama/Llama-2-7b-chat-hf \
+    --output_dir ./mbpp_eval/lora_mbpp_llama2_7b \
     --learning_rate 5e-5 --epochs 3 \
     --lora --lora_r 16 --lora_alpha 32
 """
@@ -55,7 +49,7 @@ from transformers import (
     set_seed,
 )
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "6"
 
 try:
     from peft import LoraConfig, TaskType, get_peft_model
@@ -64,10 +58,9 @@ except ImportError:
     _peft_available = False
 
 
-MEDQA_INSTRUCTION = (
-    "Answer the following multiple-choice medical question by selecting the single best answer. "
-    "Reply with only the option letter (A, B, C, or D) followed by a period and the answer text.\n"
-    "Example: A. Aspirin"
+MBPP_INSTRUCTION = (
+    "Write a Python function to solve the following programming problem. "
+    "Provide only the complete, runnable Python code without any explanation.\n"
 )
 
 
@@ -76,26 +69,29 @@ MEDQA_INSTRUCTION = (
 # ──────────────────────────────────────────────────────────────────────────────
 
 def parse_args():
-    p = argparse.ArgumentParser(description="Full-parameter or LoRA SFT for MedQA (USMLE).")
+    p = argparse.ArgumentParser(description="Full-parameter or LoRA SFT for MBPP.")
 
-    p.add_argument("--model_path", type=str, required=True)
+    p.add_argument("--model_path", type=str, default="meta-llama/Llama-2-7b-chat-hf")
 
-    p.add_argument("--medqa_train_path", type=str, required=True,
-                   help="학습용 MedQA JSONL 경로 (prepare_medqa_dataset.py 출력)")
-    p.add_argument("--medqa_eval_path", type=str, default=None,
-                   help="평가용 MedQA JSONL 경로 (없으면 eval 생략)")
-    p.add_argument("--medqa_train_split", type=str, default="train")
-    p.add_argument("--medqa_eval_split",  type=str, default="test")
+    # MBPP dataset (loaded from HuggingFace Hub; no local path required)
+    p.add_argument("--mbpp_dataset_name", type=str, default="google-research-datasets/mbpp",
+                   help="HuggingFace dataset name for MBPP")
+    p.add_argument("--mbpp_subset",       type=str, default="full",
+                   help="Dataset subset/config (full | sanitized)")
+    p.add_argument("--mbpp_train_split",  type=str, default="train",
+                   help="Split name used for training")
+    p.add_argument("--mbpp_eval_split",   type=str, default="validation",
+                   help="Split name used for evaluation (set to '' to skip)")
 
     p.add_argument("--num_train_samples", type=int, default=0,
                    help="학습 샘플 수 (0=전체)")
     p.add_argument("--num_eval_samples",  type=int, default=0,
-                   help="평가 샘플 수 (0=전체 또는 eval 비활성)")
+                   help="평가 샘플 수 (0=전체, eval 비활성 시 무시)")
     p.add_argument("--seed", type=int, default=42)
 
     # Training
-    p.add_argument("--batch_size",        type=int,   default=2)
-    p.add_argument("--eval_batch_size",   type=int,   default=8)
+    p.add_argument("--batch_size",        type=int,   default=4)
+    p.add_argument("--eval_batch_size",   type=int,   default=4)
     p.add_argument("--grad_accum",        type=int,   default=4)
     p.add_argument("--epochs",            type=int,   default=3)
     p.add_argument("--learning_rate",     type=float, default=5e-5)
@@ -105,9 +101,9 @@ def parse_args():
     p.add_argument("--max_grad_norm",     type=float, default=1.0)
     p.add_argument("--max_length",        type=int,   default=1024)
 
-    p.add_argument("--bf16",                  action="store_true", default=True)
-    p.add_argument("--fp16",                  action="store_true", default=False)
-    p.add_argument("--gradient_checkpointing",action="store_true", default=False)
+    p.add_argument("--bf16",                   action="store_true", default=True)
+    p.add_argument("--fp16",                   action="store_true", default=False)
+    p.add_argument("--gradient_checkpointing", action="store_true", default=False)
 
     p.add_argument("--output_dir",    type=str, required=True)
     p.add_argument("--logging_steps", type=int, default=10)
@@ -123,7 +119,7 @@ def parse_args():
 
     # HuggingFace upload
     p.add_argument("--upload_name", type=str, default=None,
-                   help="HF repo id (예: kmseong/llama2_7b-medqa-ft). 설정 시 학습 후 자동 업로드")
+                   help="HF repo id (예: kmseong/llama2_7b-mbpp-ft). 설정 시 학습 후 자동 업로드")
     p.add_argument("--hf_token", type=str, default=None,
                    help="HuggingFace API 토큰 (없으면 HF_TOKEN 환경변수 사용)")
 
@@ -151,10 +147,10 @@ def parse_args():
 # ──────────────────────────────────────────────────────────────────────────────
 
 def setup_logging(output_dir: str):
-    log_dir = "./logs/medqa"
+    log_dir = "./logs/mbpp"
     os.makedirs(log_dir, exist_ok=True)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    log_file = os.path.join(log_dir, f"finetune_medqa_{timestamp}.log")
+    log_file = os.path.join(log_dir, f"finetune_mbpp_{timestamp}.log")
 
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
@@ -204,8 +200,8 @@ def _keep_answer_budget(
         return prompt_ids, answer_ids
     if max_length <= 1:
         raise ValueError(f"max_length must be > 1, got {max_length}")
-    # MedQA 정답은 짧으므로 최소 32 토큰 보장
-    answer_floor = max(32, max_length // 8)
+    # 코드 정답은 길 수 있으므로 최소 128 토큰 보장
+    answer_floor = max(128, max_length // 4)
     answer_budget = min(len(answer_ids), answer_floor)
     prompt_budget = max_length - answer_budget
     answer_ids = answer_ids[:answer_budget]
@@ -251,7 +247,7 @@ def tokenize_prompt_response(
                 add_generation_prompt=False,
             )
             prompt_ids = tokenizer(prompt_text, add_special_tokens=False)["input_ids"]
-            full_ids = tokenizer(full_text, add_special_tokens=False)["input_ids"]
+            full_ids   = tokenizer(full_text,   add_special_tokens=False)["input_ids"]
             if full_ids[: len(prompt_ids)] == prompt_ids:
                 answer_ids = full_ids[len(prompt_ids):]
             else:
@@ -261,7 +257,7 @@ def tokenize_prompt_response(
         except Exception:
             prompt_text, full_text = render_chat_fallback(prompt, response, model_ref)
             prompt_ids = tokenizer(prompt_text, add_special_tokens=False)["input_ids"]
-            full_ids = tokenizer(full_text, add_special_tokens=False)["input_ids"]
+            full_ids   = tokenizer(full_text,   add_special_tokens=False)["input_ids"]
             if full_ids[: len(prompt_ids)] == prompt_ids:
                 answer_ids = full_ids[len(prompt_ids):]
             else:
@@ -277,72 +273,83 @@ def tokenize_prompt_response(
     prompt_ids, answer_ids = _keep_answer_budget(prompt_ids, answer_ids, max_length)
 
     input_ids = prompt_ids + answer_ids
-    labels = [-100] * len(prompt_ids) + answer_ids
+    labels    = [-100] * len(prompt_ids) + answer_ids
     if not any(label != -100 for label in labels):
         raise ValueError("tokenization produced no supervised response tokens")
 
     return {
-        "input_ids": input_ids,
+        "input_ids":      input_ids,
         "attention_mask": [1] * len(input_ids),
-        "labels": labels,
+        "labels":         labels,
     }
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# MedQA row → (prompt, response)
+# MBPP row → (prompt, response)
 # ──────────────────────────────────────────────────────────────────────────────
 
-def medqa_prompt_response(row: Dict, prefer_chat: bool = False) -> Tuple[str, str]:
+def mbpp_prompt_response(row: Dict, prefer_chat: bool = False) -> Tuple[str, str]:
     """
-    prepare_medqa_dataset.py 출력 포맷:
-      row["prompt"]      = "### Instruction:\n...\n### Input:\n...\n### Response:\n"
-      row["completion"]  = "D. Nitrofurantoin"
-    chat 모델에서는 instruction + input 을 user 메시지로 전달.
+    MBPP 데이터셋 포맷 (google-research-datasets/mbpp):
+      row["text"]      = 문제 설명 (자연어)
+      row["code"]      = 정답 파이썬 코드
+      row["test_list"] = 테스트 케이스 목록 (list of str)
+
+    chat 모델: instruction + problem → user 메시지
+    base 모델: alpaca-style plain prompt
     """
-    completion = _as_text(row.get("completion") or row.get("output"))
+    problem  = _as_text(row.get("text", ""))
+    solution = _as_text(row.get("code", ""))
+
+    # 테스트 케이스를 힌트로 포함 (있는 경우)
+    test_list = row.get("test_list", []) or []
+    if test_list:
+        tests_str = "\n".join(f"  {t}" for t in test_list[:3])
+        problem_with_tests = f"{problem}\n\nYour code should pass the following tests:\n{tests_str}"
+    else:
+        problem_with_tests = problem
 
     if prefer_chat:
-        instruction = _as_text(row.get("instruction") or MEDQA_INSTRUCTION)
-        input_text  = _as_text(row.get("input", ""))
-        user_content = f"{instruction}\n\n{input_text}" if input_text else instruction
-        return user_content, completion
+        user_content = f"{MBPP_INSTRUCTION}\n{problem_with_tests}"
+        return user_content, solution
 
-    # base 모델: prompt 필드 우선 사용
-    if row.get("prompt"):
-        return _as_text(row["prompt"]), completion
-
-    instruction = _as_text(row.get("instruction") or MEDQA_INSTRUCTION)
-    input_text  = _as_text(row.get("input", ""))
+    # base 모델: alpaca-style
     prompt = (
-        f"### Instruction:\n{instruction}\n\n"
-        f"### Input:\n{input_text}\n\n"
+        f"### Instruction:\n{MBPP_INSTRUCTION}\n\n"
+        f"### Input:\n{problem_with_tests}\n\n"
         f"### Response:\n"
     )
-    return prompt, completion
+    return prompt, solution
 
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Dataset loading & tokenization
 # ──────────────────────────────────────────────────────────────────────────────
 
-def load_medqa_rows(args, logger, eval_dataset: bool = False):
-    path = args.medqa_eval_path if eval_dataset else args.medqa_train_path
-    if eval_dataset and not path:
-        return None
-    if not path:
-        raise ValueError("--medqa_train_path is required")
+def load_mbpp_rows(args, logger, eval_dataset: bool = False):
+    split = args.mbpp_eval_split if eval_dataset else args.mbpp_train_split
+    label = "eval" if eval_dataset else "train"
 
-    path_obj = Path(path)
-    if path_obj.exists():
-        ds = load_dataset("json", data_files=str(path), split="train",
-                          cache_dir=args.cache_dir)
-    else:
-        raise FileNotFoundError(f"MedQA JSONL not found: {path}")
+    if eval_dataset and not split:
+        logger.info("Eval split not specified, skipping eval dataset")
+        return None
+
+    logger.info(f"Loading MBPP {label} split='{split}' from {args.mbpp_dataset_name} ...")
+    try:
+        ds = load_dataset(
+            args.mbpp_dataset_name,
+            args.mbpp_subset,
+            split=split,
+            cache_dir=args.cache_dir,
+            trust_remote_code=False,
+        )
+    except Exception as exc:
+        logger.error(f"Failed to load MBPP dataset: {exc}")
+        raise
 
     n = args.num_eval_samples if eval_dataset else args.num_train_samples
     ds = _select_random_n(ds, n, args.seed + (1 if eval_dataset else 0))
-    label = "eval" if eval_dataset else "train"
-    logger.info(f"Loaded MedQA {label} rows: {len(ds):,}")
+    logger.info(f"Loaded MBPP {label} rows: {len(ds):,}")
     return ds
 
 
@@ -350,7 +357,7 @@ def tokenize_dataset_rows(ds, args, tokenizer, model_path: str, logger, desc: st
     prefer_chat = is_instruct_model(model_path)
 
     def preprocess(ex):
-        prompt, response = medqa_prompt_response(dict(ex), prefer_chat=prefer_chat)
+        prompt, response = mbpp_prompt_response(dict(ex), prefer_chat=prefer_chat)
         return tokenize_prompt_response(prompt, response, tokenizer, args.max_length, model_path)
 
     return ds.map(
@@ -366,7 +373,7 @@ def tokenize_dataset_rows(ds, args, tokenizer, model_path: str, logger, desc: st
 # ──────────────────────────────────────────────────────────────────────────────
 
 def maybe_mix_safety(train_tok, args, tokenizer, model_path: str, logger,
-                     num_medqa: int = 0):
+                     num_mbpp: int = 0):
     if args.safety_mix_ratio <= 0:
         return train_tok
 
@@ -389,7 +396,7 @@ def maybe_mix_safety(train_tok, args, tokenizer, model_path: str, logger,
             model_path,
         )
 
-    safety_hf = HFDataset.from_list(sampled)
+    safety_hf  = HFDataset.from_list(sampled)
     safety_tok = safety_hf.map(
         preprocess_safety,
         remove_columns=safety_hf.column_names,
@@ -400,7 +407,7 @@ def maybe_mix_safety(train_tok, args, tokenizer, model_path: str, logger,
     logger.info(f"Safety data mixed: {len(safety_tok)} samples (ratio={args.safety_mix_ratio})")
     logger.info(
         f"Total training samples: {len(mixed)} "
-        f"(MedQA {num_medqa} + Safety {len(safety_tok)})"
+        f"(MBPP {num_mbpp} + Safety {len(safety_tok)})"
     )
     return mixed
 
@@ -415,14 +422,14 @@ class DataCollatorForCausalLMWithPadding:
 
     def __call__(self, features: List[Dict[str, List[int]]]) -> Dict[str, torch.Tensor]:
         max_len = max(len(f["input_ids"]) for f in features)
-        pad_id = self.tokenizer.pad_token_id or self.tokenizer.eos_token_id
+        pad_id  = self.tokenizer.pad_token_id or self.tokenizer.eos_token_id
 
         input_ids, attention_mask, labels = [], [], []
         for f in features:
             pad_len = max_len - len(f["input_ids"])
-            input_ids.append(f["input_ids"] + [pad_id] * pad_len)
-            attention_mask.append(f["attention_mask"] + [0] * pad_len)
-            labels.append(f["labels"] + [-100] * pad_len)
+            input_ids.append(f["input_ids"]      + [pad_id] * pad_len)
+            attention_mask.append(f["attention_mask"] + [0]      * pad_len)
+            labels.append(f["labels"]             + [-100]  * pad_len)
 
         return {
             "input_ids":      torch.tensor(input_ids,      dtype=torch.long),
@@ -521,7 +528,7 @@ def upload_to_hf(output_dir: str, upload_name: str, hf_token: Optional[str], log
             repo_id=upload_name,
             repo_type="model",
             ignore_patterns=ignore_patterns,
-            commit_message="MedQA fine-tuned model",
+            commit_message="MBPP fine-tuned model",
         )
         logger.info(f"Upload completed: https://huggingface.co/{upload_name}")
     except Exception as exc:
@@ -542,42 +549,42 @@ def main():
         os.environ["WANDB_API_KEY"] = args.wandb_api_key
         wandb_root = os.path.join(args.output_dir, ".wandb")
         os.makedirs(wandb_root, exist_ok=True)
-        os.environ.setdefault("WANDB_DIR", wandb_root)
+        os.environ.setdefault("WANDB_DIR",        wandb_root)
         os.environ.setdefault("WANDB_CONFIG_DIR", os.path.join(wandb_root, "config"))
         os.environ.setdefault("WANDB_CACHE_DIR",  os.path.join(wandb_root, "cache"))
         os.makedirs(os.environ["WANDB_CONFIG_DIR"], exist_ok=True)
         os.makedirs(os.environ["WANDB_CACHE_DIR"],  exist_ok=True)
 
-    raw_path = args.model_path
-    is_local = raw_path.startswith("./") or raw_path.startswith("/") or raw_path.startswith("../")
+    raw_path  = args.model_path
+    is_local  = raw_path.startswith("./") or raw_path.startswith("/") or raw_path.startswith("../")
     model_path = os.path.abspath(raw_path) if is_local else raw_path
     if is_local and not os.path.exists(model_path):
         raise FileNotFoundError(f"Model path not found: {model_path}")
 
     logger, log_file = setup_logging(args.output_dir)
     logger.info("=" * 70)
-    logger.info("Full-parameter utility fine-tuning: MedQA (USMLE)")
+    logger.info("Full-parameter utility fine-tuning: MBPP")
     logger.info("=" * 70)
     logger.info(f"Log file  : {log_file}")
     logger.info(f"Model     : {model_path}")
     logger.info(f"Input fmt : {'chat template' if is_instruct_model(model_path) else 'base plain prompt'}")
-    logger.info(f"Train     : {args.medqa_train_path}")
-    logger.info(f"Eval      : {args.medqa_eval_path or '(none)'}")
+    logger.info(f"Dataset   : {args.mbpp_dataset_name} / {args.mbpp_subset}")
+    logger.info(f"Train split: {args.mbpp_train_split}, Eval split: {args.mbpp_eval_split or '(none)'}")
     logger.info(f"Safety mix: ratio={args.safety_mix_ratio}, path={args.safety_data_path}")
     logger.info(f"LR={args.learning_rate}, epochs={args.epochs}, batch={args.batch_size}x{args.grad_accum}")
 
     model, tokenizer = load_model_and_tokenizer(args, model_path, logger)
 
-    train_rows = load_medqa_rows(args, logger, eval_dataset=False)
-    eval_rows  = load_medqa_rows(args, logger, eval_dataset=True)
+    train_rows = load_mbpp_rows(args, logger, eval_dataset=False)
+    eval_rows  = load_mbpp_rows(args, logger, eval_dataset=True)
 
     train_tok = tokenize_dataset_rows(train_rows, args, tokenizer, model_path, logger, desc="Tokenizing train")
-    eval_tok = None
+    eval_tok  = None
     if eval_rows is not None and args.num_eval_samples > 0:
         eval_tok = tokenize_dataset_rows(eval_rows, args, tokenizer, model_path, logger, desc="Tokenizing eval")
 
-    num_medqa = len(train_tok)
-    train_tok = maybe_mix_safety(train_tok, args, tokenizer, model_path, logger, num_medqa=num_medqa)
+    num_mbpp  = len(train_tok)
+    train_tok = maybe_mix_safety(train_tok, args, tokenizer, model_path, logger, num_mbpp=num_mbpp)
 
     do_eval = eval_tok is not None
     training_args = TrainingArguments(
@@ -610,20 +617,21 @@ def main():
             project=args.wandb_project,
             name=run_name,
             config={
-                "model_path":       model_path,
-                "dataset":          "medqa",
-                "learning_rate":    args.learning_rate,
-                "epochs":           args.epochs,
-                "batch_size":       args.batch_size,
-                "grad_accum":       args.grad_accum,
-                "effective_bs":     args.batch_size * args.grad_accum,
-                "max_length":       args.max_length,
-                "weight_decay":     args.weight_decay,
-                "warmup_ratio":     args.warmup_ratio,
-                "lr_scheduler":     args.lr_scheduler_type,
-                "is_instruct":      is_instruct_model(model_path),
-                "lora":             args.lora,
-                "safety_mix_ratio": args.safety_mix_ratio,
+                "model_path":        model_path,
+                "dataset":           "mbpp",
+                "mbpp_subset":       args.mbpp_subset,
+                "learning_rate":     args.learning_rate,
+                "epochs":            args.epochs,
+                "batch_size":        args.batch_size,
+                "grad_accum":        args.grad_accum,
+                "effective_bs":      args.batch_size * args.grad_accum,
+                "max_length":        args.max_length,
+                "weight_decay":      args.weight_decay,
+                "warmup_ratio":      args.warmup_ratio,
+                "lr_scheduler":      args.lr_scheduler_type,
+                "is_instruct":       is_instruct_model(model_path),
+                "lora":              args.lora,
+                "safety_mix_ratio":  args.safety_mix_ratio,
             },
         )
 
@@ -648,28 +656,30 @@ def main():
     tokenizer.save_pretrained(args.output_dir)
 
     config = {
-        "base_model":           model_path,
-        "fine_tuning_type":     "LoRA Fine-tuning" if args.lora else "Full Parameter Fine-tuning",
-        "dataset":              "medqa",
-        "num_train_samples":    len(train_tok),
-        "num_eval_samples":     len(eval_tok) if eval_tok is not None else 0,
-        "batch_size":           args.batch_size,
-        "grad_accum":           args.grad_accum,
-        "learning_rate":        args.learning_rate,
-        "weight_decay":         args.weight_decay,
-        "warmup_ratio":         args.warmup_ratio,
-        "epochs":               args.epochs,
-        "max_length":           args.max_length,
-        "max_grad_norm":        args.max_grad_norm,
-        "lr_scheduler_type":    args.lr_scheduler_type,
-        "optimizer":            "AdamW (torch)",
-        "gradient_checkpointing": args.gradient_checkpointing,
-        "dtype":                "bf16" if args.bf16 else ("fp16" if args.fp16 else "default"),
-        "trainer_type":         "Trainer",
-        "safety_mix_ratio":     args.safety_mix_ratio,
-        "safety_data_path":     args.safety_data_path if args.safety_mix_ratio > 0 else None,
-        "medqa_train_path":     args.medqa_train_path,
-        "medqa_eval_path":      args.medqa_eval_path,
+        "base_model":              model_path,
+        "fine_tuning_type":        "LoRA Fine-tuning" if args.lora else "Full Parameter Fine-tuning",
+        "dataset":                 "mbpp",
+        "mbpp_dataset_name":       args.mbpp_dataset_name,
+        "mbpp_subset":             args.mbpp_subset,
+        "mbpp_train_split":        args.mbpp_train_split,
+        "mbpp_eval_split":         args.mbpp_eval_split,
+        "num_train_samples":       len(train_tok),
+        "num_eval_samples":        len(eval_tok) if eval_tok is not None else 0,
+        "batch_size":              args.batch_size,
+        "grad_accum":              args.grad_accum,
+        "learning_rate":           args.learning_rate,
+        "weight_decay":            args.weight_decay,
+        "warmup_ratio":            args.warmup_ratio,
+        "epochs":                  args.epochs,
+        "max_length":              args.max_length,
+        "max_grad_norm":           args.max_grad_norm,
+        "lr_scheduler_type":       args.lr_scheduler_type,
+        "optimizer":               "AdamW (torch)",
+        "gradient_checkpointing":  args.gradient_checkpointing,
+        "dtype":                   "bf16" if args.bf16 else ("fp16" if args.fp16 else "default"),
+        "trainer_type":            "Trainer",
+        "safety_mix_ratio":        args.safety_mix_ratio,
+        "safety_data_path":        args.safety_data_path if args.safety_mix_ratio > 0 else None,
     }
     config_path = os.path.join(args.output_dir, "finetune_config.json")
     with open(config_path, "w", encoding="utf-8") as f:

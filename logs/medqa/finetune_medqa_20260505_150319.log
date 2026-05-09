@@ -1,0 +1,16 @@
+2026-05-05 15:03:19 - __main__ - INFO - ======================================================================
+2026-05-05 15:03:19 - __main__ - INFO - Full-parameter utility fine-tuning: MedQA (USMLE)
+2026-05-05 15:03:19 - __main__ - INFO - ======================================================================
+2026-05-05 15:03:19 - __main__ - INFO - Log file  : ./logs/medqa/finetune_medqa_20260505_150319.log
+2026-05-05 15:03:19 - __main__ - INFO - Model     : wvnvwn/llama-2-13b-chat-hf-SSFT-lr5e-5
+2026-05-05 15:03:19 - __main__ - INFO - Input fmt : chat template
+2026-05-05 15:03:19 - __main__ - INFO - Train     : /home/yonsei_jong/Safety-WaRP-LLM/data/medqa_train_10178.jsonl
+2026-05-05 15:03:19 - __main__ - INFO - Eval      : (none)
+2026-05-05 15:03:19 - __main__ - INFO - Safety mix: ratio=0.0, path=/home/yonsei_jong/Safety-WaRP-LLM/data/circuit_breakers_train.json
+2026-05-05 15:03:19 - __main__ - INFO - LR=5e-05, epochs=3, batch=2x4
+2026-05-05 15:03:19 - __main__ - INFO - Loading tokenizer...
+2026-05-05 15:03:19 - __main__ - INFO -   Tokenizer loaded from local files
+2026-05-05 15:03:19 - __main__ - INFO - Loading model...
+2026-05-05 15:03:19 - __main__ - INFO -   Model loaded from local files
+2026-05-05 15:03:19 - __main__ - INFO -   Params: total=13.02B, trainable=13.02B (100.00%)
+2026-05-05 15:03:19 - __main__ - INFO - Loaded MedQA train rows: 10,178

@@ -193,7 +193,8 @@ class Phase2ImportanceScorerPerLayer:
                 self.phase0_model_dir,
                 torch_dtype=torch_dtype,
                 device_map=self.args.device,
-                trust_remote_code=True
+                trust_remote_code=True,
+                attn_implementation="eager",
             )
 
             if hasattr(self.model.config, 'use_cache'):

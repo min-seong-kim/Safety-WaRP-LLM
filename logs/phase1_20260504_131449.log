@@ -1,0 +1,64 @@
+[2026-05-04 13:14:49] [safety_warp] [INFO] ======================================================================
+[2026-05-04 13:14:49] [safety_warp] [INFO] Safety-WaRP-LLM (Fixed - 원본 FSCIL-WaRP 방식)
+[2026-05-04 13:14:49] [safety_warp] [INFO] ======================================================================
+[2026-05-04 13:14:49] [safety_warp] [INFO] Phase: 1
+[2026-05-04 13:14:49] [safety_warp] [INFO] Model: None
+[2026-05-04 13:14:49] [safety_warp] [INFO] Layer types: attn_q,attn_k,attn_v,ffn_down,ffn_up
+[2026-05-04 13:14:49] [safety_warp] [INFO] Target layers: all
+[2026-05-04 13:14:49] [safety_warp] [INFO] ======================================================================
+[2026-05-04 13:14:51] [safety_warp] [INFO] ✓ W&B initialized: project=Safety-WaRP-LLM, run=phase1_20260504_131449
+[2026-05-04 13:14:51] [safety_warp] [INFO] ======================================================================
+[2026-05-04 13:14:51] [safety_warp] [INFO] Starting Phase 1: Basis Construction
+[2026-05-04 13:14:51] [safety_warp] [INFO] ======================================================================
+[2026-05-04 13:14:53] [safety_warp] [INFO] Loading model: wvnvwn/llama-2-13b-chat-hf-SSFT-lr5e-5
+[2026-05-04 13:15:11] [safety_warp] [ERROR] Failed to load model: Data processing error: CAS service error : IO Error: No space left on device (os error 28)
+Traceback (most recent call last):
+  File "/home/yonsei_jong/Safety-WaRP-LLM/models/phase1_basis.py", line 195, in load_model
+    self.model = AutoModelForCausalLM.from_pretrained(
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/transformers/models/auto/auto_factory.py", line 604, in from_pretrained
+    return model_class.from_pretrained(
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/transformers/modeling_utils.py", line 277, in _wrapper
+    return func(*args, **kwargs)
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/transformers/modeling_utils.py", line 4900, in from_pretrained
+    checkpoint_files, sharded_metadata = _get_resolved_checkpoint_files(
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/transformers/modeling_utils.py", line 1200, in _get_resolved_checkpoint_files
+    checkpoint_files, sharded_metadata = get_checkpoint_shard_files(
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/transformers/utils/hub.py", line 1084, in get_checkpoint_shard_files
+    cached_filenames = cached_files(
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/transformers/utils/hub.py", line 567, in cached_files
+    raise e
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/transformers/utils/hub.py", line 494, in cached_files
+    snapshot_download(
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/huggingface_hub/utils/_validators.py", line 114, in _inner_fn
+    return fn(*args, **kwargs)
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/huggingface_hub/_snapshot_download.py", line 332, in snapshot_download
+    thread_map(
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/tqdm/contrib/concurrent.py", line 69, in thread_map
+    return _executor_map(ThreadPoolExecutor, fn, *iterables, **tqdm_kwargs)
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/tqdm/contrib/concurrent.py", line 51, in _executor_map
+    return list(tqdm_class(ex.map(fn, *iterables, chunksize=chunksize), **kwargs))
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/tqdm/std.py", line 1181, in __iter__
+    for obj in iterable:
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/concurrent/futures/_base.py", line 621, in result_iterator
+    yield _result_or_cancel(fs.pop())
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/concurrent/futures/_base.py", line 319, in _result_or_cancel
+    return fut.result(timeout)
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/concurrent/futures/_base.py", line 458, in result
+    return self.__get_result()
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/concurrent/futures/_base.py", line 403, in __get_result
+    raise self._exception
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/huggingface_hub/_snapshot_download.py", line 306, in _inner_hf_hub_download
+    return hf_hub_download(
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/huggingface_hub/utils/_validators.py", line 114, in _inner_fn
+    return fn(*args, **kwargs)
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/huggingface_hub/file_download.py", line 1007, in hf_hub_download
+    return _hf_hub_download_to_cache_dir(
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/huggingface_hub/file_download.py", line 1168, in _hf_hub_download_to_cache_dir
+    _download_to_tmp_and_move(
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/huggingface_hub/file_download.py", line 1720, in _download_to_tmp_and_move
+    xet_get(
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/huggingface_hub/file_download.py", line 626, in xet_get
+    download_files(
+RuntimeError: Data processing error: CAS service error : IO Error: No space left on device (os error 28)

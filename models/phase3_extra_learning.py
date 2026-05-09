@@ -69,7 +69,7 @@ class Phase3IncrementalLearner:
 
     def _is_instruct_model(self) -> bool:
         model_ref = self.phase0_model_dir.lower()
-        return any(tag in model_ref for tag in ('instruct', 'chat'))
+        return any(tag in model_ref for tag in ('instruct', 'chat', 'it'))
 
     def _build_question_answer_prompt(self, question: str) -> str:
         return f"Question: {question.strip()}\nAnswer:"
@@ -363,7 +363,8 @@ class Phase3IncrementalLearner:
                 self.phase0_model_dir,
                 torch_dtype=torch_dtype,
                 device_map=self.args.device,
-                trust_remote_code=True
+                trust_remote_code=True,
+                attn_implementation="eager",
             )
 
             if hasattr(self.model.config, 'use_cache'):
