@@ -3,13 +3,19 @@ Custom MBPP pass@1 evaluator using EXACT training prompt format.
 
 Usage:
 python mbpp_eval/eval_mbpp_custom.py \
+<<<<<<< HEAD
     --model kmseong/llama2_7b_chat-WaRP-MBPP-FT-lr5e-5 \
     --device cuda:6 \
+=======
+    --model kmseong/llama2-7b-chat-mbpp-safedelta-scale0.3_2t \
+    --device cuda: \
+>>>>>>> 16808b457bb867c9f3463304b1b13b9ce6abc568
     --batch_size 32 \
     --output_dir mbpp_eval/results
 
 
   # compare multiple models
+<<<<<<< HEAD
 python mbpp_eval/eval_mbpp_custom.py \
     --model kmseong/llama2_7b_chat-MBPP-FT-lr3e-5 \
             kmseong/llama2-7b-chat-mbpp-safeinstr-lr3e-5-ratio0.1 \
@@ -21,6 +27,13 @@ python mbpp_eval/eval_mbpp_custom.py \
     --device cuda:6 \
     --batch_size 32 \
     --output_dir mbpp_eval/results
+=======
+    python mbpp_eval/eval_mbpp_custom.py \
+        --model kmseong/llama2-7b-chat-mbpp-safedelta-scale0.3_2t \
+        --device cuda:6 \
+        --batch_size 32 \
+        --output_dir mbpp_eval/results
+>>>>>>> 16808b457bb867c9f3463304b1b13b9ce6abc568
 """
 
 import argparse
@@ -171,6 +184,10 @@ def evaluate_model(
         model_name,
         dtype=torch.float16,
         device_map=device,
+<<<<<<< HEAD
+=======
+        attn_implementation="eager",
+>>>>>>> 16808b457bb867c9f3463304b1b13b9ce6abc568
     )
     model.eval()
 

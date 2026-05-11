@@ -31,7 +31,7 @@ PHASE0_MODEL="kmseong/llama3_2_3b-instruct-SSFT-lr5e-5"
 PHASE1_DATASET="circuit_breakers"
 PHASE1_SAMPLES=4994
 # 기존 basis가 있으면 Phase 1 스킵 (빈 문자열이면 Phase 1 수행)
-PHASE1_BASIS_DIR_OVERRIDE="/NHNHOME/WORKSPACE/26msit001_A/edge_ai_lab/minseong/Safety-WaRP-LLM/checkpoints/phase1_20260505_232643/basis"
+PHASE1_BASIS_DIR_OVERRIDE=""
 
 
 # Phase 2: Importance Scoring
@@ -89,7 +89,7 @@ DTYPE="bfloat16"
 DEVICE="cuda"
 EPOCHS=3
 # LR_LIST=("1e-5" "3e-5" "5e-5")
-LR_LIST=("5e-5")  
+LR_LIST=("3e-5")  
 TARGET_LAYERS="all"
 LAYER_TYPE="attn_q,attn_k,attn_v,ffn_down,ffn_up"
 BASE_OUTPUT_DIR="./checkpoints"

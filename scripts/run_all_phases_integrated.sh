@@ -9,7 +9,11 @@ source /home/yonsei_jong/miniconda3/etc/profile.d/conda.sh
 conda activate hb
 set -e  # Exit on error
 set -o pipefail  # Ensure failures are not hidden by tee pipelines
+<<<<<<< HEAD
 export CUDA_VISIBLE_DEVICES=5
+=======
+export CUDA_VISIBLE_DEVICES=0
+>>>>>>> 16808b457bb867c9f3463304b1b13b9ce6abc568
 
 echo "========================================================================"
 echo "Safety-WaRP-LLM: Complete Training Pipeline (Integrated)"
@@ -30,6 +34,8 @@ PHASE0_MODEL="kmseong/llama2_7b-chat-Safety-FT-lr5e-5"
 # Options: circuit_breakers, wikipedia
 PHASE1_DATASET="circuit_breakers"
 PHASE1_SAMPLES=4994
+# 기존 basis가 있으면 Phase 1 스킵 (빈 문자열이면 Phase 1 수행)
+PHASE1_BASIS_DIR_OVERRIDE="./checkpoints/phase1_20260504_143905/basis"
 
 
 # Phase 2: Importance Scoring
@@ -48,10 +54,17 @@ KEEP_RATIO_LIST=("0.1")
 # Phase 3: Incremental Learning
 # ==============================
 # Dataset 선택 (Utility 또는 Safety)
+<<<<<<< HEAD
 PHASE3_DATASET="gsm8k" # Options: safety, gsm8k, metamath, math, agnews, medqa, mmlu
 
 # SafeInstr: safety data mixing (0.0 = 비활성화, 0.1 = 학습 데이터의 10%)
 SAFEINSTR_RATIO=0.0
+=======
+PHASE3_DATASET="gsm8k" # Options: safety, gsm8k, metamath, math, agnews, medqa
+
+# SafeInstr: safety data mixing (0.0 = 비활성화, 0.1 = 학습 데이터의 10%)
+SAFEINSTR_RATIO=0.1
+>>>>>>> 16808b457bb867c9f3463304b1b13b9ce6abc568
 CIRCUIT_BREAKERS_PATH="./data/circuit_breakers_train.json"
 
 # Phase3=MATH 설정
@@ -90,8 +103,8 @@ elif [ "$PHASE3_DATASET" = "mmlu" ]; then
 fi
 
 # 공통 설정
-BATCH_SIZE=4
-GRAD_ACCUM_STEPS=4
+BATCH_SIZE=1
+GRAD_ACCUM_STEPS=8
 DTYPE="bfloat16"
 DEVICE="cuda"
 EPOCHS=3
@@ -110,9 +123,13 @@ echo "Configuration:"
 echo "  Phase 0 Model: $PHASE0_MODEL"
 echo "  Phase 1 Dataset: $PHASE1_DATASET (samples=$PHASE1_SAMPLES)"
 echo "  Phase 2 Dataset: $PHASE2_DATASET (samples=$PHASE2_SAMPLES)"
+<<<<<<< HEAD
 echo "  Phase 3 Dataset: $PHASE3_DATASET (samples=$PHASE3_SAMPLES)"
 echo "  SafeInstr Ratio: $SAFEINSTR_RATIO"
 echo "  Keep Ratios: ${KEEP_RATIO_LIST[*]}"
+=======
+echo "  Phase 3 Dataset: $PHASE3_DATASET (samples=$PHASE3_SAMPLES)"  echo "  SafeInstr Ratio: $SAFEINSTR_RATIO"echo "  Keep Ratios: ${KEEP_RATIO_LIST[*]}"
+>>>>>>> 16808b457bb867c9f3463304b1b13b9ce6abc568
 echo "  Batch Size: $BATCH_SIZE"
 echo "  Device: $DEVICE"
 echo "  Output Dir: $BASE_OUTPUT_DIR"
@@ -134,44 +151,55 @@ echo "PHASE 1: Basis Construction"
 echo "========================================================================"
 echo ""
 
-if [ "$PHASE1_DATASET" = "circuit_breakers" ]; then
-    PHASE1_DATASET_ARG="--circuit_breakers_samples_phase1 $PHASE1_SAMPLES"
-elif [ "$PHASE1_DATASET" = "wikipedia" ]; then
-    PHASE1_DATASET_ARG="--wikipedia_samples_phase1 $PHASE1_SAMPLES"
+if [ -n "$PHASE1_BASIS_DIR_OVERRIDE" ]; then
+    PHASE1_BASIS_DIR="$PHASE1_BASIS_DIR_OVERRIDE"
+    if [ ! -d "$PHASE1_BASIS_DIR" ]; then
+        echo "❌ ERROR: PHASE1_BASIS_DIR_OVERRIDE not found: $PHASE1_BASIS_DIR"
+        exit 1
+    fi
+    echo "✅ Phase 1 skipped (existing basis provided)"
+    echo "   Using basis: $PHASE1_BASIS_DIR"
+    echo ""
 else
-    echo "❌ ERROR: Unknown Phase 1 dataset: $PHASE1_DATASET"
-    echo "Choose from: circuit_breakers, wikipedia"
-    exit 1
+    if [ "$PHASE1_DATASET" = "circuit_breakers" ]; then
+        PHASE1_DATASET_ARG="--circuit_breakers_samples_phase1 $PHASE1_SAMPLES"
+    elif [ "$PHASE1_DATASET" = "wikipedia" ]; then
+        PHASE1_DATASET_ARG="--wikipedia_samples_phase1 $PHASE1_SAMPLES"
+    else
+        echo "❌ ERROR: Unknown Phase 1 dataset: $PHASE1_DATASET"
+        echo "Choose from: circuit_breakers, wikipedia"
+        exit 1
+    fi
+
+    python train.py \
+        --phase 1 \
+        --phase0_model_dir "$PHASE0_MODEL" \
+        --safety_dataset "$PHASE1_DATASET" \
+        $PHASE1_DATASET_ARG \
+        --batch_size $BATCH_SIZE \
+        --layer_type "$LAYER_TYPE" \
+        --target_layers $TARGET_LAYERS \
+        --output_dir $BASE_OUTPUT_DIR \
+        --log_dir $LOG_DIR \
+        --device $DEVICE \
+        --dtype $DTYPE \
+        --seed 42 \
+        2>&1 | tee $LOG_DIR/phase1_${TIMESTAMP}.log
+
+    # Phase 1 출력 경로 추출 (최신 phase1 디렉토리 찾기)
+    PHASE1_OUTPUT_DIR=$(find $BASE_OUTPUT_DIR -maxdepth 1 -name "phase1_*" -type d -printf '%T@ %p\n' | sort -rn | head -1 | cut -d' ' -f2-)
+    PHASE1_BASIS_DIR="$PHASE1_OUTPUT_DIR/basis"
+
+    if [ ! -d "$PHASE1_BASIS_DIR" ]; then
+        echo "❌ ERROR: Phase 1 basis directory not found: $PHASE1_BASIS_DIR"
+        exit 1
+    fi
+
+    echo ""
+    echo "✅ Phase 1 completed successfully"
+    echo "   Basis saved to: $PHASE1_BASIS_DIR"
+    echo ""
 fi
-
-python train.py \
-    --phase 1 \
-    --phase0_model_dir "$PHASE0_MODEL" \
-    --safety_dataset "$PHASE1_DATASET" \
-    $PHASE1_DATASET_ARG \
-    --batch_size $BATCH_SIZE \
-    --layer_type "$LAYER_TYPE" \
-    --target_layers $TARGET_LAYERS \
-    --output_dir $BASE_OUTPUT_DIR \
-    --log_dir $LOG_DIR \
-    --device $DEVICE \
-    --dtype $DTYPE \
-    --seed 42 \
-    2>&1 | tee $LOG_DIR/phase1_${TIMESTAMP}.log
-
-# Phase 1 출력 경로 추출 (최신 phase1 디렉토리 찾기)
-PHASE1_OUTPUT_DIR=$(find $BASE_OUTPUT_DIR -maxdepth 1 -name "phase1_*" -type d -printf '%T@ %p\n' | sort -rn | head -1 | cut -d' ' -f2-)
-PHASE1_BASIS_DIR="$PHASE1_OUTPUT_DIR/basis"
-
-if [ ! -d "$PHASE1_BASIS_DIR" ]; then
-    echo "❌ ERROR: Phase 1 basis directory not found: $PHASE1_BASIS_DIR"
-    exit 1
-fi
-
-echo ""
-echo "✅ Phase 1 completed successfully"
-echo "   Basis saved to: $PHASE1_BASIS_DIR"
-echo ""
 
 # ========================================================================
 # Phase 2 & Phase 3: Keep Ratio Sweep
@@ -290,6 +318,30 @@ for KEEP_RATIO in "${KEEP_RATIO_LIST[@]}"; do
         else
             SAFEINSTR_ARG=""
         fi
+<<<<<<< HEAD
+=======
+
+        python train.py \
+            --phase 3 \
+            --phase0_model_dir "$PHASE0_MODEL" \
+            --basis_dir "$PHASE1_BASIS_DIR" \
+            --masks_dir "$PHASE2_MASKS_DIR" \
+            $PHASE3_DATASET_ARG \
+            --epochs $EPOCHS \
+            --utility_lr $LEARNING_RATE \
+            --batch_size $BATCH_SIZE \
+            --gradient_accumulation_steps $GRAD_ACCUM_STEPS \
+            --layer_type "$LAYER_TYPE" \
+            --target_layers $TARGET_LAYERS \
+            --output_dir $BASE_OUTPUT_DIR \
+            --log_dir $LOG_DIR \
+            --device $DEVICE \
+            --dtype $DTYPE \
+            --seed 42 \
+            --non_freeze \
+            $SAFEINSTR_ARG \
+            2>&1 | tee $LOG_DIR/phase3_kr${KR_SAFE}_lr${LR_SAFE}_${TIMESTAMP}.log
+>>>>>>> 16808b457bb867c9f3463304b1b13b9ce6abc568
 
         if [ "$PHASE3_DATASET" = "mmlu" ]; then
             PHASE3_OUTPUT_DIR="$BASE_OUTPUT_DIR/phase3_mmlu_kr${KR_SAFE}_lr${LR_SAFE}_${TIMESTAMP}"

@@ -8,11 +8,11 @@ Example usage:
 
 Full-parameter:
 python medqa_eval/finetune_medqa_full_params.py \
-    --model_path kmseong/llama2_7b-chat-Safety-FT-lr5e-5 \
+    --model_path wvnvwn/llama-2-13b-chat-hf-SSFT-lr5e-5 \
     --medqa_train_path /home/yonsei_jong/Safety-WaRP-LLM/data/medqa_train_10178.jsonl \
-    --output_dir ./medqa_eval/llama2_7b_chat_SSFT_medqa_FT_lr1e-5 \
-    --learning_rate 1e-5 --epochs 3 \
-    --upload_name kmseong/llama2_7b_chat-SSFT-MEDQA-FT-lr1e-5
+    --output_dir ./medqa_eval/llama2_13b_chat_SSFT_medqa_FT_lr5e-5 \
+    --learning_rate 5e-5 --epochs 3 \
+    --upload_name kmseong/llama2_13b_chat-SSFT-MEDQA-FT-lr5e-5
 
 SafeInstr (safety mixing):
 python medqa_eval/finetune_medqa_full_params.py \
@@ -94,8 +94,8 @@ def parse_args():
     p.add_argument("--seed", type=int, default=42)
 
     # Training
-    p.add_argument("--batch_size",        type=int,   default=4)
-    p.add_argument("--eval_batch_size",   type=int,   default=4)
+    p.add_argument("--batch_size",        type=int,   default=2)
+    p.add_argument("--eval_batch_size",   type=int,   default=8)
     p.add_argument("--grad_accum",        type=int,   default=4)
     p.add_argument("--epochs",            type=int,   default=3)
     p.add_argument("--learning_rate",     type=float, default=5e-5)

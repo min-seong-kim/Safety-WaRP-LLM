@@ -5,10 +5,10 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # 논문용 폰트 및 스타일 설정
-sns.set_theme(style="white", context="paper", font_scale=1.4)
+sns.set_theme(style="white", context="paper", font_scale=2.0)
 
 def plot_and_save_all_layers(top_k=300):
-    basis_dir = "./checkpoints/phase1_20260427_220257/basis"
+    basis_dir = "./checkpoints/phase1_20260503_023523/basis"
     
     # 그래프를 저장할 새 디렉토리 이름 설정
     output_dir = "./singular_value_plots"
@@ -76,12 +76,12 @@ def plot_and_save_all_layers(top_k=300):
         plt.yscale('log')
         
         # 그래프 서식 설정
-        plt.title(f"Singular Value Distribution (Layer {layer_idx})", fontsize=16, fontweight='bold', pad=15)
-        plt.xlabel("Index", fontsize=16)
-        plt.ylabel("Normalized Singular Value ($S_i / S_0$)", fontsize=16)
+        plt.title(f"Singular Value Distribution (Layer {layer_idx})", fontsize=22, fontweight='bold', pad=15)
+        plt.xlabel("Index", fontsize=22)
+        plt.ylabel("Normalized Singular Value ($S_i / S_0$)", fontsize=22)
         
         plt.xlim(0, top_k)
-        plt.legend(loc='upper right', frameon=True, fontsize=14)
+        plt.legend(loc='upper right', frameon=True, fontsize=20)
         
         # 테두리 설정: 위쪽과 오른쪽 테두리 제거
         ax = plt.gca()
@@ -102,4 +102,4 @@ def plot_and_save_all_layers(top_k=300):
     print(f"\n✅ 완료! 총 {num_layers}개의 그래프가 '{output_dir}' 폴더에 성공적으로 저장되었습니다.")
 
 if __name__ == "__main__":
-    plot_and_save_all_layers(top_k=300)
+    plot_and_save_all_layers(top_k=150)

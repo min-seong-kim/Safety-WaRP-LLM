@@ -1,0 +1,32 @@
+[2026-05-03 21:26:17] [safety_warp] [INFO] ======================================================================
+[2026-05-03 21:26:17] [safety_warp] [INFO] Safety-WaRP-LLM (Fixed - 원본 FSCIL-WaRP 방식)
+[2026-05-03 21:26:17] [safety_warp] [INFO] ======================================================================
+[2026-05-03 21:26:17] [safety_warp] [INFO] Phase: 1
+[2026-05-03 21:26:17] [safety_warp] [INFO] Model: None
+[2026-05-03 21:26:17] [safety_warp] [INFO] Layer types: attn_q,attn_k,attn_v,ffn_down,ffn_up
+[2026-05-03 21:26:17] [safety_warp] [INFO] Target layers: all
+[2026-05-03 21:26:17] [safety_warp] [INFO] ======================================================================
+[2026-05-03 21:26:19] [safety_warp] [INFO] ✓ W&B initialized: project=Safety-WaRP-LLM, run=phase1_20260503_212617
+[2026-05-03 21:26:19] [safety_warp] [INFO] ======================================================================
+[2026-05-03 21:26:19] [safety_warp] [INFO] Starting Phase 1: Basis Construction
+[2026-05-03 21:26:19] [safety_warp] [INFO] ======================================================================
+[2026-05-03 21:26:21] [safety_warp] [INFO] Loading model: kmseong/llama2_7b-chat-Safety-FT-lr5e-5
+[2026-05-03 21:26:34] [safety_warp] [ERROR] Failed to load model: No CUDA GPUs are available
+Traceback (most recent call last):
+  File "/home/yonsei_jong/Safety-WaRP-LLM/models/phase1_basis.py", line 195, in load_model
+    self.model = AutoModelForCausalLM.from_pretrained(
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/transformers/models/auto/auto_factory.py", line 604, in from_pretrained
+    return model_class.from_pretrained(
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/transformers/modeling_utils.py", line 277, in _wrapper
+    return func(*args, **kwargs)
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/transformers/modeling_utils.py", line 5048, in from_pretrained
+    ) = cls._load_pretrained_model(
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/transformers/modeling_utils.py", line 5432, in _load_pretrained_model
+    caching_allocator_warmup(model, expanded_device_map, hf_quantizer)
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/transformers/modeling_utils.py", line 6089, in caching_allocator_warmup
+    index = device.index if device.index is not None else torch_accelerator_module.current_device()
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/torch/cuda/__init__.py", line 1148, in current_device
+    _lazy_init()
+  File "/home/yonsei_jong/miniconda3/envs/hb/lib/python3.10/site-packages/torch/cuda/__init__.py", line 478, in _lazy_init
+    torch._C._cuda_init()
+RuntimeError: No CUDA GPUs are available

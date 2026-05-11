@@ -1,0 +1,16 @@
+2026-05-05 14:45:12 - __main__ - INFO - ======================================================================
+2026-05-05 14:45:12 - __main__ - INFO - Full-parameter utility fine-tuning: MedQA (USMLE)
+2026-05-05 14:45:12 - __main__ - INFO - ======================================================================
+2026-05-05 14:45:12 - __main__ - INFO - Log file  : ./logs/medqa/finetune_medqa_20260505_144512.log
+2026-05-05 14:45:12 - __main__ - INFO - Model     : wvnvwn/llama-2-13b-chat-hf-SSFT-lr5e-5
+2026-05-05 14:45:12 - __main__ - INFO - Input fmt : chat template
+2026-05-05 14:45:12 - __main__ - INFO - Train     : /home/yonsei_jong/Safety-WaRP-LLM/data/medqa_train_10178.jsonl
+2026-05-05 14:45:12 - __main__ - INFO - Eval      : (none)
+2026-05-05 14:45:12 - __main__ - INFO - Safety mix: ratio=0.0, path=/home/yonsei_jong/Safety-WaRP-LLM/data/circuit_breakers_train.json
+2026-05-05 14:45:12 - __main__ - INFO - LR=5e-05, epochs=3, batch=2x4
+2026-05-05 14:45:12 - __main__ - INFO - Loading tokenizer...
+2026-05-05 14:45:12 - __main__ - WARNING -   Local tokenizer load failed: expected str, bytes or os.PathLike object, not NoneType
+2026-05-05 14:45:16 - __main__ - INFO - Loading model...
+2026-05-05 14:45:16 - __main__ - WARNING -   Local model load failed: We couldn't connect to 'https://huggingface.co' to load the files, and couldn't find them in the cached files.
+Check your internet connection or see how to run the library in offline mode at 'https://huggingface.co/docs/transformers/installation#offline-mode'.
+2026-05-05 14:45:40 - __main__ - INFO -   Params: total=13.02B, trainable=13.02B (100.00%)

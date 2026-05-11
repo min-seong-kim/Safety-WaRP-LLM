@@ -8,22 +8,38 @@ Usage:
 export HF_TOKEN=hf_xxx
 
 python upload_to_huggingface.py \
+<<<<<<< HEAD
     --model_path /NHNHOME/WORKSPACE/26msit001_A/edge_ai_lab/minseong/Safety-WaRP-LLM/checkpoints/phase3_original_space_20260507_201233/final_model \
     --hf_model_id kmseong/llama2-7b-chat-original-space-freeze-p20-lr5e-5 \
+=======
+    --model_path /home/yonsei_jong/Safety-WaRP-LLM/checkpoints/phase3_non_freeze_20260504_173930/final_model \
+    --hf_model_id kmseong/llama2_7b_chat-WaRP-gsm8k-FT-lr5e-5 \
+>>>>>>> 16808b457bb867c9f3463304b1b13b9ce6abc568
     --no_timestamp \
     --hf_token 
 
 python upload_to_huggingface.py \
+<<<<<<< HEAD
     --model_path /NHNHOME/WORKSPACE/26msit001_A/edge_ai_lab/minseong/Safety-WaRP-LLM/checkpoints/phase3_original_space_20260507_200459/final_model \
     --hf_model_id kmseong/llama2-7b-chat-original-space-freeze-p25-lr5e-5 \
+=======
+    --model_path /home/yonsei_jong/Safety-WaRP-LLM/Llama-2-7b-chat-hf-rotated_model_for_sn_detection \
+    --hf_model_id kmseong/llama2_7b_chat-safety-rotation \
+>>>>>>> 16808b457bb867c9f3463304b1b13b9ce6abc568
     --no_timestamp \
     --hf_token 
 
 python upload_to_huggingface.py \
+<<<<<<< HEAD
     --model_path  /NHNHOME/WORKSPACE/26msit001_A/edge_ai_lab/minseong/Safety-WaRP-LLM/checkpoints/phase3_original_space_20260507_200648/final_model \
     --hf_model_id kmseong/llama2-7b-chat-original-space-freeze-p40-lr5e-5 \
     --no_timestamp \
     --hf_token 
+=======
+    --model_path ./checkpoints/phase0_20260503_020026 \
+    --hf_model_id kmseong/llama3.1-8B-Instruct_SSFT_lr5e-5 \
+    --no_timestamp
+>>>>>>> 16808b457bb867c9f3463304b1b13b9ce6abc568
 
 
 """

@@ -10,7 +10,7 @@ python plot_singular_value_spectrum.py --layer 15
 python plot_singular_value_spectrum.py
 
 # 옵션 조합
-python plot_singular_value_spectrum.py --layer 1 --top_k 150 --basis_dir ./checkpoints/phase1_XXXX/basis
+python singular_value_plots_nolog.py --layer 15 --top_k 150 --basis_dir ./checkpoints/phase1_20260503_023523/basis
 
 '''
 import os
@@ -25,7 +25,7 @@ sns.set_theme(style="white", context="paper", font_scale=2.0)
 
 def plot_and_save_all_layers(top_k=300, target_layer=None, basis_dir=None):
     if basis_dir is None:
-        basis_dir = "./checkpoints/phase1_20260429_202427/basis"
+        basis_dir = "./checkpoints/phase1_20260503_023523/basis"
     
     # 그래프를 저장할 새 디렉토리 이름 설정
     output_dir = "./singular_value_plots"

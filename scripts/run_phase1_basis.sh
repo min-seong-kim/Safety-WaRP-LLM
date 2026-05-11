@@ -15,7 +15,11 @@ echo "========================================="
 # Phase 0 모델 경로 (로컬 디렉토리 또는 Hugging Face 모델 ID)
 # PHASE0_MODEL="./checkpoints/phase0_20260213_230047"  # 로컬 디렉토리 예시
 # PHASE0_MODEL="kmseong/Llama-3.2-3B-SSFT"
+<<<<<<< HEAD
 PHASE0_MODEL="meta-llama/Llama-2-13b-chat-hf"
+=======
+PHASE0_MODEL="meta-llama/Llama-2-7b-chat-hf"
+>>>>>>> 16808b457bb867c9f3463304b1b13b9ce6abc568
 # ========================================
 # Dataset 선택 (수정 필요)
 # ========================================
