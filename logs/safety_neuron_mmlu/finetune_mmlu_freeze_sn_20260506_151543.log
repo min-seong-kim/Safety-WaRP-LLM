@@ -1,0 +1,13 @@
+2026-05-06 15:15:43 - __main__ - INFO - ======================================================================
+2026-05-06 15:15:43 - __main__ - INFO - MMLU fine-tuning with safety-neuron freezing
+2026-05-06 15:15:43 - __main__ - INFO - ======================================================================
+2026-05-06 15:15:43 - __main__ - INFO - Log file: ./logs/safety_neuron_mmlu/finetune_mmlu_freeze_sn_20260506_151543.log
+2026-05-06 15:15:43 - __main__ - INFO - Loading tokenizer
+2026-05-06 15:15:43 - __main__ - INFO - Tokenizer loaded from local files
+2026-05-06 15:15:43 - __main__ - INFO - Loading model
+2026-05-06 15:15:50 - __main__ - INFO - Model loaded from local files
+2026-05-06 15:15:50 - __main__ - INFO - Loaded safety neurons from /NHNHOME/WORKSPACE/26msit001_A/edge_ai_lab/minseong/Safety-Neuron/neuron_detection/output_neurons/safety_neuron_accelerated_20260502_013602.txt (total=12998)
+2026-05-06 15:15:50 - __main__ - INFO - Registered safety-neuron freeze hooks: 160 params
+2026-05-06 15:15:50 - __main__ - INFO - Loading cais/mmlu 'all' auxiliary_train split
+2026-05-06 15:16:09 - __main__ - INFO - Loaded MMLU train rows: 99842
+2026-05-06 15:17:56 - __main__ - INFO - Starting training

@@ -96,14 +96,21 @@ def parse_args():
     parser.add_argument('--masks_dir', type=str, default=None,
                         help='Phase 2의 masks 디렉토리 경로 (Phase 3에서 사용)')
     parser.add_argument('--phase3_dataset', type=str, default='gsm8k',
-                        choices=['gsm8k', 'safety', 'metamath', 'math', 'swebench', 'agnews', 'medqa'],
-                        help='Phase 3 finetuning용 데이터셋 - gsm8k(Utility), safety(안전성 강화), metamath(고급 수학), math(Hendrycks MATH), swebench(소프트웨어 엔지니어링), agnews(뉴스 분류), medqa(의료 USMLE MCQ)')
+                        choices=['gsm8k', 'safety', 'metamath', 'math', 'mmlu', 'swebench', 'agnews', 'medqa', 'mbpp', 'arc'],
+                        help='Phase 3 finetuning용 데이터셋 - gsm8k(Utility), safety(안전성 강화), metamath(고급 수학), math(Hendrycks MATH), mmlu(MMLU MCQ), swebench(소프트웨어 엔지니어링), agnews(뉴스 분류), medqa(의료 USMLE MCQ), mbpp(파이썬 프로그래밍 문제), arc(ARC-Challenge MCQ)')
     parser.add_argument('--gsm8k_samples', type=int, default=1000,
                         help='GSM8K 샘플 수 (Phase 3 - GSM8K 선택시만 사용)')
     parser.add_argument('--metamath_samples', type=int, default=0,
                         help='MetaMath 샘플 수 (Phase 3 - MetaMath 선택시만 사용, 0=전체)')
     parser.add_argument('--math_samples', type=int, default=0,
                         help='Hendrycks MATH 샘플 수 (Phase 3 - MATH 선택시만 사용, 0=전체)')
+    parser.add_argument('--mmlu_subject', type=str, default='all',
+                        help='MMLU 과목 (all 또는 단일 subject)')
+    parser.add_argument('--mmlu_split', type=str, default='auxiliary_train',
+                        choices=['auxiliary_train', 'train', 'validation', 'test', 'dev'],
+                        help='MMLU 학습 split')
+    parser.add_argument('--mmlu_samples', type=int, default=10000,
+                        help='MMLU 샘플 수 (0=전체)')
     parser.add_argument('--math_subjects', type=str, default='all',
                         help='Hendrycks MATH 과목 필터 (예: Algebra,Geometry 또는 all)')
     parser.add_argument('--math_levels', type=str, default='all',
@@ -140,6 +147,22 @@ def parse_args():
                         help='MedQA split 이름 (default: train, 현재 미사용)')
     parser.add_argument('--medqa_samples', type=int, default=10000,
                         help='MedQA 학습 샘플 수 (0=전체)')
+    parser.add_argument('--mbpp_dataset_name', type=str, default='google-research-datasets/mbpp',
+                        help='MBPP HuggingFace 데이터셋 이름 (Phase 3 - MBPP 선택시 사용)')
+    parser.add_argument('--mbpp_subset', type=str, default='full',
+                        help='MBPP subset/config (full | sanitized)')
+    parser.add_argument('--mbpp_train_split', type=str, default='train',
+                        help='MBPP 학습 split 이름 (default: train)')
+    parser.add_argument('--mbpp_samples', type=int, default=0,
+                        help='MBPP 학습 샘플 수 (0=전체)')
+    parser.add_argument('--arc_dataset_name', type=str, default='allenai/ai2_arc',
+                        help='ARC HuggingFace 데이터셋 이름 (Phase 3 - ARC 선택시 사용)')
+    parser.add_argument('--arc_subset', type=str, default='ARC-Challenge',
+                        help='ARC subset/config (ARC-Challenge | ARC-Easy)')
+    parser.add_argument('--arc_train_split', type=str, default='train',
+                        help='ARC 학습 split 이름 (default: train)')
+    parser.add_argument('--arc_samples', type=int, default=0,
+                        help='ARC 학습 샘플 수 (0=전체, ARC-Challenge train은 1119개)')
     parser.add_argument('--circuit_breakers_samples_phase3', type=int, default=4994,
                         help='Circuit Breakers 샘플 수 (Phase 3 - Safety 선택시만 사용)')
     parser.add_argument('--epochs', type=int, default=20,

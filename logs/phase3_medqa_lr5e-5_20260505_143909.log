@@ -1,0 +1,699 @@
+[2026-05-05 14:39:10] [safety_warp] [INFO] ======================================================================
+[2026-05-05 14:39:10] [safety_warp] [INFO] Safety-WaRP-LLM (Fixed - 원본 FSCIL-WaRP 방식)
+[2026-05-05 14:39:10] [safety_warp] [INFO] ======================================================================
+[2026-05-05 14:39:10] [safety_warp] [INFO] Phase: 3
+[2026-05-05 14:39:10] [safety_warp] [INFO] Model: None
+[2026-05-05 14:39:10] [safety_warp] [INFO] Layer types: attn_q,attn_k,attn_v,ffn_down,ffn_up
+[2026-05-05 14:39:10] [safety_warp] [INFO] Target layers: all
+[2026-05-05 14:39:10] [safety_warp] [INFO] ======================================================================
+wandb: Currently logged in as: jeongeunn (jeongeunn-yonsei-university) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: WARNING Using a boolean value for 'reinit' is deprecated. Use 'return_previous' or 'finish_previous' instead.
+wandb: setting up run rfqs3lxp
+wandb: Tracking run with wandb version 0.23.0
+wandb: Run data is saved locally in /NHNHOME/WORKSPACE/26msit001_A/edge_ai_lab/minseong/Safety-WaRP-LLM/wandb/run-20260505_143911-rfqs3lxp
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run phase3_20260505_143910
+wandb: ⭐️ View project at https://wandb.ai/jeongeunn-yonsei-university/Safety-WaRP-LLM
+wandb: 🚀 View run at https://wandb.ai/jeongeunn-yonsei-university/Safety-WaRP-LLM/runs/rfqs3lxp
+[2026-05-05 14:39:12] [safety_warp] [INFO] ✓ W&B initialized: project=Safety-WaRP-LLM, run=phase3_20260505_143910
+[2026-05-05 14:39:12] [safety_warp] [INFO] ======================================================================
+[2026-05-05 14:39:12] [safety_warp] [INFO] Starting Phase 3: Incremental Learning (Fixed)
+[2026-05-05 14:39:12] [safety_warp] [INFO] Mode: non_freeze_warp
+[2026-05-05 14:39:12] [safety_warp] [INFO] ======================================================================
+[2026-05-05 14:39:13] [safety_warp] [INFO] Loading basis from /NHNHOME/WORKSPACE/26msit001_A/edge_ai_lab/minseong/minseong_results/checkpoints/Llama-2-13b-chat-hf/warp/checkpoints/llama2_13b_chat/phase1_20260505_002020/basis...
+[2026-05-05 14:40:07] [safety_warp] [INFO] ✓ Basis loaded: 200 combinations
+[2026-05-05 14:40:07] [safety_warp] [INFO] Loading masks from /NHNHOME/WORKSPACE/26msit001_A/edge_ai_lab/minseong/minseong_results/checkpoints/Llama-2-13b-chat-hf/warp/checkpoints/llama2_13b_chat/phase2_20260505_012224/checkpoints/masks...
+[2026-05-05 14:40:07] [safety_warp] [INFO] ✓ Mask metadata loaded:
+[2026-05-05 14:40:07] [safety_warp] [INFO]   - Keep ratio: 0.1
+[2026-05-05 14:41:03] [safety_warp] [INFO] ✓ Masks loaded: 200 combinations
+[2026-05-05 14:41:04] [safety_warp] [INFO] Loading Phase 0 model from wvnvwn/llama-2-13b-chat-hf-SSFT-lr5e-5...
+`torch_dtype` is deprecated! Use `dtype` instead!
+Loading checkpoint shards:   0%|          | 0/6 [00:00<?, ?it/s]Loading checkpoint shards:  17%|█▋        | 1/6 [00:00<00:02,  2.33it/s]Loading checkpoint shards:  33%|███▎      | 2/6 [00:00<00:01,  2.61it/s]Loading checkpoint shards:  50%|█████     | 3/6 [00:01<00:01,  2.71it/s]Loading checkpoint shards:  67%|██████▋   | 4/6 [00:01<00:00,  2.58it/s]Loading checkpoint shards:  83%|████████▎ | 5/6 [00:01<00:00,  2.52it/s]Loading checkpoint shards: 100%|██████████| 6/6 [00:02<00:00,  2.99it/s]Loading checkpoint shards: 100%|██████████| 6/6 [00:02<00:00,  2.75it/s]
+[2026-05-05 14:41:09] [safety_warp] [INFO] ✓ Model loaded
+[2026-05-05 14:41:09] [safety_warp] [INFO] Converting to WaRP modules...
+[2026-05-05 14:41:10] [safety_warp] [INFO] ✓ Tokenizer loaded
+[2026-05-05 14:41:10] [safety_warp] [INFO]   - Input formatting: chat template
+[2026-05-05 14:41:10] [safety_warp] [INFO] ======================================================================
+[2026-05-05 14:41:10] [safety_warp] [INFO] Setting up WaRP modules with basis and masks
+[2026-05-05 14:41:10] [safety_warp] [INFO] ======================================================================
+[2026-05-05 14:41:10] [safety_warp] [INFO] Layer 0 (attn_q):
+[2026-05-05 14:41:10] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:10] [safety_warp] [INFO]   ✓ mask: Frozen 2621440/26214400 (10.0%)
+[2026-05-05 14:41:10] [safety_warp] [INFO] Layer 0 (attn_k):
+[2026-05-05 14:41:10] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:10] [safety_warp] [INFO]   ✓ mask: Frozen 2621440/26214400 (10.0%)
+[2026-05-05 14:41:10] [safety_warp] [INFO] Layer 0 (attn_v):
+[2026-05-05 14:41:10] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:10] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:10] [safety_warp] [INFO] Layer 0 (ffn_down):
+[2026-05-05 14:41:10] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 13824])
+[2026-05-05 14:41:10] [safety_warp] [INFO]   ✓ mask: Frozen 7077889/70778880 (10.0%)
+[2026-05-05 14:41:10] [safety_warp] [INFO] Layer 0 (ffn_up):
+[2026-05-05 14:41:10] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([13824, 5120])
+[2026-05-05 14:41:10] [safety_warp] [INFO]   ✓ mask: Frozen 7077890/70778880 (10.0%)
+[2026-05-05 14:41:11] [safety_warp] [INFO] Layer 1 (attn_q):
+[2026-05-05 14:41:11] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:11] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:11] [safety_warp] [INFO] Layer 1 (attn_k):
+[2026-05-05 14:41:11] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:11] [safety_warp] [INFO]   ✓ mask: Frozen 2621440/26214400 (10.0%)
+[2026-05-05 14:41:11] [safety_warp] [INFO] Layer 1 (attn_v):
+[2026-05-05 14:41:11] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:11] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:11] [safety_warp] [INFO] Layer 1 (ffn_down):
+[2026-05-05 14:41:11] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 13824])
+[2026-05-05 14:41:11] [safety_warp] [INFO]   ✓ mask: Frozen 7077890/70778880 (10.0%)
+[2026-05-05 14:41:11] [safety_warp] [INFO] Layer 1 (ffn_up):
+[2026-05-05 14:41:11] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([13824, 5120])
+[2026-05-05 14:41:11] [safety_warp] [INFO]   ✓ mask: Frozen 7077890/70778880 (10.0%)
+[2026-05-05 14:41:11] [safety_warp] [INFO] Layer 2 (attn_q):
+[2026-05-05 14:41:11] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:11] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:11] [safety_warp] [INFO] Layer 2 (attn_k):
+[2026-05-05 14:41:11] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:11] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:11] [safety_warp] [INFO] Layer 2 (attn_v):
+[2026-05-05 14:41:11] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:11] [safety_warp] [INFO]   ✓ mask: Frozen 2621442/26214400 (10.0%)
+[2026-05-05 14:41:11] [safety_warp] [INFO] Layer 2 (ffn_down):
+[2026-05-05 14:41:11] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 13824])
+[2026-05-05 14:41:11] [safety_warp] [INFO]   ✓ mask: Frozen 7077890/70778880 (10.0%)
+[2026-05-05 14:41:11] [safety_warp] [INFO] Layer 2 (ffn_up):
+[2026-05-05 14:41:11] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([13824, 5120])
+[2026-05-05 14:41:11] [safety_warp] [INFO]   ✓ mask: Frozen 7077889/70778880 (10.0%)
+[2026-05-05 14:41:11] [safety_warp] [INFO] Layer 3 (attn_q):
+[2026-05-05 14:41:11] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:11] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:11] [safety_warp] [INFO] Layer 3 (attn_k):
+[2026-05-05 14:41:11] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:11] [safety_warp] [INFO]   ✓ mask: Frozen 2621440/26214400 (10.0%)
+[2026-05-05 14:41:11] [safety_warp] [INFO] Layer 3 (attn_v):
+[2026-05-05 14:41:11] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:11] [safety_warp] [INFO]   ✓ mask: Frozen 2621440/26214400 (10.0%)
+[2026-05-05 14:41:12] [safety_warp] [INFO] Layer 3 (ffn_down):
+[2026-05-05 14:41:12] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 13824])
+[2026-05-05 14:41:12] [safety_warp] [INFO]   ✓ mask: Frozen 7077889/70778880 (10.0%)
+[2026-05-05 14:41:12] [safety_warp] [INFO] Layer 3 (ffn_up):
+[2026-05-05 14:41:12] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([13824, 5120])
+[2026-05-05 14:41:12] [safety_warp] [INFO]   ✓ mask: Frozen 7077889/70778880 (10.0%)
+[2026-05-05 14:41:12] [safety_warp] [INFO] Layer 4 (attn_q):
+[2026-05-05 14:41:12] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:12] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:12] [safety_warp] [INFO] Layer 4 (attn_k):
+[2026-05-05 14:41:12] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:12] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:12] [safety_warp] [INFO] Layer 4 (attn_v):
+[2026-05-05 14:41:12] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:12] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:13] [safety_warp] [INFO] Layer 4 (ffn_down):
+[2026-05-05 14:41:13] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 13824])
+[2026-05-05 14:41:13] [safety_warp] [INFO]   ✓ mask: Frozen 7077890/70778880 (10.0%)
+[2026-05-05 14:41:13] [safety_warp] [INFO] Layer 4 (ffn_up):
+[2026-05-05 14:41:13] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([13824, 5120])
+[2026-05-05 14:41:13] [safety_warp] [INFO]   ✓ mask: Frozen 7077889/70778880 (10.0%)
+[2026-05-05 14:41:13] [safety_warp] [INFO] Layer 5 (attn_q):
+[2026-05-05 14:41:13] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:13] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:13] [safety_warp] [INFO] Layer 5 (attn_k):
+[2026-05-05 14:41:13] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:13] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:13] [safety_warp] [INFO] Layer 5 (attn_v):
+[2026-05-05 14:41:13] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:13] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:13] [safety_warp] [INFO] Layer 5 (ffn_down):
+[2026-05-05 14:41:13] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 13824])
+[2026-05-05 14:41:13] [safety_warp] [INFO]   ✓ mask: Frozen 7077890/70778880 (10.0%)
+[2026-05-05 14:41:13] [safety_warp] [INFO] Layer 5 (ffn_up):
+[2026-05-05 14:41:13] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([13824, 5120])
+[2026-05-05 14:41:13] [safety_warp] [INFO]   ✓ mask: Frozen 7077889/70778880 (10.0%)
+[2026-05-05 14:41:13] [safety_warp] [INFO] Layer 6 (attn_q):
+[2026-05-05 14:41:13] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:13] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:13] [safety_warp] [INFO] Layer 6 (attn_k):
+[2026-05-05 14:41:13] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:13] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:13] [safety_warp] [INFO] Layer 6 (attn_v):
+[2026-05-05 14:41:13] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:13] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:13] [safety_warp] [INFO] Layer 6 (ffn_down):
+[2026-05-05 14:41:13] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 13824])
+[2026-05-05 14:41:13] [safety_warp] [INFO]   ✓ mask: Frozen 7077889/70778880 (10.0%)
+[2026-05-05 14:41:13] [safety_warp] [INFO] Layer 6 (ffn_up):
+[2026-05-05 14:41:13] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([13824, 5120])
+[2026-05-05 14:41:13] [safety_warp] [INFO]   ✓ mask: Frozen 7077889/70778880 (10.0%)
+[2026-05-05 14:41:13] [safety_warp] [INFO] Layer 7 (attn_q):
+[2026-05-05 14:41:13] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:13] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:14] [safety_warp] [INFO] Layer 7 (attn_k):
+[2026-05-05 14:41:14] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:14] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:14] [safety_warp] [INFO] Layer 7 (attn_v):
+[2026-05-05 14:41:14] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:14] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:14] [safety_warp] [INFO] Layer 7 (ffn_down):
+[2026-05-05 14:41:14] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 13824])
+[2026-05-05 14:41:14] [safety_warp] [INFO]   ✓ mask: Frozen 7077889/70778880 (10.0%)
+[2026-05-05 14:41:14] [safety_warp] [INFO] Layer 7 (ffn_up):
+[2026-05-05 14:41:14] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([13824, 5120])
+[2026-05-05 14:41:14] [safety_warp] [INFO]   ✓ mask: Frozen 7077889/70778880 (10.0%)
+[2026-05-05 14:41:14] [safety_warp] [INFO] Layer 8 (attn_q):
+[2026-05-05 14:41:14] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:14] [safety_warp] [INFO]   ✓ mask: Frozen 2621440/26214400 (10.0%)
+[2026-05-05 14:41:14] [safety_warp] [INFO] Layer 8 (attn_k):
+[2026-05-05 14:41:14] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:14] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:14] [safety_warp] [INFO] Layer 8 (attn_v):
+[2026-05-05 14:41:14] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:14] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:14] [safety_warp] [INFO] Layer 8 (ffn_down):
+[2026-05-05 14:41:14] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 13824])
+[2026-05-05 14:41:14] [safety_warp] [INFO]   ✓ mask: Frozen 7077890/70778880 (10.0%)
+[2026-05-05 14:41:14] [safety_warp] [INFO] Layer 8 (ffn_up):
+[2026-05-05 14:41:14] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([13824, 5120])
+[2026-05-05 14:41:14] [safety_warp] [INFO]   ✓ mask: Frozen 7077889/70778880 (10.0%)
+[2026-05-05 14:41:14] [safety_warp] [INFO] Layer 9 (attn_q):
+[2026-05-05 14:41:14] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:14] [safety_warp] [INFO]   ✓ mask: Frozen 2621440/26214400 (10.0%)
+[2026-05-05 14:41:14] [safety_warp] [INFO] Layer 9 (attn_k):
+[2026-05-05 14:41:14] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:14] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:14] [safety_warp] [INFO] Layer 9 (attn_v):
+[2026-05-05 14:41:14] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:14] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:15] [safety_warp] [INFO] Layer 9 (ffn_down):
+[2026-05-05 14:41:15] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 13824])
+[2026-05-05 14:41:15] [safety_warp] [INFO]   ✓ mask: Frozen 7077889/70778880 (10.0%)
+[2026-05-05 14:41:15] [safety_warp] [INFO] Layer 9 (ffn_up):
+[2026-05-05 14:41:15] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([13824, 5120])
+[2026-05-05 14:41:15] [safety_warp] [INFO]   ✓ mask: Frozen 7077890/70778880 (10.0%)
+[2026-05-05 14:41:15] [safety_warp] [INFO] Layer 10 (attn_q):
+[2026-05-05 14:41:15] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:15] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:15] [safety_warp] [INFO] Layer 10 (attn_k):
+[2026-05-05 14:41:15] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:15] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:15] [safety_warp] [INFO] Layer 10 (attn_v):
+[2026-05-05 14:41:15] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:15] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:15] [safety_warp] [INFO] Layer 10 (ffn_down):
+[2026-05-05 14:41:15] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 13824])
+[2026-05-05 14:41:15] [safety_warp] [INFO]   ✓ mask: Frozen 7077889/70778880 (10.0%)
+[2026-05-05 14:41:15] [safety_warp] [INFO] Layer 10 (ffn_up):
+[2026-05-05 14:41:15] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([13824, 5120])
+[2026-05-05 14:41:15] [safety_warp] [INFO]   ✓ mask: Frozen 7077890/70778880 (10.0%)
+[2026-05-05 14:41:15] [safety_warp] [INFO] Layer 11 (attn_q):
+[2026-05-05 14:41:15] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:15] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:15] [safety_warp] [INFO] Layer 11 (attn_k):
+[2026-05-05 14:41:15] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:15] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:15] [safety_warp] [INFO] Layer 11 (attn_v):
+[2026-05-05 14:41:15] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:15] [safety_warp] [INFO]   ✓ mask: Frozen 2621440/26214400 (10.0%)
+[2026-05-05 14:41:15] [safety_warp] [INFO] Layer 11 (ffn_down):
+[2026-05-05 14:41:15] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 13824])
+[2026-05-05 14:41:15] [safety_warp] [INFO]   ✓ mask: Frozen 7077890/70778880 (10.0%)
+[2026-05-05 14:41:16] [safety_warp] [INFO] Layer 11 (ffn_up):
+[2026-05-05 14:41:16] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([13824, 5120])
+[2026-05-05 14:41:16] [safety_warp] [INFO]   ✓ mask: Frozen 7077890/70778880 (10.0%)
+[2026-05-05 14:41:16] [safety_warp] [INFO] Layer 12 (attn_q):
+[2026-05-05 14:41:16] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:16] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:16] [safety_warp] [INFO] Layer 12 (attn_k):
+[2026-05-05 14:41:16] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:16] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:16] [safety_warp] [INFO] Layer 12 (attn_v):
+[2026-05-05 14:41:16] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:16] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:16] [safety_warp] [INFO] Layer 12 (ffn_down):
+[2026-05-05 14:41:16] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 13824])
+[2026-05-05 14:41:16] [safety_warp] [INFO]   ✓ mask: Frozen 7077890/70778880 (10.0%)
+[2026-05-05 14:41:16] [safety_warp] [INFO] Layer 12 (ffn_up):
+[2026-05-05 14:41:16] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([13824, 5120])
+[2026-05-05 14:41:16] [safety_warp] [INFO]   ✓ mask: Frozen 7077891/70778880 (10.0%)
+[2026-05-05 14:41:16] [safety_warp] [INFO] Layer 13 (attn_q):
+[2026-05-05 14:41:16] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:16] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:16] [safety_warp] [INFO] Layer 13 (attn_k):
+[2026-05-05 14:41:16] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:16] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:16] [safety_warp] [INFO] Layer 13 (attn_v):
+[2026-05-05 14:41:16] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:16] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:16] [safety_warp] [INFO] Layer 13 (ffn_down):
+[2026-05-05 14:41:16] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 13824])
+[2026-05-05 14:41:16] [safety_warp] [INFO]   ✓ mask: Frozen 7077889/70778880 (10.0%)
+[2026-05-05 14:41:16] [safety_warp] [INFO] Layer 13 (ffn_up):
+[2026-05-05 14:41:16] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([13824, 5120])
+[2026-05-05 14:41:16] [safety_warp] [INFO]   ✓ mask: Frozen 7077891/70778880 (10.0%)
+[2026-05-05 14:41:16] [safety_warp] [INFO] Layer 14 (attn_q):
+[2026-05-05 14:41:16] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:16] [safety_warp] [INFO]   ✓ mask: Frozen 2621440/26214400 (10.0%)
+[2026-05-05 14:41:17] [safety_warp] [INFO] Layer 14 (attn_k):
+[2026-05-05 14:41:17] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:17] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:17] [safety_warp] [INFO] Layer 14 (attn_v):
+[2026-05-05 14:41:17] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:17] [safety_warp] [INFO]   ✓ mask: Frozen 2621440/26214400 (10.0%)
+[2026-05-05 14:41:17] [safety_warp] [INFO] Layer 14 (ffn_down):
+[2026-05-05 14:41:17] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 13824])
+[2026-05-05 14:41:17] [safety_warp] [INFO]   ✓ mask: Frozen 7077889/70778880 (10.0%)
+[2026-05-05 14:41:17] [safety_warp] [INFO] Layer 14 (ffn_up):
+[2026-05-05 14:41:17] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([13824, 5120])
+[2026-05-05 14:41:17] [safety_warp] [INFO]   ✓ mask: Frozen 7077889/70778880 (10.0%)
+[2026-05-05 14:41:17] [safety_warp] [INFO] Layer 15 (attn_q):
+[2026-05-05 14:41:17] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:17] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:17] [safety_warp] [INFO] Layer 15 (attn_k):
+[2026-05-05 14:41:17] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:17] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:17] [safety_warp] [INFO] Layer 15 (attn_v):
+[2026-05-05 14:41:17] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:17] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:17] [safety_warp] [INFO] Layer 15 (ffn_down):
+[2026-05-05 14:41:17] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 13824])
+[2026-05-05 14:41:17] [safety_warp] [INFO]   ✓ mask: Frozen 7077889/70778880 (10.0%)
+[2026-05-05 14:41:17] [safety_warp] [INFO] Layer 15 (ffn_up):
+[2026-05-05 14:41:17] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([13824, 5120])
+[2026-05-05 14:41:17] [safety_warp] [INFO]   ✓ mask: Frozen 7077890/70778880 (10.0%)
+[2026-05-05 14:41:17] [safety_warp] [INFO] Layer 16 (attn_q):
+[2026-05-05 14:41:17] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:17] [safety_warp] [INFO]   ✓ mask: Frozen 2621440/26214400 (10.0%)
+[2026-05-05 14:41:17] [safety_warp] [INFO] Layer 16 (attn_k):
+[2026-05-05 14:41:17] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:17] [safety_warp] [INFO]   ✓ mask: Frozen 2621442/26214400 (10.0%)
+[2026-05-05 14:41:17] [safety_warp] [INFO] Layer 16 (attn_v):
+[2026-05-05 14:41:17] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:17] [safety_warp] [INFO]   ✓ mask: Frozen 2621440/26214400 (10.0%)
+[2026-05-05 14:41:18] [safety_warp] [INFO] Layer 16 (ffn_down):
+[2026-05-05 14:41:18] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 13824])
+[2026-05-05 14:41:18] [safety_warp] [INFO]   ✓ mask: Frozen 7077888/70778880 (10.0%)
+[2026-05-05 14:41:18] [safety_warp] [INFO] Layer 16 (ffn_up):
+[2026-05-05 14:41:18] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([13824, 5120])
+[2026-05-05 14:41:18] [safety_warp] [INFO]   ✓ mask: Frozen 7077889/70778880 (10.0%)
+[2026-05-05 14:41:18] [safety_warp] [INFO] Layer 17 (attn_q):
+[2026-05-05 14:41:18] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:18] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:18] [safety_warp] [INFO] Layer 17 (attn_k):
+[2026-05-05 14:41:18] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:18] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:18] [safety_warp] [INFO] Layer 17 (attn_v):
+[2026-05-05 14:41:18] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:18] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:18] [safety_warp] [INFO] Layer 17 (ffn_down):
+[2026-05-05 14:41:18] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 13824])
+[2026-05-05 14:41:18] [safety_warp] [INFO]   ✓ mask: Frozen 7077890/70778880 (10.0%)
+[2026-05-05 14:41:18] [safety_warp] [INFO] Layer 17 (ffn_up):
+[2026-05-05 14:41:18] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([13824, 5120])
+[2026-05-05 14:41:18] [safety_warp] [INFO]   ✓ mask: Frozen 7077889/70778880 (10.0%)
+[2026-05-05 14:41:18] [safety_warp] [INFO] Layer 18 (attn_q):
+[2026-05-05 14:41:18] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:18] [safety_warp] [INFO]   ✓ mask: Frozen 2621442/26214400 (10.0%)
+[2026-05-05 14:41:18] [safety_warp] [INFO] Layer 18 (attn_k):
+[2026-05-05 14:41:18] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:18] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:18] [safety_warp] [INFO] Layer 18 (attn_v):
+[2026-05-05 14:41:18] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:18] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:19] [safety_warp] [INFO] Layer 18 (ffn_down):
+[2026-05-05 14:41:19] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 13824])
+[2026-05-05 14:41:19] [safety_warp] [INFO]   ✓ mask: Frozen 7077889/70778880 (10.0%)
+[2026-05-05 14:41:19] [safety_warp] [INFO] Layer 18 (ffn_up):
+[2026-05-05 14:41:19] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([13824, 5120])
+[2026-05-05 14:41:19] [safety_warp] [INFO]   ✓ mask: Frozen 7077889/70778880 (10.0%)
+[2026-05-05 14:41:19] [safety_warp] [INFO] Layer 19 (attn_q):
+[2026-05-05 14:41:19] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:19] [safety_warp] [INFO]   ✓ mask: Frozen 2621440/26214400 (10.0%)
+[2026-05-05 14:41:19] [safety_warp] [INFO] Layer 19 (attn_k):
+[2026-05-05 14:41:19] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:19] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:19] [safety_warp] [INFO] Layer 19 (attn_v):
+[2026-05-05 14:41:19] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:19] [safety_warp] [INFO]   ✓ mask: Frozen 2621442/26214400 (10.0%)
+[2026-05-05 14:41:19] [safety_warp] [INFO] Layer 19 (ffn_down):
+[2026-05-05 14:41:19] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 13824])
+[2026-05-05 14:41:19] [safety_warp] [INFO]   ✓ mask: Frozen 7077889/70778880 (10.0%)
+[2026-05-05 14:41:19] [safety_warp] [INFO] Layer 19 (ffn_up):
+[2026-05-05 14:41:19] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([13824, 5120])
+[2026-05-05 14:41:19] [safety_warp] [INFO]   ✓ mask: Frozen 7077889/70778880 (10.0%)
+[2026-05-05 14:41:19] [safety_warp] [INFO] Layer 20 (attn_q):
+[2026-05-05 14:41:19] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:19] [safety_warp] [INFO]   ✓ mask: Frozen 2621440/26214400 (10.0%)
+[2026-05-05 14:41:19] [safety_warp] [INFO] Layer 20 (attn_k):
+[2026-05-05 14:41:19] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:19] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:19] [safety_warp] [INFO] Layer 20 (attn_v):
+[2026-05-05 14:41:19] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:19] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:20] [safety_warp] [INFO] Layer 20 (ffn_down):
+[2026-05-05 14:41:20] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 13824])
+[2026-05-05 14:41:20] [safety_warp] [INFO]   ✓ mask: Frozen 7077889/70778880 (10.0%)
+[2026-05-05 14:41:20] [safety_warp] [INFO] Layer 20 (ffn_up):
+[2026-05-05 14:41:20] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([13824, 5120])
+[2026-05-05 14:41:20] [safety_warp] [INFO]   ✓ mask: Frozen 7077889/70778880 (10.0%)
+[2026-05-05 14:41:20] [safety_warp] [INFO] Layer 21 (attn_q):
+[2026-05-05 14:41:20] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:20] [safety_warp] [INFO]   ✓ mask: Frozen 2621440/26214400 (10.0%)
+[2026-05-05 14:41:20] [safety_warp] [INFO] Layer 21 (attn_k):
+[2026-05-05 14:41:20] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:20] [safety_warp] [INFO]   ✓ mask: Frozen 2621440/26214400 (10.0%)
+[2026-05-05 14:41:20] [safety_warp] [INFO] Layer 21 (attn_v):
+[2026-05-05 14:41:20] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:20] [safety_warp] [INFO]   ✓ mask: Frozen 2621442/26214400 (10.0%)
+[2026-05-05 14:41:20] [safety_warp] [INFO] Layer 21 (ffn_down):
+[2026-05-05 14:41:20] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 13824])
+[2026-05-05 14:41:20] [safety_warp] [INFO]   ✓ mask: Frozen 7077889/70778880 (10.0%)
+[2026-05-05 14:41:20] [safety_warp] [INFO] Layer 21 (ffn_up):
+[2026-05-05 14:41:20] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([13824, 5120])
+[2026-05-05 14:41:20] [safety_warp] [INFO]   ✓ mask: Frozen 7077891/70778880 (10.0%)
+[2026-05-05 14:41:20] [safety_warp] [INFO] Layer 22 (attn_q):
+[2026-05-05 14:41:20] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:20] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:20] [safety_warp] [INFO] Layer 22 (attn_k):
+[2026-05-05 14:41:20] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:20] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:20] [safety_warp] [INFO] Layer 22 (attn_v):
+[2026-05-05 14:41:20] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:20] [safety_warp] [INFO]   ✓ mask: Frozen 2621440/26214400 (10.0%)
+[2026-05-05 14:41:20] [safety_warp] [INFO] Layer 22 (ffn_down):
+[2026-05-05 14:41:20] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 13824])
+[2026-05-05 14:41:20] [safety_warp] [INFO]   ✓ mask: Frozen 7077890/70778880 (10.0%)
+[2026-05-05 14:41:21] [safety_warp] [INFO] Layer 22 (ffn_up):
+[2026-05-05 14:41:21] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([13824, 5120])
+[2026-05-05 14:41:21] [safety_warp] [INFO]   ✓ mask: Frozen 7077889/70778880 (10.0%)
+[2026-05-05 14:41:21] [safety_warp] [INFO] Layer 23 (attn_q):
+[2026-05-05 14:41:21] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:21] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:21] [safety_warp] [INFO] Layer 23 (attn_k):
+[2026-05-05 14:41:21] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:21] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:21] [safety_warp] [INFO] Layer 23 (attn_v):
+[2026-05-05 14:41:21] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:21] [safety_warp] [INFO]   ✓ mask: Frozen 2621440/26214400 (10.0%)
+[2026-05-05 14:41:21] [safety_warp] [INFO] Layer 23 (ffn_down):
+[2026-05-05 14:41:21] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 13824])
+[2026-05-05 14:41:21] [safety_warp] [INFO]   ✓ mask: Frozen 7077889/70778880 (10.0%)
+[2026-05-05 14:41:21] [safety_warp] [INFO] Layer 23 (ffn_up):
+[2026-05-05 14:41:21] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([13824, 5120])
+[2026-05-05 14:41:21] [safety_warp] [INFO]   ✓ mask: Frozen 7077889/70778880 (10.0%)
+[2026-05-05 14:41:21] [safety_warp] [INFO] Layer 24 (attn_q):
+[2026-05-05 14:41:21] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:21] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:21] [safety_warp] [INFO] Layer 24 (attn_k):
+[2026-05-05 14:41:21] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:21] [safety_warp] [INFO]   ✓ mask: Frozen 2621440/26214400 (10.0%)
+[2026-05-05 14:41:21] [safety_warp] [INFO] Layer 24 (attn_v):
+[2026-05-05 14:41:21] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:21] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:22] [safety_warp] [INFO] Layer 24 (ffn_down):
+[2026-05-05 14:41:22] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 13824])
+[2026-05-05 14:41:22] [safety_warp] [INFO]   ✓ mask: Frozen 7077889/70778880 (10.0%)
+[2026-05-05 14:41:22] [safety_warp] [INFO] Layer 24 (ffn_up):
+[2026-05-05 14:41:22] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([13824, 5120])
+[2026-05-05 14:41:22] [safety_warp] [INFO]   ✓ mask: Frozen 7077890/70778880 (10.0%)
+[2026-05-05 14:41:22] [safety_warp] [INFO] Layer 25 (attn_q):
+[2026-05-05 14:41:22] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:22] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:22] [safety_warp] [INFO] Layer 25 (attn_k):
+[2026-05-05 14:41:22] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:22] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:22] [safety_warp] [INFO] Layer 25 (attn_v):
+[2026-05-05 14:41:22] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:22] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:22] [safety_warp] [INFO] Layer 25 (ffn_down):
+[2026-05-05 14:41:22] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 13824])
+[2026-05-05 14:41:22] [safety_warp] [INFO]   ✓ mask: Frozen 7077889/70778880 (10.0%)
+[2026-05-05 14:41:22] [safety_warp] [INFO] Layer 25 (ffn_up):
+[2026-05-05 14:41:22] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([13824, 5120])
+[2026-05-05 14:41:22] [safety_warp] [INFO]   ✓ mask: Frozen 7077889/70778880 (10.0%)
+[2026-05-05 14:41:22] [safety_warp] [INFO] Layer 26 (attn_q):
+[2026-05-05 14:41:22] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:22] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:22] [safety_warp] [INFO] Layer 26 (attn_k):
+[2026-05-05 14:41:22] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:22] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:22] [safety_warp] [INFO] Layer 26 (attn_v):
+[2026-05-05 14:41:22] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:22] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:23] [safety_warp] [INFO] Layer 26 (ffn_down):
+[2026-05-05 14:41:23] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 13824])
+[2026-05-05 14:41:23] [safety_warp] [INFO]   ✓ mask: Frozen 7077889/70778880 (10.0%)
+[2026-05-05 14:41:23] [safety_warp] [INFO] Layer 26 (ffn_up):
+[2026-05-05 14:41:23] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([13824, 5120])
+[2026-05-05 14:41:23] [safety_warp] [INFO]   ✓ mask: Frozen 7077889/70778880 (10.0%)
+[2026-05-05 14:41:23] [safety_warp] [INFO] Layer 27 (attn_q):
+[2026-05-05 14:41:23] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:23] [safety_warp] [INFO]   ✓ mask: Frozen 2621440/26214400 (10.0%)
+[2026-05-05 14:41:23] [safety_warp] [INFO] Layer 27 (attn_k):
+[2026-05-05 14:41:23] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:23] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:23] [safety_warp] [INFO] Layer 27 (attn_v):
+[2026-05-05 14:41:23] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:23] [safety_warp] [INFO]   ✓ mask: Frozen 2621442/26214400 (10.0%)
+[2026-05-05 14:41:23] [safety_warp] [INFO] Layer 27 (ffn_down):
+[2026-05-05 14:41:23] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 13824])
+[2026-05-05 14:41:23] [safety_warp] [INFO]   ✓ mask: Frozen 7077890/70778880 (10.0%)
+[2026-05-05 14:41:23] [safety_warp] [INFO] Layer 27 (ffn_up):
+[2026-05-05 14:41:23] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([13824, 5120])
+[2026-05-05 14:41:23] [safety_warp] [INFO]   ✓ mask: Frozen 7077893/70778880 (10.0%)
+[2026-05-05 14:41:23] [safety_warp] [INFO] Layer 28 (attn_q):
+[2026-05-05 14:41:23] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:23] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:23] [safety_warp] [INFO] Layer 28 (attn_k):
+[2026-05-05 14:41:23] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:23] [safety_warp] [INFO]   ✓ mask: Frozen 2621440/26214400 (10.0%)
+[2026-05-05 14:41:23] [safety_warp] [INFO] Layer 28 (attn_v):
+[2026-05-05 14:41:23] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:23] [safety_warp] [INFO]   ✓ mask: Frozen 2621442/26214400 (10.0%)
+[2026-05-05 14:41:24] [safety_warp] [INFO] Layer 28 (ffn_down):
+[2026-05-05 14:41:24] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 13824])
+[2026-05-05 14:41:24] [safety_warp] [INFO]   ✓ mask: Frozen 7077889/70778880 (10.0%)
+[2026-05-05 14:41:24] [safety_warp] [INFO] Layer 28 (ffn_up):
+[2026-05-05 14:41:24] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([13824, 5120])
+[2026-05-05 14:41:24] [safety_warp] [INFO]   ✓ mask: Frozen 7077889/70778880 (10.0%)
+[2026-05-05 14:41:24] [safety_warp] [INFO] Layer 29 (attn_q):
+[2026-05-05 14:41:24] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:24] [safety_warp] [INFO]   ✓ mask: Frozen 2621440/26214400 (10.0%)
+[2026-05-05 14:41:24] [safety_warp] [INFO] Layer 29 (attn_k):
+[2026-05-05 14:41:24] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:24] [safety_warp] [INFO]   ✓ mask: Frozen 2621440/26214400 (10.0%)
+[2026-05-05 14:41:24] [safety_warp] [INFO] Layer 29 (attn_v):
+[2026-05-05 14:41:24] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:24] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:24] [safety_warp] [INFO] Layer 29 (ffn_down):
+[2026-05-05 14:41:24] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 13824])
+[2026-05-05 14:41:24] [safety_warp] [INFO]   ✓ mask: Frozen 7077890/70778880 (10.0%)
+[2026-05-05 14:41:24] [safety_warp] [INFO] Layer 29 (ffn_up):
+[2026-05-05 14:41:24] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([13824, 5120])
+[2026-05-05 14:41:24] [safety_warp] [INFO]   ✓ mask: Frozen 7077889/70778880 (10.0%)
+[2026-05-05 14:41:24] [safety_warp] [INFO] Layer 30 (attn_q):
+[2026-05-05 14:41:24] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:24] [safety_warp] [INFO]   ✓ mask: Frozen 2621442/26214400 (10.0%)
+[2026-05-05 14:41:24] [safety_warp] [INFO] Layer 30 (attn_k):
+[2026-05-05 14:41:24] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:24] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:24] [safety_warp] [INFO] Layer 30 (attn_v):
+[2026-05-05 14:41:24] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:24] [safety_warp] [INFO]   ✓ mask: Frozen 2621442/26214400 (10.0%)
+[2026-05-05 14:41:25] [safety_warp] [INFO] Layer 30 (ffn_down):
+[2026-05-05 14:41:25] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 13824])
+[2026-05-05 14:41:25] [safety_warp] [INFO]   ✓ mask: Frozen 7077891/70778880 (10.0%)
+[2026-05-05 14:41:25] [safety_warp] [INFO] Layer 30 (ffn_up):
+[2026-05-05 14:41:25] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([13824, 5120])
+[2026-05-05 14:41:25] [safety_warp] [INFO]   ✓ mask: Frozen 7077890/70778880 (10.0%)
+[2026-05-05 14:41:25] [safety_warp] [INFO] Layer 31 (attn_q):
+[2026-05-05 14:41:25] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:25] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:25] [safety_warp] [INFO] Layer 31 (attn_k):
+[2026-05-05 14:41:25] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:25] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:25] [safety_warp] [INFO] Layer 31 (attn_v):
+[2026-05-05 14:41:25] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:25] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:25] [safety_warp] [INFO] Layer 31 (ffn_down):
+[2026-05-05 14:41:25] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 13824])
+[2026-05-05 14:41:25] [safety_warp] [INFO]   ✓ mask: Frozen 7077890/70778880 (10.0%)
+[2026-05-05 14:41:25] [safety_warp] [INFO] Layer 31 (ffn_up):
+[2026-05-05 14:41:25] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([13824, 5120])
+[2026-05-05 14:41:25] [safety_warp] [INFO]   ✓ mask: Frozen 7077889/70778880 (10.0%)
+[2026-05-05 14:41:25] [safety_warp] [INFO] Layer 32 (attn_q):
+[2026-05-05 14:41:25] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:25] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:26] [safety_warp] [INFO] Layer 32 (attn_k):
+[2026-05-05 14:41:26] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:26] [safety_warp] [INFO]   ✓ mask: Frozen 2621440/26214400 (10.0%)
+[2026-05-05 14:41:26] [safety_warp] [INFO] Layer 32 (attn_v):
+[2026-05-05 14:41:26] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:26] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:26] [safety_warp] [INFO] Layer 32 (ffn_down):
+[2026-05-05 14:41:26] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 13824])
+[2026-05-05 14:41:26] [safety_warp] [INFO]   ✓ mask: Frozen 7077889/70778880 (10.0%)
+[2026-05-05 14:41:26] [safety_warp] [INFO] Layer 32 (ffn_up):
+[2026-05-05 14:41:26] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([13824, 5120])
+[2026-05-05 14:41:26] [safety_warp] [INFO]   ✓ mask: Frozen 7077890/70778880 (10.0%)
+[2026-05-05 14:41:26] [safety_warp] [INFO] Layer 33 (attn_q):
+[2026-05-05 14:41:26] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:26] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:26] [safety_warp] [INFO] Layer 33 (attn_k):
+[2026-05-05 14:41:26] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:26] [safety_warp] [INFO]   ✓ mask: Frozen 2621440/26214400 (10.0%)
+[2026-05-05 14:41:26] [safety_warp] [INFO] Layer 33 (attn_v):
+[2026-05-05 14:41:26] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:26] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:27] [safety_warp] [INFO] Layer 33 (ffn_down):
+[2026-05-05 14:41:27] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 13824])
+[2026-05-05 14:41:27] [safety_warp] [INFO]   ✓ mask: Frozen 7077889/70778880 (10.0%)
+[2026-05-05 14:41:27] [safety_warp] [INFO] Layer 33 (ffn_up):
+[2026-05-05 14:41:27] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([13824, 5120])
+[2026-05-05 14:41:27] [safety_warp] [INFO]   ✓ mask: Frozen 7077890/70778880 (10.0%)
+[2026-05-05 14:41:27] [safety_warp] [INFO] Layer 34 (attn_q):
+[2026-05-05 14:41:27] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:27] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:27] [safety_warp] [INFO] Layer 34 (attn_k):
+[2026-05-05 14:41:27] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:27] [safety_warp] [INFO]   ✓ mask: Frozen 2621440/26214400 (10.0%)
+[2026-05-05 14:41:27] [safety_warp] [INFO] Layer 34 (attn_v):
+[2026-05-05 14:41:27] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:27] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:27] [safety_warp] [INFO] Layer 34 (ffn_down):
+[2026-05-05 14:41:27] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 13824])
+[2026-05-05 14:41:27] [safety_warp] [INFO]   ✓ mask: Frozen 7077891/70778880 (10.0%)
+[2026-05-05 14:41:27] [safety_warp] [INFO] Layer 34 (ffn_up):
+[2026-05-05 14:41:27] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([13824, 5120])
+[2026-05-05 14:41:27] [safety_warp] [INFO]   ✓ mask: Frozen 7077889/70778880 (10.0%)
+[2026-05-05 14:41:27] [safety_warp] [INFO] Layer 35 (attn_q):
+[2026-05-05 14:41:27] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:27] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:27] [safety_warp] [INFO] Layer 35 (attn_k):
+[2026-05-05 14:41:27] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:27] [safety_warp] [INFO]   ✓ mask: Frozen 2621440/26214400 (10.0%)
+[2026-05-05 14:41:27] [safety_warp] [INFO] Layer 35 (attn_v):
+[2026-05-05 14:41:27] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:27] [safety_warp] [INFO]   ✓ mask: Frozen 2621440/26214400 (10.0%)
+[2026-05-05 14:41:28] [safety_warp] [INFO] Layer 35 (ffn_down):
+[2026-05-05 14:41:28] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 13824])
+[2026-05-05 14:41:28] [safety_warp] [INFO]   ✓ mask: Frozen 7077890/70778880 (10.0%)
+[2026-05-05 14:41:28] [safety_warp] [INFO] Layer 35 (ffn_up):
+[2026-05-05 14:41:28] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([13824, 5120])
+[2026-05-05 14:41:28] [safety_warp] [INFO]   ✓ mask: Frozen 7077889/70778880 (10.0%)
+[2026-05-05 14:41:28] [safety_warp] [INFO] Layer 36 (attn_q):
+[2026-05-05 14:41:28] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:28] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:28] [safety_warp] [INFO] Layer 36 (attn_k):
+[2026-05-05 14:41:28] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:28] [safety_warp] [INFO]   ✓ mask: Frozen 2621442/26214400 (10.0%)
+[2026-05-05 14:41:28] [safety_warp] [INFO] Layer 36 (attn_v):
+[2026-05-05 14:41:28] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:28] [safety_warp] [INFO]   ✓ mask: Frozen 2621442/26214400 (10.0%)
+[2026-05-05 14:41:28] [safety_warp] [INFO] Layer 36 (ffn_down):
+[2026-05-05 14:41:28] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 13824])
+[2026-05-05 14:41:28] [safety_warp] [INFO]   ✓ mask: Frozen 7077891/70778880 (10.0%)
+[2026-05-05 14:41:28] [safety_warp] [INFO] Layer 36 (ffn_up):
+[2026-05-05 14:41:28] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([13824, 5120])
+[2026-05-05 14:41:28] [safety_warp] [INFO]   ✓ mask: Frozen 7077889/70778880 (10.0%)
+[2026-05-05 14:41:28] [safety_warp] [INFO] Layer 37 (attn_q):
+[2026-05-05 14:41:28] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:28] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:28] [safety_warp] [INFO] Layer 37 (attn_k):
+[2026-05-05 14:41:28] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:28] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:28] [safety_warp] [INFO] Layer 37 (attn_v):
+[2026-05-05 14:41:28] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:28] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:29] [safety_warp] [INFO] Layer 37 (ffn_down):
+[2026-05-05 14:41:29] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 13824])
+[2026-05-05 14:41:29] [safety_warp] [INFO]   ✓ mask: Frozen 7077889/70778880 (10.0%)
+[2026-05-05 14:41:29] [safety_warp] [INFO] Layer 37 (ffn_up):
+[2026-05-05 14:41:29] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([13824, 5120])
+[2026-05-05 14:41:29] [safety_warp] [INFO]   ✓ mask: Frozen 7077889/70778880 (10.0%)
+[2026-05-05 14:41:29] [safety_warp] [INFO] Layer 38 (attn_q):
+[2026-05-05 14:41:29] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:29] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:29] [safety_warp] [INFO] Layer 38 (attn_k):
+[2026-05-05 14:41:29] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:29] [safety_warp] [INFO]   ✓ mask: Frozen 2621443/26214400 (10.0%)
+[2026-05-05 14:41:29] [safety_warp] [INFO] Layer 38 (attn_v):
+[2026-05-05 14:41:29] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:29] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:29] [safety_warp] [INFO] Layer 38 (ffn_down):
+[2026-05-05 14:41:29] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 13824])
+[2026-05-05 14:41:29] [safety_warp] [INFO]   ✓ mask: Frozen 7077889/70778880 (10.0%)
+[2026-05-05 14:41:30] [safety_warp] [INFO] Layer 38 (ffn_up):
+[2026-05-05 14:41:30] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([13824, 5120])
+[2026-05-05 14:41:30] [safety_warp] [INFO]   ✓ mask: Frozen 7077890/70778880 (10.0%)
+[2026-05-05 14:41:30] [safety_warp] [INFO] Layer 39 (attn_q):
+[2026-05-05 14:41:30] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:30] [safety_warp] [INFO]   ✓ mask: Frozen 2621442/26214400 (10.0%)
+[2026-05-05 14:41:30] [safety_warp] [INFO] Layer 39 (attn_k):
+[2026-05-05 14:41:30] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:30] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:30] [safety_warp] [INFO] Layer 39 (attn_v):
+[2026-05-05 14:41:30] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 5120])
+[2026-05-05 14:41:30] [safety_warp] [INFO]   ✓ mask: Frozen 2621441/26214400 (10.0%)
+[2026-05-05 14:41:30] [safety_warp] [INFO] Layer 39 (ffn_down):
+[2026-05-05 14:41:30] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([5120, 13824])
+[2026-05-05 14:41:30] [safety_warp] [INFO]   ✓ mask: Frozen 7077893/70778880 (10.0%)
+[2026-05-05 14:41:30] [safety_warp] [INFO] Layer 39 (ffn_up):
+[2026-05-05 14:41:30] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([13824, 5120])
+[2026-05-05 14:41:30] [safety_warp] [INFO]   ✓ mask: Frozen 7077889/70778880 (10.0%)
+[2026-05-05 14:41:30] [safety_warp] [INFO] ======================================================================
+[2026-05-05 14:41:30] [safety_warp] [INFO] ✓ Setup completed: 200 WaRP modules
+[2026-05-05 14:41:30] [safety_warp] [INFO] ======================================================================
+[2026-05-05 14:41:30] [safety_warp] [INFO] Forward에서 자동으로 마스킹 적용:
+[2026-05-05 14:41:30] [safety_warp] [INFO]   W = V @ (basis_coeff * mask).detach() + basis_coeff * (1-mask) @ U
+[2026-05-05 14:41:30] [safety_warp] [INFO]   mask=1: gradient 차단 (동결)
+[2026-05-05 14:41:30] [safety_warp] [INFO]   mask=0: gradient 흐름 (학습 가능)
+[2026-05-05 14:41:30] [safety_warp] [INFO] ======================================================================
+[2026-05-05 14:41:30] [safety_warp] [INFO] [WaRP-Monitor] verification probes registered
+[2026-05-05 14:41:30] [safety_warp] [INFO]   - modules: 200
+[2026-05-05 14:41:30] [safety_warp] [INFO]   - masked probes: 800
+[2026-05-05 14:41:30] [safety_warp] [INFO]   - trainable probes: 800
+[2026-05-05 14:41:30] [safety_warp] [INFO] Loading MedQA dataset from ./data/medqa_train_10178.jsonl (split=train)...
+[2026-05-05 14:41:31] [safety_warp] [INFO] ✓ Using all 10178 MedQA examples
+[2026-05-05 14:41:31] [safety_warp] [INFO] 
+[MedQA Sample #0]
+[2026-05-05 14:41:31] [safety_warp] [INFO]   Prompt (first 80 chars): Answer the following multiple-choice medical question by selecting the single be...
+[2026-05-05 14:41:31] [safety_warp] [INFO]   Answer: D. Nitrofurantoin
+[2026-05-05 14:41:38] [safety_warp] [INFO] ✓ MedQA dataset created (10178 samples)
+[2026-05-05 14:41:38] [safety_warp] [INFO] ======================================================================
+[2026-05-05 14:41:38] [safety_warp] [INFO] Phase 3: Incremental Learning with medqa (Non-Freeze)
+[2026-05-05 14:41:38] [safety_warp] [INFO] ======================================================================
+[2026-05-05 14:41:38] [safety_warp] [INFO] Non-Freeze 모드: weight_decay=0.01 적용 (WaRPMaskRestoreCallback으로 mask=1 basis_coeff drift 완전 차단)
+[2026-05-05 14:41:38] [safety_warp] [INFO] Parameter freeze status (Non-Freeze mode):
+[2026-05-05 14:41:38] [safety_warp] [INFO]   - Total params: 13,015,864,320
+[2026-05-05 14:41:38] [safety_warp] [INFO]   - Trainable params: 13,015,864,320
+[2026-05-05 14:41:38] [safety_warp] [INFO]   - basis_coeff params: 8,808,038,400
+[2026-05-05 14:41:38] [safety_warp] [INFO]   - Frozen params (requires_grad=False): 0
+[2026-05-05 14:41:38] [safety_warp] [INFO]   - Trainable ratio: 100.00%
+[2026-05-05 14:41:38] [safety_warp] [INFO]   - WaRP masked frozen coeff elems: 880,804,069/8,808,038,400
+[2026-05-05 14:41:38] [safety_warp] [INFO]   - WaRP masked trainable coeff elems: 7,927,234,331 (90.00%)
+[2026-05-05 14:41:38] [safety_warp] [INFO] Training configuration:
+[2026-05-05 14:41:38] [safety_warp] [INFO]   - Epochs: 3
+[2026-05-05 14:41:38] [safety_warp] [INFO]   - Learning rate: 5e-05
+[2026-05-05 14:41:38] [safety_warp] [INFO]   - Weight decay (requested): 0.01
+[2026-05-05 14:41:38] [safety_warp] [INFO]   - Weight decay (effective): 0.01
+[2026-05-05 14:41:38] [safety_warp] [INFO]   - Warmup ratio: 0.1
+[2026-05-05 14:41:38] [safety_warp] [INFO]   - Batch size: 1
+[2026-05-05 14:41:38] [safety_warp] [INFO]   - Gradient accumulation steps: 16
+[2026-05-05 14:41:38] [safety_warp] [INFO]   - Effective batch size: 16
+[2026-05-05 14:41:38] [safety_warp] [INFO]   - Max gradient norm: 1.0
+[2026-05-05 14:41:38] [safety_warp] [INFO]   - Optimizer: adamw_torch
+[2026-05-05 14:41:38] [safety_warp] [INFO]   - LR scheduler: linear
+[2026-05-05 14:41:38] [safety_warp] [INFO]   - Input formatting: chat template
+[2026-05-05 14:41:38] [safety_warp] [INFO]   - Checkpoint directory: ./checkpoints/phase3_non_freeze_20260505_144138
+[2026-05-05 14:41:38] [safety_warp] [INFO] ======================================================================
+[2026-05-05 14:41:39] [safety_warp] [INFO] [WaRP-GradCheck] one-batch gradient sanity
+[2026-05-05 14:41:39] [safety_warp] [INFO]   - loss: 0.606327
+[2026-05-05 14:41:39] [safety_warp] [INFO]   - masked(=1) grad |mean|: 0.000000e+00, nonzero ratio: 0.00%
+[2026-05-05 14:41:39] [safety_warp] [INFO]   - trainable(=0) grad |mean|: 1.474788e-04, nonzero ratio: 100.00%
+[2026-05-05 14:41:39] [safety_warp] [INFO] [WaRPMaskRestoreCallback] registered 200 modules for post-step weight-decay restore
+/NHNHOME/WORKSPACE/26msit001_A/edge_ai_lab/minseong/Safety-WaRP-LLM/models/phase3_extra_learning_non_freeze.py:246: FutureWarning: `tokenizer` is deprecated and will be removed in version 5.0.0 for `Trainer.__init__`. Use `processing_class` instead.
+  trainer = Trainer(
+[2026-05-05 14:41:39] [safety_warp] [INFO] ✓ Trainer initialized
+[2026-05-05 14:41:39] [safety_warp] [INFO] Starting training (Non-Freeze mode)...
+[2026-05-05 14:41:39] [safety_warp] [INFO]   WaRP forward still applies masking:
+[2026-05-05 14:41:39] [safety_warp] [INFO]     W = V @ (basis_coeff * mask).detach() + basis_coeff * (1-mask) @ U
+[2026-05-05 14:41:39] [safety_warp] [INFO]     mask=1: gradient 차단 (frozen)
+[2026-05-05 14:41:39] [safety_warp] [INFO]     mask=0: gradient 흐름 (trainable)
+The tokenizer has new PAD/BOS/EOS tokens that differ from the model config and generation config. The model config and generation config were aligned accordingly, being updated with the tokenizer's values. Updated tokens: {'pad_token_id': 2}.
+  0%|          | 0/1911 [00:00<?, ?it/s]  0%|          | 1/1911 [00:07<4:12:02,  7.92s/it]  0%|          | 2/1911 [00:15<4:03:21,  7.65s/it]  0%|          | 3/1911 [00:22<4:00:43,  7.57s/it]  0%|          | 4/1911 [00:30<3:58:35,  7.51s/it]  0%|          | 5/1911 [00:37<3:57:29,  7.48s/it]  0%|          | 6/1911 [00:45<3:56:48,  7.46s/it]  0%|          | 7/1911 [00:52<3:56:57,  7.47s/it]  0%|          | 8/1911 [01:00<3:56:31,  7.46s/it]  0%|          | 9/1911 [01:07<3:56:57,  7.48s/it]  1%|          | 10/1911 [01:15<3:56:45,  7.47s/it]                                                     1%|          | 10/1911 [01:15<3:56:45,  7.47s/it]  1%|          | 11/1911 [01:22<3:56:09,  7.46s/it]  1%|          | 12/1911 [01:29<3:56:10,  7.46s/it]  1%|          | 13/1911 [01:37<3:55:22,  7.44s/it]  1%|          | 14/1911 [01:44<3:54:44,  7.42s/it]  1%|          | 15/1911 [01:52<3:54:40,  7.43s/it]  1%|          | 16/1911 [01:59<3:54:14,  7.42s/it]  1%|          | 17/1911 [02:06<3:54:43,  7.44s/it]  1%|          | 18/1911 [02:14<3:54:35,  7.44s/it]  1%|          | 19/1911 [02:21<3:54:36,  7.44s/it]  1%|          | 20/1911 [02:29<3:54:04,  7.43s/it]                                                     1%|          | 20/1911 [02:29<3:54:04,  7.43s/it]  1%|          | 21/1911 [02:36<3:54:01,  7.43s/it]  1%|          | 22/1911 [02:44<3:53:32,  7.42s/it]  1%|          | 23/1911 [02:51<3:52:41,  7.39s/it]  1%|▏         | 24/1911 [02:59<3:55:14,  7.48s/it]  1%|▏         | 25/1911 [03:06<3:55:37,  7.50s/it]  1%|▏         | 26/1911 [03:14<3:55:12,  7.49s/it]  1%|▏         | 27/1911 [03:21<3:54:33,  7.47s/it]  1%|▏         | 28/1911 [03:28<3:54:12,  7.46s/it]  2%|▏         | 29/1911 [03:36<3:54:03,  7.46s/it]  2%|▏         | 30/1911 [03:43<3:52:59,  7.43s/it]                                                     2%|▏         | 30/1911 [03:43<3:52:59,  7.43s/it]  2%|▏         | 31/1911 [03:51<3:52:27,  7.42s/it]  2%|▏         | 32/1911 [03:58<3:51:36,  7.40s/it]  2%|▏         | 33/1911 [04:05<3:51:15,  7.39s/it]  2%|▏         | 34/1911 [04:13<3:51:32,  7.40s/it]  2%|▏         | 35/1911 [04:20<3:51:35,  7.41s/it]  2%|▏         | 36/1911 [04:28<3:51:21,  7.40s/it]  2%|▏         | 37/1911 [04:35<3:51:15,  7.40s/it]  2%|▏         | 38/1911 [04:42<3:50:59,  7.40s/it]  2%|▏         | 39/1911 [04:50<3:51:42,  7.43s/it]  2%|▏         | 40/1911 [04:57<3:51:18,  7.42s/it]                                                     2%|▏         | 40/1911 [04:57<3:51:18,  7.42s/it]  2%|▏         | 41/1911 [05:05<3:50:43,  7.40s/it]  2%|▏         | 42/1911 [05:12<3:50:36,  7.40s/it]  2%|▏         | 43/1911 [05:20<3:50:30,  7.40s/it]  2%|▏         | 44/1911 [05:27<3:49:56,  7.39s/it]  2%|▏         | 45/1911 [05:34<3:50:17,  7.40s/it]  2%|▏         | 46/1911 [05:42<3:50:54,  7.43s/it]  2%|▏         | 47/1911 [05:49<3:50:35,  7.42s/it]  3%|▎         | 48/1911 [05:57<3:50:23,  7.42s/it]  3%|▎         | 49/1911 [06:04<3:49:47,  7.40s/it]  3%|▎         | 50/1911 [06:11<3:49:34,  7.40s/it]                                                     3%|▎         | 50/1911 [06:11<3:49:34,  7.40s/it]  3%|▎         | 51/1911 [06:19<3:49:45,  7.41s/it]  3%|▎         | 52/1911 [06:26<3:49:36,  7.41s/it]  3%|▎         | 53/1911 [06:34<3:49:40,  7.42s/it]  3%|▎         | 54/1911 [06:41<3:49:44,  7.42s/it]  3%|▎         | 55/1911 [06:49<3:49:54,  7.43s/it]  3%|▎         | 56/1911 [06:56<3:49:30,  7.42s/it]  3%|▎         | 57/1911 [07:03<3:49:22,  7.42s/it]  3%|▎         | 58/1911 [07:11<3:49:26,  7.43s/it]  3%|▎         | 59/1911 [07:18<3:49:16,  7.43s/it]  3%|▎         | 60/1911 [07:26<3:49:18,  7.43s/it]                                                     3%|▎         | 60/1911 [07:26<3:49:18,  7.43s/it]  3%|▎         | 61/1911 [07:33<3:48:39,  7.42s/it]  3%|▎         | 62/1911 [07:40<3:48:07,  7.40s/it]  3%|▎         | 63/1911 [07:48<3:47:42,  7.39s/it]  3%|▎         | 64/1911 [07:55<3:48:00,  7.41s/it]  3%|▎         | 65/1911 [08:03<3:48:26,  7.42s/it]  3%|▎         | 66/1911 [08:10<3:48:01,  7.42s/it]  4%|▎         | 67/1911 [08:18<3:48:00,  7.42s/it]  4%|▎         | 68/1911 [08:25<3:47:27,  7.40s/it]  4%|▎         | 69/1911 [08:32<3:47:02,  7.40s/it]  4%|▎         | 70/1911 [08:40<3:46:57,  7.40s/it]                                                     4%|▎         | 70/1911 [08:40<3:46:57,  7.40s/it]  4%|▎         | 71/1911 [08:47<3:46:48,  7.40s/it]  4%|▍         | 72/1911 [08:54<3:46:17,  7.38s/it]  4%|▍         | 73/1911 [09:02<3:46:59,  7.41s/it]  4%|▍         | 74/1911 [09:09<3:46:11,  7.39s/it]  4%|▍         | 75/1911 [09:17<3:46:27,  7.40s/it]  4%|▍         | 76/1911 [09:24<3:46:47,  7.42s/it]  4%|▍         | 77/1911 [09:32<3:46:53,  7.42s/it]  4%|▍         | 78/1911 [09:39<3:46:25,  7.41s/it]  4%|▍         | 79/1911 [09:46<3:46:00,  7.40s/it]  4%|▍         | 80/1911 [09:54<3:45:53,  7.40s/it]                                                     4%|▍         | 80/1911 [09:54<3:45:53,  7.40s/it]  4%|▍         | 81/1911 [10:01<3:45:32,  7.39s/it]  4%|▍         | 82/1911 [10:09<3:45:23,  7.39s/it]  4%|▍         | 83/1911 [10:16<3:45:30,  7.40s/it]  4%|▍         | 84/1911 [10:23<3:44:52,  7.39s/it]  4%|▍         | 85/1911 [10:31<3:45:21,  7.40s/it]  5%|▍         | 86/1911 [10:38<3:45:26,  7.41s/it]  5%|▍         | 87/1911 [10:46<3:45:56,  7.43s/it]  5%|▍         | 88/1911 [10:53<3:45:48,  7.43s/it]  5%|▍         | 89/1911 [11:00<3:44:35,  7.40s/it]  5%|▍         | 90/1911 [11:08<3:45:19,  7.42s/it]                                                     5%|▍         | 90/1911 [11:08<3:45:19,  7.42s/it]  5%|▍         | 91/1911 [11:15<3:45:09,  7.42s/it]  5%|▍         | 92/1911 [11:23<3:45:25,  7.44s/it]  5%|▍         | 93/1911 [11:30<3:44:39,  7.41s/it]  5%|▍         | 94/1911 [11:37<3:43:34,  7.38s/it]  5%|▍         | 95/1911 [11:45<3:43:51,  7.40s/it]  5%|▌         | 96/1911 [11:52<3:43:20,  7.38s/it]  5%|▌         | 97/1911 [12:00<3:43:21,  7.39s/it]  5%|▌         | 98/1911 [12:07<3:43:32,  7.40s/it]  5%|▌         | 99/1911 [12:14<3:43:45,  7.41s/it]  5%|▌         | 100/1911 [12:22<3:44:12,  7.43s/it]                                                      5%|▌         | 100/1911 [12:22<3:44:12,  7.43s/it]  5%|▌         | 101/1911 [12:29<3:43:33,  7.41s/it]  5%|▌         | 102/1911 [12:37<3:43:01,  7.40s/it]  5%|▌         | 103/1911 [12:44<3:42:46,  7.39s/it]  5%|▌         | 104/1911 [12:51<3:42:28,  7.39s/it]  5%|▌         | 105/1911 [12:59<3:42:46,  7.40s/it]  6%|▌         | 106/1911 [13:06<3:42:24,  7.39s/it]  6%|▌         | 107/1911 [13:14<3:42:20,  7.39s/it]  6%|▌         | 108/1911 [13:21<3:42:30,  7.40s/it]  6%|▌         | 109/1911 [13:28<3:42:01,  7.39s/it]  6%|▌         | 110/1911 [13:36<3:41:36,  7.38s/it]                                                      6%|▌         | 110/1911 [13:36<3:41:36,  7.38s/it]  6%|▌         | 111/1911 [13:43<3:42:01,  7.40s/it]  6%|▌         | 112/1911 [13:51<3:42:08,  7.41s/it]  6%|▌         | 113/1911 [13:58<3:41:55,  7.41s/it]  6%|▌         | 114/1911 [14:05<3:41:25,  7.39s/it]  6%|▌         | 115/1911 [14:13<3:41:10,  7.39s/it]  6%|▌         | 116/1911 [14:20<3:41:15,  7.40s/it]  6%|▌         | 117/1911 [14:28<3:41:52,  7.42s/it]  6%|▌         | 118/1911 [14:35<3:41:51,  7.42s/it]  6%|▌         | 119/1911 [14:43<3:41:33,  7.42s/it]  6%|▋         | 120/1911 [14:50<3:42:13,  7.44s/it]                                                      6%|▋         | 120/1911 [14:50<3:42:13,  7.44s/it]  6%|▋         | 121/1911 [14:57<3:42:01,  7.44s/it]  6%|▋         | 122/1911 [15:05<3:41:43,  7.44s/it]  6%|▋         | 123/1911 [15:12<3:41:13,  7.42s/it]  6%|▋         | 124/1911 [15:20<3:41:03,  7.42s/it]  7%|▋         | 125/1911 [15:27<3:41:30,  7.44s/it]  7%|▋         | 126/1911 [15:35<3:40:59,  7.43s/it]  7%|▋         | 127/1911 [15:42<3:40:37,  7.42s/it]  7%|▋         | 128/1911 [15:49<3:40:12,  7.41s/it]  7%|▋         | 129/1911 [15:57<3:39:16,  7.38s/it]  7%|▋         | 130/1911 [16:04<3:39:04,  7.38s/it]                                                      7%|▋         | 130/1911 [16:04<3:39:04,  7.38s/it]  7%|▋         | 131/1911 [16:11<3:39:06,  7.39s/it]  7%|▋         | 132/1911 [16:19<3:39:11,  7.39s/it]  7%|▋         | 133/1911 [16:26<3:38:36,  7.38s/it]  7%|▋         | 134/1911 [16:34<3:38:44,  7.39s/it]  7%|▋         | 135/1911 [16:41<3:38:33,  7.38s/it]  7%|▋         | 136/1911 [16:48<3:38:36,  7.39s/it]  7%|▋         | 137/1911 [16:56<3:38:19,  7.38s/it]  7%|▋         | 138/1911 [17:03<3:37:58,  7.38s/it]  7%|▋         | 139/1911 [17:11<3:37:57,  7.38s/it]  7%|▋         | 140/1911 [17:18<3:38:01,  7.39s/it]                                                      7%|▋         | 140/1911 [17:18<3:38:01,  7.39s/it]  7%|▋         | 141/1911 [17:25<3:38:14,  7.40s/it]  7%|▋         | 142/1911 [17:33<3:37:49,  7.39s/it]  7%|▋         | 143/1911 [17:40<3:37:39,  7.39s/it]  8%|▊         | 144/1911 [17:48<3:39:27,  7.45s/it]  8%|▊         | 145/1911 [17:55<3:38:43,  7.43s/it]  8%|▊         | 146/1911 [18:02<3:38:03,  7.41s/it]  8%|▊         | 147/1911 [18:10<3:37:36,  7.40s/it]  8%|▊         | 148/1911 [18:17<3:37:13,  7.39s/it]  8%|▊         | 149/1911 [18:25<3:37:10,  7.40s/it]  8%|▊         | 150/1911 [18:32<3:37:01,  7.39s/it]                                                      8%|▊         | 150/1911 [18:32<3:37:01,  7.39s/it]  8%|▊         | 151/1911 [18:39<3:36:46,  7.39s/it]  8%|▊         | 152/1911 [18:47<3:36:50,  7.40s/it]  8%|▊         | 153/1911 [18:54<3:36:48,  7.40s/it]  8%|▊         | 154/1911 [19:02<3:37:44,  7.44s/it]  8%|▊         | 155/1911 [19:09<3:37:18,  7.43s/it]  8%|▊         | 156/1911 [19:17<3:37:11,  7.43s/it]  8%|▊         | 157/1911 [19:24<3:36:44,  7.41s/it]  8%|▊         | 158/1911 [19:31<3:36:09,  7.40s/it]  8%|▊         | 159/1911 [19:39<3:36:07,  7.40s/it]  8%|▊         | 160/1911 [19:46<3:35:57,  7.40s/it]                                                      8%|▊         | 160/1911 [19:46<3:35:57,  7.40s/it]  8%|▊         | 161/1911 [19:54<3:36:33,  7.43s/it]  8%|▊         | 162/1911 [20:01<3:35:57,  7.41s/it]  9%|▊         | 163/1911 [20:08<3:35:26,  7.40s/it]  9%|▊         | 164/1911 [20:16<3:35:49,  7.41s/it]  9%|▊         | 165/1911 [20:23<3:35:56,  7.42s/it]  9%|▊         | 166/1911 [20:31<3:35:13,  7.40s/it]  9%|▊         | 167/1911 [20:38<3:35:01,  7.40s/it]  9%|▉         | 168/1911 [20:45<3:35:02,  7.40s/it]  9%|▉         | 169/1911 [20:53<3:34:56,  7.40s/it]  9%|▉         | 170/1911 [21:00<3:34:44,  7.40s/it]                                                      9%|▉         | 170/1911 [21:00<3:34:44,  7.40s/it]  9%|▉         | 171/1911 [21:08<3:34:11,  7.39s/it]  9%|▉         | 172/1911 [21:15<3:34:12,  7.39s/it]  9%|▉         | 173/1911 [21:22<3:34:09,  7.39s/it]  9%|▉         | 174/1911 [21:30<3:34:28,  7.41s/it]  9%|▉         | 175/1911 [21:37<3:34:53,  7.43s/it]  9%|▉         | 176/1911 [21:45<3:34:58,  7.43s/it]  9%|▉         | 177/1911 [21:52<3:35:04,  7.44s/it]  9%|▉         | 178/1911 [22:00<3:34:21,  7.42s/it]  9%|▉         | 179/1911 [22:07<3:34:09,  7.42s/it]  9%|▉         | 180/1911 [22:14<3:33:50,  7.41s/it]                                                      9%|▉         | 180/1911 [22:14<3:33:50,  7.41s/it]  9%|▉         | 181/1911 [22:22<3:33:40,  7.41s/it] 10%|▉         | 182/1911 [22:29<3:33:52,  7.42s/it] 10%|▉         | 183/1911 [22:37<3:33:40,  7.42s/it] 10%|▉         | 184/1911 [22:44<3:34:06,  7.44s/it] 10%|▉         | 185/1911 [22:51<3:33:25,  7.42s/it] 10%|▉         | 186/1911 [22:59<3:33:19,  7.42s/it] 10%|▉         | 187/1911 [23:06<3:32:51,  7.41s/it] 10%|▉         | 188/1911 [23:14<3:32:07,  7.39s/it] 10%|▉         | 189/1911 [23:21<3:32:36,  7.41s/it] 10%|▉         | 190/1911 [23:28<3:32:54,  7.42s/it]                                                     10%|▉         | 190/1911 [23:28<3:32:54,  7.42s/it] 10%|▉         | 191/1911 [23:36<3:32:33,  7.41s/it] 10%|█         | 192/1911 [23:43<3:33:29,  7.45s/it] 10%|█         | 193/1911 [23:51<3:32:46,  7.43s/it] 10%|█         | 194/1911 [23:58<3:32:50,  7.44s/it] 10%|█         | 195/1911 [24:06<3:32:23,  7.43s/it] 10%|█         | 196/1911 [24:13<3:31:35,  7.40s/it] 10%|█         | 197/1911 [24:20<3:31:47,  7.41s/it] 10%|█         | 198/1911 [24:28<3:31:32,  7.41s/it] 10%|█         | 199/1911 [24:35<3:31:26,  7.41s/it] 10%|█         | 200/1911 [24:43<3:31:31,  7.42s/it]                                                     10%|█         | 200/1911 [24:43<3:31:31,  7.42s/it] 11%|█         | 201/1911 [24:50<3:31:08,  7.41s/it] 11%|█         | 202/1911 [24:57<3:30:28,  7.39s/it] 11%|█         | 203/1911 [25:05<3:30:35,  7.40s/it] 11%|█         | 204/1911 [25:12<3:30:03,  7.38s/it] 11%|█         | 205/1911 [25:20<3:30:17,  7.40s/it] 11%|█         | 206/1911 [25:27<3:30:09,  7.40s/it] 11%|█         | 207/1911 [25:34<3:30:12,  7.40s/it] 11%|█         | 208/1911 [25:42<3:30:49,  7.43s/it] 11%|█         | 209/1911 [25:49<3:30:37,  7.42s/it] 11%|█         | 210/1911 [25:57<3:30:19,  7.42s/it]                                                     11%|█         | 210/1911 [25:57<3:30:19,  7.42s/it] 11%|█         | 211/1911 [26:04<3:30:17,  7.42s/it] 11%|█         | 212/1911 [26:12<3:29:58,  7.42s/it] 11%|█         | 213/1911 [26:19<3:30:10,  7.43s/it] 11%|█         | 214/1911 [26:26<3:29:31,  7.41s/it] 11%|█▏        | 215/1911 [26:34<3:28:57,  7.39s/it] 11%|█▏        | 216/1911 [26:41<3:29:01,  7.40s/it] 11%|█▏        | 217/1911 [26:49<3:29:01,  7.40s/it] 11%|█▏        | 218/1911 [26:56<3:28:59,  7.41s/it] 11%|█▏        | 219/1911 [27:03<3:28:53,  7.41s/it] 12%|█▏        | 220/1911 [27:11<3:29:00,  7.42s/it]                                                     12%|█▏        | 220/1911 [27:11<3:29:00,  7.42s/it] 12%|█▏        | 221/1911 [27:18<3:29:21,  7.43s/it] 12%|█▏        | 222/1911 [27:26<3:28:47,  7.42s/it] 12%|█▏        | 223/1911 [27:33<3:28:17,  7.40s/it] 12%|█▏        | 224/1911 [27:40<3:27:58,  7.40s/it] 12%|█▏        | 225/1911 [27:48<3:27:40,  7.39s/it] 12%|█▏        | 226/1911 [27:55<3:27:27,  7.39s/it] 12%|█▏        | 227/1911 [28:03<3:27:23,  7.39s/it] 12%|█▏        | 228/1911 [28:10<3:26:57,  7.38s/it] 12%|█▏        | 229/1911 [28:17<3:26:41,  7.37s/it] 12%|█▏        | 230/1911 [28:25<3:27:23,  7.40s/it]                                                     12%|█▏        | 230/1911 [28:25<3:27:23,  7.40s/it] 12%|█▏        | 231/1911 [28:32<3:27:27,  7.41s/it] 12%|█▏        | 232/1911 [28:40<3:27:08,  7.40s/it] 12%|█▏        | 233/1911 [28:47<3:27:32,  7.42s/it] 12%|█▏        | 234/1911 [28:55<3:27:37,  7.43s/it] 12%|█▏        | 235/1911 [29:02<3:27:47,  7.44s/it] 12%|█▏        | 236/1911 [29:09<3:27:35,  7.44s/it] 12%|█▏        | 237/1911 [29:17<3:27:46,  7.45s/it] 12%|█▏        | 238/1911 [29:24<3:27:21,  7.44s/it] 13%|█▎        | 239/1911 [29:32<3:26:55,  7.43s/it] 13%|█▎        | 240/1911 [29:39<3:27:19,  7.44s/it]                                                     13%|█▎        | 240/1911 [29:39<3:27:19,  7.44s/it] 13%|█▎        | 241/1911 [29:47<3:26:50,  7.43s/it] 13%|█▎        | 242/1911 [29:54<3:26:31,  7.42s/it] 13%|█▎        | 243/1911 [30:01<3:26:04,  7.41s/it] 13%|█▎        | 244/1911 [30:09<3:25:20,  7.39s/it] 13%|█▎        | 245/1911 [30:16<3:25:25,  7.40s/it] 13%|█▎        | 246/1911 [30:24<3:25:35,  7.41s/it] 13%|█▎        | 247/1911 [30:31<3:25:14,  7.40s/it] 13%|█▎        | 248/1911 [30:38<3:24:37,  7.38s/it] 13%|█▎        | 249/1911 [30:46<3:24:23,  7.38s/it] 13%|█▎        | 250/1911 [30:53<3:24:51,  7.40s/it]                                                     13%|█▎        | 250/1911 [30:53<3:24:51,  7.40s/it] 13%|█▎        | 251/1911 [31:01<3:25:22,  7.42s/it] 13%|█▎        | 252/1911 [31:08<3:25:27,  7.43s/it] 13%|█▎        | 253/1911 [31:15<3:25:18,  7.43s/it] 13%|█▎        | 254/1911 [31:23<3:25:27,  7.44s/it] 13%|█▎        | 255/1911 [31:30<3:24:52,  7.42s/it] 13%|█▎        | 256/1911 [31:38<3:24:04,  7.40s/it] 13%|█▎        | 257/1911 [31:45<3:24:21,  7.41s/it] 14%|█▎        | 258/1911 [31:53<3:24:21,  7.42s/it] 14%|█▎        | 259/1911 [32:00<3:23:46,  7.40s/it] 14%|█▎        | 260/1911 [32:07<3:23:36,  7.40s/it]                                                     14%|█▎        | 260/1911 [32:07<3:23:36,  7.40s/it] 14%|█▎        | 261/1911 [32:15<3:23:11,  7.39s/it] 14%|█▎        | 262/1911 [32:22<3:23:13,  7.39s/it] 14%|█▍        | 263/1911 [32:29<3:23:09,  7.40s/it] 14%|█▍        | 264/1911 [32:37<3:23:09,  7.40s/it] 14%|█▍        | 265/1911 [32:44<3:23:02,  7.40s/it] 14%|█▍        | 266/1911 [32:52<3:22:11,  7.37s/it] 14%|█▍        | 267/1911 [32:59<3:21:46,  7.36s/it] 14%|█▍        | 268/1911 [33:06<3:21:50,  7.37s/it] 14%|█▍        | 269/1911 [33:14<3:22:11,  7.39s/it] 14%|█▍        | 270/1911 [33:21<3:21:46,  7.38s/it]                                                     14%|█▍        | 270/1911 [33:21<3:21:46,  7.38s/it] 14%|█▍        | 271/1911 [33:29<3:22:06,  7.39s/it] 14%|█▍        | 272/1911 [33:36<3:22:19,  7.41s/it] 14%|█▍        | 273/1911 [33:43<3:22:32,  7.42s/it] 14%|█▍        | 274/1911 [33:51<3:22:22,  7.42s/it] 14%|█▍        | 275/1911 [33:58<3:21:56,  7.41s/it] 14%|█▍        | 276/1911 [34:06<3:22:05,  7.42s/it] 14%|█▍        | 277/1911 [34:13<3:22:25,  7.43s/it] 15%|█▍        | 278/1911 [34:21<3:22:53,  7.45s/it] 15%|█▍        | 279/1911 [34:28<3:21:52,  7.42s/it] 15%|█▍        | 280/1911 [34:35<3:21:11,  7.40s/it]                                                     15%|█▍        | 280/1911 [34:35<3:21:11,  7.40s/it] 15%|█▍        | 281/1911 [34:43<3:20:44,  7.39s/it] 15%|█▍        | 282/1911 [34:50<3:20:33,  7.39s/it] 15%|█▍        | 283/1911 [34:57<3:20:42,  7.40s/it] 15%|█▍        | 284/1911 [35:05<3:20:41,  7.40s/it] 15%|█▍        | 285/1911 [35:12<3:20:33,  7.40s/it] 15%|█▍        | 286/1911 [35:20<3:20:44,  7.41s/it] 15%|█▌        | 287/1911 [35:27<3:20:41,  7.41s/it] 15%|█▌        | 288/1911 [35:35<3:20:37,  7.42s/it] 15%|█▌        | 289/1911 [35:42<3:20:49,  7.43s/it] 15%|█▌        | 290/1911 [35:50<3:22:36,  7.50s/it]                                                     15%|█▌        | 290/1911 [35:50<3:22:36,  7.50s/it] 15%|█▌        | 291/1911 [35:57<3:21:34,  7.47s/it] 15%|█▌        | 292/1911 [36:05<3:21:14,  7.46s/it] 15%|█▌        | 293/1911 [36:12<3:20:12,  7.42s/it] 15%|█▌        | 294/1911 [36:19<3:19:29,  7.40s/it] 15%|█▌        | 295/1911 [36:27<3:18:56,  7.39s/it] 15%|█▌        | 296/1911 [36:34<3:18:21,  7.37s/it] 16%|█▌        | 297/1911 [36:41<3:18:44,  7.39s/it] 16%|█▌        | 298/1911 [36:49<3:18:29,  7.38s/it] 16%|█▌        | 299/1911 [36:56<3:18:55,  7.40s/it] 16%|█▌        | 300/1911 [37:04<3:18:36,  7.40s/it]                                                     16%|█▌        | 300/1911 [37:04<3:18:36,  7.40s/it] 16%|█▌        | 301/1911 [37:11<3:18:32,  7.40s/it] 16%|█▌        | 302/1911 [37:18<3:18:18,  7.40s/it] 16%|█▌        | 303/1911 [37:26<3:18:23,  7.40s/it] 16%|█▌        | 304/1911 [37:33<3:18:15,  7.40s/it] 16%|█▌        | 305/1911 [37:41<3:17:54,  7.39s/it] 16%|█▌        | 306/1911 [37:48<3:17:51,  7.40s/it] 16%|█▌        | 307/1911 [37:55<3:17:48,  7.40s/it] 16%|█▌        | 308/1911 [38:03<3:18:09,  7.42s/it] 16%|█▌        | 309/1911 [38:10<3:17:35,  7.40s/it] 16%|█▌        | 310/1911 [38:18<3:17:26,  7.40s/it]                                                     16%|█▌        | 310/1911 [38:18<3:17:26,  7.40s/it] 16%|█▋        | 311/1911 [38:25<3:17:28,  7.41s/it] 16%|█▋        | 312/1911 [38:32<3:17:13,  7.40s/it] 16%|█▋        | 313/1911 [38:40<3:17:13,  7.40s/it] 16%|█▋        | 314/1911 [38:47<3:17:13,  7.41s/it] 16%|█▋        | 315/1911 [38:55<3:16:49,  7.40s/it] 17%|█▋        | 316/1911 [39:02<3:16:16,  7.38s/it] 17%|█▋        | 317/1911 [39:09<3:16:01,  7.38s/it] 17%|█▋        | 318/1911 [39:17<3:16:12,  7.39s/it] 17%|█▋        | 319/1911 [39:24<3:16:02,  7.39s/it] 17%|█▋        | 320/1911 [39:31<3:16:13,  7.40s/it]                                                     17%|█▋        | 320/1911 [39:31<3:16:13,  7.40s/it] 17%|█▋        | 321/1911 [39:39<3:15:56,  7.39s/it] 17%|█▋        | 322/1911 [39:46<3:16:03,  7.40s/it] 17%|█▋        | 323/1911 [39:54<3:16:31,  7.43s/it] 17%|█▋        | 324/1911 [40:01<3:16:38,  7.43s/it] 17%|█▋        | 325/1911 [40:09<3:15:59,  7.41s/it] 17%|█▋        | 326/1911 [40:16<3:16:32,  7.44s/it] 17%|█▋        | 327/1911 [40:24<3:16:31,  7.44s/it] 17%|█▋        | 328/1911 [40:31<3:16:00,  7.43s/it] 17%|█▋        | 329/1911 [40:38<3:16:19,  7.45s/it] 17%|█▋        | 330/1911 [40:46<3:16:30,  7.46s/it]                                                     17%|█▋        | 330/1911 [40:46<3:16:30,  7.46s/it] 17%|█▋        | 331/1911 [40:53<3:16:33,  7.46s/it] 17%|█▋        | 332/1911 [41:01<3:16:17,  7.46s/it] 17%|█▋        | 333/1911 [41:08<3:16:03,  7.45s/it] 17%|█▋        | 334/1911 [41:16<3:15:07,  7.42s/it] 18%|█▊        | 335/1911 [41:23<3:14:39,  7.41s/it] 18%|█▊        | 336/1911 [41:30<3:14:29,  7.41s/it] 18%|█▊        | 337/1911 [41:38<3:14:19,  7.41s/it] 18%|█▊        | 338/1911 [41:45<3:13:56,  7.40s/it] 18%|█▊        | 339/1911 [41:53<3:13:57,  7.40s/it] 18%|█▊        | 340/1911 [42:00<3:13:45,  7.40s/it]                                                     18%|█▊        | 340/1911 [42:00<3:13:45,  7.40s/it] 18%|█▊        | 341/1911 [42:07<3:14:17,  7.43s/it] 18%|█▊        | 342/1911 [42:15<3:14:39,  7.44s/it] 18%|█▊        | 343/1911 [42:22<3:14:47,  7.45s/it] 18%|█▊        | 344/1911 [42:30<3:13:40,  7.42s/it] 18%|█▊        | 345/1911 [42:37<3:13:21,  7.41s/it] 18%|█▊        | 346/1911 [42:45<3:13:26,  7.42s/it] 18%|█▊        | 347/1911 [42:52<3:12:52,  7.40s/it] 18%|█▊        | 348/1911 [42:59<3:12:16,  7.38s/it] 18%|█▊        | 349/1911 [43:07<3:12:12,  7.38s/it] 18%|█▊        | 350/1911 [43:14<3:12:24,  7.40s/it]                                                     18%|█▊        | 350/1911 [43:14<3:12:24,  7.40s/it] 18%|█▊        | 351/1911 [43:22<3:12:30,  7.40s/it] 18%|█▊        | 352/1911 [43:29<3:12:27,  7.41s/it] 18%|█▊        | 353/1911 [43:36<3:12:13,  7.40s/it] 19%|█▊        | 354/1911 [43:44<3:12:30,  7.42s/it] 19%|█▊        | 355/1911 [43:51<3:11:33,  7.39s/it] 19%|█▊        | 356/1911 [43:58<3:10:56,  7.37s/it] 19%|█▊        | 357/1911 [44:06<3:10:49,  7.37s/it] 19%|█▊        | 358/1911 [44:13<3:10:34,  7.36s/it] 19%|█▉        | 359/1911 [44:21<3:10:44,  7.37s/it] 19%|█▉        | 360/1911 [44:28<3:11:04,  7.39s/it]                                                     19%|█▉        | 360/1911 [44:28<3:11:04,  7.39s/it]

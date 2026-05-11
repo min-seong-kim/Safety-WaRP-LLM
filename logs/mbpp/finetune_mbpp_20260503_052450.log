@@ -1,0 +1,25 @@
+2026-05-03 05:24:50 - __main__ - INFO - ======================================================================
+2026-05-03 05:24:50 - __main__ - INFO - Full-parameter utility fine-tuning: MBPP
+2026-05-03 05:24:50 - __main__ - INFO - ======================================================================
+2026-05-03 05:24:50 - __main__ - INFO - Log file  : ./logs/mbpp/finetune_mbpp_20260503_052450.log
+2026-05-03 05:24:50 - __main__ - INFO - Model     : kmseong/llama2_7b-chat-Safety-FT-lr5e-5
+2026-05-03 05:24:50 - __main__ - INFO - Input fmt : chat template
+2026-05-03 05:24:50 - __main__ - INFO - Dataset   : google-research-datasets/mbpp / full
+2026-05-03 05:24:50 - __main__ - INFO - Train split: train, Eval split: validation
+2026-05-03 05:24:50 - __main__ - INFO - Safety mix: ratio=0.0, path=/home/yonsei_jong/Safety-WaRP-LLM/data/circuit_breakers_train.json
+2026-05-03 05:24:50 - __main__ - INFO - LR=3e-05, epochs=3, batch=4x4
+2026-05-03 05:24:50 - __main__ - INFO - Loading tokenizer...
+2026-05-03 05:24:50 - __main__ - INFO -   Tokenizer loaded from local files
+2026-05-03 05:24:50 - __main__ - INFO - Loading model...
+2026-05-03 05:24:54 - __main__ - INFO -   Model loaded from local files
+2026-05-03 05:24:54 - __main__ - INFO -   Params: total=6.74B, trainable=6.74B (100.00%)
+2026-05-03 05:24:54 - __main__ - INFO - Loading MBPP train split='train' from google-research-datasets/mbpp ...
+2026-05-03 05:24:56 - __main__ - INFO - Loaded MBPP train rows: 374
+2026-05-03 05:24:56 - __main__ - INFO - Loading MBPP eval split='validation' from google-research-datasets/mbpp ...
+2026-05-03 05:24:57 - __main__ - INFO - Loaded MBPP eval rows: 90
+2026-05-03 05:25:00 - __main__ - INFO - Starting training...
+2026-05-03 05:25:36 - __main__ - INFO - Saving fine-tuned model...
+2026-05-03 05:25:51 - __main__ - INFO - Config saved to ./mbpp_eval/llama2_7b_chat_mbpp_FT_lr5e-5/finetune_config.json
+2026-05-03 05:25:51 - __main__ - INFO - Uploading to HuggingFace: kmseong/llama2_7b_chat-MBPP-FT-lr3e-5
+2026-05-03 05:25:51 - __main__ - ERROR - HF 토큰이 없습니다. --hf_token 또는 HF_TOKEN 환경변수를 설정하세요.
+2026-05-03 05:25:52 - __main__ - INFO - Fine-tuning complete

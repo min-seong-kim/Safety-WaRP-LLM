@@ -145,6 +145,8 @@ experiments/
 *.jsonl
 
 !data/README.md
+!data/*.json
+!data/**/*.json
 
 # Cache
 .cache/

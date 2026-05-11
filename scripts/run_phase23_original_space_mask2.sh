@@ -1,0 +1,222 @@
+#!/bin/bash
+
+# Phase 2 + 3: Original-Space Importance Mask Pipeline
+#
+# 목표:
+# - basis/rotation/WaRP 없이 original weight space에서 importance mask 생성
+# - mask=1(중요 weight)은 freeze, 나머지만 downstream finetuning
+
+set -e
+set -o pipefail
+export CUDA_VISIBLE_DEVICES=6
+
+echo "========================================================================"
+echo "Phase 2 + 3: Original-Space Importance Mask Pipeline"
+echo "========================================================================"
+echo ""
+
+# ========================================================================
+# Configuration
+# ========================================================================
+
+PHASE0_MODEL="kmseong/llama2_7b-chat-Safety-FT-lr5e-5"  
+
+# Phase 2 (importance)
+PHASE2_DATASET="circuit_breakers"   # circuit_breakers | wikipedia
+PHASE2_SAMPLES=4994
+PHASE2_WIKIPEDIA_SAMPLES=4994
+KEEP_RATIO_LIST=("0.4")   # 두 모델: 10% freeze vs 90% freeze
+
+# Phase 3 (downstream)
+PHASE3_DATASET="gsm8k"              # safety | gsm8k | metamath | math | agnews
+GSM8K_SAMPLES=0
+METAMATH_SAMPLES=0
+MATH_SAMPLES=0
+MATH_SUBJECTS="all"
+MATH_LEVELS="all"
+CIRCUIT_BREAKERS_SAMPLES_PHASE3=4994
+AGNEWS_DATASET_PATH=""              # --agnews_dataset_path 필수 (agnews 선택 시)
+AGNEWS_SAMPLES=8000
+MEDQA_DATASET_PATH="/home/yonsei_jong/Safety-WaRP-LLM/data/medqa_train_10178.jsonl"   # --medqa_dataset_path 필수 (medqa 선택 시)
+MEDQA_SAMPLES=10000
+
+# Common training
+EPOCHS=3
+LR_LIST=("5e-5")
+BATCH_SIZE=4
+GRAD_ACCUM=4
+WARMUP_RATIO=0.1
+LR_SCHEDULER="cosine"
+BASE_WEIGHT_DECAY=0.01
+MAX_LENGTH=1024
+
+LAYER_TYPE="attn_q,attn_k,attn_v,ffn_down,ffn_up"
+TARGET_LAYERS="all"
+OUTPUT_DIR="./checkpoints"
+LOG_DIR="./logs"
+DEVICE="cuda"
+DTYPE="bfloat16"
+SEED=42
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+
+mkdir -p "$OUTPUT_DIR"
+mkdir -p "$LOG_DIR"
+
+echo "Configuration:"
+echo "  CUDA_VISIBLE_DEVICES: $CUDA_VISIBLE_DEVICES"
+echo "  Phase 0 Model: $PHASE0_MODEL"
+echo "  Phase 2 Dataset: $PHASE2_DATASET"
+echo "  Keep Ratios: ${KEEP_RATIO_LIST[*]}"
+echo "  Phase 3 Dataset: $PHASE3_DATASET"
+echo "  LR Sweep: ${LR_LIST[*]}"
+echo "  Batch Size: $BATCH_SIZE"
+echo "  Grad Accum: $GRAD_ACCUM"
+echo "  Epochs: $EPOCHS"
+echo ""
+
+# Phase 2/3 데이터셋 인자 사전 구성
+if [ "$PHASE2_DATASET" = "circuit_breakers" ]; then
+    PHASE2_DATASET_ARG="--dataset_phase2 circuit_breakers --circuit_breakers_path ./data/circuit_breakers_train.json --circuit_breakers_samples_phase2 $PHASE2_SAMPLES"
+elif [ "$PHASE2_DATASET" = "wikipedia" ]; then
+    PHASE2_DATASET_ARG="--dataset_phase2 wikipedia --wikipedia_samples_phase2 $PHASE2_WIKIPEDIA_SAMPLES"
+else
+    echo "ERROR: Unknown PHASE2_DATASET: $PHASE2_DATASET"
+    exit 1
+fi
+
+if [ "$PHASE3_DATASET" = "gsm8k" ]; then
+    PHASE3_DATASET_ARG="--phase3_dataset gsm8k --gsm8k_samples $GSM8K_SAMPLES"
+elif [ "$PHASE3_DATASET" = "safety" ]; then
+    PHASE3_DATASET_ARG="--phase3_dataset safety --circuit_breakers_path ./data/circuit_breakers_train.json --circuit_breakers_samples_phase3 $CIRCUIT_BREAKERS_SAMPLES_PHASE3"
+elif [ "$PHASE3_DATASET" = "metamath" ]; then
+    PHASE3_DATASET_ARG="--phase3_dataset metamath --metamath_samples $METAMATH_SAMPLES"
+elif [ "$PHASE3_DATASET" = "math" ]; then
+    PHASE3_DATASET_ARG="--phase3_dataset math --math_samples $MATH_SAMPLES --math_subjects $MATH_SUBJECTS --math_levels $MATH_LEVELS"
+elif [ "$PHASE3_DATASET" = "agnews" ]; then
+    if [ -z "$AGNEWS_DATASET_PATH" ]; then
+        echo "ERROR: AGNEWS_DATASET_PATH must be set when PHASE3_DATASET=agnews"
+        exit 1
+    fi
+    PHASE3_DATASET_ARG="--phase3_dataset agnews --agnews_dataset_path $AGNEWS_DATASET_PATH --agnews_samples $AGNEWS_SAMPLES"
+elif [ "$PHASE3_DATASET" = "medqa" ]; then
+    if [ -z "$MEDQA_DATASET_PATH" ]; then
+        echo "ERROR: MEDQA_DATASET_PATH must be set when PHASE3_DATASET=medqa"
+        exit 1
+    fi
+    PHASE3_DATASET_ARG="--phase3_dataset medqa --medqa_dataset_path $MEDQA_DATASET_PATH --medqa_samples $MEDQA_SAMPLES"
+else
+    echo "ERROR: Unknown PHASE3_DATASET: $PHASE3_DATASET"
+    exit 1
+fi
+
+PHASE3_OUTPUT_DIRS=()
+
+for KEEP_RATIO in "${KEEP_RATIO_LIST[@]}"; do
+    KR_SAFE=$(echo "$KEEP_RATIO" | sed 's/[^a-zA-Z0-9_-]/_/g')
+
+    # ========================================================================
+    # Phase 2: Importance Scoring in Original Space (keep_ratio=$KEEP_RATIO)
+    # ========================================================================
+    echo "========================================================================"
+    echo "PHASE 2: Importance Scoring (Original Space, keep_ratio=$KEEP_RATIO)"
+    echo "========================================================================"
+
+    python train.py \
+        --phase 2 \
+        --phase0_model_dir "$PHASE0_MODEL" \
+        --original_space_mask \
+        $PHASE2_DATASET_ARG \
+        --keep_ratio $KEEP_RATIO \
+        --batch_size $BATCH_SIZE \
+        --max_length $MAX_LENGTH \
+        --layer_type "$LAYER_TYPE" \
+        --target_layers $TARGET_LAYERS \
+        --output_dir "$OUTPUT_DIR" \
+        --log_dir "$LOG_DIR" \
+        --device $DEVICE \
+        --dtype $DTYPE \
+        --perlayer \
+        --seed $SEED \
+        2>&1 | tee "$LOG_DIR/phase2_original_space_kr${KR_SAFE}_${TIMESTAMP}.log"
+
+    PHASE2_OUTPUT_DIR=$(find "$OUTPUT_DIR" -maxdepth 1 -name "phase2_original_space_*" -type d -printf '%T@ %p\n' | sort -rn | head -1 | cut -d' ' -f2-)
+    PHASE2_MASKS_DIR="$PHASE2_OUTPUT_DIR/checkpoints/masks"
+
+    if [ ! -d "$PHASE2_MASKS_DIR" ]; then
+        echo "ERROR: Phase 2 (kr=$KEEP_RATIO) masks not found: $PHASE2_MASKS_DIR"
+        exit 1
+    fi
+
+    echo ""
+    echo "Phase 2 (kr=$KEEP_RATIO) completed: $PHASE2_MASKS_DIR"
+    echo ""
+
+    # ========================================================================
+    # Phase 3: Downstream Finetuning (keep_ratio=$KEEP_RATIO, LR sweep)
+    # ========================================================================
+    for LEARNING_RATE in "${LR_LIST[@]}"; do
+        LR_SAFE=$(echo "$LEARNING_RATE" | sed 's/[^a-zA-Z0-9_-]/_/g')
+
+        echo "========================================================================"
+        echo "PHASE 3: Original-Space Finetuning (kr=$KEEP_RATIO, LR=$LEARNING_RATE)"
+        echo "========================================================================"
+
+        python train.py \
+            --phase 3 \
+            --phase0_model_dir "$PHASE0_MODEL" \
+            --masks_dir "$PHASE2_MASKS_DIR" \
+            --original_space_mask \
+            $PHASE3_DATASET_ARG \
+            --epochs $EPOCHS \
+            --utility_lr $LEARNING_RATE \
+            --batch_size $BATCH_SIZE \
+            --gradient_accumulation_steps $GRAD_ACCUM \
+            --warmup_ratio $WARMUP_RATIO \
+            --lr_scheduler_type $LR_SCHEDULER \
+            --base_weight_decay $BASE_WEIGHT_DECAY \
+            --max_length $MAX_LENGTH \
+            --layer_type "$LAYER_TYPE" \
+            --target_layers $TARGET_LAYERS \
+            --output_dir "$OUTPUT_DIR" \
+            --log_dir "$LOG_DIR" \
+            --device $DEVICE \
+            --dtype $DTYPE \
+            --seed $SEED \
+            2>&1 | tee "$LOG_DIR/phase3_original_space_kr${KR_SAFE}_lr${LR_SAFE}_${TIMESTAMP}.log"
+
+        PHASE3_OUTPUT_DIR=$(find "$OUTPUT_DIR" -maxdepth 1 -name "phase3_original_space_*" -type d -printf '%T@ %p\n' | sort -rn | head -1 | cut -d' ' -f2-)
+        if [ -d "$PHASE3_OUTPUT_DIR" ]; then
+            PHASE3_OUTPUT_DIRS+=("kr${KEEP_RATIO}_lr${LEARNING_RATE}:$PHASE3_OUTPUT_DIR")
+            echo "Phase 3 completed (kr=$KEEP_RATIO, LR=$LEARNING_RATE): $PHASE3_OUTPUT_DIR"
+        else
+            echo "WARNING: Phase 3 output not found (kr=$KEEP_RATIO, LR=$LEARNING_RATE)"
+        fi
+        echo ""
+    done
+
+done
+
+# ========================================================================
+# Summary
+# ========================================================================
+echo "========================================================================"
+echo "Original-Space Mask Pipeline Completed"
+echo "========================================================================"
+echo ""
+echo "Phase 3 Models (keep_ratio x LR):"
+for entry in "${PHASE3_OUTPUT_DIRS[@]}"; do
+    label="${entry%%:*}"
+    dir="${entry#*:}"
+    echo "  [$label]  $dir/final_model"
+done
+echo ""
+echo "Log files:"
+for KEEP_RATIO in "${KEEP_RATIO_LIST[@]}"; do
+    KR_SAFE=$(echo "$KEEP_RATIO" | sed 's/[^a-zA-Z0-9_-]/_/g')
+    echo "  Phase 2 (kr=$KEEP_RATIO): $LOG_DIR/phase2_original_space_kr${KR_SAFE}_${TIMESTAMP}.log"
+    for LEARNING_RATE in "${LR_LIST[@]}"; do
+        LR_SAFE=$(echo "$LEARNING_RATE" | sed 's/[^a-zA-Z0-9_-]/_/g')
+        echo "  Phase 3 (kr=$KEEP_RATIO, LR=$LEARNING_RATE): $LOG_DIR/phase3_original_space_kr${KR_SAFE}_lr${LR_SAFE}_${TIMESTAMP}.log"
+    done
+done
+echo "========================================================================"

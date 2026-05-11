@@ -411,9 +411,11 @@ class Phase3IncrementalLearner:
         - 'safety': Circuit breakers (safety learning)
         - 'metamath': Advanced math reasoning (utility learning)
         - 'math': Hendrycks MATH (utility learning)
+        - 'mmlu': Multiple-choice QA (utility learning)
         - 'swebench': SWE-bench patch generation (software engineering utility)
         - 'agnews': AG News classification (utility learning)
         - 'medqa': MedQA USMLE MCQ (medical QA utility learning)
+        - 'mbpp': MBPP Python programming problems (utility learning)
         """
         phase3_dataset = getattr(self.args, 'phase3_dataset', 'gsm8k')
         safety_mix_ratio = getattr(self.args, 'safety_mix_ratio', 0.0)
@@ -426,12 +428,18 @@ class Phase3IncrementalLearner:
             self._load_metamath()
         elif phase3_dataset == 'math':
             self._load_hendrycks_math()
+        elif phase3_dataset == 'mmlu':
+            self._load_mmlu()
         elif phase3_dataset == 'swebench':
             self._load_swebench()
         elif phase3_dataset == 'agnews':
             self._load_agnews()
         elif phase3_dataset == 'medqa':
             self._load_medqa()
+        elif phase3_dataset == 'mbpp':
+            self._load_mbpp()
+        elif phase3_dataset == 'arc':
+            self._load_arc()
         else:
             raise ValueError(f"Unknown phase3_dataset: {phase3_dataset}")
 
@@ -921,6 +929,374 @@ class Phase3IncrementalLearner:
 
         except Exception as e:
             self.logger.error(f"Failed to load MetaMath data: {str(e)}", exc_info=True)
+            raise
+
+    def _load_mbpp(self):
+        """
+        MBPP (Mostly Basic Python Problems) 데이터셋 로드.
+
+        포맷 (google-research-datasets/mbpp):
+          row["text"]      = 문제 설명 (자연어)
+          row["code"]      = 정답 파이썬 코드
+          row["test_list"] = 테스트 케이스 목록 (list of str)
+
+        question = 문제 설명 + 테스트 케이스 힌트
+        answer   = 정답 파이썬 코드
+        """
+        from datasets import load_dataset
+
+        MBPP_INSTRUCTION = (
+            "Write a Python function to solve the following programming problem. "
+            "Provide only the complete, runnable Python code without any explanation."
+        )
+
+        try:
+            dataset_name = getattr(self.args, 'mbpp_dataset_name', 'google-research-datasets/mbpp')
+            mbpp_subset  = getattr(self.args, 'mbpp_subset', 'full')
+            mbpp_split   = getattr(self.args, 'mbpp_train_split', 'train')
+
+            self.logger.info(f"Loading MBPP dataset: {dataset_name} / {mbpp_subset} / {mbpp_split} ...")
+            dataset = load_dataset(dataset_name, mbpp_subset, split=mbpp_split)
+
+            max_samples = getattr(self.args, 'mbpp_samples', 0)
+            if max_samples > 0 and len(dataset) > max_samples:
+                dataset = dataset.select(range(max_samples))
+                self.logger.info(f"Limited to {max_samples} samples")
+            else:
+                self.logger.info(f"Using all {len(dataset)} samples")
+
+            max_length = getattr(self.args, 'max_length', 1024)
+
+            def _as_text(v) -> str:
+                return "" if v is None else str(v).strip()
+
+            def _build_question(row) -> str:
+                problem   = _as_text(row.get("text", ""))
+                test_list = row.get("test_list", []) or []
+                if test_list:
+                    tests_str = "\n".join(str(t) for t in test_list)
+                    return f"{MBPP_INSTRUCTION}\n\n{problem}\n\nExample tests:\n{tests_str}"
+                return f"{MBPP_INSTRUCTION}\n\n{problem}"
+
+            tokenized_data = []
+            skipped = 0
+            for ex in dataset:
+                question = _build_question(ex)
+                answer   = _as_text(ex.get("code", ""))
+                if not question or not answer:
+                    skipped += 1
+                    continue
+                tok = self._tokenize_question_answer_example(question, answer, max_length=max_length)
+                if tok is None or not any(l != -100 for l in tok.get("labels", [])):
+                    skipped += 1
+                    continue
+                tokenized_data.append(tok)
+
+            if skipped:
+                self.logger.warning(f"Skipped {skipped} samples (empty or no supervised tokens)")
+
+            from datasets import Dataset as HFDataset
+            self.dataset = HFDataset.from_dict({
+                "input_ids":      [d["input_ids"]      for d in tokenized_data],
+                "attention_mask": [d["attention_mask"] for d in tokenized_data],
+                "labels":         [d["labels"]         for d in tokenized_data],
+            })
+            del tokenized_data
+
+            self.logger.info(f"MBPP dataset created ({len(self.dataset)} samples)")
+
+        except Exception as e:
+            self.logger.error(f"Failed to load MBPP data: {str(e)}", exc_info=True)
+            raise
+
+    def _load_mmlu(self):
+        """
+        MMLU 데이터셋 로드 및 SFT 방식 토크나이제이션.
+
+        - dataset: cais/mmlu
+        - subject: all 또는 단일 subject
+        - answer: A/B/C/D 단일 문자 라벨
+        """
+        from datasets import load_dataset, concatenate_datasets
+
+        mmlu_choices = ["A", "B", "C", "D"]
+        mmlu_instruction = (
+            "The following is a multiple choice question. "
+            "Choose the single best answer from A, B, C, or D."
+        )
+        mmlu_all_subjects = [
+            "abstract_algebra", "anatomy", "astronomy", "business_ethics", "clinical_knowledge",
+            "college_biology", "college_chemistry", "college_computer_science", "college_mathematics",
+            "college_medicine", "college_physics", "computer_security", "conceptual_physics",
+            "econometrics", "electrical_engineering", "elementary_mathematics", "formal_logic",
+            "global_facts", "high_school_biology", "high_school_chemistry", "high_school_computer_science",
+            "high_school_european_history", "high_school_geography", "high_school_government_and_politics",
+            "high_school_macroeconomics", "high_school_mathematics", "high_school_microeconomics",
+            "high_school_physics", "high_school_psychology", "high_school_statistics",
+            "high_school_us_history", "high_school_world_history", "human_aging", "human_sexuality",
+            "international_law", "jurisprudence", "logical_fallacies", "machine_learning", "management",
+            "marketing", "medical_genetics", "miscellaneous", "moral_disputes", "moral_scenarios",
+            "nutrition", "philosophy", "prehistory", "professional_accounting", "professional_law",
+            "professional_medicine", "professional_psychology", "public_relations", "security_studies",
+            "sociology", "us_foreign_policy", "virology", "world_religions",
+        ]
+
+        try:
+            subject = getattr(self.args, 'mmlu_subject', 'all')
+            split = getattr(self.args, 'mmlu_split', 'auxiliary_train')
+            max_samples = int(
+                getattr(
+                    self.args,
+                    'mmlu_samples',
+                    getattr(self.args, 'mmlu_train_samples', getattr(self.args, 'num_train_samples', 10000))
+                )
+            )
+            max_length = getattr(self.args, 'max_length', 1024)
+            seed = int(getattr(self.args, 'seed', 42))
+
+            self.logger.info(f"Loading MMLU dataset (subject={subject}, split={split})...")
+
+            if subject == 'all':
+                if split == 'auxiliary_train':
+                    dataset = load_dataset('cais/mmlu', 'all', split='auxiliary_train')
+                else:
+                    ds_list = []
+                    for subj in mmlu_all_subjects:
+                        try:
+                            ds_sub = load_dataset('cais/mmlu', subj, split=split)
+                            ds_list.append(ds_sub)
+                        except Exception as e:
+                            self.logger.warning(f"Skipping MMLU subject {subj}: {e}")
+
+                    if not ds_list:
+                        raise ValueError(f"No MMLU subjects loaded for split={split}")
+                    dataset = concatenate_datasets(ds_list)
+            else:
+                dataset = load_dataset('cais/mmlu', subject, split=split)
+
+            if max_samples > 0 and len(dataset) > max_samples:
+                dataset = dataset.shuffle(seed=seed).select(range(max_samples))
+                self.logger.info(f"✓ Randomly sampled {max_samples} MMLU examples")
+            else:
+                self.logger.info(f"✓ Using all {len(dataset)} MMLU examples")
+
+            tokenized_data = []
+            skipped = 0
+            for idx, row in enumerate(dataset):
+                question = str(row.get('question', '')).strip()
+                choices = row.get('choices', [])
+                answer_idx = row.get('answer')
+
+                if not question or not choices or answer_idx is None:
+                    skipped += 1
+                    continue
+
+                try:
+                    answer_idx = int(answer_idx)
+                except Exception:
+                    skipped += 1
+                    continue
+
+                if answer_idx < 0 or answer_idx >= len(mmlu_choices):
+                    skipped += 1
+                    continue
+
+                choice_lines = []
+                for i in range(min(len(choices), len(mmlu_choices))):
+                    choice_lines.append(f"{mmlu_choices[i]}. {str(choices[i]).strip()}")
+
+                choice_block = "\n".join(choice_lines)
+
+                prompt = (
+                    f"{mmlu_instruction}\n\n"
+                    f"Question: {question}\n\n"
+                    f"{choice_block}"
+                )
+                response = mmlu_choices[answer_idx]
+
+                if idx == 0:
+                    self.logger.info("\n[MMLU Sample #0]")
+                    self.logger.info(f"  Prompt (first 100 chars): {prompt[:100]}...")
+                    self.logger.info(f"  Answer: {response}")
+
+                tokenized_data.append(
+                    self._tokenize_question_answer_example(
+                        prompt,
+                        response,
+                        max_length=max_length,
+                    )
+                )
+
+            if not tokenized_data:
+                raise ValueError("MMLU dataset produced no valid training examples")
+
+            from datasets import Dataset as HFDataset
+            self.dataset = HFDataset.from_dict({
+                "input_ids": [d["input_ids"] for d in tokenized_data],
+                "attention_mask": [d["attention_mask"] for d in tokenized_data],
+                "labels": [d["labels"] for d in tokenized_data],
+            })
+            del tokenized_data
+
+            if skipped:
+                self.logger.warning(f"Skipped {skipped} MMLU rows with invalid format")
+            self.logger.info(f"✓ MMLU dataset created ({len(self.dataset)} samples)")
+
+        except Exception as e:
+            self.logger.error(f"Failed to load MMLU data: {str(e)}", exc_info=True)
+            raise
+
+    def _load_arc(self):
+        """
+        ARC-Challenge 데이터셋 로드 및 SFT 방식으로 토크나이제이션.
+
+        포맷 (allenai/ai2_arc, ARC-Challenge):
+          row["question"]   = 문제
+          row["choices"]    = {"label": [...], "text": [...]}
+          row["answerKey"]  = 정답 레이블 (A/B/C/D 또는 1/2/3/4)
+
+        lm-evaluation-harness의 arc_challenge_chat.yaml과 동일한 포맷으로 변환:
+          Question + choices → user 메시지
+          "The best answer is X" → assistant 메시지 (loss 계산 대상)
+        """
+        from datasets import load_dataset
+
+        ARC_CHAT_PROMPT_TEMPLATE = (
+            'Given the following question and four candidate answers (A, B, C and D), '
+            'choose the best answer.\n'
+            'Question: {question}\n'
+            '{choices}\n'
+            'Your response should end with "The best answer is [the_answer_letter]" '
+            'where the [the_answer_letter] is one of A, B, C or D.'
+        )
+        ARC_GEN_PREFIX = "The best answer is"
+        LETTER_MAP = {"1": "A", "2": "B", "3": "C", "4": "D"}
+
+        def _format_arc_question(question: str, choices: dict) -> str:
+            labels = choices["label"]
+            texts  = choices["text"]
+            choice_lines = []
+            for lbl, txt in zip(labels, texts):
+                letter = LETTER_MAP.get(str(lbl), str(lbl))
+                choice_lines.append(f"{letter}. {txt}")
+            return ARC_CHAT_PROMPT_TEMPLATE.format(
+                question=question.strip(),
+                choices="\n".join(choice_lines),
+            )
+
+        def _get_arc_answer_letter(answer_key: str) -> str:
+            return LETTER_MAP.get(str(answer_key), str(answer_key))
+
+        def _tokenize_arc_example(question_with_choices: str, answer_text: str, max_length: int):
+            question_with_choices = str(question_with_choices).strip()
+            answer_text = str(answer_text).strip()
+
+            if self._is_instruct_model():
+                try:
+                    prompt_text = self.tokenizer.apply_chat_template(
+                        [{"role": "user", "content": question_with_choices}],
+                        tokenize=False,
+                        add_generation_prompt=True,
+                    )
+                    full_text = self.tokenizer.apply_chat_template(
+                        [
+                            {"role": "user", "content": question_with_choices},
+                            {"role": "assistant", "content": answer_text},
+                        ],
+                        tokenize=False,
+                        add_generation_prompt=False,
+                    )
+                    prompt_ids = self.tokenizer(
+                        prompt_text, add_special_tokens=False, truncation=True, max_length=max_length
+                    )["input_ids"]
+                    full_ids = self.tokenizer(
+                        full_text, add_special_tokens=False, truncation=True, max_length=max_length
+                    )["input_ids"]
+                    labels = full_ids.copy()
+                    for i in range(min(len(prompt_ids), len(labels))):
+                        labels[i] = -100
+                    return {
+                        "input_ids": full_ids,
+                        "attention_mask": [1] * len(full_ids),
+                        "labels": labels,
+                    }
+                except Exception as e:
+                    self.logger.warning(
+                        f"Failed to apply chat template for ARC; falling back to plain format. Error: {e}"
+                    )
+
+            # base 모델: plain prompt
+            plain_prompt = f"{question_with_choices}\n{ARC_GEN_PREFIX} "
+            prompt_ids = self.tokenizer(
+                plain_prompt, add_special_tokens=False, truncation=True, max_length=max_length
+            )["input_ids"]
+            remain = max(1, max_length - len(prompt_ids))
+            answer_ids = self.tokenizer(
+                answer_text, add_special_tokens=False, truncation=True, max_length=remain
+            )["input_ids"]
+            if (self.tokenizer.eos_token_id is not None
+                    and (not answer_ids or answer_ids[-1] != self.tokenizer.eos_token_id)
+                    and len(prompt_ids) + len(answer_ids) < max_length):
+                answer_ids = answer_ids + [self.tokenizer.eos_token_id]
+            input_ids = (prompt_ids + answer_ids)[:max_length]
+            labels = ([-100] * len(prompt_ids) + answer_ids)[:max_length]
+            return {
+                "input_ids": input_ids,
+                "attention_mask": [1] * len(input_ids),
+                "labels": labels,
+            }
+
+        try:
+            dataset_name   = getattr(self.args, 'arc_dataset_name',   'allenai/ai2_arc')
+            arc_subset     = getattr(self.args, 'arc_subset',         'ARC-Challenge')
+            arc_split      = getattr(self.args, 'arc_train_split',    'train')
+            max_samples    = getattr(self.args, 'arc_samples',        0)
+            max_length     = getattr(self.args, 'max_length',         1024)
+
+            self.logger.info(
+                f"Loading ARC dataset: {dataset_name} / {arc_subset} / {arc_split} ..."
+            )
+            dataset = load_dataset(dataset_name, arc_subset, split=arc_split)
+
+            if max_samples > 0 and len(dataset) > max_samples:
+                dataset = dataset.select(range(max_samples))
+                self.logger.info(f"Limited to {max_samples} samples")
+            else:
+                self.logger.info(f"Using all {len(dataset)} samples")
+
+            tokenized_data = []
+            skipped = 0
+            for idx, ex in enumerate(dataset):
+                question_str = _format_arc_question(ex["question"], ex["choices"])
+                answer_letter = _get_arc_answer_letter(ex["answerKey"])
+                answer_text   = f"{ARC_GEN_PREFIX} {answer_letter}"
+
+                if idx == 0:
+                    self.logger.info("\n[ARC-Challenge Sample #0]")
+                    self.logger.info(f"  Question (first 100 chars): {question_str[:100]}...")
+                    self.logger.info(f"  Answer: {answer_text}")
+
+                tok = _tokenize_arc_example(question_str, answer_text, max_length)
+                if tok is None or not any(l != -100 for l in tok.get("labels", [])):
+                    skipped += 1
+                    continue
+                tokenized_data.append(tok)
+
+            if skipped:
+                self.logger.warning(f"Skipped {skipped} ARC samples (no supervised tokens)")
+
+            from datasets import Dataset as HFDataset
+            self.dataset = HFDataset.from_dict({
+                "input_ids":      [d["input_ids"]      for d in tokenized_data],
+                "attention_mask": [d["attention_mask"] for d in tokenized_data],
+                "labels":         [d["labels"]         for d in tokenized_data],
+            })
+            del tokenized_data
+
+            self.logger.info(f"ARC-Challenge dataset created ({len(self.dataset)} samples)")
+
+        except Exception as e:
+            self.logger.error(f"Failed to load ARC data: {str(e)}", exc_info=True)
             raise
 
     def _mix_safety_data(self, ratio: float):
@@ -1639,6 +2015,7 @@ class Phase3IncrementalLearner:
                 'metamath': 'MetaMath',
                 'math': 'Hendrycks MATH',
                 'safety': 'Safety (Circuit Breakers)',
+                'mmlu': 'MMLU',
             }
             dataset_name = dataset_name_map.get(phase3_dataset, phase3_dataset)
             

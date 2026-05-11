@@ -1,0 +1,43 @@
+[2026-05-04 21:57:34] [safety_warp] [INFO] ======================================================================
+[2026-05-04 21:57:34] [safety_warp] [INFO] Safety-WaRP-LLM (Fixed - 원본 FSCIL-WaRP 방식)
+[2026-05-04 21:57:34] [safety_warp] [INFO] ======================================================================
+[2026-05-04 21:57:34] [safety_warp] [INFO] Phase: 1
+[2026-05-04 21:57:34] [safety_warp] [INFO] Model: None
+[2026-05-04 21:57:34] [safety_warp] [INFO] Layer types: attn_q,attn_k,attn_v,ffn_down,ffn_up
+[2026-05-04 21:57:34] [safety_warp] [INFO] Target layers: all
+[2026-05-04 21:57:34] [safety_warp] [INFO] ======================================================================
+[2026-05-04 21:57:36] [safety_warp] [INFO] ✓ W&B initialized: project=Safety-WaRP-LLM, run=phase1_20260504_215734
+[2026-05-04 21:57:36] [safety_warp] [INFO] ======================================================================
+[2026-05-04 21:57:36] [safety_warp] [INFO] Starting Phase 1: Basis Construction
+[2026-05-04 21:57:36] [safety_warp] [INFO] ======================================================================
+[2026-05-04 21:57:38] [safety_warp] [INFO] Loading model: Jeesup/llama-2-13b_cb_alpha5_layers10-20_lr1e-4 circuit
+[2026-05-04 21:57:38] [safety_warp] [ERROR] Failed to load model: Repo id must use alphanumeric chars, '-', '_' or '.'. The name cannot start or end with '-' or '.' and the maximum length is 96: 'Jeesup/llama-2-13b_cb_alpha5_layers10-20_lr1e-4 circuit'.
+Traceback (most recent call last):
+  File "/home/korea_bupj/miniconda3/envs/hb/lib/python3.10/site-packages/transformers/utils/hub.py", line 479, in cached_files
+    hf_hub_download(
+  File "/home/korea_bupj/miniconda3/envs/hb/lib/python3.10/site-packages/huggingface_hub/utils/_validators.py", line 106, in _inner_fn
+    validate_repo_id(arg_value)
+  File "/home/korea_bupj/miniconda3/envs/hb/lib/python3.10/site-packages/huggingface_hub/utils/_validators.py", line 160, in validate_repo_id
+    raise HFValidationError(
+huggingface_hub.errors.HFValidationError: Repo id must use alphanumeric chars, '-', '_' or '.'. The name cannot start or end with '-' or '.' and the maximum length is 96: 'Jeesup/llama-2-13b_cb_alpha5_layers10-20_lr1e-4 circuit'.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/NHNHOME/WORKSPACE/26msit001_A/edge_ai_lab/minseong/Safety-WaRP-LLM/models/phase1_basis.py", line 195, in load_model
+    self.model = AutoModelForCausalLM.from_pretrained(
+  File "/home/korea_bupj/miniconda3/envs/hb/lib/python3.10/site-packages/transformers/models/auto/auto_factory.py", line 508, in from_pretrained
+    resolved_config_file = cached_file(
+  File "/home/korea_bupj/miniconda3/envs/hb/lib/python3.10/site-packages/transformers/utils/hub.py", line 322, in cached_file
+    file = cached_files(path_or_repo_id=path_or_repo_id, filenames=[filename], **kwargs)
+  File "/home/korea_bupj/miniconda3/envs/hb/lib/python3.10/site-packages/transformers/utils/hub.py", line 531, in cached_files
+    resolved_files = [
+  File "/home/korea_bupj/miniconda3/envs/hb/lib/python3.10/site-packages/transformers/utils/hub.py", line 532, in <listcomp>
+    _get_cache_file_to_return(path_or_repo_id, filename, cache_dir, revision, repo_type)
+  File "/home/korea_bupj/miniconda3/envs/hb/lib/python3.10/site-packages/transformers/utils/hub.py", line 143, in _get_cache_file_to_return
+    resolved_file = try_to_load_from_cache(
+  File "/home/korea_bupj/miniconda3/envs/hb/lib/python3.10/site-packages/huggingface_hub/utils/_validators.py", line 106, in _inner_fn
+    validate_repo_id(arg_value)
+  File "/home/korea_bupj/miniconda3/envs/hb/lib/python3.10/site-packages/huggingface_hub/utils/_validators.py", line 160, in validate_repo_id
+    raise HFValidationError(
+huggingface_hub.errors.HFValidationError: Repo id must use alphanumeric chars, '-', '_' or '.'. The name cannot start or end with '-' or '.' and the maximum length is 96: 'Jeesup/llama-2-13b_cb_alpha5_layers10-20_lr1e-4 circuit'.

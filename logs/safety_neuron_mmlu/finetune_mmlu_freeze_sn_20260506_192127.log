@@ -1,0 +1,19 @@
+2026-05-06 19:21:27 - __main__ - INFO - ======================================================================
+2026-05-06 19:21:27 - __main__ - INFO - MMLU fine-tuning with safety-neuron freezing
+2026-05-06 19:21:27 - __main__ - INFO - ======================================================================
+2026-05-06 19:21:27 - __main__ - INFO - Log file: ./logs/safety_neuron_mmlu/finetune_mmlu_freeze_sn_20260506_192127.log
+2026-05-06 19:21:27 - __main__ - INFO - Loading tokenizer
+2026-05-06 19:21:27 - __main__ - INFO - Tokenizer loaded from local files
+2026-05-06 19:21:27 - __main__ - INFO - Loading model
+2026-05-06 19:21:30 - __main__ - INFO - Model loaded from local files
+2026-05-06 19:21:30 - __main__ - INFO - Loaded safety neurons from /NHNHOME/WORKSPACE/26msit001_A/edge_ai_lab/minseong/Safety-Neuron/neuron_detection/output_neurons/critical_safety_neuron_20260502_022558.txt (total=11329)
+2026-05-06 19:21:30 - __main__ - INFO - Registered safety-neuron freeze hooks: 160 params
+2026-05-06 19:21:30 - __main__ - INFO - Loading cais/mmlu 'all' auxiliary_train split
+2026-05-06 19:21:32 - __main__ - INFO - Loaded MMLU train rows: 8000
+2026-05-06 19:21:42 - __main__ - INFO - Starting training
+2026-05-06 19:42:52 - __main__ - INFO - Saving fine-tuned model
+2026-05-06 19:43:07 - __main__ - INFO - Config saved to ./llama2_7b_chat_mmlu_freeze_rsn_lr5e-5/finetune_config.json
+2026-05-06 19:43:07 - __main__ - INFO - Starting upload to Hugging Face: kmseong/llama2_7b_chat_mmlu_freeze_rsn_lr5e-5
+2026-05-06 19:43:07 - __main__ - ERROR - Upload failed: No module named 'upload_to_huggingface'
+2026-05-06 19:43:07 - __main__ - ERROR - Model was saved locally; upload manually if needed
+2026-05-06 19:43:07 - __main__ - INFO - Fine-tuning complete

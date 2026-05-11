@@ -1,0 +1,8 @@
+[2026-05-03 05:04:54] [safety_warp] [INFO] ======================================================================
+[2026-05-03 05:04:54] [safety_warp] [INFO] Safety-WaRP-LLM (Fixed - 원본 FSCIL-WaRP 방식)
+[2026-05-03 05:04:54] [safety_warp] [INFO] ======================================================================
+[2026-05-03 05:04:54] [safety_warp] [INFO] Phase: 3
+[2026-05-03 05:04:54] [safety_warp] [INFO] Model: None
+[2026-05-03 05:04:54] [safety_warp] [INFO] Layer types: attn_q,attn_k,attn_v,ffn_down,ffn_up
+[2026-05-03 05:04:54] [safety_warp] [INFO] Target layers: all
+[2026-05-03 05:04:54] [safety_warp] [INFO] ======================================================================

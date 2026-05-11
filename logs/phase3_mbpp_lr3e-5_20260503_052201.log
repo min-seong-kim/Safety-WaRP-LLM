@@ -1,0 +1,27 @@
+[2026-05-03 05:22:02] [safety_warp] [INFO] ======================================================================
+[2026-05-03 05:22:02] [safety_warp] [INFO] Safety-WaRP-LLM (Fixed - 원본 FSCIL-WaRP 방식)
+[2026-05-03 05:22:02] [safety_warp] [INFO] ======================================================================
+[2026-05-03 05:22:02] [safety_warp] [INFO] Phase: 3
+[2026-05-03 05:22:02] [safety_warp] [INFO] Model: None
+[2026-05-03 05:22:02] [safety_warp] [INFO] Layer types: attn_q,attn_k,attn_v,ffn_down,ffn_up
+[2026-05-03 05:22:02] [safety_warp] [INFO] Target layers: all
+[2026-05-03 05:22:02] [safety_warp] [INFO] ======================================================================
+wandb: Currently logged in as: augustinlib (data-intelligence-lab) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: WARNING Using a boolean value for 'reinit' is deprecated. Use 'return_previous' or 'finish_previous' instead.
+wandb: setting up run d8wkzqdr
+wandb: Tracking run with wandb version 0.23.0
+wandb: Run data is saved locally in /NHNHOME/WORKSPACE/26msit001_A/edge_ai_lab/minseong/Safety-WaRP-LLM/wandb/run-20260503_052203-d8wkzqdr
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run phase3_20260503_052202
+wandb: ⭐️ View project at https://wandb.ai/data-intelligence-lab/Safety-WaRP-LLM
+wandb: 🚀 View run at https://wandb.ai/data-intelligence-lab/Safety-WaRP-LLM/runs/d8wkzqdr
+[2026-05-03 05:22:04] [safety_warp] [INFO] ✓ W&B initialized: project=Safety-WaRP-LLM, run=phase3_20260503_052202
+[2026-05-03 05:22:04] [safety_warp] [INFO] ======================================================================
+[2026-05-03 05:22:04] [safety_warp] [INFO] Starting Phase 3: Incremental Learning (Fixed)
+[2026-05-03 05:22:04] [safety_warp] [INFO] Mode: non_freeze_warp
+[2026-05-03 05:22:04] [safety_warp] [INFO] ======================================================================
+[2026-05-03 05:22:05] [safety_warp] [INFO] Loading basis from /NHNHOME/WORKSPACE/26msit001_A/edge_ai_lab/minseong/minseong_results/checkpoints/Llama-2-7b-chat-hf/warp/checkpoints/llama2_7b_chat/phase1_20260503_013034/basis...
+[2026-05-03 05:22:17] [safety_warp] [INFO] ✓ Basis loaded: 160 combinations
+[2026-05-03 05:22:17] [safety_warp] [INFO] Loading masks from /NHNHOME/WORKSPACE/26msit001_A/edge_ai_lab/minseong/minseong_results/checkpoints/Llama-2-7b-chat-hf/warp/checkpoints/llama2_7b_chat/phase2_20260503_015121/checkpoints/masks...
+[2026-05-03 05:22:17] [safety_warp] [INFO] ✓ Mask metadata loaded:
+[2026-05-03 05:22:17] [safety_warp] [INFO]   - Keep ratio: 0.1

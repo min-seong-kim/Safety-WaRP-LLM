@@ -8,7 +8,7 @@
 
 set -e
 set -o pipefail
-export CUDA_VISIBLE_DEVICES=1
+export CUDA_VISIBLE_DEVICES=7
 
 echo "========================================================================"
 echo "Phase 2 + 3: Original-Space Importance Mask Pipeline"
@@ -19,13 +19,13 @@ echo ""
 # Configuration
 # ========================================================================
 
-PHASE0_MODEL="kmseong/llama2_7b-Safety-FT-lr3e-5"  
+PHASE0_MODEL="kmseong/llama2_7b-chat-Safety-FT-lr5e-5"  
 
 # Phase 2 (importance)
 PHASE2_DATASET="circuit_breakers"   # circuit_breakers | wikipedia
 PHASE2_SAMPLES=4994
 PHASE2_WIKIPEDIA_SAMPLES=4994
-KEEP_RATIO_LIST=("0.31" "0.62")   # 두 모델: 10% freeze vs 90% freeze
+KEEP_RATIO_LIST=("0.25")   # 두 모델: 10% freeze vs 90% freeze
 
 # Phase 3 (downstream)
 PHASE3_DATASET="gsm8k"              # safety | gsm8k | metamath | math | agnews
@@ -50,7 +50,7 @@ LR_SCHEDULER="cosine"
 BASE_WEIGHT_DECAY=0.01
 MAX_LENGTH=1024
 
-LAYER_TYPE="attn_q,attn_k,attn_v,attn_o,ffn_gate,ffn_down,ffn_up"
+LAYER_TYPE="attn_q,attn_k,attn_v,ffn_down,ffn_up"
 TARGET_LAYERS="all"
 OUTPUT_DIR="./checkpoints"
 LOG_DIR="./logs"

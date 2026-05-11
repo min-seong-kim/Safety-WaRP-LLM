@@ -8,19 +8,22 @@ Usage:
 export HF_TOKEN=hf_xxx
 
 python upload_to_huggingface.py \
-    --model_path /home/yonsei_jong/Safety-WaRP-LLM/medqa_eval/llama2_7b_chat_SSFT_medqa_FT_lr3e-5 \
-    --hf_model_id kmseong/llama2_7b_chat-SSFT-MEDQA-FT-lr3e-5 \
-    --no_timestamp
+    --model_path /NHNHOME/WORKSPACE/26msit001_A/edge_ai_lab/minseong/Safety-WaRP-LLM/checkpoints/phase3_original_space_20260507_201233/final_model \
+    --hf_model_id kmseong/llama2-7b-chat-original-space-freeze-p20-lr5e-5 \
+    --no_timestamp \
+    --hf_token 
 
 python upload_to_huggingface.py \
-    --model_path ./checkpoints/warp_safelora_20260427_000614/merged_model \
-    --hf_model_id kmseong/llama2_7b_base-WaRP-safelora-freeze_lr2e-4
-    --no_timestamp
+    --model_path /NHNHOME/WORKSPACE/26msit001_A/edge_ai_lab/minseong/Safety-WaRP-LLM/checkpoints/phase3_original_space_20260507_200459/final_model \
+    --hf_model_id kmseong/llama2-7b-chat-original-space-freeze-p25-lr5e-5 \
+    --no_timestamp \
+    --hf_token 
 
 python upload_to_huggingface.py \
-    --model_path ./checkpoints/phase3_non_freeze_20260501_150227/final_model \
-    --hf_model_id kmseong/llama2_7b-SSFT-WaRP_medqa_FT_lr1e-5_fix \
-    --no_timestamp
+    --model_path  /NHNHOME/WORKSPACE/26msit001_A/edge_ai_lab/minseong/Safety-WaRP-LLM/checkpoints/phase3_original_space_20260507_200648/final_model \
+    --hf_model_id kmseong/llama2-7b-chat-original-space-freeze-p40-lr5e-5 \
+    --no_timestamp \
+    --hf_token 
 
 
 """

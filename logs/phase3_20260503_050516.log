@@ -1,0 +1,19 @@
+[2026-05-03 05:05:16] [safety_warp] [INFO] ======================================================================
+[2026-05-03 05:05:16] [safety_warp] [INFO] Safety-WaRP-LLM (Fixed - 원본 FSCIL-WaRP 방식)
+[2026-05-03 05:05:16] [safety_warp] [INFO] ======================================================================
+[2026-05-03 05:05:16] [safety_warp] [INFO] Phase: 3
+[2026-05-03 05:05:16] [safety_warp] [INFO] Model: None
+[2026-05-03 05:05:16] [safety_warp] [INFO] Layer types: attn_q,attn_k,attn_v,ffn_down,ffn_up
+[2026-05-03 05:05:16] [safety_warp] [INFO] Target layers: all
+[2026-05-03 05:05:16] [safety_warp] [INFO] ======================================================================
+[2026-05-03 05:05:18] [safety_warp] [INFO] ✓ W&B initialized: project=Safety-WaRP-LLM, run=phase3_20260503_050516
+[2026-05-03 05:05:18] [safety_warp] [INFO] ======================================================================
+[2026-05-03 05:05:18] [safety_warp] [INFO] Starting Phase 3: Incremental Learning (Fixed)
+[2026-05-03 05:05:18] [safety_warp] [INFO] Mode: non_freeze_warp
+[2026-05-03 05:05:18] [safety_warp] [INFO] ======================================================================
+[2026-05-03 05:05:19] [safety_warp] [INFO] Loading basis from /NHNHOME/WORKSPACE/26msit001_A/edge_ai_lab/minseong/minseong_results/checkpoints/Llama-2-7b-chat-hf/warp/checkpoints/llama2_7b_chat/phase1_20260503_013034...
+[2026-05-03 05:05:19] [safety_warp] [ERROR] Failed to load basis: [Errno 2] No such file or directory: '/NHNHOME/WORKSPACE/26msit001_A/edge_ai_lab/minseong/minseong_results/checkpoints/Llama-2-7b-chat-hf/warp/checkpoints/llama2_7b_chat/phase1_20260503_013034/metadata.json'
+Traceback (most recent call last):
+  File "/NHNHOME/WORKSPACE/26msit001_A/edge_ai_lab/minseong/Safety-WaRP-LLM/models/phase3_extra_learning.py", line 258, in load_basis
+    with open(metadata_path, 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/NHNHOME/WORKSPACE/26msit001_A/edge_ai_lab/minseong/minseong_results/checkpoints/Llama-2-7b-chat-hf/warp/checkpoints/llama2_7b_chat/phase1_20260503_013034/metadata.json'
