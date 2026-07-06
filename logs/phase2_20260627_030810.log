@@ -1,0 +1,44 @@
+[2026-06-27 03:08:10] [safety_warp] [INFO] ======================================================================
+[2026-06-27 03:08:10] [safety_warp] [INFO] Safety-WaRP-LLM (Fixed - 원본 FSCIL-WaRP 방식)
+[2026-06-27 03:08:10] [safety_warp] [INFO] ======================================================================
+[2026-06-27 03:08:10] [safety_warp] [INFO] Phase: 2
+[2026-06-27 03:08:10] [safety_warp] [INFO] Model: None
+[2026-06-27 03:08:10] [safety_warp] [INFO] Layer types: attn_q,attn_k,attn_v,ffn_down,ffn_up
+[2026-06-27 03:08:10] [safety_warp] [INFO] Target layers: all
+[2026-06-27 03:08:10] [safety_warp] [INFO] ======================================================================
+[2026-06-27 03:08:12] [safety_warp] [INFO] ✓ W&B initialized: project=Safety-WaRP-LLM, run=phase2_20260627_030810
+[2026-06-27 03:08:12] [safety_warp] [INFO] ======================================================================
+[2026-06-27 03:08:12] [safety_warp] [INFO] Starting Phase 2: Importance Scoring (Fixed)
+[2026-06-27 03:08:12] [safety_warp] [INFO] ======================================================================
+[2026-06-27 03:08:12] [safety_warp] [INFO] Loading basis from ./checkpoints/phase1_20260626_222115/basis...
+[2026-06-27 03:08:12] [safety_warp] [INFO] ✓ Metadata loaded:
+[2026-06-27 03:08:12] [safety_warp] [INFO]   - Layer types: ['attn_k', 'attn_q', 'attn_v', 'ffn_down', 'ffn_up']
+[2026-06-27 03:13:23] [safety_warp] [INFO] ✓ Basis loaded: 320 (layer, type) combinations
+[2026-06-27 03:13:24] [safety_warp] [INFO] Loading Phase 0 trained model from kmseong/qwen2_5_32b_instruct_SSFT-lr5e-5...
+[2026-06-27 03:13:33] [safety_warp] [INFO] ✓ Phase 0 model loaded
+[2026-06-27 03:13:34] [safety_warp] [INFO] ✓ Tokenizer loaded
+[2026-06-27 03:13:34] [safety_warp] [INFO]   - Input formatting: chat template
+[2026-06-27 03:13:34] [safety_warp] [INFO] Converting to WaRP modules...
+[2026-06-27 03:13:35] [safety_warp] [INFO] ✓ Conversion completed
+[2026-06-27 03:13:35] [safety_warp] [INFO] Reparameterizing weights to basis space...
+[2026-06-27 03:13:35] [safety_warp] [INFO] ======================================================================
+[2026-06-27 03:14:48] [safety_warp] [INFO] ======================================================================
+[2026-06-27 03:14:48] [safety_warp] [INFO] ✓ Reparameterization completed: 320 modules
+[2026-06-27 03:14:48] [safety_warp] [INFO] Loading circuit_breakers data from ./data/circuit_breakers_train.json...
+[2026-06-27 03:14:48] [safety_warp] [INFO] ✓ Loaded 4994 samples
+[2026-06-27 03:14:48] [safety_warp] [INFO] ✓ Dataloader created (2497 batches)
+[2026-06-27 03:14:48] [safety_warp] [INFO]   - Input format: chat template user/assistant pairs
+[2026-06-27 03:14:48] [safety_warp] [INFO] ======================================================================
+[2026-06-27 03:14:48] [safety_warp] [INFO] Phase 2: Importance Scoring (Per-layer keep_ratio)
+[2026-06-27 03:14:48] [safety_warp] [INFO] ======================================================================
+[2026-06-27 03:14:48] [safety_warp] [INFO] ✅ model.eval() 모드 - 파라미터 업데이트 없음
+[2026-06-27 03:14:48] [safety_warp] [INFO] ✅ Gradient만 계산하여 importance 측정
+[2026-06-27 03:14:48] [safety_warp] [INFO] ======================================================================
+[2026-06-27 03:14:48] [safety_warp] [INFO] ✓ Model set to eval mode (파라미터 변경 없음)
+[2026-06-27 03:14:48] [safety_warp] [INFO] ✓ Found 320 WaRP modules
+[2026-06-27 03:14:48] [safety_warp] [INFO] ✓ Trainable params in Phase 2: 20,468,203,520/32,763,417,600 (62.47%)
+[2026-06-27 03:14:51] [safety_warp] [ERROR] Failed to compute importance: CUDA out of memory. Tried to allocate 540.00 MiB. GPU 0 has a total capacity of 178.35 GiB of which 373.94 MiB is free. Including non-PyTorch memory, this process has 177.97 GiB memory in use. Of the allocated memory 176.14 GiB is allocated by PyTorch, and 1.01 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+Traceback (most recent call last):
+  File "/NHNHOME/26msit001_A/edge_ai_lab/minseong/Safety-WaRP-LLM/models/phase2_importance_per_layer.py", line 967, in compute_importance
+    importances[module] = grad_abs.clone()
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 540.00 MiB. GPU 0 has a total capacity of 178.35 GiB of which 373.94 MiB is free. Including non-PyTorch memory, this process has 177.97 GiB memory in use. Of the allocated memory 176.14 GiB is allocated by PyTorch, and 1.01 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)

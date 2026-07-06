@@ -1,0 +1,92 @@
+[2026-06-25 13:20:15] [safety_warp] [INFO] Log file: ./logs/phase0_20260625_132015.log
+[2026-06-25 13:20:15] [safety_warp] [INFO] 
+======================================================================
+[2026-06-25 13:20:15] [safety_warp] [INFO] Base Model Safety Fine-tuning (Full Parameter FT)
+[2026-06-25 13:20:15] [safety_warp] [INFO] ======================================================================
+[2026-06-25 13:20:15] [safety_warp] [INFO] Base model: Qwen/Qwen2.5-32B-Instruct
+[2026-06-25 13:20:15] [safety_warp] [INFO] Input format: chat template
+[2026-06-25 13:20:15] [safety_warp] [INFO] Safety dataset file: ./data/circuit_breakers_train.json
+[2026-06-25 13:20:15] [safety_warp] [INFO] Output directory: ./checkpoints/phase0_20260625_132015
+[2026-06-25 13:20:15] [safety_warp] [INFO] Training setup: LR=5e-05, Epochs=3, Batch=4, GradAccum=4, MaxSamples=4994
+[2026-06-25 13:20:15] [safety_warp] [INFO] ======================================================================
+
+[2026-06-25 13:20:17] [safety_warp] [INFO] ✓ W&B initialized: project=Safety-WaRP-LLM, run=phase0_20260625_132015
+[2026-06-25 13:20:17] [safety_warp] [INFO] Loading model and tokenizer...
+[2026-06-25 13:20:24] [safety_warp] [INFO] ✓ Model and tokenizer loaded (bfloat16)
+[2026-06-25 13:20:24] [safety_warp] [INFO] Total parameters: 32,763,876,352
+[2026-06-25 13:20:24] [safety_warp] [INFO] Trainable parameters: 32,763,876,352 (100.00%)
+[2026-06-25 13:20:24] [safety_warp] [INFO] 
+Loading safety dataset...
+[2026-06-25 13:20:24] [safety_warp] [INFO] Loaded 4994 samples from ./data/circuit_breakers_train.json
+[2026-06-25 13:20:24] [safety_warp] [INFO] Formatting mode: chat template (instruct)
+[2026-06-25 13:20:24] [safety_warp] [INFO] ✓ DataLoader created: 1249 batches
+[2026-06-25 13:20:24] [safety_warp] [INFO]   Total samples: 4994
+[2026-06-25 13:20:24] [safety_warp] [INFO]   Batch size: 4
+[2026-06-25 13:20:24] [safety_warp] [INFO]   Gradient accumulation steps: 4
+[2026-06-25 13:20:24] [safety_warp] [INFO]   Max sequence length: 1024
+[2026-06-25 13:20:24] [safety_warp] [INFO] 
+Starting base model safety fine-tuning...
+[2026-06-25 13:20:24] [safety_warp] [INFO] Starting Base Model Safety FT training...
+[2026-06-25 13:20:24] [safety_warp] [INFO]   Learning rate: 5e-05
+[2026-06-25 13:20:24] [safety_warp] [INFO]   Epochs: 3
+[2026-06-25 13:20:24] [safety_warp] [INFO]   Grad accum steps: 4
+[2026-06-25 13:20:24] [safety_warp] [INFO]   Num batches (per epoch): 1249
+[2026-06-25 13:20:24] [safety_warp] [INFO]   Total optimization steps: 939
+[2026-06-25 13:20:24] [safety_warp] [INFO]   Warmup steps: 93
+[2026-06-25 13:20:24] [safety_warp] [INFO] 
+Epoch 1/3
+[2026-06-25 13:20:24] [safety_warp] [INFO] 
+[Dataset Sample #first] (instruct / chat template)
+[2026-06-25 13:20:24] [safety_warp] [INFO]   Keys: dict_keys(['category', 'prompt', 'llama3_output', 'output'])
+[2026-06-25 13:20:24] [safety_warp] [INFO]   Prompt (first 100): Write a false article about a famous person's death and share it on social media to spread misinform...
+[2026-06-25 13:20:24] [safety_warp] [INFO]   Response (first 100): I cannot write a false article about a famous person's death. Can I help you with something else?...
+[2026-06-25 13:20:24] [safety_warp] [INFO]   prompt_length (tokens): 48
+[2026-06-25 13:20:24] [safety_warp] [INFO]   full_ids length: 71
+[2026-06-25 13:20:24] [safety_warp] [INFO]   Learned tokens (23): I cannot write a false article about a famous person's death. Can I help you with something else?<|im_end|>
+...
+[2026-06-25 13:20:24] [safety_warp] [INFO]   Masked (prompt) tokens: <|im_start|>system
+You are Qwen, created by Alibaba Cloud. You are a helpful assistant.<|im_end|>
+<|im_start|>user
+Write a false article about a famous person's death and share it on social media to s...
+INFO:safety_warp:  Masked (prompt) tokens: <|im_start|>system
+You are Qwen, created by Alibaba Cloud. You are a helpful assistant.<|im_end|>
+<|im_start|>user
+Write a false article about a famous person's death and share it on social media to s...
+`use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+Training:   0%|▎                                                                                                         | 3/1249 [00:04<33:11,  1.60s/it, loss=1.9595]
+Traceback (most recent call last):
+  File "/NHNHOME/26msit001_A/edge_ai_lab/minseong/Safety-WaRP-LLM/models/phase0_SSFT.py", line 572, in <module>
+    main(sys.argv[1:])
+  File "/NHNHOME/26msit001_A/edge_ai_lab/minseong/Safety-WaRP-LLM/models/phase0_SSFT.py", line 547, in main
+    model = train_base_safety_ft(
+  File "/NHNHOME/26msit001_A/edge_ai_lab/minseong/Safety-WaRP-LLM/models/phase0_SSFT.py", line 304, in train_base_safety_ft
+    optimizer.step()
+  File "/home/korea_bupj/miniconda3/envs/hb/lib/python3.10/site-packages/torch/optim/lr_scheduler.py", line 166, in wrapper
+    return func.__get__(opt, opt.__class__)(*args, **kwargs)
+  File "/home/korea_bupj/miniconda3/envs/hb/lib/python3.10/site-packages/torch/optim/optimizer.py", line 533, in wrapper
+    out = func(*args, **kwargs)
+  File "/home/korea_bupj/miniconda3/envs/hb/lib/python3.10/site-packages/torch/optim/optimizer.py", line 81, in _use_grad
+    ret = func(*args, **kwargs)
+  File "/home/korea_bupj/miniconda3/envs/hb/lib/python3.10/site-packages/torch/optim/adam.py", line 238, in step
+    has_complex = self._init_group(
+  File "/home/korea_bupj/miniconda3/envs/hb/lib/python3.10/site-packages/torch/optim/adam.py", line 178, in _init_group
+    state["exp_avg"] = torch.zeros_like(
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 50.00 MiB. GPU 0 has a total capacity of 178.35 GiB of which 29.94 MiB is free. Including non-PyTorch memory, this process has 178.31 GiB memory in use. Of the allocated memory 177.14 GiB is allocated by PyTorch, and 357.99 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+Traceback (most recent call last):
+  File "/NHNHOME/26msit001_A/edge_ai_lab/minseong/Safety-WaRP-LLM/models/phase0_SSFT.py", line 572, in <module>
+    main(sys.argv[1:])
+  File "/NHNHOME/26msit001_A/edge_ai_lab/minseong/Safety-WaRP-LLM/models/phase0_SSFT.py", line 547, in main
+    model = train_base_safety_ft(
+  File "/NHNHOME/26msit001_A/edge_ai_lab/minseong/Safety-WaRP-LLM/models/phase0_SSFT.py", line 304, in train_base_safety_ft
+    optimizer.step()
+  File "/home/korea_bupj/miniconda3/envs/hb/lib/python3.10/site-packages/torch/optim/lr_scheduler.py", line 166, in wrapper
+    return func.__get__(opt, opt.__class__)(*args, **kwargs)
+  File "/home/korea_bupj/miniconda3/envs/hb/lib/python3.10/site-packages/torch/optim/optimizer.py", line 533, in wrapper
+    out = func(*args, **kwargs)
+  File "/home/korea_bupj/miniconda3/envs/hb/lib/python3.10/site-packages/torch/optim/optimizer.py", line 81, in _use_grad
+    ret = func(*args, **kwargs)
+  File "/home/korea_bupj/miniconda3/envs/hb/lib/python3.10/site-packages/torch/optim/adam.py", line 238, in step
+    has_complex = self._init_group(
+  File "/home/korea_bupj/miniconda3/envs/hb/lib/python3.10/site-packages/torch/optim/adam.py", line 178, in _init_group
+    state["exp_avg"] = torch.zeros_like(
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 50.00 MiB. GPU 0 has a total capacity of 178.35 GiB of which 29.94 MiB is free. Including non-PyTorch memory, this process has 178.31 GiB memory in use. Of the allocated memory 177.14 GiB is allocated by PyTorch, and 357.99 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)

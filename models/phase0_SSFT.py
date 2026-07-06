@@ -9,11 +9,7 @@ Goal:
   - Fine-tune all model parameters on the same safety dataset
 
 Usage:
-<<<<<<< HEAD
-python models/phase0_SSFT.py --model_name meta-llama/Llama-3.1-8B
-=======
-python models/phase0_SSFT.py --model_name meta-llama/Llama-3.1-8B-Instruct
->>>>>>> 16808b457bb867c9f3463304b1b13b9ce6abc568
+python models/phase0_SSFT.py --model_name Qwen/Qwen2.5-32B-Instruct
 
 python Safety-WaRP-LLM/models/phase0_SSFT.py --model_name meta-llama/Llama-2-13b-chat-hf
 
@@ -34,11 +30,12 @@ from tqdm import tqdm
 import logging
 import math
 
-<<<<<<< HEAD
-os.environ["CUDA_VISIBLE_DEVICES"] = "7"
-=======
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
->>>>>>> 16808b457bb867c9f3463304b1b13b9ce6abc568
+os.environ["CUDA_VISIBLE_DEVICES"] = "2,3"
+
+# cuDNN attention 백엔드는 일부 head_dim/gradient_checkpointing/torch nightly 조합에서
+# "No valid execution plans built" 오류를 냄. cuDNN SDP만 끄면 SDPA가 flash/mem-efficient/
+# math 커널로 폴백하므로 성능 손해 없이 동작한다.
+torch.backends.cuda.enable_cudnn_sdp(False)
 
 # 로거는 main()에서 setup_logger로 초기화됨
 # 모듈 레벨 fallback (직접 import 시)
@@ -49,15 +46,11 @@ logger = logging.getLogger('safety_warp')
 # =====================================================================
 # Configuration (matched to sn_tune.py)
 # =====================================================================
-<<<<<<< HEAD
 MODEL_NAME = "meta-llama/Llama-3.1-8B"  # Base 모델 (Phase 0) - WaRP 제거 전 모델 사용
-=======
-MODEL_NAME = "meta-llama/Llama-3.1-8B-Instruct"  # Base 모델 (Phase 0) - WaRP 제거 전 모델 사용
->>>>>>> 16808b457bb867c9f3463304b1b13b9ce6abc568
 
 LEARNING_RATE = 5e-5
 NUM_EPOCHS = 3
-BATCH_SIZE = 4
+BATCH_SIZE = 1
 GRAD_ACCUM_STEPS = 4
 MAX_SEQ_LENGTH = 1024
 MAX_SAMPLES = 4994
@@ -246,6 +239,7 @@ def train_base_safety_ft(
     grad_accum_steps=4,
     warmup_ratio=0.1,
     device=DEVICE,
+    use_8bit_optim=False,
 ):
     # device_map="auto"로 로드된 모델은 .to(device) 호출 불필요
     # LoRA(PEFT) 모델에서 gradient checkpointing 사용 시 enable_input_require_grads() 필요
@@ -253,7 +247,15 @@ def train_base_safety_ft(
     model.gradient_checkpointing_enable()
     model.train()
 
-    optimizer = AdamW(model.parameters(), lr=learning_rate, weight_decay=0.01)
+    if use_8bit_optim:
+        # 8-bit AdamW: 옵티마이저 상태(m, v)를 8-bit로 저장해 메모리를 ~1/4로 절감.
+        # 32B full-FT처럼 옵티마이저 상태가 OOM의 주원인일 때 사용.
+        from bitsandbytes.optim import AdamW8bit
+        optimizer = AdamW8bit(model.parameters(), lr=learning_rate, weight_decay=0.01)
+        logger.info("Optimizer: 8-bit AdamW (bitsandbytes)")
+    else:
+        optimizer = AdamW(model.parameters(), lr=learning_rate, weight_decay=0.01)
+        logger.info("Optimizer: AdamW (fp/bf full-state)")
 
     total_optimization_steps = num_epochs * math.ceil(len(train_dataloader) / grad_accum_steps)
     warmup_steps = int(total_optimization_steps * warmup_ratio)
@@ -400,6 +402,10 @@ def parse_args(argv):
                         help='W&B 로깅 비활성화')
     parser.add_argument('--log_dir', type=str, default='./logs',
                         help='로그 파일 저장 디렉토리')
+    # 옵티마이저 옵션
+    parser.add_argument('--optim_8bit', action='store_true',
+                        help='8-bit AdamW(bitsandbytes) 사용하여 옵티마이저 상태 메모리 절감 '
+                             '(대형 모델 full-FT OOM 회피용)')
     # LoRA 옵션
     parser.add_argument('--lora', action='store_true',
                         help='LoRA를 사용하여 학습 (peft 필요)')
@@ -558,6 +564,7 @@ def main(argv):
         num_epochs=NUM_EPOCHS,
         grad_accum_steps=GRAD_ACCUM_STEPS,
         device=DEVICE,
+        use_8bit_optim=args.optim_8bit,
     )
 
     logger.info("\nSaving fine-tuned model...")

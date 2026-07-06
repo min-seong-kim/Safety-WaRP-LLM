@@ -1,0 +1,580 @@
+[2026-06-29 21:47:18] [safety_warp] [INFO] ======================================================================
+[2026-06-29 21:47:18] [safety_warp] [INFO] Safety-WaRP-LLM (Fixed - 원본 FSCIL-WaRP 방식)
+[2026-06-29 21:47:18] [safety_warp] [INFO] ======================================================================
+[2026-06-29 21:47:18] [safety_warp] [INFO] Phase: 3
+[2026-06-29 21:47:18] [safety_warp] [INFO] Model: None
+[2026-06-29 21:47:18] [safety_warp] [INFO] Layer types: attn_q,attn_k,attn_v,ffn_down,ffn_up
+[2026-06-29 21:47:18] [safety_warp] [INFO] Target layers: all
+[2026-06-29 21:47:18] [safety_warp] [INFO] ======================================================================
+[2026-06-29 21:47:20] [safety_warp] [INFO] ✓ W&B initialized: project=Safety-WaRP-LLM, run=phase3_20260629_214718
+[2026-06-29 21:47:20] [safety_warp] [INFO] ======================================================================
+[2026-06-29 21:47:20] [safety_warp] [INFO] Starting Phase 3: Incremental Learning (Fixed)
+[2026-06-29 21:47:20] [safety_warp] [INFO] Mode: non_freeze_warp
+[2026-06-29 21:47:20] [safety_warp] [INFO] ======================================================================
+[2026-06-29 21:47:23] [safety_warp] [INFO] Loading basis from ./checkpoints/phase1_20260629_212448/basis...
+[2026-06-29 21:47:33] [safety_warp] [INFO] ✓ Basis loaded: 160 combinations
+[2026-06-29 21:47:33] [safety_warp] [INFO] Loading masks from ./checkpoints/phase2_20260629_214623/checkpoints/masks...
+[2026-06-29 21:47:33] [safety_warp] [INFO] ✓ Mask metadata loaded:
+[2026-06-29 21:47:33] [safety_warp] [INFO]   - Keep ratio: 0.1
+[2026-06-29 21:47:56] [safety_warp] [INFO] ✓ Masks loaded: 160 combinations
+[2026-06-29 21:47:56] [safety_warp] [INFO] Loading Phase 0 model from kmseong/llama2_7b-chat-Safety-FT-lr5e-5...
+[2026-06-29 21:47:59] [safety_warp] [INFO] ✓ Model loaded
+[2026-06-29 21:47:59] [safety_warp] [INFO] Converting to WaRP modules...
+[2026-06-29 21:48:00] [safety_warp] [INFO] ✓ Tokenizer loaded
+[2026-06-29 21:48:00] [safety_warp] [INFO]   - Input formatting: chat template
+[2026-06-29 21:48:00] [safety_warp] [INFO] ======================================================================
+[2026-06-29 21:48:00] [safety_warp] [INFO] Setting up WaRP modules with basis and masks
+[2026-06-29 21:48:00] [safety_warp] [INFO] ======================================================================
+[2026-06-29 21:48:00] [safety_warp] [INFO] Layer 0 (attn_q):
+[2026-06-29 21:48:00] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:00] [safety_warp] [INFO]   ✓ mask: Frozen 1682506/16777216 (10.0%)
+[2026-06-29 21:48:00] [safety_warp] [INFO] Layer 0 (attn_k):
+[2026-06-29 21:48:00] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:00] [safety_warp] [INFO]   ✓ mask: Frozen 1680559/16777216 (10.0%)
+[2026-06-29 21:48:00] [safety_warp] [INFO] Layer 0 (attn_v):
+[2026-06-29 21:48:00] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:00] [safety_warp] [INFO]   ✓ mask: Frozen 1678239/16777216 (10.0%)
+[2026-06-29 21:48:00] [safety_warp] [INFO] Layer 0 (ffn_down):
+[2026-06-29 21:48:00] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-06-29 21:48:00] [safety_warp] [INFO]   ✓ mask: Frozen 4511265/45088768 (10.0%)
+[2026-06-29 21:48:00] [safety_warp] [INFO] Layer 0 (ffn_up):
+[2026-06-29 21:48:00] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-06-29 21:48:00] [safety_warp] [INFO]   ✓ mask: Frozen 4525343/45088768 (10.0%)
+[2026-06-29 21:48:00] [safety_warp] [INFO] Layer 1 (attn_q):
+[2026-06-29 21:48:00] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:00] [safety_warp] [INFO]   ✓ mask: Frozen 1681261/16777216 (10.0%)
+[2026-06-29 21:48:00] [safety_warp] [INFO] Layer 1 (attn_k):
+[2026-06-29 21:48:00] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:00] [safety_warp] [INFO]   ✓ mask: Frozen 1679031/16777216 (10.0%)
+[2026-06-29 21:48:00] [safety_warp] [INFO] Layer 1 (attn_v):
+[2026-06-29 21:48:00] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:00] [safety_warp] [INFO]   ✓ mask: Frozen 1679124/16777216 (10.0%)
+[2026-06-29 21:48:00] [safety_warp] [INFO] Layer 1 (ffn_down):
+[2026-06-29 21:48:00] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-06-29 21:48:00] [safety_warp] [INFO]   ✓ mask: Frozen 4531020/45088768 (10.0%)
+[2026-06-29 21:48:00] [safety_warp] [INFO] Layer 1 (ffn_up):
+[2026-06-29 21:48:00] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-06-29 21:48:00] [safety_warp] [INFO]   ✓ mask: Frozen 4554488/45088768 (10.1%)
+[2026-06-29 21:48:00] [safety_warp] [INFO] Layer 2 (attn_q):
+[2026-06-29 21:48:00] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:00] [safety_warp] [INFO]   ✓ mask: Frozen 1685300/16777216 (10.0%)
+[2026-06-29 21:48:00] [safety_warp] [INFO] Layer 2 (attn_k):
+[2026-06-29 21:48:00] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:00] [safety_warp] [INFO]   ✓ mask: Frozen 1697869/16777216 (10.1%)
+[2026-06-29 21:48:01] [safety_warp] [INFO] Layer 2 (attn_v):
+[2026-06-29 21:48:01] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:01] [safety_warp] [INFO]   ✓ mask: Frozen 1693055/16777216 (10.1%)
+[2026-06-29 21:48:01] [safety_warp] [INFO] Layer 2 (ffn_down):
+[2026-06-29 21:48:01] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-06-29 21:48:01] [safety_warp] [INFO]   ✓ mask: Frozen 4550089/45088768 (10.1%)
+[2026-06-29 21:48:01] [safety_warp] [INFO] Layer 2 (ffn_up):
+[2026-06-29 21:48:01] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-06-29 21:48:01] [safety_warp] [INFO]   ✓ mask: Frozen 4520934/45088768 (10.0%)
+[2026-06-29 21:48:01] [safety_warp] [INFO] Layer 3 (attn_q):
+[2026-06-29 21:48:01] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:01] [safety_warp] [INFO]   ✓ mask: Frozen 1700658/16777216 (10.1%)
+[2026-06-29 21:48:01] [safety_warp] [INFO] Layer 3 (attn_k):
+[2026-06-29 21:48:01] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:01] [safety_warp] [INFO]   ✓ mask: Frozen 1678831/16777216 (10.0%)
+[2026-06-29 21:48:01] [safety_warp] [INFO] Layer 3 (attn_v):
+[2026-06-29 21:48:01] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:01] [safety_warp] [INFO]   ✓ mask: Frozen 1686530/16777216 (10.1%)
+[2026-06-29 21:48:01] [safety_warp] [INFO] Layer 3 (ffn_down):
+[2026-06-29 21:48:01] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-06-29 21:48:01] [safety_warp] [INFO]   ✓ mask: Frozen 4531385/45088768 (10.0%)
+[2026-06-29 21:48:01] [safety_warp] [INFO] Layer 3 (ffn_up):
+[2026-06-29 21:48:01] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-06-29 21:48:01] [safety_warp] [INFO]   ✓ mask: Frozen 4552241/45088768 (10.1%)
+[2026-06-29 21:48:01] [safety_warp] [INFO] Layer 4 (attn_q):
+[2026-06-29 21:48:01] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:01] [safety_warp] [INFO]   ✓ mask: Frozen 1703801/16777216 (10.2%)
+[2026-06-29 21:48:01] [safety_warp] [INFO] Layer 4 (attn_k):
+[2026-06-29 21:48:01] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:01] [safety_warp] [INFO]   ✓ mask: Frozen 1682184/16777216 (10.0%)
+[2026-06-29 21:48:01] [safety_warp] [INFO] Layer 4 (attn_v):
+[2026-06-29 21:48:01] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:01] [safety_warp] [INFO]   ✓ mask: Frozen 1681432/16777216 (10.0%)
+[2026-06-29 21:48:01] [safety_warp] [INFO] Layer 4 (ffn_down):
+[2026-06-29 21:48:01] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-06-29 21:48:01] [safety_warp] [INFO]   ✓ mask: Frozen 4528889/45088768 (10.0%)
+[2026-06-29 21:48:01] [safety_warp] [INFO] Layer 4 (ffn_up):
+[2026-06-29 21:48:01] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-06-29 21:48:01] [safety_warp] [INFO]   ✓ mask: Frozen 4523783/45088768 (10.0%)
+[2026-06-29 21:48:01] [safety_warp] [INFO] Layer 5 (attn_q):
+[2026-06-29 21:48:01] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:01] [safety_warp] [INFO]   ✓ mask: Frozen 1684021/16777216 (10.0%)
+[2026-06-29 21:48:01] [safety_warp] [INFO] Layer 5 (attn_k):
+[2026-06-29 21:48:01] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:01] [safety_warp] [INFO]   ✓ mask: Frozen 1684911/16777216 (10.0%)
+[2026-06-29 21:48:01] [safety_warp] [INFO] Layer 5 (attn_v):
+[2026-06-29 21:48:01] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:01] [safety_warp] [INFO]   ✓ mask: Frozen 1681998/16777216 (10.0%)
+[2026-06-29 21:48:01] [safety_warp] [INFO] Layer 5 (ffn_down):
+[2026-06-29 21:48:01] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-06-29 21:48:01] [safety_warp] [INFO]   ✓ mask: Frozen 4529870/45088768 (10.0%)
+[2026-06-29 21:48:02] [safety_warp] [INFO] Layer 5 (ffn_up):
+[2026-06-29 21:48:02] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-06-29 21:48:02] [safety_warp] [INFO]   ✓ mask: Frozen 4525033/45088768 (10.0%)
+[2026-06-29 21:48:02] [safety_warp] [INFO] Layer 6 (attn_q):
+[2026-06-29 21:48:02] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:02] [safety_warp] [INFO]   ✓ mask: Frozen 1695349/16777216 (10.1%)
+[2026-06-29 21:48:02] [safety_warp] [INFO] Layer 6 (attn_k):
+[2026-06-29 21:48:02] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:02] [safety_warp] [INFO]   ✓ mask: Frozen 1682684/16777216 (10.0%)
+[2026-06-29 21:48:02] [safety_warp] [INFO] Layer 6 (attn_v):
+[2026-06-29 21:48:02] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:02] [safety_warp] [INFO]   ✓ mask: Frozen 1679615/16777216 (10.0%)
+[2026-06-29 21:48:02] [safety_warp] [INFO] Layer 6 (ffn_down):
+[2026-06-29 21:48:02] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-06-29 21:48:02] [safety_warp] [INFO]   ✓ mask: Frozen 4516909/45088768 (10.0%)
+[2026-06-29 21:48:02] [safety_warp] [INFO] Layer 6 (ffn_up):
+[2026-06-29 21:48:02] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-06-29 21:48:02] [safety_warp] [INFO]   ✓ mask: Frozen 4517176/45088768 (10.0%)
+[2026-06-29 21:48:02] [safety_warp] [INFO] Layer 7 (attn_q):
+[2026-06-29 21:48:02] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:02] [safety_warp] [INFO]   ✓ mask: Frozen 1680054/16777216 (10.0%)
+[2026-06-29 21:48:02] [safety_warp] [INFO] Layer 7 (attn_k):
+[2026-06-29 21:48:02] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:02] [safety_warp] [INFO]   ✓ mask: Frozen 1697849/16777216 (10.1%)
+[2026-06-29 21:48:02] [safety_warp] [INFO] Layer 7 (attn_v):
+[2026-06-29 21:48:02] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:02] [safety_warp] [INFO]   ✓ mask: Frozen 1697481/16777216 (10.1%)
+[2026-06-29 21:48:02] [safety_warp] [INFO] Layer 7 (ffn_down):
+[2026-06-29 21:48:02] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-06-29 21:48:02] [safety_warp] [INFO]   ✓ mask: Frozen 4511165/45088768 (10.0%)
+[2026-06-29 21:48:02] [safety_warp] [INFO] Layer 7 (ffn_up):
+[2026-06-29 21:48:02] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-06-29 21:48:02] [safety_warp] [INFO]   ✓ mask: Frozen 4547277/45088768 (10.1%)
+[2026-06-29 21:48:02] [safety_warp] [INFO] Layer 8 (attn_q):
+[2026-06-29 21:48:02] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:02] [safety_warp] [INFO]   ✓ mask: Frozen 1683762/16777216 (10.0%)
+[2026-06-29 21:48:02] [safety_warp] [INFO] Layer 8 (attn_k):
+[2026-06-29 21:48:02] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:02] [safety_warp] [INFO]   ✓ mask: Frozen 1700994/16777216 (10.1%)
+[2026-06-29 21:48:02] [safety_warp] [INFO] Layer 8 (attn_v):
+[2026-06-29 21:48:02] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:02] [safety_warp] [INFO]   ✓ mask: Frozen 1704117/16777216 (10.2%)
+[2026-06-29 21:48:02] [safety_warp] [INFO] Layer 8 (ffn_down):
+[2026-06-29 21:48:02] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-06-29 21:48:02] [safety_warp] [INFO]   ✓ mask: Frozen 4519401/45088768 (10.0%)
+[2026-06-29 21:48:02] [safety_warp] [INFO] Layer 8 (ffn_up):
+[2026-06-29 21:48:02] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-06-29 21:48:02] [safety_warp] [INFO]   ✓ mask: Frozen 4551715/45088768 (10.1%)
+[2026-06-29 21:48:02] [safety_warp] [INFO] Layer 9 (attn_q):
+[2026-06-29 21:48:02] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:02] [safety_warp] [INFO]   ✓ mask: Frozen 1687286/16777216 (10.1%)
+[2026-06-29 21:48:02] [safety_warp] [INFO] Layer 9 (attn_k):
+[2026-06-29 21:48:02] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:02] [safety_warp] [INFO]   ✓ mask: Frozen 1679214/16777216 (10.0%)
+[2026-06-29 21:48:02] [safety_warp] [INFO] Layer 9 (attn_v):
+[2026-06-29 21:48:02] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:02] [safety_warp] [INFO]   ✓ mask: Frozen 1681665/16777216 (10.0%)
+[2026-06-29 21:48:03] [safety_warp] [INFO] Layer 9 (ffn_down):
+[2026-06-29 21:48:03] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-06-29 21:48:03] [safety_warp] [INFO]   ✓ mask: Frozen 4517401/45088768 (10.0%)
+[2026-06-29 21:48:03] [safety_warp] [INFO] Layer 9 (ffn_up):
+[2026-06-29 21:48:03] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-06-29 21:48:03] [safety_warp] [INFO]   ✓ mask: Frozen 4536883/45088768 (10.1%)
+[2026-06-29 21:48:03] [safety_warp] [INFO] Layer 10 (attn_q):
+[2026-06-29 21:48:03] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:03] [safety_warp] [INFO]   ✓ mask: Frozen 1679344/16777216 (10.0%)
+[2026-06-29 21:48:03] [safety_warp] [INFO] Layer 10 (attn_k):
+[2026-06-29 21:48:03] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:03] [safety_warp] [INFO]   ✓ mask: Frozen 1677915/16777216 (10.0%)
+[2026-06-29 21:48:03] [safety_warp] [INFO] Layer 10 (attn_v):
+[2026-06-29 21:48:03] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:03] [safety_warp] [INFO]   ✓ mask: Frozen 1701675/16777216 (10.1%)
+[2026-06-29 21:48:03] [safety_warp] [INFO] Layer 10 (ffn_down):
+[2026-06-29 21:48:03] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-06-29 21:48:03] [safety_warp] [INFO]   ✓ mask: Frozen 4520929/45088768 (10.0%)
+[2026-06-29 21:48:03] [safety_warp] [INFO] Layer 10 (ffn_up):
+[2026-06-29 21:48:03] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-06-29 21:48:03] [safety_warp] [INFO]   ✓ mask: Frozen 4542506/45088768 (10.1%)
+[2026-06-29 21:48:03] [safety_warp] [INFO] Layer 11 (attn_q):
+[2026-06-29 21:48:03] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:03] [safety_warp] [INFO]   ✓ mask: Frozen 1690625/16777216 (10.1%)
+[2026-06-29 21:48:03] [safety_warp] [INFO] Layer 11 (attn_k):
+[2026-06-29 21:48:03] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:03] [safety_warp] [INFO]   ✓ mask: Frozen 1685102/16777216 (10.0%)
+[2026-06-29 21:48:03] [safety_warp] [INFO] Layer 11 (attn_v):
+[2026-06-29 21:48:03] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:03] [safety_warp] [INFO]   ✓ mask: Frozen 1687367/16777216 (10.1%)
+[2026-06-29 21:48:03] [safety_warp] [INFO] Layer 11 (ffn_down):
+[2026-06-29 21:48:03] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-06-29 21:48:03] [safety_warp] [INFO]   ✓ mask: Frozen 4521482/45088768 (10.0%)
+[2026-06-29 21:48:03] [safety_warp] [INFO] Layer 11 (ffn_up):
+[2026-06-29 21:48:03] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-06-29 21:48:03] [safety_warp] [INFO]   ✓ mask: Frozen 4551468/45088768 (10.1%)
+[2026-06-29 21:48:03] [safety_warp] [INFO] Layer 12 (attn_q):
+[2026-06-29 21:48:03] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:03] [safety_warp] [INFO]   ✓ mask: Frozen 1688039/16777216 (10.1%)
+[2026-06-29 21:48:03] [safety_warp] [INFO] Layer 12 (attn_k):
+[2026-06-29 21:48:03] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:03] [safety_warp] [INFO]   ✓ mask: Frozen 1686204/16777216 (10.1%)
+[2026-06-29 21:48:03] [safety_warp] [INFO] Layer 12 (attn_v):
+[2026-06-29 21:48:03] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:03] [safety_warp] [INFO]   ✓ mask: Frozen 1697276/16777216 (10.1%)
+[2026-06-29 21:48:03] [safety_warp] [INFO] Layer 12 (ffn_down):
+[2026-06-29 21:48:03] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-06-29 21:48:03] [safety_warp] [INFO]   ✓ mask: Frozen 4527054/45088768 (10.0%)
+[2026-06-29 21:48:03] [safety_warp] [INFO] Layer 12 (ffn_up):
+[2026-06-29 21:48:03] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-06-29 21:48:03] [safety_warp] [INFO]   ✓ mask: Frozen 4542538/45088768 (10.1%)
+[2026-06-29 21:48:03] [safety_warp] [INFO] Layer 13 (attn_q):
+[2026-06-29 21:48:03] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:03] [safety_warp] [INFO]   ✓ mask: Frozen 1686258/16777216 (10.1%)
+[2026-06-29 21:48:03] [safety_warp] [INFO] Layer 13 (attn_k):
+[2026-06-29 21:48:03] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:03] [safety_warp] [INFO]   ✓ mask: Frozen 1680215/16777216 (10.0%)
+[2026-06-29 21:48:03] [safety_warp] [INFO] Layer 13 (attn_v):
+[2026-06-29 21:48:03] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:03] [safety_warp] [INFO]   ✓ mask: Frozen 1692036/16777216 (10.1%)
+[2026-06-29 21:48:04] [safety_warp] [INFO] Layer 13 (ffn_down):
+[2026-06-29 21:48:04] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-06-29 21:48:04] [safety_warp] [INFO]   ✓ mask: Frozen 4513436/45088768 (10.0%)
+[2026-06-29 21:48:04] [safety_warp] [INFO] Layer 13 (ffn_up):
+[2026-06-29 21:48:04] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-06-29 21:48:04] [safety_warp] [INFO]   ✓ mask: Frozen 4525600/45088768 (10.0%)
+[2026-06-29 21:48:04] [safety_warp] [INFO] Layer 14 (attn_q):
+[2026-06-29 21:48:04] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:04] [safety_warp] [INFO]   ✓ mask: Frozen 1679955/16777216 (10.0%)
+[2026-06-29 21:48:04] [safety_warp] [INFO] Layer 14 (attn_k):
+[2026-06-29 21:48:04] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:04] [safety_warp] [INFO]   ✓ mask: Frozen 1680606/16777216 (10.0%)
+[2026-06-29 21:48:04] [safety_warp] [INFO] Layer 14 (attn_v):
+[2026-06-29 21:48:04] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:04] [safety_warp] [INFO]   ✓ mask: Frozen 1678574/16777216 (10.0%)
+[2026-06-29 21:48:04] [safety_warp] [INFO] Layer 14 (ffn_down):
+[2026-06-29 21:48:04] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-06-29 21:48:04] [safety_warp] [INFO]   ✓ mask: Frozen 4518096/45088768 (10.0%)
+[2026-06-29 21:48:04] [safety_warp] [INFO] Layer 14 (ffn_up):
+[2026-06-29 21:48:04] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-06-29 21:48:04] [safety_warp] [INFO]   ✓ mask: Frozen 4550043/45088768 (10.1%)
+[2026-06-29 21:48:04] [safety_warp] [INFO] Layer 15 (attn_q):
+[2026-06-29 21:48:04] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:04] [safety_warp] [INFO]   ✓ mask: Frozen 1684066/16777216 (10.0%)
+[2026-06-29 21:48:04] [safety_warp] [INFO] Layer 15 (attn_k):
+[2026-06-29 21:48:04] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:04] [safety_warp] [INFO]   ✓ mask: Frozen 1686951/16777216 (10.1%)
+[2026-06-29 21:48:04] [safety_warp] [INFO] Layer 15 (attn_v):
+[2026-06-29 21:48:04] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:04] [safety_warp] [INFO]   ✓ mask: Frozen 1679450/16777216 (10.0%)
+[2026-06-29 21:48:04] [safety_warp] [INFO] Layer 15 (ffn_down):
+[2026-06-29 21:48:04] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-06-29 21:48:04] [safety_warp] [INFO]   ✓ mask: Frozen 4529642/45088768 (10.0%)
+[2026-06-29 21:48:04] [safety_warp] [INFO] Layer 15 (ffn_up):
+[2026-06-29 21:48:04] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-06-29 21:48:04] [safety_warp] [INFO]   ✓ mask: Frozen 4528760/45088768 (10.0%)
+[2026-06-29 21:48:04] [safety_warp] [INFO] Layer 16 (attn_q):
+[2026-06-29 21:48:04] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:04] [safety_warp] [INFO]   ✓ mask: Frozen 1683813/16777216 (10.0%)
+[2026-06-29 21:48:04] [safety_warp] [INFO] Layer 16 (attn_k):
+[2026-06-29 21:48:04] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:04] [safety_warp] [INFO]   ✓ mask: Frozen 1686913/16777216 (10.1%)
+[2026-06-29 21:48:04] [safety_warp] [INFO] Layer 16 (attn_v):
+[2026-06-29 21:48:04] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:04] [safety_warp] [INFO]   ✓ mask: Frozen 1693814/16777216 (10.1%)
+[2026-06-29 21:48:04] [safety_warp] [INFO] Layer 16 (ffn_down):
+[2026-06-29 21:48:04] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-06-29 21:48:04] [safety_warp] [INFO]   ✓ mask: Frozen 4527275/45088768 (10.0%)
+[2026-06-29 21:48:04] [safety_warp] [INFO] Layer 16 (ffn_up):
+[2026-06-29 21:48:04] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-06-29 21:48:04] [safety_warp] [INFO]   ✓ mask: Frozen 4509145/45088768 (10.0%)
+[2026-06-29 21:48:04] [safety_warp] [INFO] Layer 17 (attn_q):
+[2026-06-29 21:48:04] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:04] [safety_warp] [INFO]   ✓ mask: Frozen 1686128/16777216 (10.1%)
+[2026-06-29 21:48:04] [safety_warp] [INFO] Layer 17 (attn_k):
+[2026-06-29 21:48:04] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:04] [safety_warp] [INFO]   ✓ mask: Frozen 1690719/16777216 (10.1%)
+[2026-06-29 21:48:05] [safety_warp] [INFO] Layer 17 (attn_v):
+[2026-06-29 21:48:05] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:05] [safety_warp] [INFO]   ✓ mask: Frozen 1696791/16777216 (10.1%)
+[2026-06-29 21:48:05] [safety_warp] [INFO] Layer 17 (ffn_down):
+[2026-06-29 21:48:05] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-06-29 21:48:05] [safety_warp] [INFO]   ✓ mask: Frozen 4520054/45088768 (10.0%)
+[2026-06-29 21:48:05] [safety_warp] [INFO] Layer 17 (ffn_up):
+[2026-06-29 21:48:05] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-06-29 21:48:05] [safety_warp] [INFO]   ✓ mask: Frozen 4551157/45088768 (10.1%)
+[2026-06-29 21:48:05] [safety_warp] [INFO] Layer 18 (attn_q):
+[2026-06-29 21:48:05] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:05] [safety_warp] [INFO]   ✓ mask: Frozen 1680936/16777216 (10.0%)
+[2026-06-29 21:48:05] [safety_warp] [INFO] Layer 18 (attn_k):
+[2026-06-29 21:48:05] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:05] [safety_warp] [INFO]   ✓ mask: Frozen 1678752/16777216 (10.0%)
+[2026-06-29 21:48:05] [safety_warp] [INFO] Layer 18 (attn_v):
+[2026-06-29 21:48:05] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:05] [safety_warp] [INFO]   ✓ mask: Frozen 1678074/16777216 (10.0%)
+[2026-06-29 21:48:05] [safety_warp] [INFO] Layer 18 (ffn_down):
+[2026-06-29 21:48:05] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-06-29 21:48:05] [safety_warp] [INFO]   ✓ mask: Frozen 4528250/45088768 (10.0%)
+[2026-06-29 21:48:05] [safety_warp] [INFO] Layer 18 (ffn_up):
+[2026-06-29 21:48:05] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-06-29 21:48:05] [safety_warp] [INFO]   ✓ mask: Frozen 4559670/45088768 (10.1%)
+[2026-06-29 21:48:05] [safety_warp] [INFO] Layer 19 (attn_q):
+[2026-06-29 21:48:05] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:05] [safety_warp] [INFO]   ✓ mask: Frozen 1681929/16777216 (10.0%)
+[2026-06-29 21:48:05] [safety_warp] [INFO] Layer 19 (attn_k):
+[2026-06-29 21:48:05] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:05] [safety_warp] [INFO]   ✓ mask: Frozen 1679843/16777216 (10.0%)
+[2026-06-29 21:48:05] [safety_warp] [INFO] Layer 19 (attn_v):
+[2026-06-29 21:48:05] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:05] [safety_warp] [INFO]   ✓ mask: Frozen 1694625/16777216 (10.1%)
+[2026-06-29 21:48:05] [safety_warp] [INFO] Layer 19 (ffn_down):
+[2026-06-29 21:48:05] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-06-29 21:48:05] [safety_warp] [INFO]   ✓ mask: Frozen 4530950/45088768 (10.0%)
+[2026-06-29 21:48:05] [safety_warp] [INFO] Layer 19 (ffn_up):
+[2026-06-29 21:48:05] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-06-29 21:48:05] [safety_warp] [INFO]   ✓ mask: Frozen 4524826/45088768 (10.0%)
+[2026-06-29 21:48:05] [safety_warp] [INFO] Layer 20 (attn_q):
+[2026-06-29 21:48:05] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:05] [safety_warp] [INFO]   ✓ mask: Frozen 1682374/16777216 (10.0%)
+[2026-06-29 21:48:05] [safety_warp] [INFO] Layer 20 (attn_k):
+[2026-06-29 21:48:05] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:05] [safety_warp] [INFO]   ✓ mask: Frozen 1691065/16777216 (10.1%)
+[2026-06-29 21:48:05] [safety_warp] [INFO] Layer 20 (attn_v):
+[2026-06-29 21:48:05] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:05] [safety_warp] [INFO]   ✓ mask: Frozen 1679389/16777216 (10.0%)
+[2026-06-29 21:48:05] [safety_warp] [INFO] Layer 20 (ffn_down):
+[2026-06-29 21:48:05] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-06-29 21:48:05] [safety_warp] [INFO]   ✓ mask: Frozen 4528687/45088768 (10.0%)
+[2026-06-29 21:48:06] [safety_warp] [INFO] Layer 20 (ffn_up):
+[2026-06-29 21:48:06] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-06-29 21:48:06] [safety_warp] [INFO]   ✓ mask: Frozen 4552400/45088768 (10.1%)
+[2026-06-29 21:48:06] [safety_warp] [INFO] Layer 21 (attn_q):
+[2026-06-29 21:48:06] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:06] [safety_warp] [INFO]   ✓ mask: Frozen 1683182/16777216 (10.0%)
+[2026-06-29 21:48:06] [safety_warp] [INFO] Layer 21 (attn_k):
+[2026-06-29 21:48:06] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:06] [safety_warp] [INFO]   ✓ mask: Frozen 1690865/16777216 (10.1%)
+[2026-06-29 21:48:06] [safety_warp] [INFO] Layer 21 (attn_v):
+[2026-06-29 21:48:06] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:06] [safety_warp] [INFO]   ✓ mask: Frozen 1705614/16777216 (10.2%)
+[2026-06-29 21:48:06] [safety_warp] [INFO] Layer 21 (ffn_down):
+[2026-06-29 21:48:06] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-06-29 21:48:06] [safety_warp] [INFO]   ✓ mask: Frozen 4532774/45088768 (10.1%)
+[2026-06-29 21:48:06] [safety_warp] [INFO] Layer 21 (ffn_up):
+[2026-06-29 21:48:06] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-06-29 21:48:06] [safety_warp] [INFO]   ✓ mask: Frozen 4541020/45088768 (10.1%)
+[2026-06-29 21:48:06] [safety_warp] [INFO] Layer 22 (attn_q):
+[2026-06-29 21:48:06] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:06] [safety_warp] [INFO]   ✓ mask: Frozen 1684360/16777216 (10.0%)
+[2026-06-29 21:48:06] [safety_warp] [INFO] Layer 22 (attn_k):
+[2026-06-29 21:48:06] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:06] [safety_warp] [INFO]   ✓ mask: Frozen 1705923/16777216 (10.2%)
+[2026-06-29 21:48:06] [safety_warp] [INFO] Layer 22 (attn_v):
+[2026-06-29 21:48:06] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:06] [safety_warp] [INFO]   ✓ mask: Frozen 1680289/16777216 (10.0%)
+[2026-06-29 21:48:06] [safety_warp] [INFO] Layer 22 (ffn_down):
+[2026-06-29 21:48:06] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-06-29 21:48:06] [safety_warp] [INFO]   ✓ mask: Frozen 4513793/45088768 (10.0%)
+[2026-06-29 21:48:06] [safety_warp] [INFO] Layer 22 (ffn_up):
+[2026-06-29 21:48:06] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-06-29 21:48:06] [safety_warp] [INFO]   ✓ mask: Frozen 4513363/45088768 (10.0%)
+[2026-06-29 21:48:06] [safety_warp] [INFO] Layer 23 (attn_q):
+[2026-06-29 21:48:06] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:06] [safety_warp] [INFO]   ✓ mask: Frozen 1683158/16777216 (10.0%)
+[2026-06-29 21:48:06] [safety_warp] [INFO] Layer 23 (attn_k):
+[2026-06-29 21:48:06] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:06] [safety_warp] [INFO]   ✓ mask: Frozen 1681585/16777216 (10.0%)
+[2026-06-29 21:48:06] [safety_warp] [INFO] Layer 23 (attn_v):
+[2026-06-29 21:48:06] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:06] [safety_warp] [INFO]   ✓ mask: Frozen 1709602/16777216 (10.2%)
+[2026-06-29 21:48:06] [safety_warp] [INFO] Layer 23 (ffn_down):
+[2026-06-29 21:48:06] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-06-29 21:48:06] [safety_warp] [INFO]   ✓ mask: Frozen 4534523/45088768 (10.1%)
+[2026-06-29 21:48:06] [safety_warp] [INFO] Layer 23 (ffn_up):
+[2026-06-29 21:48:06] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-06-29 21:48:06] [safety_warp] [INFO]   ✓ mask: Frozen 4533432/45088768 (10.1%)
+[2026-06-29 21:48:06] [safety_warp] [INFO] Layer 24 (attn_q):
+[2026-06-29 21:48:06] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:06] [safety_warp] [INFO]   ✓ mask: Frozen 1691166/16777216 (10.1%)
+[2026-06-29 21:48:06] [safety_warp] [INFO] Layer 24 (attn_k):
+[2026-06-29 21:48:06] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:06] [safety_warp] [INFO]   ✓ mask: Frozen 1689464/16777216 (10.1%)
+[2026-06-29 21:48:06] [safety_warp] [INFO] Layer 24 (attn_v):
+[2026-06-29 21:48:06] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:06] [safety_warp] [INFO]   ✓ mask: Frozen 1678756/16777216 (10.0%)
+[2026-06-29 21:48:07] [safety_warp] [INFO] Layer 24 (ffn_down):
+[2026-06-29 21:48:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-06-29 21:48:07] [safety_warp] [INFO]   ✓ mask: Frozen 4539280/45088768 (10.1%)
+[2026-06-29 21:48:07] [safety_warp] [INFO] Layer 24 (ffn_up):
+[2026-06-29 21:48:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-06-29 21:48:07] [safety_warp] [INFO]   ✓ mask: Frozen 4554927/45088768 (10.1%)
+[2026-06-29 21:48:07] [safety_warp] [INFO] Layer 25 (attn_q):
+[2026-06-29 21:48:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:07] [safety_warp] [INFO]   ✓ mask: Frozen 1701669/16777216 (10.1%)
+[2026-06-29 21:48:07] [safety_warp] [INFO] Layer 25 (attn_k):
+[2026-06-29 21:48:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:07] [safety_warp] [INFO]   ✓ mask: Frozen 1682439/16777216 (10.0%)
+[2026-06-29 21:48:07] [safety_warp] [INFO] Layer 25 (attn_v):
+[2026-06-29 21:48:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:07] [safety_warp] [INFO]   ✓ mask: Frozen 1685674/16777216 (10.0%)
+[2026-06-29 21:48:07] [safety_warp] [INFO] Layer 25 (ffn_down):
+[2026-06-29 21:48:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-06-29 21:48:07] [safety_warp] [INFO]   ✓ mask: Frozen 4524148/45088768 (10.0%)
+[2026-06-29 21:48:07] [safety_warp] [INFO] Layer 25 (ffn_up):
+[2026-06-29 21:48:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-06-29 21:48:07] [safety_warp] [INFO]   ✓ mask: Frozen 4555295/45088768 (10.1%)
+[2026-06-29 21:48:07] [safety_warp] [INFO] Layer 26 (attn_q):
+[2026-06-29 21:48:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:07] [safety_warp] [INFO]   ✓ mask: Frozen 1686694/16777216 (10.1%)
+[2026-06-29 21:48:07] [safety_warp] [INFO] Layer 26 (attn_k):
+[2026-06-29 21:48:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:07] [safety_warp] [INFO]   ✓ mask: Frozen 1677831/16777216 (10.0%)
+[2026-06-29 21:48:07] [safety_warp] [INFO] Layer 26 (attn_v):
+[2026-06-29 21:48:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:07] [safety_warp] [INFO]   ✓ mask: Frozen 1681753/16777216 (10.0%)
+[2026-06-29 21:48:07] [safety_warp] [INFO] Layer 26 (ffn_down):
+[2026-06-29 21:48:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-06-29 21:48:07] [safety_warp] [INFO]   ✓ mask: Frozen 4564541/45088768 (10.1%)
+[2026-06-29 21:48:07] [safety_warp] [INFO] Layer 26 (ffn_up):
+[2026-06-29 21:48:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-06-29 21:48:07] [safety_warp] [INFO]   ✓ mask: Frozen 4523662/45088768 (10.0%)
+[2026-06-29 21:48:07] [safety_warp] [INFO] Layer 27 (attn_q):
+[2026-06-29 21:48:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:07] [safety_warp] [INFO]   ✓ mask: Frozen 1685737/16777216 (10.0%)
+[2026-06-29 21:48:07] [safety_warp] [INFO] Layer 27 (attn_k):
+[2026-06-29 21:48:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:07] [safety_warp] [INFO]   ✓ mask: Frozen 1689047/16777216 (10.1%)
+[2026-06-29 21:48:07] [safety_warp] [INFO] Layer 27 (attn_v):
+[2026-06-29 21:48:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:07] [safety_warp] [INFO]   ✓ mask: Frozen 1701799/16777216 (10.1%)
+[2026-06-29 21:48:08] [safety_warp] [INFO] Layer 27 (ffn_down):
+[2026-06-29 21:48:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-06-29 21:48:08] [safety_warp] [INFO]   ✓ mask: Frozen 4557622/45088768 (10.1%)
+[2026-06-29 21:48:08] [safety_warp] [INFO] Layer 27 (ffn_up):
+[2026-06-29 21:48:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-06-29 21:48:08] [safety_warp] [INFO]   ✓ mask: Frozen 4518758/45088768 (10.0%)
+[2026-06-29 21:48:08] [safety_warp] [INFO] Layer 28 (attn_q):
+[2026-06-29 21:48:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:08] [safety_warp] [INFO]   ✓ mask: Frozen 1684740/16777216 (10.0%)
+[2026-06-29 21:48:08] [safety_warp] [INFO] Layer 28 (attn_k):
+[2026-06-29 21:48:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:08] [safety_warp] [INFO]   ✓ mask: Frozen 1687423/16777216 (10.1%)
+[2026-06-29 21:48:08] [safety_warp] [INFO] Layer 28 (attn_v):
+[2026-06-29 21:48:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:08] [safety_warp] [INFO]   ✓ mask: Frozen 1687168/16777216 (10.1%)
+[2026-06-29 21:48:08] [safety_warp] [INFO] Layer 28 (ffn_down):
+[2026-06-29 21:48:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-06-29 21:48:08] [safety_warp] [INFO]   ✓ mask: Frozen 4525506/45088768 (10.0%)
+[2026-06-29 21:48:08] [safety_warp] [INFO] Layer 28 (ffn_up):
+[2026-06-29 21:48:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-06-29 21:48:08] [safety_warp] [INFO]   ✓ mask: Frozen 4528514/45088768 (10.0%)
+[2026-06-29 21:48:08] [safety_warp] [INFO] Layer 29 (attn_q):
+[2026-06-29 21:48:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:08] [safety_warp] [INFO]   ✓ mask: Frozen 1697351/16777216 (10.1%)
+[2026-06-29 21:48:08] [safety_warp] [INFO] Layer 29 (attn_k):
+[2026-06-29 21:48:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:08] [safety_warp] [INFO]   ✓ mask: Frozen 1688581/16777216 (10.1%)
+[2026-06-29 21:48:08] [safety_warp] [INFO] Layer 29 (attn_v):
+[2026-06-29 21:48:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:08] [safety_warp] [INFO]   ✓ mask: Frozen 1682096/16777216 (10.0%)
+[2026-06-29 21:48:08] [safety_warp] [INFO] Layer 29 (ffn_down):
+[2026-06-29 21:48:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-06-29 21:48:08] [safety_warp] [INFO]   ✓ mask: Frozen 4535443/45088768 (10.1%)
+[2026-06-29 21:48:08] [safety_warp] [INFO] Layer 29 (ffn_up):
+[2026-06-29 21:48:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-06-29 21:48:08] [safety_warp] [INFO]   ✓ mask: Frozen 4516573/45088768 (10.0%)
+[2026-06-29 21:48:08] [safety_warp] [INFO] Layer 30 (attn_q):
+[2026-06-29 21:48:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:08] [safety_warp] [INFO]   ✓ mask: Frozen 1692668/16777216 (10.1%)
+[2026-06-29 21:48:08] [safety_warp] [INFO] Layer 30 (attn_k):
+[2026-06-29 21:48:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:08] [safety_warp] [INFO]   ✓ mask: Frozen 1680099/16777216 (10.0%)
+[2026-06-29 21:48:08] [safety_warp] [INFO] Layer 30 (attn_v):
+[2026-06-29 21:48:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:08] [safety_warp] [INFO]   ✓ mask: Frozen 1706014/16777216 (10.2%)
+[2026-06-29 21:48:08] [safety_warp] [INFO] Layer 30 (ffn_down):
+[2026-06-29 21:48:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-06-29 21:48:08] [safety_warp] [INFO]   ✓ mask: Frozen 4526666/45088768 (10.0%)
+[2026-06-29 21:48:09] [safety_warp] [INFO] Layer 30 (ffn_up):
+[2026-06-29 21:48:09] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-06-29 21:48:09] [safety_warp] [INFO]   ✓ mask: Frozen 4522262/45088768 (10.0%)
+[2026-06-29 21:48:09] [safety_warp] [INFO] Layer 31 (attn_q):
+[2026-06-29 21:48:09] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:09] [safety_warp] [INFO]   ✓ mask: Frozen 1678580/16777216 (10.0%)
+[2026-06-29 21:48:09] [safety_warp] [INFO] Layer 31 (attn_k):
+[2026-06-29 21:48:09] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:09] [safety_warp] [INFO]   ✓ mask: Frozen 1688400/16777216 (10.1%)
+[2026-06-29 21:48:09] [safety_warp] [INFO] Layer 31 (attn_v):
+[2026-06-29 21:48:09] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-06-29 21:48:09] [safety_warp] [INFO]   ✓ mask: Frozen 1680803/16777216 (10.0%)
+[2026-06-29 21:48:09] [safety_warp] [INFO] Layer 31 (ffn_down):
+[2026-06-29 21:48:09] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-06-29 21:48:09] [safety_warp] [INFO]   ✓ mask: Frozen 4516660/45088768 (10.0%)
+[2026-06-29 21:48:09] [safety_warp] [INFO] Layer 31 (ffn_up):
+[2026-06-29 21:48:09] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-06-29 21:48:09] [safety_warp] [INFO]   ✓ mask: Frozen 4521763/45088768 (10.0%)
+[2026-06-29 21:48:09] [safety_warp] [INFO] ======================================================================
+[2026-06-29 21:48:09] [safety_warp] [INFO] ✓ Setup completed: 160 WaRP modules
+[2026-06-29 21:48:09] [safety_warp] [INFO] ======================================================================
+[2026-06-29 21:48:09] [safety_warp] [INFO] Forward에서 자동으로 마스킹 적용:
+[2026-06-29 21:48:09] [safety_warp] [INFO]   W = V @ (basis_coeff * mask).detach() + basis_coeff * (1-mask) @ U
+[2026-06-29 21:48:09] [safety_warp] [INFO]   mask=1: gradient 차단 (동결)
+[2026-06-29 21:48:09] [safety_warp] [INFO]   mask=0: gradient 흐름 (학습 가능)
+[2026-06-29 21:48:09] [safety_warp] [INFO] ======================================================================
+[2026-06-29 21:48:09] [safety_warp] [INFO] [WaRP-Monitor] verification probes registered
+[2026-06-29 21:48:09] [safety_warp] [INFO]   - modules: 160
+[2026-06-29 21:48:09] [safety_warp] [INFO]   - masked probes: 640
+[2026-06-29 21:48:09] [safety_warp] [INFO]   - trainable probes: 640
+[2026-06-29 21:48:09] [safety_warp] [INFO] Loading GSM8K dataset...
+[2026-06-29 21:48:11] [safety_warp] [INFO] ✓ Using all 7473 samples (gsm8k_samples=0 or not specified)
+[2026-06-29 21:48:14] [safety_warp] [INFO] ✓ Dataset created (7473 samples)
+[2026-06-29 21:48:14] [safety_warp] [INFO] ======================================================================
+[2026-06-29 21:48:14] [safety_warp] [INFO] Phase 3: Incremental Learning with GSM8K (Non-Freeze)
+[2026-06-29 21:48:14] [safety_warp] [INFO] ======================================================================
+[2026-06-29 21:48:14] [safety_warp] [INFO] Non-Freeze 모드: weight_decay=0.01 적용 (WaRPMaskRestoreCallback으로 mask=1 basis_coeff drift 완전 차단)
+[2026-06-29 21:48:14] [safety_warp] [INFO] Parameter freeze status (Non-Freeze mode):
+[2026-06-29 21:48:14] [safety_warp] [INFO]   - Total params: 6,738,415,616
+[2026-06-29 21:48:14] [safety_warp] [INFO]   - Trainable params: 6,738,415,616
+[2026-06-29 21:48:14] [safety_warp] [INFO]   - basis_coeff params: 4,496,293,888
+[2026-06-29 21:48:14] [safety_warp] [INFO]   - Frozen params (requires_grad=False): 0
+[2026-06-29 21:48:14] [safety_warp] [INFO]   - Trainable ratio: 100.00%
+[2026-06-29 21:48:14] [safety_warp] [INFO]   - WaRP masked frozen coeff elems: 451,975,493/4,496,293,888
+[2026-06-29 21:48:14] [safety_warp] [INFO]   - WaRP masked trainable coeff elems: 4,044,318,395 (89.95%)
+[2026-06-29 21:48:14] [safety_warp] [INFO] Training configuration:
+[2026-06-29 21:48:14] [safety_warp] [INFO]   - Epochs: 3
+[2026-06-29 21:48:14] [safety_warp] [INFO]   - Learning rate: 5e-05
+[2026-06-29 21:48:14] [safety_warp] [INFO]   - Weight decay (requested): 0.01
+[2026-06-29 21:48:14] [safety_warp] [INFO]   - Weight decay (effective): 0.01
+[2026-06-29 21:48:14] [safety_warp] [INFO]   - Warmup ratio: 0.1
+[2026-06-29 21:48:14] [safety_warp] [INFO]   - Batch size: 2
+[2026-06-29 21:48:14] [safety_warp] [INFO]   - Gradient accumulation steps: 8
+[2026-06-29 21:48:14] [safety_warp] [INFO]   - Effective batch size: 16
+[2026-06-29 21:48:14] [safety_warp] [INFO]   - Max gradient norm: 1.0
+[2026-06-29 21:48:14] [safety_warp] [INFO]   - Optimizer: adamw_torch
+[2026-06-29 21:48:14] [safety_warp] [INFO]   - LR scheduler: linear
+[2026-06-29 21:48:14] [safety_warp] [INFO]   - Input formatting: chat template
+[2026-06-29 21:48:14] [safety_warp] [INFO]   - Checkpoint directory: ./checkpoints/phase3_non_freeze_20260629_214814
+[2026-06-29 21:48:14] [safety_warp] [INFO] ======================================================================
+[2026-06-29 21:48:14] [safety_warp] [INFO] [Constrained SFT] precomputing reference logps (π_aligned = init reparameterized model == safety model)
+[2026-06-29 21:52:19] [safety_warp] [INFO] ✓ Reference logps precomputed for 7473 examples
+[2026-06-29 21:52:20] [safety_warp] [INFO] [WaRP-GradCheck] one-batch gradient sanity
+[2026-06-29 21:52:20] [safety_warp] [INFO]   - loss: 1.540679
+[2026-06-29 21:52:20] [safety_warp] [INFO]   - masked(=1) grad |mean|: 0.000000e+00, nonzero ratio: 0.00%
+[2026-06-29 21:52:20] [safety_warp] [INFO]   - trainable(=0) grad |mean|: 1.210150e-04, nonzero ratio: 100.00%
+[2026-06-29 21:52:20] [safety_warp] [INFO] [WaRPMaskRestoreCallback] registered 160 modules for post-step weight-decay restore
+[2026-06-29 21:52:20] [safety_warp] [INFO] ✓ ConstrainedSFTTrainer initialized (WaRP masking + token-wise constrained loss)
+[2026-06-29 21:52:20] [safety_warp] [INFO]   β schedule: β1=0.3, β2..3=1, β_rest=0.1
+[2026-06-29 21:52:20] [safety_warp] [INFO] ✓ Trainer initialized
+[2026-06-29 21:52:20] [safety_warp] [INFO] Starting training (Non-Freeze mode)...
+[2026-06-29 21:52:20] [safety_warp] [INFO]   WaRP forward still applies masking:
+[2026-06-29 21:52:20] [safety_warp] [INFO]     W = V @ (basis_coeff * mask).detach() + basis_coeff * (1-mask) @ U
+[2026-06-29 21:52:20] [safety_warp] [INFO]     mask=1: gradient 차단 (frozen)
+[2026-06-29 21:52:20] [safety_warp] [INFO]     mask=0: gradient 흐름 (trainable)
+[2026-06-29 22:24:23] [safety_warp] [INFO] ✓ Training completed
+[2026-06-29 22:24:23] [safety_warp] [INFO] [WaRP-ParamCheck] post-train sampled delta
+[2026-06-29 22:24:23] [safety_warp] [INFO]   - masked(=1) delta |mean|: 0.000000e+00, changed ratio: 0.00%
+[2026-06-29 22:24:23] [safety_warp] [INFO]   - trainable(=0) delta |mean|: 2.317909e-04, changed ratio: 45.16%
+[2026-06-29 22:24:37] [safety_warp] [INFO] ======================================================================
+[2026-06-29 22:24:37] [safety_warp] [INFO] Phase 3 (Non-Freeze) Completed
+[2026-06-29 22:24:37] [safety_warp] [INFO]   - Final model: ./checkpoints/phase3_non_freeze_20260629_214814/final_model
+[2026-06-29 22:24:37] [safety_warp] [INFO] ======================================================================
+[2026-06-29 22:24:37] [safety_warp] [INFO] ✓ Metadata saved to: ./checkpoints/phase3_non_freeze_20260629_214814/metadata.json
+[2026-06-29 22:24:37] [safety_warp] [INFO] ======================================================================
+[2026-06-29 22:24:37] [safety_warp] [INFO] Phase 3 Completed!
+[2026-06-29 22:24:37] [safety_warp] [INFO] Final model saved to: ./checkpoints/phase3_non_freeze_20260629_214814/final_model
+[2026-06-29 22:24:37] [safety_warp] [INFO] ======================================================================
+[2026-06-29 22:24:38] [safety_warp] [INFO] ======================================================================
+[2026-06-29 22:24:38] [safety_warp] [INFO] All tasks completed successfully!
+[2026-06-29 22:24:38] [safety_warp] [INFO] ======================================================================

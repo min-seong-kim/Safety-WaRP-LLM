@@ -280,7 +280,10 @@ class Phase3IncrementalLearner:
                     layer_idx = int(svd_file.split('_')[1])
                     svd_path = os.path.join(layer_type_dir, svd_file)
                     
-                    svd_data = torch.load(svd_path)
+                    # CPU로 로드: basis U(특히 ffn_down은 입력차원^2로 거대)를 전부
+                    # GPU 0에 올리면 device_map="auto" 분산 모델과 겹쳐 OOM이 난다.
+                    # reparameterize 단계에서 각 weight의 device로 분산 이동한다.
+                    svd_data = torch.load(svd_path, map_location='cpu')
                     key = (layer_idx, layer_type)
                     self.basis_data[key] = {
                         'U': svd_data['U'],

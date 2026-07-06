@@ -192,6 +192,24 @@ def parse_args():
     parser.add_argument('--gradient_checkpointing', action='store_true',
                         help='Phase 3에서 gradient checkpointing 사용 (비교 실험 시 freeze/non-freeze 동일하게 설정 권장)')
 
+    # ───────────────────────────────────────────────────────────────────
+    # Constrained SFT (WSR-Tune + token-wise constrained loss 결합용)
+    #   Phase 3(non_freeze)에서 표준 CE 대신 shallow-vs-deep 의 constrained loss 사용.
+    #   reference π_aligned = 학습 시작 시점의 reparameterized 모델(=safety 모델).
+    #   β_1 = csft_beta * csft_first_token_bias_factor, β_{2..L} = csft_beta * csft_bias_factor,
+    #   β_{t>L} = csft_beta   (L = csft_bias_length, 응답 앞 토큰 보호)
+    # ───────────────────────────────────────────────────────────────────
+    parser.add_argument('--constrained_sft', action='store_true',
+                        help='Phase 3(non_freeze)에서 token-wise constrained SFT loss 사용 (WaRP 마스킹과 결합)')
+    parser.add_argument('--csft_beta', type=float, default=0.1,
+                        help='뒤쪽 토큰(t>bias_length)에 적용하는 base β')
+    parser.add_argument('--csft_bias_factor', type=float, default=20.0,
+                        help='앞쪽 토큰(2..bias_length)의 β 배율')
+    parser.add_argument('--csft_first_token_bias_factor', type=float, default=5.0,
+                        help='첫 토큰(t=1)의 β 배율')
+    parser.add_argument('--csft_bias_length', type=int, default=5,
+                        help='강한 제약을 거는 응답 앞부분 토큰 수')
+
     # LoRA 설정 (Phase 3)
     parser.add_argument('--use_lora', action='store_true',
                         help='Phase 3에서 full parameter tuning 대신 PEFT LoRA 사용 (--original_space_mask 와 함께 사용)')

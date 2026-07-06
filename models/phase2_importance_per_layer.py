@@ -163,7 +163,10 @@ class Phase2ImportanceScorerPerLayer:
                     layer_idx = int(svd_file.split('_')[1])
                     svd_path = os.path.join(layer_type_dir, svd_file)
 
-                    svd_data = torch.load(svd_path)
+                    # CPU로 로드: basis U(특히 ffn_down은 입력차원^2로 거대)를 전부
+                    # GPU 0에 올리면 device_map="auto" 분산 모델과 겹쳐 OOM이 난다.
+                    # CPU에 둔 뒤 reparameterize_weights에서 각 weight의 device로 분산 이동한다.
+                    svd_data = torch.load(svd_path, map_location='cpu')
                     key = (layer_idx, layer_type)
                     self.basis_data[key] = {
                         'U': svd_data['U'],
@@ -962,7 +965,10 @@ class Phase2ImportanceScorerPerLayer:
 
                     for module in warp_modules:
                         if module.basis_coeff.grad is not None:
-                            grad_abs = module.basis_coeff.grad.detach().abs().float()
+                            # importance 누적 버퍼를 GPU에 bf16으로 유지(fp32는 2배 커서
+                            # 모델+basis와 겹쳐 OOM). CPU 누적은 매 배치 전송으로 너무 느려
+                            # GPU bf16 누적을 사용한다. mask 생성 시 _convert에서 fp32로 변환.
+                            grad_abs = module.basis_coeff.grad.detach().abs()
                             if module not in importances:
                                 importances[module] = grad_abs.clone()
                             else:

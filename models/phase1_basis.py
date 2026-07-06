@@ -561,7 +561,9 @@ class Phase1BasisBuilder:
                     # 패딩 위치를 0으로 마스킹: (batch, seq, 1) 브로드캐스트
                     mask = current_mask['val']  # (batch, seq)
                     if mask is not None:
-                        act = act * mask.unsqueeze(-1).to(act.dtype)
+                        # device_map="auto" 분산 시 레이어마다 device가 다를 수 있으므로
+                        # mask를 act과 같은 device로도 이동 (dtype뿐 아니라 device까지 정렬)
+                        act = act * mask.unsqueeze(-1).to(device=act.device, dtype=act.dtype)
 
                     # Reshape: (batch*seq, hidden_dim)
                     act_flat = act.reshape(batch_size * seq_len, hidden_dim)

@@ -18,7 +18,7 @@ from datetime import datetime
 from dataclasses import dataclass
 from typing import Dict, List
 
-from transformers import TrainerCallback
+from transformers import TrainerCallback, Trainer
 
 from .warp_modules import WaRPModule, restore_weight, restore_to_linear
 from .phase3_extra_learning import Phase3IncrementalLearner
@@ -51,6 +51,102 @@ class WaRPMaskRestoreCallback(TrainerCallback):
             with torch.no_grad():
                 module.basis_coeff.data[mask] = frozen_vals
         return control
+
+
+# =====================================================================
+# Constrained SFT (WSR-Tune + token-wise constrained loss 결합)
+#   shallow-vs-deep ("Safety Alignment Should Be Made More Than Just a
+#   Few Tokens Deep", ICLR 2025) 의 Eqn 3 / Appendix D.2 구현.
+#   표준 CE gradient(-∇logπθ)에 적응 가중치 w_t = 2·σ(β_t·Δ_t) 를 곱한다
+#   (Δ_t = logπ_aligned - logπθ). .detach() 로 가중치를 상수화하면
+#   gradient 가 논문과 정확히 일치하는 weighted-CE 가 된다.
+#   이 gradient 는 WaRPModule.forward 의 mask+detach 를 그대로 통과하므로
+#   안전 좌표(mask=1)는 동결되고 보완 부분공간(mask=0)만 업데이트된다.
+# =====================================================================
+def _per_token_answer_logps(logits: torch.Tensor, labels: torch.Tensor):
+    """auto-regressive shift 후 label != -100 (=응답 토큰) 위치의 per-token logπ 를
+    example 별 1D 텐서 리스트로 반환. (gsm8k tokenizer 가 prompt 를 -100 마스킹)"""
+    labels = labels[:, 1:]
+    logits = logits[:, :-1, :]
+    mask = labels != -100
+    safe = labels.masked_fill(~mask, 0)
+    logps = torch.gather(logits.float().log_softmax(-1), dim=2, index=safe.unsqueeze(2)).squeeze(2)
+    return [logps[i][mask[i]] for i in range(logps.size(0))]
+
+
+@torch.no_grad()
+def _precompute_reference_logps(model, dataset, collator, batch_size, logger=None):
+    """학습 시작 전(=reparameterized 모델이 수학적으로 safety 모델과 동일할 때)
+    응답 토큰별 reference logprob 를 1회 계산. shuffle=False 로 순서 보존 → add_column 정합."""
+    was_training = model.training
+    model.eval()
+    emb_device = model.get_input_embeddings().weight.device
+    loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=False, collate_fn=collator)
+    all_ref = []
+    for batch in loader:
+        logits = model(
+            input_ids=batch["input_ids"].to(emb_device),
+            attention_mask=batch["attention_mask"].to(emb_device),
+            use_cache=False,
+        ).logits
+        for t in _per_token_answer_logps(logits, batch["labels"].to(logits.device)):
+            all_ref.append(t.detach().float().cpu().tolist())
+    if was_training:
+        model.train()
+    if logger is not None:
+        logger.info(f"✓ Reference logps precomputed for {len(all_ref)} examples")
+    return all_ref
+
+
+class ConstrainedSFTTrainer(Trainer):
+    """vanilla Trainer 위에 token-wise constrained loss 만 얹은 trainer.
+    WaRP 마스킹은 모델 forward 안에서 그대로 작동하므로 여기서는 손대지 않는다."""
+
+    def __init__(self, *args, csft_beta=0.1, csft_bias_factor=20.0,
+                 csft_first_token_bias_factor=5.0, csft_bias_length=5, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.csft_beta = csft_beta
+        self.csft_bias_factor = csft_bias_factor
+        self.csft_first_token_bias_factor = csft_first_token_bias_factor
+        self.csft_bias_length = csft_bias_length
+
+    def get_beta_list(self, length: int) -> torch.Tensor:
+        beta = self.csft_beta
+        len_prefix = self.csft_bias_length
+        prefix = torch.full((len_prefix,), beta * self.csft_bias_factor)
+        if len_prefix != 0:
+            prefix[0] = beta * self.csft_first_token_bias_factor
+        if length <= len_prefix:
+            return prefix[:length]
+        beta_list = torch.full((length,), beta)
+        beta_list[:len_prefix] = prefix
+        return beta_list
+
+    def compute_loss(self, model, inputs, return_outputs=False, num_items_in_batch=None):
+        ref_logps_list = inputs.pop("ref_logps")
+        outputs = model(
+            input_ids=inputs["input_ids"],
+            attention_mask=inputs["attention_mask"],
+            use_cache=False,
+        )
+        policy_list = _per_token_answer_logps(outputs.logits, inputs["labels"].to(outputs.logits.device))
+
+        losses = []
+        for i, policy_item in enumerate(policy_list):
+            ref_item = torch.tensor(ref_logps_list[i], device=policy_item.device, dtype=policy_item.dtype)
+            n = min(policy_item.shape[0], ref_item.shape[0])
+            if n == 0:
+                continue
+            policy_item = policy_item[:n]
+            ref_item = ref_item[:n]
+            beta = self.get_beta_list(n).to(device=policy_item.device, dtype=policy_item.dtype)
+            # w_t = 2·σ(β_t·Δ_t), Δ_t = ref - policy → policy - ref = -Δ_t
+            weight = 2.0 * (1.0 - torch.sigmoid(beta * (policy_item - ref_item))).detach()
+            weight = torch.clamp(weight, min=1e-3)
+            losses.append(-(weight * policy_item))
+
+        loss = torch.cat(losses).mean() if losses else outputs.logits.sum() * 0.0
+        return (loss, outputs) if return_outputs else loss
 
 
 class Phase3IncrementalLearnerNonFreeze(Phase3IncrementalLearner):
@@ -224,13 +320,30 @@ class Phase3IncrementalLearnerNonFreeze(Phase3IncrementalLearner):
                         attention_mask.append(f["attention_mask"] + [0] * pad_len)
                         labels.append(f["labels"] + [-100] * pad_len)
 
-                    return {
+                    batch = {
                         "input_ids": torch.tensor(input_ids, dtype=torch.long),
                         "attention_mask": torch.tensor(attention_mask, dtype=torch.long),
                         "labels": torch.tensor(labels, dtype=torch.long),
                     }
+                    # constrained SFT: reference per-token logprob (가변 길이) 통과
+                    if "ref_logps" in features[0]:
+                        batch["ref_logps"] = [list(f["ref_logps"]) for f in features]
+                    return batch
 
             data_collator = DataCollatorForCausalLMWithPadding(self.tokenizer)
+
+            # ── Constrained SFT: reference logps 사전 캐싱 (reparameterized init = safety 모델) ──
+            use_constrained = bool(getattr(self.args, 'constrained_sft', False))
+            if use_constrained:
+                self.logger.info(
+                    "[Constrained SFT] precomputing reference logps "
+                    "(π_aligned = init reparameterized model == safety model)"
+                )
+                ref_list = _precompute_reference_logps(
+                    self.model, self.dataset, data_collator,
+                    batch_size=getattr(self.args, 'batch_size', 4), logger=self.logger,
+                )
+                self.dataset = self.dataset.add_column("ref_logps", ref_list)
 
             self.model.train()
 
@@ -243,14 +356,37 @@ class Phase3IncrementalLearnerNonFreeze(Phase3IncrementalLearner):
                 f"for post-step weight-decay restore"
             )
 
-            trainer = Trainer(
-                model=self.model,
-                args=training_args,
-                train_dataset=self.dataset,
-                data_collator=data_collator,
-                tokenizer=self.tokenizer,
-                callbacks=[restore_callback],
-            )
+            if use_constrained:
+                trainer = ConstrainedSFTTrainer(
+                    model=self.model,
+                    args=training_args,
+                    train_dataset=self.dataset,
+                    data_collator=data_collator,
+                    tokenizer=self.tokenizer,
+                    callbacks=[restore_callback],
+                    csft_beta=getattr(self.args, 'csft_beta', 0.1),
+                    csft_bias_factor=getattr(self.args, 'csft_bias_factor', 20.0),
+                    csft_first_token_bias_factor=getattr(self.args, 'csft_first_token_bias_factor', 5.0),
+                    csft_bias_length=getattr(self.args, 'csft_bias_length', 5),
+                )
+                b = getattr(self.args, 'csft_beta', 0.1)
+                self.logger.info(
+                    "✓ ConstrainedSFTTrainer initialized (WaRP masking + token-wise constrained loss)"
+                )
+                self.logger.info(
+                    f"  β schedule: β1={b*getattr(self.args,'csft_first_token_bias_factor',5.0):.3g}, "
+                    f"β2..{getattr(self.args,'csft_bias_length',5)}={b*getattr(self.args,'csft_bias_factor',20.0):.3g}, "
+                    f"β_rest={b:.3g}"
+                )
+            else:
+                trainer = Trainer(
+                    model=self.model,
+                    args=training_args,
+                    train_dataset=self.dataset,
+                    data_collator=data_collator,
+                    tokenizer=self.tokenizer,
+                    callbacks=[restore_callback],
+                )
 
             if phase3_dataset == 'safety':
                 self.logger.info("Safety dataset: shuffle disabled (sequential order)")

@@ -59,7 +59,7 @@ try:
 except ImportError:
     _peft_available = False
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "6"
+os.environ["CUDA_VISIBLE_DEVICES"] = "2,3"
 
 def parse_args():
     p = argparse.ArgumentParser(description='Full Parameter Finetune SN-Tuned Model on GSM8K')
@@ -102,7 +102,11 @@ def parse_args():
     p.add_argument("--output_dir", type=str, default='./gsm8k_sn_tune_full_finetune')
     p.add_argument("--logging_steps", type=int, default=10)
     p.add_argument("--eval_steps", type=int, default=500)
-    p.add_argument("--report_to", type=str, default="none")
+    p.add_argument("--report_to", type=str, default="none",
+                    help="'none' (기본, wandb 미사용) 또는 'wandb'")
+    p.add_argument("--wandb_entity", type=str, default=None,
+                    help="wandb entity (미지정 시 로그인 계정의 기본 entity 사용)")
+    p.add_argument("--wandb_project", type=str, default="GSM8K Full Finetuning")
     p.add_argument("--num_workers", type=int, default=4)
     p.add_argument("--cache_dir", type=str, default='./cache')
     p.add_argument("--upload_name", type=str, default=None,
@@ -367,6 +371,15 @@ def main():
     logger.info(f"\n{'='*70}")
     logger.info(f"  [2/4] Loading Model (bf16)")
     logger.info(f"{'='*70}\n")
+
+    # cuDNN SDPA 백엔드 비활성화 (Qwen2.5-32B + 특정 cuDNN 조합에서
+    # "No valid execution plans built" 에러 회피). flash/mem-efficient/math
+    # 커널은 그대로 사용되므로 속도 손해는 거의 없음.
+    try:
+        torch.backends.cuda.enable_cudnn_sdp(False)
+        logger.info("✓ Disabled cuDNN SDPA backend")
+    except Exception as _e:
+        logger.warning(f"Could not toggle cuDNN SDPA backend: {_e}")
     dtype = torch.bfloat16 if args.bf16 else (torch.float16 if args.fp16 else None)
     
     model = None
@@ -542,7 +555,7 @@ def main():
         eval_steps=(args.eval_steps if do_eval else None),
         bf16=args.bf16,
         fp16=args.fp16,
-        report_to="wandb",
+        report_to=(args.report_to if args.report_to != "none" else "none"),
         remove_unused_columns=False,
         # 핵심: Adam optimizer (메모리 효율적)
         optim="adamw_torch",
@@ -551,10 +564,12 @@ def main():
     )
 
     run_name = os.path.basename(os.path.normpath(args.output_dir))
+    use_wandb = (args.report_to == "wandb")
     wandb.init(
-        entity="gokms0509-yonsei-university",
-        project="GSM8K Full Finetuning",
+        entity=args.wandb_entity,                 # None = 로그인 계정 기본 entity
+        project=args.wandb_project,
         name=run_name,
+        mode=("online" if use_wandb else "disabled"),   # report_to=none 이면 no-op (네트워크/권한 불필요)
         config={
             "model_path": model_path,
             "learning_rate": args.learning_rate,
