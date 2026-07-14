@@ -1,0 +1,78 @@
+[2026-07-13 15:13:12] [safety_warp] [INFO] ======================================================================
+[2026-07-13 15:13:12] [safety_warp] [INFO] Safety-WaRP-LLM (Fixed - 원본 FSCIL-WaRP 방식)
+[2026-07-13 15:13:12] [safety_warp] [INFO] ======================================================================
+[2026-07-13 15:13:12] [safety_warp] [INFO] Phase: 2
+[2026-07-13 15:13:12] [safety_warp] [INFO] Model: None
+[2026-07-13 15:13:12] [safety_warp] [INFO] Layer types: attn_q,attn_k,attn_v,ffn_down,ffn_up
+[2026-07-13 15:13:12] [safety_warp] [INFO] Target layers: all
+[2026-07-13 15:13:12] [safety_warp] [INFO] ======================================================================
+[2026-07-13 15:13:12] [safety_warp] [WARNING] W&B 초기화 실패 (로깅 없이 계속): api_key not configured (no-tty). call wandb.login(key=[your_api_key])
+[2026-07-13 15:13:12] [safety_warp] [INFO] ======================================================================
+[2026-07-13 15:13:12] [safety_warp] [INFO] Starting Phase 2: Importance Scoring (Fixed)
+[2026-07-13 15:13:12] [safety_warp] [INFO] ======================================================================
+[2026-07-13 15:13:13] [safety_warp] [INFO] Loading basis from ./checkpoints/phase1_20260713_144203/basis...
+[2026-07-13 15:13:13] [safety_warp] [INFO] ✓ Metadata loaded:
+[2026-07-13 15:13:13] [safety_warp] [INFO]   - Layer types: ['attn_k', 'attn_q', 'attn_v', 'ffn_down', 'ffn_up']
+[2026-07-13 15:13:27] [safety_warp] [INFO] ✓ Basis loaded: 160 (layer, type) combinations
+[2026-07-13 15:13:28] [safety_warp] [INFO] Loading Phase 0 trained model from kmseong/llama2_7b-chat-Safety-FT-lr5e-5...
+[2026-07-13 15:13:31] [safety_warp] [INFO] ✓ Phase 0 model loaded
+[2026-07-13 15:13:32] [safety_warp] [INFO] ✓ Tokenizer loaded
+[2026-07-13 15:13:32] [safety_warp] [INFO]   - Input formatting: chat template
+[2026-07-13 15:13:32] [safety_warp] [INFO] Converting to WaRP modules...
+[2026-07-13 15:13:32] [safety_warp] [INFO] ✓ Conversion completed
+[2026-07-13 15:13:32] [safety_warp] [INFO] Reparameterizing weights to basis space...
+[2026-07-13 15:13:32] [safety_warp] [INFO] ======================================================================
+[2026-07-13 15:13:39] [safety_warp] [INFO] ======================================================================
+[2026-07-13 15:13:39] [safety_warp] [INFO] ✓ Reparameterization completed: 160 modules
+[2026-07-13 15:13:39] [safety_warp] [INFO] Loading circuit_breakers data from data/circuit_breakers_train.json...
+[2026-07-13 15:13:39] [safety_warp] [INFO] ✓ Loaded 4994 samples
+[2026-07-13 15:13:39] [safety_warp] [INFO] ✓ Dataloader created (1249 batches)
+[2026-07-13 15:13:39] [safety_warp] [INFO]   - Input format: chat template user/assistant pairs
+[2026-07-13 15:13:39] [safety_warp] [INFO] ======================================================================
+[2026-07-13 15:13:39] [safety_warp] [INFO] Phase 2: Importance Scoring (Per-layer keep_ratio)
+[2026-07-13 15:13:39] [safety_warp] [INFO] ======================================================================
+[2026-07-13 15:13:39] [safety_warp] [INFO] ✅ model.eval() 모드 - 파라미터 업데이트 없음
+[2026-07-13 15:13:39] [safety_warp] [INFO] ✅ Gradient만 계산하여 importance 측정
+[2026-07-13 15:13:39] [safety_warp] [INFO] ======================================================================
+[2026-07-13 15:13:39] [safety_warp] [INFO] ✓ Model set to eval mode (파라미터 변경 없음)
+[2026-07-13 15:13:39] [safety_warp] [INFO] ✓ Found 160 WaRP modules
+[2026-07-13 15:13:39] [safety_warp] [INFO] ✓ Trainable params in Phase 2: 4,496,293,888/6,738,415,616 (66.73%)
+[2026-07-13 15:13:54] [safety_warp] [ERROR] Failed to compute importance: CUDA out of memory. Tried to allocate 208.00 MiB. GPU 0 has a total capacity of 94.97 GiB of which 208.44 MiB is free. Including non-PyTorch memory, this process has 94.76 GiB memory in use. Of the allocated memory 89.38 GiB is allocated by PyTorch, and 4.73 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+Traceback (most recent call last):
+  File "/home/users/minseong/Safety-WaRP-LLM/models/phase2_importance_per_layer.py", line 954, in compute_importance
+    outputs = self.model(
+  File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/transformers/utils/generic.py", line 911, in wrapper
+    output = func(self, *args, **kwargs)
+  File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/transformers/models/llama/modeling_llama.py", line 474, in forward
+    outputs: BaseModelOutputWithPast = self.model(
+  File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/transformers/utils/generic.py", line 1040, in wrapper
+    output = func(self, *args, **kwargs)
+  File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/transformers/utils/output_capturing.py", line 252, in wrapper
+    outputs = func(self, *args, **kwargs)
+  File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/transformers/models/llama/modeling_llama.py", line 411, in forward
+    hidden_states = decoder_layer(
+  File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/transformers/modeling_layers.py", line 93, in __call__
+    return super().__call__(*args, **kwargs)
+  File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/transformers/models/llama/modeling_llama.py", line 316, in forward
+    hidden_states, _ = self.self_attn(
+  File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/transformers/models/llama/modeling_llama.py", line 276, in forward
+    attn_output, attn_weights = attention_interface(
+  File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/transformers/models/llama/modeling_llama.py", line 212, in eager_attention_forward
+    attn_weights = torch.matmul(query, key_states.transpose(2, 3)) * scaling
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 208.00 MiB. GPU 0 has a total capacity of 94.97 GiB of which 208.44 MiB is free. Including non-PyTorch memory, this process has 94.76 GiB memory in use. Of the allocated memory 89.38 GiB is allocated by PyTorch, and 4.73 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)

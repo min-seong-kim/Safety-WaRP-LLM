@@ -102,6 +102,48 @@ Many root-level scripts are analysis/plotting one-offs: `plot_*.py`, `singular_v
 `upload_to_huggingface.py` (and `upload_phase0_to_hf.py`, `upload_phase3_to_hf.py`) push trained checkpoints to the
 Hub. `patch_chat_template.py` fixes tokenizer chat templates on saved models.
 
+## SEAL × WaRP integration (`seal/`)
+
+`seal/` reimplements **SEAL** (Safety-Enhanced Aligned LLM finetuning via *bilevel data selection*, ICLR'25)
+in this repo's HF-Trainer style, then fine-tunes the SEAL-selected data two ways to compare:
+**(A) baseline** = standard full-param SFT, **(B) WaRP** = WSR-Tune reparameterized-space SFT (`basis_coeff` only,
+safety directions frozen). Safety data = `data/circuit_breakers_train.json`, downstream = `gsm8k`, base model =
+`kmseong/llama2_7b-chat-Safety-FT-lr5e-5`. See `seal/README.md` for full docs.
+
+Pipeline (maps to SEAL's S1–S4; only **S2** uses LoRA, **S4-baseline** is full-param, **S4-WaRP** is `basis_coeff`-only):
+- `seal/train_selector.py` — Stage 1: bilevel selector loop (port of SEAL `SFTSelectorTrainer.fit`, no DeepSpeed).
+  `model_loss = ul*safe + (1-ul)*mean(σ[ide]*ft)`, `selector_loss = mean(σ[ide]*ft.detach())`, `ul` decays per epoch.
+  → saves raw-tensor logits `seal/ckpt/<name>_softmax.pt`.
+- `seal/select_data.py` — Stage 1.5: `torch.topk(logits, topp*N)` → `seal/ckpt/gsm8k_selected_topNN.json` (indices
+  into the **fixed** gsm8k train order).
+- `seal/train_sft.py` — Stage 2: SFT on selected data; `--use_warp` toggles WaRP. WaRP path calls
+  `seal/warp_setup.apply_warp` (replicates Phase 3 `setup_warp_modules`: `basis_coeff=W@U`, `UT_forward=U`, mask,
+  train `basis_coeff` only) then `restore_and_delinearize` before save.
+- `seal/scripts/run_all.sh` — chains all stages incl. Phase 1 (basis) + Phase 2 (mask) via the repo's `train.py`.
+
+Run: `bash seal/scripts/run_all.sh` from repo root. It **tees all output to `seal/logs/run_all_<ts>.log`** and
+**skips already-completed stages** (guards on `seal/ckpt/*.pt`, `*_selected_*.json`, `out/*/sft_config.json`), so
+re-running resumes. Edit the config block at the top (`CUDA_VISIBLE_DEVICES`, `MODEL`, `TOPP`, `KEEP_RATIO`, epochs/lr).
+
+**Known issues / gotchas (esp. when moving to a new environment):**
+- **No `python` on PATH** on the original box — the working interpreter was the conda env `hb`
+  (`/home/users/minseong/.conda/envs/hb/bin/python`, torch 2.11+cu130, transformers 5.13). On a new machine, point
+  the scripts at a python that has torch+transformers; `run_all.sh` calls bare `python`, so activate the right env first.
+- **transformers 5.x removed `Trainer(tokenizer=...)`** → use `processing_class=`. `train_sft.py` already handles this
+  with a `processing_class`-first / `tokenizer=` fallback. Harmless deprecation warnings remain (`torch_dtype`,
+  `warmup_ratio`).
+- **Selector artifacts are gitignored** (`*.pt`, most `*.json`), so `seal/ckpt/` does **not** transfer via git. On a
+  fresh checkout either copy `seal/ckpt/` over manually or re-run Stage 1 (the resume guards will otherwise redo the
+  ~2-epoch selector). Stage 1 + 1.5 were completed on the original box (selector + `gsm8k_selected_top80.json`,
+  5978/7473 selected).
+- **Index alignment**: Stage 1 and Stage 2 must use identical gsm8k `dataset_name/subset/split/num_train_samples`, or
+  the selector indices point at the wrong rows.
+- **Base model is an HF hub id** → needs network / HF cache on the new env (first run downloads it).
+- **Known divergences from SEAL's real `train_selector_llama3.sh`** (currently repo defaults, not yet aligned): our
+  selector uses `ul_weight=0.9/decay=0.1` (SEAL 1.0/0.03), `selector_lr=1e-2` (SEAL 5e-3), cosine LR (SEAL constant),
+  LoRA all-linear/α32 (SEAL q,v/α16), and **no gradient accumulation** (SEAL effective batch 64). The full-param S4 is
+  an intentional WSR-Tune-alignment choice, not a bug. Align these if strict SEAL fidelity is wanted.
+
 ## Environment
 
 Python 3.11 + PyTorch (CUDA) + `transformers`/`peft`/`trl`/`accelerate`/`bitsandbytes`. Install via
