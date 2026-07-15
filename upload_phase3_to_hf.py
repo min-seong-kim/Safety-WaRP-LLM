@@ -4,8 +4,8 @@ Phase 3 모델을 Hugging Face Hub에 업로드하는 스크립트
 
 사용법:
 python upload_phase3_to_hf.py \
-    --model_path ./checkpoints/phase3_non_freeze_20260310_121356/final_model \
-    --repo_name kmseong/safety-warp-Llama-3.2-3b-phase3-perlayer-non-freeze \
+    --model_path /home/edgeai_lab/Safety-WaRP-LLM/seal/out/warp_top80 \
+    --repo_name kmseong/llama2_7b_chat_seal_warp_5e-5 \
     --token 
 
 """

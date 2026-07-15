@@ -16,8 +16,13 @@ set -euo pipefail
 cd "$(dirname "$0")/../.."   # → 저장소 루트
 
 # ─────────────── 설정 (환경에 맞게 수정) ───────────────
-export CUDA_VISIBLE_DEVICES=1          # 사용할 GPU
-# conda activate <env>                   # 필요 시 주석 해제
+export CUDA_VISIBLE_DEVICES=0          # 사용할 GPU (이 머신은 B200 0번 하나뿐)
+
+# ─── 실행 인터프리터 고정 ───
+# tmux/PATH 상태와 무관하게 bare `python`이 항상 hb env(3.10, transformers 포함)를
+# 쓰도록 강제한다. 다른 머신에서는 HB_ENV_BIN 환경변수로 오버라이드:
+#   HB_ENV_BIN=/path/to/envs/<name>/bin bash seal/scripts/run_all.sh
+export PATH="${HB_ENV_BIN:-/home/edgeai_lab/miniconda3/envs/hb/bin}:$PATH"
 
 MODEL="kmseong/llama2_7b-chat-Safety-FT-lr5e-5"   # 안전정렬 초기 모델
 SAFETY_JSON="data/circuit_breakers_train.json"
