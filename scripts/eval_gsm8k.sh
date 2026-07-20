@@ -8,6 +8,8 @@ export VLLM_LOGGING_LEVEL=ERROR
 export HF_HUB_DISABLE_XET=1
 export HF_HUB_ENABLE_HF_TRANSFER=1
 export TOKENIZERS_PARALLELISM=false
+export VLLM_USE_STANDALONE_COMPILE=0
+export VLLM_USE_DEEP_GEMM=0
 
 OUT=/home/users/minseong/Safety-WaRP-LLM/outputs/lora_comparison/eval_gsm8k
 mkdir -p "$OUT"

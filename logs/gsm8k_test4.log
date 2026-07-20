@@ -1,0 +1,210 @@
+/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.5.0) or chardet (6.0.0.post1)/charset_normalizer (3.4.4) doesn't match a supported version!
+  warnings.warn(
+2026-07-20:05:57:07 WARNING  [config.evaluate_config:281] --limit SHOULD ONLY BE USED FOR TESTING. REAL METRICS SHOULD NOT BE COMPUTED USING LIMIT.
+2026-07-20:05:57:07 INFO     [config.evaluate_config:301] Using default fewshot_as_multiturn=True.
+2026-07-20:05:57:12 INFO     [_cli.run:378] Selected Tasks: ['gsm8k']
+2026-07-20:05:57:12 INFO     [evaluator:213] Setting random seed to 42 | Setting numpy seed to 42 | Setting torch manual seed to 42 | Setting fewshot manual seed to 42
+2026-07-20:05:57:12 INFO     [evaluator:238] Initializing vllm model, with arguments: {'pretrained': 'kmseong/llama2_7b-chat-gsm8k-lora-r16-lr1e-4', 'seed': 42, 'enforce_eager': True, 'enable_prefix_caching': False, 'tensor_parallel_size': 1, 'data_parallel_size': 1, 'dtype': 'auto', 'gpu_memory_utilization': 0.85}
+(EngineCore pid=940932) /home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/torch/library.py:363: UserWarning: Warning only once for all operators,  other operators may also be overridden.
+(EngineCore pid=940932)   Overriding a previously registered kernel for the same operator and the same dispatch key
+(EngineCore pid=940932)   operator: aten::_log_softmax(Tensor self, int dim, bool half_to_float) -> Tensor
+(EngineCore pid=940932)     registered at /pytorch/build/aten/src/ATen/RegisterSchema.cpp:6
+(EngineCore pid=940932)   dispatch key: CUDA
+(EngineCore pid=940932)   previous kernel: registered at /pytorch/build/aten/src/ATen/RegisterCPU_3.cpp:3799
+(EngineCore pid=940932)        new kernel: registered at /home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/model_executor/layers/batch_invariant.py:905 (Triggered internally at /pytorch/aten/src/ATen/core/dispatch/OperatorEntry.cpp:208.)
+(EngineCore pid=940932)   self.m.impl(
+[W720 05:57:20.101314086 Context.cpp:541] Warning: torch.backends.cuda.preferred_blas_library is an experimental feature. If you see any error or unexpected behavior when this flag is set please file an issue on GitHub. (function operator())
+(EngineCore pid=940932) Loading safetensors checkpoint shards:   0% Completed | 0/3 [00:00<?, ?it/s]
+(EngineCore pid=940932) Loading safetensors checkpoint shards:  33% Completed | 1/3 [00:00<00:00,  2.78it/s]
+(EngineCore pid=940932) Loading safetensors checkpoint shards:  67% Completed | 2/3 [00:00<00:00,  2.65it/s]
+(EngineCore pid=940932) Loading safetensors checkpoint shards: 100% Completed | 3/3 [00:01<00:00,  2.97it/s]
+(EngineCore pid=940932) Loading safetensors checkpoint shards: 100% Completed | 3/3 [00:01<00:00,  2.89it/s]
+(EngineCore pid=940932) 
+(EngineCore pid=940932) 2026-07-20 05:57:27,429 - INFO - autotuner.py:622 - flashinfer.jit: [Autotuner]: Autotuning process starts ...
+(EngineCore pid=940932) 2026-07-20 05:57:27,476 - INFO - autotuner.py:641 - flashinfer.jit: [Autotuner]: Autotuning process ends
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231] EngineCore failed to start.
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231] Traceback (most recent call last):
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/v1/engine/core.py", line 1200, in run_engine_core
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]     engine_core = EngineCoreProc(*args, engine_index=dp_rank, **kwargs)
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]     return func(*args, **kwargs)
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/v1/engine/core.py", line 966, in __init__
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]     super().__init__(
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/v1/engine/core.py", line 133, in __init__
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]     kv_cache_config = self._initialize_kv_caches(vllm_config)
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]     return func(*args, **kwargs)
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/v1/engine/core.py", line 321, in _initialize_kv_caches
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]     self.model_executor.initialize_from_config(kv_cache_configs)
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/v1/executor/abstract.py", line 124, in initialize_from_config
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]     compilation_times: list[CompilationTimes] = self.collective_rpc(
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/v1/executor/uniproc_executor.py", line 92, in collective_rpc
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]     result = run_method(self.driver_worker, method, args, kwargs)
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/v1/serial_utils.py", line 510, in run_method
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]     return func(*args, **kwargs)
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]     return func(*args, **kwargs)
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/v1/worker/gpu_worker.py", line 735, in compile_or_warm_up_model
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]     warmup_kernels(self.model_runner, self.execute_model, self.sample_tokens)
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]     return func(*args, **kwargs)
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/v1/worker/gpu/warmup.py", line 249, in warmup_kernels
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]     worker_sample_tokens(grammar_output)
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]     return func(*args, **kwargs)
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/v1/worker/gpu_worker.py", line 833, in sample_tokens
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]     return self.model_runner.sample_tokens(grammar_output)
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]     return func(*args, **kwargs)
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/v1/worker/gpu/eplb_utils.py", line 37, in wrapper
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]     result = fn(self, *args, **kwargs)
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/v1/worker/gpu/model_runner.py", line 1360, in sample_tokens
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]     sampler_output, num_sampled, num_rejected = self.sample(
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/v1/worker/gpu/model_runner.py", line 1057, in sample
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]     sampler_output = self.sampler(logits, input_batch)
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/v1/worker/gpu/sample/sampler.py", line 94, in __call__
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]     sampled, processed_logits = self.sample(
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/v1/worker/gpu/sample/sampler.py", line 232, in sample
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]     sampled = flashinfer_sample(processed_logits, top_k, top_p).to(torch.int64)
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/v1/sample/ops/topk_topp_sampler.py", line 504, in flashinfer_sample
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]     next_token_ids = flashinfer.sampling.top_k_top_p_sampling_from_logits(
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/flashinfer/api_logging.py", line 2333, in _auto_dump_wrapper
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]     return _inner(*args, **kwargs)
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/flashinfer/sampling.py", line 1414, in top_k_top_p_sampling_from_logits
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]     masked_logits = top_k_mask_logits(logits, top_k)
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/flashinfer/api_logging.py", line 2333, in _auto_dump_wrapper
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]     return _inner(*args, **kwargs)
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/flashinfer/sampling.py", line 1820, in top_k_mask_logits
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]     return get_sampling_module().top_k_mask_logits(
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/flashinfer/sampling.py", line 68, in get_sampling_module
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]     module = gen_sampling_module().build_and_load()
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/flashinfer/jit/core.py", line 316, in build_and_load
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]     self.build(verbose, need_lock=False)
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/flashinfer/jit/core.py", line 302, in build
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]     run_ninja(self.build_dir, self.ninja_path, verbose)
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/flashinfer/jit/cpp_ext.py", line 368, in run_ninja
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]     subprocess.run(
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/subprocess.py", line 503, in run
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]     with Popen(*popenargs, **kwargs) as process:
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/subprocess.py", line 971, in __init__
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]     self._execute_child(args, executable, preexec_fn, close_fds,
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/subprocess.py", line 1863, in _execute_child
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231]     raise child_exception_type(errno_num, err_msg, err_filename)
+(EngineCore pid=940932) ERROR 07-20 05:57:28 [core.py:1231] FileNotFoundError: [Errno 2] No such file or directory: 'ninja'
+(EngineCore pid=940932) Process EngineCore:
+(EngineCore pid=940932) Traceback (most recent call last):
+(EngineCore pid=940932)   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+(EngineCore pid=940932)     self.run()
+(EngineCore pid=940932)   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/multiprocessing/process.py", line 108, in run
+(EngineCore pid=940932)     self._target(*self._args, **self._kwargs)
+(EngineCore pid=940932)   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/v1/engine/core.py", line 1235, in run_engine_core
+(EngineCore pid=940932)     raise e
+(EngineCore pid=940932)   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/v1/engine/core.py", line 1200, in run_engine_core
+(EngineCore pid=940932)     engine_core = EngineCoreProc(*args, engine_index=dp_rank, **kwargs)
+(EngineCore pid=940932)   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(EngineCore pid=940932)     return func(*args, **kwargs)
+(EngineCore pid=940932)   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/v1/engine/core.py", line 966, in __init__
+(EngineCore pid=940932)     super().__init__(
+(EngineCore pid=940932)   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/v1/engine/core.py", line 133, in __init__
+(EngineCore pid=940932)     kv_cache_config = self._initialize_kv_caches(vllm_config)
+(EngineCore pid=940932)   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(EngineCore pid=940932)     return func(*args, **kwargs)
+(EngineCore pid=940932)   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/v1/engine/core.py", line 321, in _initialize_kv_caches
+(EngineCore pid=940932)     self.model_executor.initialize_from_config(kv_cache_configs)
+(EngineCore pid=940932)   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/v1/executor/abstract.py", line 124, in initialize_from_config
+(EngineCore pid=940932)     compilation_times: list[CompilationTimes] = self.collective_rpc(
+(EngineCore pid=940932)   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/v1/executor/uniproc_executor.py", line 92, in collective_rpc
+(EngineCore pid=940932)     result = run_method(self.driver_worker, method, args, kwargs)
+(EngineCore pid=940932)   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/v1/serial_utils.py", line 510, in run_method
+(EngineCore pid=940932)     return func(*args, **kwargs)
+(EngineCore pid=940932)   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(EngineCore pid=940932)     return func(*args, **kwargs)
+(EngineCore pid=940932)   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/v1/worker/gpu_worker.py", line 735, in compile_or_warm_up_model
+(EngineCore pid=940932)     warmup_kernels(self.model_runner, self.execute_model, self.sample_tokens)
+(EngineCore pid=940932)   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+(EngineCore pid=940932)     return func(*args, **kwargs)
+(EngineCore pid=940932)   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/v1/worker/gpu/warmup.py", line 249, in warmup_kernels
+(EngineCore pid=940932)     worker_sample_tokens(grammar_output)
+(EngineCore pid=940932)   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+(EngineCore pid=940932)     return func(*args, **kwargs)
+(EngineCore pid=940932)   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/v1/worker/gpu_worker.py", line 833, in sample_tokens
+(EngineCore pid=940932)     return self.model_runner.sample_tokens(grammar_output)
+(EngineCore pid=940932)   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+(EngineCore pid=940932)     return func(*args, **kwargs)
+(EngineCore pid=940932)   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/v1/worker/gpu/eplb_utils.py", line 37, in wrapper
+(EngineCore pid=940932)     result = fn(self, *args, **kwargs)
+(EngineCore pid=940932)   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/v1/worker/gpu/model_runner.py", line 1360, in sample_tokens
+(EngineCore pid=940932)     sampler_output, num_sampled, num_rejected = self.sample(
+(EngineCore pid=940932)   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/v1/worker/gpu/model_runner.py", line 1057, in sample
+(EngineCore pid=940932)     sampler_output = self.sampler(logits, input_batch)
+(EngineCore pid=940932)   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/v1/worker/gpu/sample/sampler.py", line 94, in __call__
+(EngineCore pid=940932)     sampled, processed_logits = self.sample(
+(EngineCore pid=940932)   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/v1/worker/gpu/sample/sampler.py", line 232, in sample
+(EngineCore pid=940932)     sampled = flashinfer_sample(processed_logits, top_k, top_p).to(torch.int64)
+(EngineCore pid=940932)   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/v1/sample/ops/topk_topp_sampler.py", line 504, in flashinfer_sample
+(EngineCore pid=940932)     next_token_ids = flashinfer.sampling.top_k_top_p_sampling_from_logits(
+(EngineCore pid=940932)   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/flashinfer/api_logging.py", line 2333, in _auto_dump_wrapper
+(EngineCore pid=940932)     return _inner(*args, **kwargs)
+(EngineCore pid=940932)   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/flashinfer/sampling.py", line 1414, in top_k_top_p_sampling_from_logits
+(EngineCore pid=940932)     masked_logits = top_k_mask_logits(logits, top_k)
+(EngineCore pid=940932)   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/flashinfer/api_logging.py", line 2333, in _auto_dump_wrapper
+(EngineCore pid=940932)     return _inner(*args, **kwargs)
+(EngineCore pid=940932)   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/flashinfer/sampling.py", line 1820, in top_k_mask_logits
+(EngineCore pid=940932)     return get_sampling_module().top_k_mask_logits(
+(EngineCore pid=940932)   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/flashinfer/sampling.py", line 68, in get_sampling_module
+(EngineCore pid=940932)     module = gen_sampling_module().build_and_load()
+(EngineCore pid=940932)   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/flashinfer/jit/core.py", line 316, in build_and_load
+(EngineCore pid=940932)     self.build(verbose, need_lock=False)
+(EngineCore pid=940932)   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/flashinfer/jit/core.py", line 302, in build
+(EngineCore pid=940932)     run_ninja(self.build_dir, self.ninja_path, verbose)
+(EngineCore pid=940932)   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/flashinfer/jit/cpp_ext.py", line 368, in run_ninja
+(EngineCore pid=940932)     subprocess.run(
+(EngineCore pid=940932)   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/subprocess.py", line 503, in run
+(EngineCore pid=940932)     with Popen(*popenargs, **kwargs) as process:
+(EngineCore pid=940932)   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/subprocess.py", line 971, in __init__
+(EngineCore pid=940932)     self._execute_child(args, executable, preexec_fn, close_fds,
+(EngineCore pid=940932)   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/subprocess.py", line 1863, in _execute_child
+(EngineCore pid=940932)     raise child_exception_type(errno_num, err_msg, err_filename)
+(EngineCore pid=940932) FileNotFoundError: [Errno 2] No such file or directory: 'ninja'
+Traceback (most recent call last):
+  File "/home/users/minseong/.conda/envs/hb/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/home/users/minseong/.conda/envs/hb/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/users/minseong/lm-evaluation-harness/lm_eval/__main__.py", line 14, in <module>
+    cli_evaluate()
+  File "/home/users/minseong/lm-evaluation-harness/lm_eval/__main__.py", line 10, in cli_evaluate
+    parser.execute(args)
+  File "/home/users/minseong/lm-evaluation-harness/lm_eval/_cli/harness.py", line 60, in execute
+    args.func(args)
+  File "/home/users/minseong/lm-evaluation-harness/lm_eval/_cli/run.py", line 381, in _execute
+    results = simple_evaluate(
+  File "/home/users/minseong/lm-evaluation-harness/lm_eval/utils.py", line 575, in _wrapper
+    return fn(*args, **kwargs)
+  File "/home/users/minseong/lm-evaluation-harness/lm_eval/evaluator.py", line 241, in simple_evaluate
+    lm = lm_eval.api.registry.get_model(model).create_from_arg_obj(
+  File "/home/users/minseong/lm-evaluation-harness/lm_eval/api/model.py", line 169, in create_from_arg_obj
+    return cls(**arg_dict, **additional_config)
+  File "/home/users/minseong/lm-evaluation-harness/lm_eval/models/vllm_causallms.py", line 206, in __init__
+    self.model = LLM(**self.model_args)  # type: ignore[invalid-argument-type]
+  File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/entrypoints/llm.py", line 349, in __init__
+    self.llm_engine = LLMEngine.from_engine_args(
+  File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/v1/engine/llm_engine.py", line 179, in from_engine_args
+    return cls(
+  File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/v1/engine/llm_engine.py", line 105, in __init__
+    self.engine_core = EngineCoreClient.make_client(
+  File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/v1/engine/core_client.py", line 103, in make_client
+    return SyncMPClient(vllm_config, executor_class, log_stats)
+  File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+    return func(*args, **kwargs)
+  File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/v1/engine/core_client.py", line 786, in __init__
+    super().__init__(
+  File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/v1/engine/core_client.py", line 573, in __init__
+    with launch_core_engines(
+  File "/home/users/minseong/.conda/envs/hb/lib/python3.10/contextlib.py", line 142, in __exit__
+    next(self.gen)
+  File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/v1/engine/utils.py", line 1213, in launch_core_engines
+    wait_for_engine_startup(
+  File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/vllm/v1/engine/utils.py", line 1272, in wait_for_engine_startup
+    raise RuntimeError(
+RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
