@@ -1,0 +1,28 @@
+======== GSM8K: kmseong/llama2_7b-chat-gsm8k-lora-r16-lr1e-4 ========
+(EngineCore pid=610271) Error while downloading from https://huggingface.co/kmseong/llama2_7b-chat-gsm8k-lora-r16-lr1e-4/resolve/625c71c037d0caef0c10b6182689780a29b7278e/model-00003-of-00003.safetensors: peer closed connection without sending complete message body (received 881772771 bytes, expected 3552732256)
+scripts/eval_gsm8k.sh: line 22: 609560 Killed                  $HBPY -m lm_eval --model vllm --model_args "pretrained=${m},dtype=bfloat16,gpu_memory_utilization=0.85,enforce_eager=True,tensor_parallel_size=1,data_parallel_size=1,max_model_len=2048" --tasks gsm8k --num_fewshot 5 --apply_chat_template --output_path "${OUT}/${tag}" 2>&1
+     609561 Done                    | tee "${OUT}/${tag}.log"
+     609562 Done                    | grep -iE "exact_match|Running|error"
+     609563 Done                    | tail -20
+======== GSM8K: kmseong/llama2_7b-chat-gsm8k-origproj-lora-kr0.1-r16-lr1e-4 ========
+(EngineCore pid=636642) ERROR 07-20 04:33:11 [core.py:1231]   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/flashinfer/sampling.py", line 1820, in top_k_mask_logits
+(EngineCore pid=636642) ERROR 07-20 04:33:11 [core.py:1231]     return get_sampling_module().top_k_mask_logits(
+(EngineCore pid=636642) ERROR 07-20 04:33:11 [core.py:1231]   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/flashinfer/sampling.py", line 68, in get_sampling_module
+(EngineCore pid=636642) ERROR 07-20 04:33:11 [core.py:1231]     module = gen_sampling_module().build_and_load()
+(EngineCore pid=636642) ERROR 07-20 04:33:11 [core.py:1231]   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/flashinfer/jit/core.py", line 316, in build_and_load
+(EngineCore pid=636642) ERROR 07-20 04:33:11 [core.py:1231]     self.build(verbose, need_lock=False)
+(EngineCore pid=636642) ERROR 07-20 04:33:11 [core.py:1231]   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/flashinfer/jit/core.py", line 302, in build
+(EngineCore pid=636642) ERROR 07-20 04:33:11 [core.py:1231]     run_ninja(self.build_dir, self.ninja_path, verbose)
+(EngineCore pid=636642) ERROR 07-20 04:33:11 [core.py:1231]   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/flashinfer/jit/cpp_ext.py", line 368, in run_ninja
+(EngineCore pid=636642) ERROR 07-20 04:33:11 [core.py:1231]     subprocess.run(
+(EngineCore pid=636642) ERROR 07-20 04:33:11 [core.py:1231]   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/subprocess.py", line 503, in run
+(EngineCore pid=636642) ERROR 07-20 04:33:11 [core.py:1231]     with Popen(*popenargs, **kwargs) as process:
+(EngineCore pid=636642) ERROR 07-20 04:33:11 [core.py:1231]   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/subprocess.py", line 971, in __init__
+(EngineCore pid=636642) ERROR 07-20 04:33:11 [core.py:1231]     self._execute_child(args, executable, preexec_fn, close_fds,
+(EngineCore pid=636642) ERROR 07-20 04:33:11 [core.py:1231]   File "/home/users/minseong/.conda/envs/hb/lib/python3.10/subprocess.py", line 1863, in _execute_child
+(EngineCore pid=636642) ERROR 07-20 04:33:11 [core.py:1231]     raise child_exception_type(errno_num, err_msg, err_filename)
+(EngineCore pid=636642) ERROR 07-20 04:33:11 [core.py:1231] FileNotFoundError: [Errno 2] No such file or directory: 'ninja'
+(EngineCore pid=636642) FileNotFoundError: [Errno 2] No such file or directory: 'ninja'
+    raise RuntimeError(
+RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+======== GSM8K: kmseong/llama2_7b-chat-gsm8k-wsr-lora-elem-kr0.1-r16-lr1e-4 ========

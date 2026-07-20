@@ -1,0 +1,12 @@
+/home/users/minseong/.conda/envs/hb/lib/python3.10/site-packages/huggingface_hub/constants.py:298: FutureWarning: The `HF_HUB_ENABLE_HF_TRANSFER` environment variable is deprecated as 'hf_transfer' is not used anymore. Please use `HF_XET_HIGH_PERFORMANCE` instead to enable high performance transfer with Xet. Visit https://huggingface.co/docs/huggingface_hub/package_reference/environment_variables#hfxethighperformance for more details.
+  warnings.warn(
+prefetch kmseong/llama2_7b-chat-gsm8k-lora-r16-lr1e-4 ...
+Fetching 8 files:   0%|          | 0/8 [00:00<?, ?it/s]Error while downloading from https://huggingface.co/kmseong/llama2_7b-chat-gsm8k-lora-r16-lr1e-4/resolve/625c71c037d0caef0c10b6182689780a29b7278e/model-00002-of-00003.safetensors: peer closed connection without sending complete message body (received 424013548 bytes, expected 4947390896)
+Trying to resume download...
+Fetching 8 files:  38%|███▊      | 3/8 [37:31<1:02:31, 750.34s/it]Fetching 8 files: 100%|██████████| 8/8 [37:31<00:00, 281.38s/it]  
+  done -> /home/users/minseong/.cache/huggingface/hub/models--kmseong--llama2_7b-chat-gsm8k-lora-r16-lr1e-4/snapshots/625c71c037d0caef0c10b6182689780a29b7278e
+prefetch kmseong/llama2_7b-chat-gsm8k-origproj-lora-kr0.1-r16-lr1e-4 ...
+Fetching 8 files:   0%|          | 0/8 [00:00<?, ?it/s]Fetching 8 files:  50%|█████     | 4/8 [00:10<00:10,  2.51s/it]Fetching 8 files: 100%|██████████| 8/8 [00:10<00:00,  1.26s/it]
+  done -> /home/users/minseong/.cache/huggingface/hub/models--kmseong--llama2_7b-chat-gsm8k-origproj-lora-kr0.1-r16-lr1e-4/snapshots/ec05091cc95626b8a616a1759ab8429ebfe71ee0
+prefetch kmseong/llama2_7b-chat-gsm8k-wsr-lora-elem-kr0.1-r16-lr1e-4 ...
+Fetching 5 files:   0%|          | 0/5 [00:00<?, ?it/s]

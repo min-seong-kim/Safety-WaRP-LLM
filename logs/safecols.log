@@ -1,0 +1,68 @@
+2026-07-19 15:04:16,662 [INFO] HTTP Request: HEAD https://huggingface.co/kmseong/llama2_7b-chat-Safety-FT-lr5e-5/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-07-19 15:04:16,669 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/kmseong/llama2_7b-chat-Safety-FT-lr5e-5/c4cac2bc0cffc7ffae43ec047f4d527caeedd529/config.json "HTTP/1.1 200 OK"
+2026-07-19 15:04:17,104 [INFO] HTTP Request: HEAD https://huggingface.co/kmseong/llama2_7b-chat-Safety-FT-lr5e-5/resolve/main/tokenizer_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-07-19 15:04:17,110 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/kmseong/llama2_7b-chat-Safety-FT-lr5e-5/c4cac2bc0cffc7ffae43ec047f4d527caeedd529/tokenizer_config.json "HTTP/1.1 200 OK"
+2026-07-19 15:04:17,325 [INFO] HTTP Request: GET https://huggingface.co/api/models/kmseong/llama2_7b-chat-Safety-FT-lr5e-5/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+2026-07-19 15:04:17,533 [INFO] HTTP Request: GET https://huggingface.co/api/models/kmseong/llama2_7b-chat-Safety-FT-lr5e-5/tree/main?recursive=true&expand=false "HTTP/1.1 200 OK"
+2026-07-19 15:04:17,791 [INFO] HTTP Request: HEAD https://huggingface.co/kmseong/llama2_7b-chat-Safety-FT-lr5e-5/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-07-19 15:04:17,797 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/kmseong/llama2_7b-chat-Safety-FT-lr5e-5/c4cac2bc0cffc7ffae43ec047f4d527caeedd529/config.json "HTTP/1.1 200 OK"
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+2026-07-19 15:04:18,054 [INFO] HTTP Request: HEAD https://huggingface.co/kmseong/llama2_7b-chat-Safety-FT-lr5e-5/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-07-19 15:04:18,061 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/kmseong/llama2_7b-chat-Safety-FT-lr5e-5/c4cac2bc0cffc7ffae43ec047f4d527caeedd529/config.json "HTTP/1.1 200 OK"
+Loading weights:   0%|          | 0/291 [00:00<?, ?it/s]Loading weights:  10%|▉         | 29/291 [00:00<00:00, 281.81it/s]Loading weights:  20%|█▉        | 58/291 [00:00<00:00, 265.54it/s]Loading weights:  29%|██▉       | 85/291 [00:00<00:00, 266.88it/s]Loading weights:  38%|███▊      | 112/291 [00:00<00:00, 264.93it/s]Loading weights:  48%|████▊     | 139/291 [00:00<00:00, 266.31it/s]Loading weights:  57%|█████▋    | 167/291 [00:00<00:00, 266.00it/s]Loading weights:  67%|██████▋   | 194/291 [00:00<00:00, 266.53it/s]Loading weights:  76%|███████▋  | 222/291 [00:00<00:00, 266.82it/s]Loading weights:  86%|████████▌ | 249/291 [00:00<00:00, 264.60it/s]Loading weights:  96%|█████████▌| 278/291 [00:01<00:00, 271.73it/s]Loading weights: 100%|██████████| 291/291 [00:01<00:00, 269.52it/s]
+2026-07-19 15:04:20,130 [INFO] HTTP Request: HEAD https://huggingface.co/kmseong/llama2_7b-chat-Safety-FT-lr5e-5/resolve/main/generation_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-07-19 15:04:20,137 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/kmseong/llama2_7b-chat-Safety-FT-lr5e-5/c4cac2bc0cffc7ffae43ec047f4d527caeedd529/generation_config.json "HTTP/1.1 200 OK"
+2026-07-19 15:04:20,139 [INFO] Target weights: 160
+2026-07-19 15:04:20,159 [INFO] Safety samples: 4994
+2026-07-19 15:04:26,611 [INFO]   processed 50 batches
+2026-07-19 15:04:32,350 [INFO]   processed 100 batches
+2026-07-19 15:04:38,639 [INFO]   processed 150 batches
+2026-07-19 15:04:44,589 [INFO]   processed 200 batches
+2026-07-19 15:04:51,418 [INFO]   processed 250 batches
+2026-07-19 15:04:57,660 [INFO]   processed 300 batches
+2026-07-19 15:05:04,169 [INFO]   processed 350 batches
+2026-07-19 15:05:09,848 [INFO]   processed 400 batches
+2026-07-19 15:05:15,933 [INFO]   processed 450 batches
+2026-07-19 15:05:21,850 [INFO]   processed 500 batches
+2026-07-19 15:05:27,718 [INFO]   processed 550 batches
+2026-07-19 15:05:33,801 [INFO]   processed 600 batches
+2026-07-19 15:05:39,723 [INFO]   processed 650 batches
+2026-07-19 15:05:45,797 [INFO]   processed 700 batches
+2026-07-19 15:05:52,002 [INFO]   processed 750 batches
+2026-07-19 15:05:58,159 [INFO]   processed 800 batches
+2026-07-19 15:06:04,033 [INFO]   processed 850 batches
+2026-07-19 15:06:09,734 [INFO]   processed 900 batches
+2026-07-19 15:06:15,914 [INFO]   processed 950 batches
+2026-07-19 15:06:21,914 [INFO]   processed 1000 batches
+2026-07-19 15:06:28,436 [INFO]   processed 1050 batches
+2026-07-19 15:06:34,693 [INFO]   processed 1100 batches
+2026-07-19 15:06:41,220 [INFO]   processed 1150 batches
+2026-07-19 15:06:47,039 [INFO]   processed 1200 batches
+2026-07-19 15:06:52,956 [INFO]   processed 1250 batches
+2026-07-19 15:06:59,197 [INFO]   processed 1300 batches
+2026-07-19 15:07:05,469 [INFO]   processed 1350 batches
+2026-07-19 15:07:12,136 [INFO]   processed 1400 batches
+2026-07-19 15:07:18,363 [INFO]   processed 1450 batches
+2026-07-19 15:07:24,418 [INFO]   processed 1500 batches
+2026-07-19 15:07:30,576 [INFO]   processed 1550 batches
+2026-07-19 15:07:36,831 [INFO]   processed 1600 batches
+2026-07-19 15:07:42,730 [INFO]   processed 1650 batches
+2026-07-19 15:07:49,018 [INFO]   processed 1700 batches
+2026-07-19 15:07:54,933 [INFO]   processed 1750 batches
+2026-07-19 15:08:00,986 [INFO]   processed 1800 batches
+2026-07-19 15:08:06,862 [INFO]   processed 1850 batches
+2026-07-19 15:08:12,831 [INFO]   processed 1900 batches
+2026-07-19 15:08:18,732 [INFO]   processed 1950 batches
+2026-07-19 15:08:24,637 [INFO]   processed 2000 batches
+2026-07-19 15:08:30,395 [INFO]   processed 2050 batches
+2026-07-19 15:08:36,717 [INFO]   processed 2100 batches
+2026-07-19 15:08:42,863 [INFO]   processed 2150 batches
+2026-07-19 15:08:48,606 [INFO]   processed 2200 batches
+2026-07-19 15:08:54,674 [INFO]   processed 2250 batches
+2026-07-19 15:09:01,216 [INFO]   processed 2300 batches
+2026-07-19 15:09:07,723 [INFO]   processed 2350 batches
+2026-07-19 15:09:13,714 [INFO]   processed 2400 batches
+2026-07-19 15:09:20,024 [INFO]   processed 2450 batches
+2026-07-19 15:09:25,633 [INFO] Accumulated over 2497 batches
+2026-07-19 15:09:25,761 [INFO] ✓ Saved safe_cols to outputs/lora_comparison/artifacts/orig_safecols
+=== safecols done. files: 160 ===
