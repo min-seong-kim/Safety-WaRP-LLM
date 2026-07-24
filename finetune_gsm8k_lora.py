@@ -6,8 +6,9 @@
   lora                     : ΔW = s·BA
   original_projected_lora  : ΔW = s·BA(I−EEᵀ)          (A[:, safe_cols]=0, optimizer.step 후 재투영)
   wsr_lora                 : ΔW = [(1−M)∘(s·BA)] Uᵀ    (basis 공간 element freeze, forward 사전제약)
+  safe_lora                : 표준 LoRA 학습 후 lora_B ← C·B (C=VVᵀ/‖V‖, cos≤thr 레이어만) 사후 투영
 
-저장은 dense: lora/orig → merge_and_unload, wsr → restore_wsr_lora_to_linear. HF push.
+저장은 dense: lora/orig/safe_lora → merge_and_unload, wsr → restore_wsr_lora_to_linear. HF push.
 """
 import argparse
 import json
@@ -47,13 +48,24 @@ LT_TO_PROJ = {v: k for k, v in PROJ_TO_LT.items()}
 
 def parse_args():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--method", required=True, choices=["lora", "original_projected_lora", "wsr_lora"])
+    ap.add_argument("--method", required=True,
+                    choices=["lora", "original_projected_lora", "wsr_lora", "wsr_lora_nou", "safe_lora"])
     ap.add_argument("--model_name", required=True)
     ap.add_argument("--output_dir", required=True)
     ap.add_argument("--safety_data_path", default="./data/circuit_breakers_train.json")
     ap.add_argument("--basis_dir", default=None)          # wsr_lora
     ap.add_argument("--mask_dir", default=None)           # wsr_lora
     ap.add_argument("--safecols_dir", default=None)       # original_projected_lora
+    # safe_lora (바닐라 Safe LoRA, NeurIPS'24) — 사후 projection 전용
+    ap.add_argument("--safelora_base_model", default="meta-llama/Llama-2-7b-chat-hf",
+                    help="alignment delta V=W_aligned−W_base 의 base(비정렬 참조) 모델")
+    ap.add_argument("--safelora_aligned_model", default=None,
+                    help="aligned 모델 (기본: --model_name, 세 방법 공통 시작점 = safety 모델)")
+    ap.add_argument("--safelora_select_type", default="threshold", choices=["threshold", "number"])
+    ap.add_argument("--safelora_threshold", type=float, default=0.35)
+    ap.add_argument("--safelora_num_proj_layers", type=int, default=10)
+    ap.add_argument("--safelora_load_dtype", default="float32", choices=["float32", "bfloat16", "float16"],
+                    help="base/aligned 로드 dtype (기본 float32=공식 구현과 동일)")
     ap.add_argument("--keep_ratio", type=float, default=0.1)
     ap.add_argument("--direction_keep_ratio", type=float, default=0.1)
     ap.add_argument("--layer_type", default="attn_q,attn_k,attn_v,ffn_up,ffn_down")
@@ -221,6 +233,27 @@ def main():
         model = model.to(0)
         trainable = mark_only_lora_trainable(model)
         logger.info(f"trainable params (WSR-LoRA): {trainable:,}")
+    elif args.method == "wsr_lora_nou":
+        # WSR-LoRA 에서 rotation(U)만 제거한 ablation:
+        #   ΔW = (1-M) ∘ (s·BA)  (원래 weight 공간, element-wise mask, forward-내 freeze).
+        #   mask 는 원래공간 element importance |∂L/∂W| 로 계산(train.py --phase 2 --original_space_mask).
+        if not args.mask_dir:
+            raise ValueError("wsr_lora_nou requires --mask_dir (original-space element mask; no basis)")
+        masks = _load_masks(args.mask_dir, layer_types)
+        converted = switch_to_wsr_lora(model, layer_types, args.target_layers,
+                                       r=args.lora_r, alpha=args.lora_alpha, dropout=args.lora_dropout)
+        n_set = 0
+        for key, mod in converted.items():
+            if key not in masks:
+                raise ValueError(f"missing mask for {key}")
+            M = torch.as_tensor(masks[key])
+            assert tuple(M.shape) == (mod.out_features, mod.in_features), f"{key}: mask {tuple(M.shape)}"
+            mod.set_basis_and_mask(None, M)   # U=None → no rotation
+            n_set += 1
+        logger.info(f"✓ WSR-LoRA(no-rotation) mask set for {n_set} modules")
+        model = model.to(0)
+        trainable = mark_only_lora_trainable(model)
+        logger.info(f"trainable params (WSR-LoRA-noU): {trainable:,}")
     else:
         from peft import LoraConfig, get_peft_model
         cfg = LoraConfig(r=args.lora_r, lora_alpha=args.lora_alpha, lora_dropout=args.lora_dropout,
@@ -271,7 +304,24 @@ def main():
     if projection_cb is not None:
         projection_cb.project()  # 마지막 재투영
 
-    if args.method == "wsr_lora":
+    safelora_stats = None
+    if args.method == "safe_lora":
+        from models.safelora_baseline import apply_safelora
+        aligned = args.safelora_aligned_model or args.model_name
+        sl_dtype = {"float32": torch.float32, "float16": torch.float16,
+                    "bfloat16": torch.bfloat16}[args.safelora_load_dtype]
+        logger.info(f"[SafeLoRA] projection: base={args.safelora_base_model} aligned={aligned} "
+                    f"select={args.safelora_select_type} thr={args.safelora_threshold}")
+        safelora_stats = apply_safelora(
+            model, base_path=args.safelora_base_model, aligned_path=aligned,
+            target_modules=target_modules, r=args.lora_r,
+            select_layers_type=args.safelora_select_type,
+            threshold=args.safelora_threshold, num_proj_layers=args.safelora_num_proj_layers,
+            compute_device=("cuda" if torch.cuda.is_available() else "cpu"),
+            load_dtype=sl_dtype, logger=logger)
+        logger.info(f"[SafeLoRA] stats: {safelora_stats}")
+
+    if args.method in ("wsr_lora", "wsr_lora_nou"):
         restore_wsr_lora_to_linear(model)
         merged = model
     else:
@@ -299,16 +349,25 @@ def main():
                "lora_r": args.lora_r, "lora_alpha": args.lora_alpha, "keep_ratio": args.keep_ratio,
                "direction_keep_ratio": args.direction_keep_ratio, "epochs": args.epochs,
                "merged_dir": merged_dir, "hf_repo_id": args.hf_repo_id,
-               "projection_calls": projection_cb.count if projection_cb else None}
+               "projection_calls": projection_cb.count if projection_cb else None,
+               "safelora": safelora_stats}
     json.dump(summary, open(os.path.join(args.output_dir, "summary.json"), "w"), indent=2)
 
     if args.push_to_hub:
         if not args.hf_repo_id:
             raise ValueError("--push_to_hub requires --hf_repo_id")
-        logger.info(f"pushing to hub: {args.hf_repo_id}")
-        merged.push_to_hub(args.hf_repo_id)
-        tok.push_to_hub(args.hf_repo_id)
-        logger.info(f"✓ pushed: https://huggingface.co/{args.hf_repo_id}")
+        # ⚠️ push 실패(토큰 무효/네트워크 등)가 학습 파이프라인을 중단시키지 않도록 non-fatal.
+        #    merged 모델은 이미 merged_dir(/scratch2)에 저장되어 있으므로, 실패 시
+        #    나중에 scripts/push_safelora_from_scratch.py 로 재업로드하면 됨.
+        try:
+            logger.info(f"pushing to hub: {args.hf_repo_id}")
+            merged.push_to_hub(args.hf_repo_id)
+            tok.push_to_hub(args.hf_repo_id)
+            logger.info(f"✓ pushed: https://huggingface.co/{args.hf_repo_id}")
+        except Exception as e:
+            logger.error(f"PUSH_FAILED repo={args.hf_repo_id} merged_dir={merged_dir} "
+                         f"err={type(e).__name__}: {str(e)[:200]}")
+            logger.error("→ 모델은 저장됨. 유효 HF 토큰으로 나중에 재업로드 필요.")
 
     logger.info("=== DONE ===")
 

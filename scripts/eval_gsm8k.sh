@@ -20,6 +20,10 @@ MODELS=(
   "kmseong/llama2_7b-chat-gsm8k-lora-r16-lr2e-4"
   "kmseong/llama2_7b-chat-gsm8k-origproj-lora-kr0.1-r16-lr2e-4"
   "kmseong/llama2_7b-chat-gsm8k-wsr-lora-elem-kr0.1-r16-lr2e-4"
+  "kmseong/llama2_7b-chat-gsm8k-safelora-thr0.35-r16-lr1e-4"
+  "kmseong/llama2_7b-chat-gsm8k-safelora-thr0.35-r16-lr2e-4"
+  "kmseong/llama2_7b-chat-gsm8k-salora-r16-lr1e-4"
+  "kmseong/llama2_7b-chat-gsm8k-salora-r16-lr2e-4"
 )
 for m in "${MODELS[@]}"; do
   tag=$(echo "$m" | sed 's#.*/##')

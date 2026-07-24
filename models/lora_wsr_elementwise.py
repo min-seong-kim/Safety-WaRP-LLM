@@ -77,6 +77,7 @@ class LinearWSRLoRA(nn.Module):
             "coeff_mask", torch.zeros((self.out_features, self.in_features), dtype=torch.bool, device=device)
         )
         self._basis_ready = False
+        self._no_rotation = False   # U=None → ΔW=(1-M)∘(s·BA), 원래공간 (rotation ablation)
 
         self.lora_dropout = nn.Dropout(p=dropout) if dropout and dropout > 0.0 else nn.Identity()
 
@@ -87,10 +88,15 @@ class LinearWSRLoRA(nn.Module):
 
     @torch.no_grad()
     def set_basis_and_mask(self, U: torch.Tensor, mask: torch.Tensor):
-        """U: (n×n) orthonormal (warp_modules 관례상 V=UT.t() 가 저장됨). mask: (m×n) bool, True=freeze."""
+        """U: (n×n) orthonormal (warp_modules 관례상 V=UT.t() 가 저장됨). mask: (m×n) bool, True=freeze.
+        U=None 이면 no-rotation ablation: ΔW=(1-M)∘(s·BA) 를 원래공간에서 그대로 사용."""
         W = self.weight
-        U = U.to(dtype=W.dtype, device=W.device)
-        self.UT_forward = U.clone()
+        if U is None:
+            self._no_rotation = True
+            self.UT_forward = torch.empty(0, dtype=W.dtype, device=W.device)
+        else:
+            U = U.to(dtype=W.dtype, device=W.device)
+            self.UT_forward = U.clone()
 
         if mask is not None:
             if not isinstance(mask, torch.Tensor):
@@ -105,9 +111,12 @@ class LinearWSRLoRA(nn.Module):
         self._basis_ready = True
 
     def _delta_weight(self) -> torch.Tensor:
-        """ΔW = [ (1-M) ∘ (s·BA) ] @ U^T  (original weight space)."""
+        """ΔW = [ (1-M) ∘ (s·BA) ] @ U^T  (original weight space).
+        no_rotation 이면 U 없이 ΔW = (1-M) ∘ (s·BA)."""
         delta_coeff = self.scaling * (self.lora_B @ self.lora_A)  # (m×n), basis 공간
         delta_coeff = torch.where(self.coeff_mask, torch.zeros_like(delta_coeff), delta_coeff)
+        if self._no_rotation:
+            return delta_coeff
         return delta_coeff @ self.UT_forward.t()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
