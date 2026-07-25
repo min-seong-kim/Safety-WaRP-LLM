@@ -87,6 +87,36 @@ Pipeline: Convert layers to `LinearSNWaRP` (`C = W @ U`) → detect top-k safety
 `|∂L/∂C|` → tune only those coordinates → restore to `nn.Linear` (`W_final = C @ U.T`, exact because `U` is
 orthonormal). Components: `module.py`, `detect.py`, `run.py`.
 
+## LoRA line: WSR-LoRA and friends (`finetune_gsm8k_lora.py`)
+
+A **separate experiment line** from the numbered phases, answering "does the WSR idea carry over to LoRA?".
+All methods share the same LoRA budget (r=16, α=32, `q,k,v,up,down`) and differ only in *which coordinate
+system the update lives in and how it is constrained*. Single entry point `finetune_gsm8k_lora.py --method`:
+
+| method | ΔW | space / unit | rank | needs |
+|---|---|---|---|---|
+| `lora` | `s·BA` | — | r | — |
+| `original_projected_lora` | `s·BA(I−EEᵀ)` | original / column | r | `--safecols_dir` |
+| `wsr_lora` | `[(1−M)∘(s·BA)]Uᵀ` | rotated / **element** | full | `--basis_dir --mask_dir` |
+| `wsr_lora_nou` | `(1−M)∘(s·BA)` | original / element | full | `--mask_dir` |
+| `safe_lora` | post-hoc `B←C·B` | output space / layer | r | base+aligned models |
+| `adapter_subspace_lora` | `s·BA(I−Q_SQ_Sᵀ)` | rotated / **direction** | r | `--safety_adapter_path --adapter_subspace_dir` |
+
+SaLoRA has its own runner (`finetune_gsm8k_salora.py`). Element-wise `wsr_lora` breaks rank-r, so it saves via
+dense fold (`restore_wsr_lora_to_linear`) instead of `merge_and_unload`.
+
+**`adapter_subspace_lora` does NOT run Phase 1 or Phase 2.** Instead of activation-covariance basis + gradient
+importance, it takes the compact SVD of an already-trained **safety LoRA adapter** (`ΔW_s = s_s B_s A_s =
+P_s Σ_s Q_sᵀ`, via thin QR ×2 + r×r SVD, never materializing dense `ΔW_s`) and forbids the downstream adapter
+from touching `Q_S` (`A_d Q_S = 0`), giving `W_final Q_S = W_safe Q_S` exactly. `models/adapter_subspace.py` +
+`build_adapter_subspace.py` + `scripts/run_adapter_subspace_lora.sh` (Stage 0 safety LoRA → 0.5 merge →
+1 Q_S extraction → 2 downstream → 3 control; `STOP_AFTER_STAGE1=1` halts after Stage 1; completed stages are
+skipped on re-run). Both a gradient hook **and** a post-`optimizer.step()` reprojection are required — AdamW's
+elementwise `1/√v` breaks linearity, so projecting gradients alone does not keep the update in the subspace.
+
+**See `wsr_lora_status.md`** for what has actually been trained/uploaded, current results, and the
+environment-migration checklist. `wsr_lora_comparison.md` is the older pre-implementation spec.
+
 ## Evaluation
 
 Downstream task eval/fine-tune harnesses live in per-task directories, each a standalone script (not wired into
@@ -149,6 +179,21 @@ re-running resumes. Edit the config block at the top (`CUDA_VISIBLE_DEVICES`, `M
 Python 3.11 + PyTorch (CUDA) + `transformers`/`peft`/`trl`/`accelerate`/`bitsandbytes`. Install via
 `pip install -r requirements.txt` or `conda env create -f environment.yml`. Optional Weights & Biases logging
 (`--use_wandb`); `wandb/` run dirs are gitignored.
+
+### SLURM (current box)
+
+Jobs get GPUs via `sbatch` (`#SBATCH --gres=gpu:1`); see `scripts/sbatch_adapter_subspace_lora.sh` or
+`~/code_test.sh` for the template. **Never set `CUDA_VISIBLE_DEVICES`** — the scheduler sets it, and a
+hardcoded value makes the job grab a GPU it was not allocated. Two inherited hardcodings are commented out
+for this reason (`models/phase0_SSFT.py`, `gsm8k_eval/finetune_gsm8k_full_params.py` — the latter set it at
+*import* time, poisoning every module that imports it); do not revive them.
+
+Partitions have `AllowQos` restrictions: `gigabyte_a6000`/`suma_a6000` accept the default QOS, while
+`suma_a100` needs `a100_qos`/`a100_low_qos` (otherwise `Invalid qos specification`). `sacct`/`sacctmgr`
+often fail with `Connection refused` (flaky slurmdbd) — do not treat a single failed `squeue` as job exit.
+
+Verify the HF token with `hf auth whoami`, never `hf auth login` (which reports "Already logged in" whenever
+a token file exists, valid or not).
 
 `config.yaml` holds default hyperparameters but the shell scripts pass explicit CLI args that override it — the
 scripts, not `config.yaml`, are the source of truth for what actually ran.

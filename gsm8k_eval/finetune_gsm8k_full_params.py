@@ -59,7 +59,11 @@ try:
 except ImportError:
     _peft_available = False
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "2,3"
+# SLURM 환경에서는 스케줄러가 CUDA_VISIBLE_DEVICES 를 할당 GPU 로 설정해 주므로
+# 코드에서 하드코딩하면 할당받지 않은 물리 GPU 를 잡으려다 실패한다. 셸/스케줄러가 정하도록 둔다.
+# ⚠️ 이 모듈은 finetune_gsm8k_lora.py 등에서 import 되므로, 여기서의 하드코딩은
+#    import 하는 쪽의 device 설정까지 덮어쓴다.
+# os.environ["CUDA_VISIBLE_DEVICES"] = "2,3"
 
 def parse_args():
     p = argparse.ArgumentParser(description='Full Parameter Finetune SN-Tuned Model on GSM8K')

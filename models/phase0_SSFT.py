@@ -30,7 +30,9 @@ from tqdm import tqdm
 import logging
 import math
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "2,3"
+# SLURM 환경에서는 스케줄러가 CUDA_VISIBLE_DEVICES 를 할당 GPU 로 설정해 주므로
+# 코드에서 하드코딩하면 할당받지 않은 물리 GPU 를 잡으려다 실패한다. 셸/스케줄러가 정하도록 둔다.
+# os.environ["CUDA_VISIBLE_DEVICES"] = "2,3"
 
 # cuDNN attention 백엔드는 일부 head_dim/gradient_checkpointing/torch nightly 조합에서
 # "No valid execution plans built" 오류를 냄. cuDNN SDP만 끄면 SDPA가 flash/mem-efficient/
@@ -46,11 +48,11 @@ logger = logging.getLogger('safety_warp')
 # =====================================================================
 # Configuration (matched to sn_tune.py)
 # =====================================================================
-MODEL_NAME = "meta-llama/Llama-3.1-8B"  # Base 모델 (Phase 0) - WaRP 제거 전 모델 사용
+MODEL_NAME = "meta-llama/Llama-2-7B-chat"  # Base 모델 (Phase 0) - WaRP 제거 전 모델 사용
 
-LEARNING_RATE = 5e-5
+LEARNING_RATE = 1e-4
 NUM_EPOCHS = 3
-BATCH_SIZE = 1
+BATCH_SIZE = 4
 GRAD_ACCUM_STEPS = 4
 MAX_SEQ_LENGTH = 1024
 MAX_SAMPLES = 4994
@@ -63,7 +65,7 @@ DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 LORA_R = 16
 LORA_ALPHA = 32
 LORA_DROPOUT = 0.05
-LORA_TARGET_MODULES = ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+LORA_TARGET_MODULES = ["q_proj", "k_proj", "v_proj", "up_proj", "down_proj"]
 
 
 # setup_logger 임포트 (train.py와 동일한 유틸)

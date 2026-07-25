@@ -7,8 +7,16 @@
   original_projected_lora  : ΔW = s·BA(I−EEᵀ)          (A[:, safe_cols]=0, optimizer.step 후 재투영)
   wsr_lora                 : ΔW = [(1−M)∘(s·BA)] Uᵀ    (basis 공간 element freeze, forward 사전제약)
   safe_lora                : 표준 LoRA 학습 후 lora_B ← C·B (C=VVᵀ/‖V‖, cos≤thr 레이어만) 사후 투영
+  adapter_subspace_lora    : ΔW_d^⊥ = s·B_d A_d (I−Q_S Q_Sᵀ)
+                             Q_S = safety LoRA adapter ΔW_s=s_s B_s A_s 의 right singular vectors.
+                             safety adapter 는 고정, downstream adapter 만 학습하며 A_d Q_S = 0 유지.
+                             ⇒ W_final Q_S = W_safe Q_S (정확). Q_S 는 build_adapter_subspace.py 산출물.
 
-저장은 dense: lora/orig/safe_lora → merge_and_unload, wsr → restore_wsr_lora_to_linear. HF push.
+⚠️ method=adapter_subspace_lora 일 때만 --model_name 은 **base** 모델(예: Llama-2-7b-chat-hf)이고
+   safety 는 --safety_adapter_path 로 얹는다. 다른 method 는 --model_name 이 safety 모델이다.
+
+저장은 dense: lora/orig/safe_lora/adapter_subspace → merge_and_unload,
+wsr → restore_wsr_lora_to_linear. HF push.
 """
 import argparse
 import json
@@ -16,9 +24,9 @@ import logging
 import os
 import sys
 
-# ⚠️ gsm8k_eval.finetune_gsm8k_full_params 는 import 시점에
-#    os.environ["CUDA_VISIBLE_DEVICES"]="2,3" 을 하드코딩한다. 우리가 shell 로 지정한
-#    device 를 덮어쓰지 않도록, import 전에 캡처해 import 후 복원한다.
+# gsm8k_eval.finetune_gsm8k_full_params 의 import-time CUDA_VISIBLE_DEVICES 하드코딩은
+# 현재 주석 처리되어 있으므로 아래 캡처/복원은 사실상 no-op 이다(셸/SLURM 값을 그대로 보존).
+# 누군가 다시 하드코딩을 살릴 경우를 대비한 방어 코드로 남겨 둔다.
 _INTENDED_CVD = os.environ.get("CUDA_VISIBLE_DEVICES")
 
 import torch
@@ -49,7 +57,8 @@ LT_TO_PROJ = {v: k for k, v in PROJ_TO_LT.items()}
 def parse_args():
     ap = argparse.ArgumentParser()
     ap.add_argument("--method", required=True,
-                    choices=["lora", "original_projected_lora", "wsr_lora", "wsr_lora_nou", "safe_lora"])
+                    choices=["lora", "original_projected_lora", "wsr_lora", "wsr_lora_nou",
+                             "safe_lora", "adapter_subspace_lora"])
     ap.add_argument("--model_name", required=True)
     ap.add_argument("--output_dir", required=True)
     ap.add_argument("--safety_data_path", default="./data/circuit_breakers_train.json")
@@ -66,6 +75,23 @@ def parse_args():
     ap.add_argument("--safelora_num_proj_layers", type=int, default=10)
     ap.add_argument("--safelora_load_dtype", default="float32", choices=["float32", "bfloat16", "float16"],
                     help="base/aligned 로드 dtype (기본 float32=공식 구현과 동일)")
+    # adapter_subspace_lora
+    ap.add_argument("--safety_adapter_path", default=None,
+                    help="safety LoRA adapter 디렉토리 (B_s, A_s). --model_name 은 base 모델이어야 함")
+    ap.add_argument("--adapter_subspace_dir", default=None,
+                    help="build_adapter_subspace.py 가 만든 Q_S artifact 디렉토리")
+    ap.add_argument("--safety_adapter_mode", default="merge", choices=["merge", "keep"],
+                    help="merge=safety adapter 를 base 에 병합 후 downstream adapter 1개 학습 / "
+                         "keep=safety adapter 를 frozen 으로 유지하고 두 adapter 를 동시 활성화")
+    ap.add_argument("--require_safety_adapter_for_all_targets", action="store_true",
+                    help="Q_S 가 없는 target module 이 하나라도 있으면 error")
+    ap.add_argument("--lora_param_dtype", default="float32", choices=["float32", "bfloat16"],
+                    help="downstream LoRA 파라미터 dtype. 제약 A_d·Q_S=0 의 달성 정밀도를 좌우한다 "
+                         "(fp32≈1e-7, bf16≈1e-3 상대오차). 다른 baseline 과 dtype 을 맞추려면 bfloat16")
+    ap.add_argument("--project_optimizer_exp_avg", action="store_true",
+                    help="AdamW exp_avg 도 매 step 투영 (grad 투영 시 대체로 중복이지만 안전장치)")
+    ap.add_argument("--verify_every_steps", type=int, default=0,
+                    help=">0 이면 N step 마다 제약 지표를 로깅")
     ap.add_argument("--keep_ratio", type=float, default=0.1)
     ap.add_argument("--direction_keep_ratio", type=float, default=0.1)
     ap.add_argument("--layer_type", default="attn_q,attn_k,attn_v,ffn_up,ffn_down")
@@ -181,6 +207,140 @@ class ProjectionCallback(TrainerCallback):
         self.project()
 
 
+# ───────────────── adapter_subspace 투영 콜백 ─────────────────
+class AdapterSubspaceCallback(TrainerCallback):
+    """downstream lora_A 를 매 step 후 Q_S 의 직교보공간으로 재투영.
+
+    gradient projection 은 projector 가 등록한 post-accumulate-grad hook 이 담당하고,
+    이 콜백은 optimizer.step() 이후의 parameter 재투영을 담당한다. 둘 다 필요한 이유는
+    models/adapter_subspace.AdapterSubspaceProjector docstring 참조 (AdamW 의 원소별
+    normalization 이 선형성을 깨서 grad 만 투영해서는 제약이 유지되지 않는다).
+    """
+
+    def __init__(self, projector, verify_every_steps=0, logger_=None):
+        self.projector = projector
+        self.verify_every_steps = verify_every_steps
+        self.log = logger_ or logger
+        self._optimizer = None
+
+    @property
+    def count(self):
+        return self.projector.count
+
+    def project(self):
+        self.projector.project(self._optimizer)
+
+    def on_train_begin(self, args, state, control, **kwargs):
+        self._optimizer = kwargs.get("optimizer", self._optimizer)
+        self.project()
+
+    def on_step_end(self, args, state, control, **kwargs):
+        self._optimizer = kwargs.get("optimizer", self._optimizer)
+        self.project()
+        if self.verify_every_steps and state.global_step % self.verify_every_steps == 0:
+            _, agg = self.projector.verify(check_mapping=False)
+            self.log.info(
+                f"[adapter_subspace] step {state.global_step} "
+                f"constraint_A(max)={agg['constraint_A']['max']:.3e} "
+                f"constraint_delta(max)={agg['constraint_delta']['max']:.3e} "
+                f"delta_norm(mean)={agg['delta_norm']['mean']:.4f}")
+
+
+def _setup_adapter_subspace(model, args, target_modules, dtype):
+    """base model 위에 safety adapter + 제약된 downstream adapter 를 구성.
+
+    Returns: (model, projector, downstream_adapter_name, info_dict)
+    """
+    from peft import LoraConfig, PeftModel, get_peft_model
+    from models.adapter_subspace import AdapterSubspaceProjector, load_subspaces, read_report
+
+    if not args.safety_adapter_path:
+        raise ValueError("adapter_subspace_lora requires --safety_adapter_path (no fallback)")
+    if not args.adapter_subspace_dir:
+        raise ValueError("adapter_subspace_lora requires --adapter_subspace_dir "
+                         "(build_adapter_subspace.py 로 먼저 생성)")
+
+    subspaces = load_subspaces(args.adapter_subspace_dir)
+    if not subspaces:
+        raise ValueError(f"no Q_S artifacts found in {args.adapter_subspace_dir}")
+    report = read_report(args.adapter_subspace_dir)
+    logger.info(f"[adapter_subspace] loaded Q_S for {len(subspaces)} modules from "
+                f"{args.adapter_subspace_dir}")
+    if report:
+        logger.info(f"  protected_k: min={report['protected_k_min']} max={report['protected_k_max']} "
+                    f"mean={report['protected_k_mean']:.2f} | "
+                    f"max recon err={report['max_reconstruction_error']:.3e}")
+
+    cfg = LoraConfig(r=args.lora_r, lora_alpha=args.lora_alpha, lora_dropout=args.lora_dropout,
+                     bias="none", task_type="CAUSAL_LM", target_modules=target_modules)
+
+    if args.safety_adapter_mode == "merge":
+        logger.info(f"[adapter_subspace] merging safety adapter into base: "
+                    f"{args.safety_adapter_path}")
+        model = PeftModel.from_pretrained(model, args.safety_adapter_path)
+        model = model.merge_and_unload()          # W_safe = W_base + s_s B_s A_s
+        model = get_peft_model(model, cfg)
+        downstream_name = "default"
+    else:
+        logger.info(f"[adapter_subspace] keeping safety adapter frozen: "
+                    f"{args.safety_adapter_path}")
+        model = PeftModel.from_pretrained(model, args.safety_adapter_path,
+                                          adapter_name="safety", is_trainable=False)
+        model.add_adapter("downstream", cfg)
+        # PeftModel.set_adapter 는 단일 이름만 받으므로 LoraModel 쪽 API 로 둘 다 활성화한다.
+        model.base_model.set_adapter(["safety", "downstream"])
+        downstream_name = "downstream"
+        frozen = 0
+        for n, p in model.named_parameters():
+            if ".safety." in n:
+                p.requires_grad_(False)
+                frozen += p.numel()
+        logger.info(f"[adapter_subspace] safety adapter frozen: {frozen:,} params")
+
+    # LoRA 파라미터 dtype: 제약 달성 정밀도를 좌우하므로 명시적으로 로깅한다.
+    if args.lora_param_dtype == "float32" and dtype != torch.float32:
+        n_cast = 0
+        for n, p in model.named_parameters():
+            if "lora_" in n and p.requires_grad:
+                p.data = p.data.float()
+                n_cast += 1
+        logger.info(f"[adapter_subspace] downstream LoRA params → fp32 ({n_cast} tensors). "
+                    f"제약 A_d·Q_S=0 을 ~1e-7 상대오차로 유지하기 위함 "
+                    f"(bf16 이면 ~1e-3 에서 멈춘다).")
+
+    model.print_trainable_parameters()
+
+    projector = AdapterSubspaceProjector(
+        model, subspaces, adapter_name=downstream_name,
+        project_exp_avg=args.project_optimizer_exp_avg, logger_=logger)
+
+    if projector.unconstrained_targets:
+        msg = (f"Q_S 가 없어 제약이 걸리지 않는 target module {len(projector.unconstrained_targets)} 개: "
+               f"{projector.unconstrained_targets[:5]}{' ...' if len(projector.unconstrained_targets) > 5 else ''}")
+        if args.require_safety_adapter_for_all_targets:
+            raise ValueError(msg + " (--require_safety_adapter_for_all_targets)")
+        logger.warning(msg + " → 일반 LoRA 로 학습됩니다.")
+
+    projector.register_grad_hooks()
+    logger.info(f"[adapter_subspace] constrained modules: {projector.num_constrained}, "
+                f"unconstrained: {len(projector.unconstrained_targets)}")
+
+    info = {
+        "safety_adapter_path": args.safety_adapter_path,
+        "adapter_subspace_dir": args.adapter_subspace_dir,
+        "safety_adapter_mode": args.safety_adapter_mode,
+        "downstream_adapter_name": downstream_name,
+        "lora_param_dtype": args.lora_param_dtype,
+        "num_constrained_modules": projector.num_constrained,
+        "num_unconstrained_targets": len(projector.unconstrained_targets),
+        "subspace_report": {k: report[k] for k in
+                            ("num_modules", "protected_k_min", "protected_k_max",
+                             "protected_k_mean", "max_reconstruction_error",
+                             "max_orthogonality_error")} if report else None,
+    }
+    return model, projector, downstream_name, info
+
+
 def build_gsm8k(tokenizer, args):
     ds = load_dataset(args.dataset_name, args.dataset_subset, split="train")
     if args.gsm8k_samples > 0:
@@ -208,6 +368,13 @@ def main():
     model.config.use_cache = False
 
     projection_cb = None
+    projector = None
+    subspace_info = None
+    subspace_verify = None
+
+    if args.method == "adapter_subspace_lora":
+        logger.info("⚠️ method=adapter_subspace_lora: --model_name 은 BASE 모델이어야 하며 "
+                    f"safety 는 --safety_adapter_path 로 얹습니다 (model_name={args.model_name})")
 
     # ───────────── method setup ─────────────
     if args.method == "wsr_lora":
@@ -254,6 +421,10 @@ def main():
         model = model.to(0)
         trainable = mark_only_lora_trainable(model)
         logger.info(f"trainable params (WSR-LoRA-noU): {trainable:,}")
+    elif args.method == "adapter_subspace_lora":
+        model, projector, downstream_adapter, subspace_info = _setup_adapter_subspace(
+            model, args, target_modules, dtype)
+        projection_cb = AdapterSubspaceCallback(projector, args.verify_every_steps, logger)
     else:
         from peft import LoraConfig, get_peft_model
         cfg = LoraConfig(r=args.lora_r, lora_alpha=args.lora_alpha, lora_dropout=args.lora_dropout,
@@ -304,6 +475,33 @@ def main():
     if projection_cb is not None:
         projection_cb.project()  # 마지막 재투영
 
+    # ───────────── adapter_subspace 제약 검증 (§10 A–E) ─────────────
+    if projector is not None:
+        from models.adapter_subspace import load_subspaces
+        subspaces = load_subspaces(args.adapter_subspace_dir)
+        rows, agg = projector.verify(subspaces=subspaces, check_mapping=True)
+        subspace_verify = {"aggregate": agg, "per_layer": rows}
+        with open(os.path.join(args.output_dir, "subspace_verification.json"), "w") as f:
+            json.dump(subspace_verify, f, indent=2)
+        logger.info("=" * 70)
+        logger.info("[adapter_subspace] constraint verification")
+        for field, label in (("constraint_A", "A  ‖A_d Q_S‖/‖A_d‖        "),
+                             ("constraint_delta", "B  ‖ΔW_d Q_S‖/‖ΔW_d‖     "),
+                             ("mapping_drift", "C  ‖W_final Q−W_safe Q‖/‖·‖"),
+                             ("safety_recon_error", "D  safety ΔW_s recon err  "),
+                             ("delta_norm", "E  ‖B_d A_d‖_F            ")):
+            v = agg.get(field)
+            if v:
+                logger.info(f"  {label} max={v['max']:.3e}  mean={v['mean']:.3e}")
+        if agg["constraint_A"] and agg["constraint_A"]["max"] > 1e-2:
+            logger.warning("constraint_A 가 큽니다 — 제약이 제대로 유지되지 않았습니다. "
+                           "--lora_param_dtype float32 인지, grad hook 이 등록됐는지 확인하세요.")
+        if agg["delta_norm"] and agg["delta_norm"]["mean"] < 1e-4:
+            logger.warning("downstream update 가 거의 0 입니다 — 보호 subspace 가 너무 커서 "
+                           "학습 여지가 없을 수 있습니다 (top_k/energy 를 낮춰보세요).")
+        logger.info("=" * 70)
+        projector.remove_grad_hooks()
+
     safelora_stats = None
     if args.method == "safe_lora":
         from models.safelora_baseline import apply_safelora
@@ -350,7 +548,9 @@ def main():
                "direction_keep_ratio": args.direction_keep_ratio, "epochs": args.epochs,
                "merged_dir": merged_dir, "hf_repo_id": args.hf_repo_id,
                "projection_calls": projection_cb.count if projection_cb else None,
-               "safelora": safelora_stats}
+               "safelora": safelora_stats,
+               "adapter_subspace": subspace_info,
+               "adapter_subspace_verify": subspace_verify["aggregate"] if subspace_verify else None}
     json.dump(summary, open(os.path.join(args.output_dir, "summary.json"), "w"), indent=2)
 
     if args.push_to_hub:
