@@ -1,0 +1,30 @@
+2026-07-26 02:55:10 - __main__ - INFO - 
+======================================================================
+2026-07-26 02:55:10 - __main__ - INFO -   🚀 LISA (Bi-State Optimization) GSM8K Fine-tuning
+2026-07-26 02:55:10 - __main__ - INFO - ======================================================================
+
+2026-07-26 02:55:10 - __main__ - INFO - Log file: ./logs/lisa_gsm8k/finetune_gsm8k_lisa_20260726_025510.log
+2026-07-26 02:55:10 - __main__ - INFO - ⚙️  Configuration:
+2026-07-26 02:55:10 - __main__ - INFO -    ├─ Base model: kmseong/llama2_7b-chat-Safety-FT-lr5e-5
+2026-07-26 02:55:10 - __main__ - INFO -    ├─ Input formatting: chat template
+2026-07-26 02:55:10 - __main__ - INFO -    ├─ Tuning: LoRA (r=8, alpha=4)
+2026-07-26 02:55:10 - __main__ - INFO -    ├─ BSO: ON  rho=1.0 align_step=100 finetune_step=900
+2026-07-26 02:55:10 - __main__ - INFO -    ├─ Safety(alignment) data: /root/Safety-WaRP-LLM/data/circuit_breakers_train.json (guide_data_num=4994)
+2026-07-26 02:55:10 - __main__ - INFO -    ├─ Downstream: GSM8K (7473 samples), clean (no poison)
+2026-07-26 02:55:10 - __main__ - INFO -    ├─ LR: 0.0002  epochs: 3  eff.batch: 16
+2026-07-26 02:55:10 - __main__ - INFO -    └─ Output dir: outputs/faithful_baselines/lisa_faithful/lr_2e-4
+
+2026-07-26 02:55:10 - __main__ - INFO - [1/4] Loading tokenizer
+2026-07-26 02:55:10 - __main__ - INFO - ✅ Tokenizer loaded (vocab=32000, pad=</s>)
+2026-07-26 02:55:10 - __main__ - INFO - [2/4] Loading model (bf16)
+2026-07-26 02:55:15 - __main__ - INFO - ✓ LoRA applied: r=8, alpha=4, targets=['q_proj', 'v_proj']
+2026-07-26 02:55:15 - __main__ - INFO - ✅ Model loaded (6.74B total, 4.2M trainable = 0.06%)
+2026-07-26 02:55:15 - __main__ - INFO - [3/4] Loading & tokenizing GSM8K (downstream/finetune)
+2026-07-26 02:55:16 - __main__ - INFO - ✅ GSM8K train: 7473 samples
+2026-07-26 02:55:18 - __main__ - INFO - ✅ Alignment(safety) data: 4994 samples (from /root/Safety-WaRP-LLM/data/circuit_breakers_train.json)
+2026-07-26 02:55:18 - __main__ - INFO - [4/4] Training with LISA BSO
+2026-07-26 02:55:18 - __main__ - INFO - Starting training...
+2026-07-26 03:10:07 - __main__ - INFO - Saving model
+2026-07-26 03:10:23 - __main__ - INFO - ✅ Saved to outputs/faithful_baselines/lisa_faithful/lr_2e-4
+2026-07-26 03:10:45 - __main__ - INFO - ✅ Uploaded: https://huggingface.co/kmseong/llama2_7b-chat-gsm8k-lisa-faithful-qv-r8a4-lr2e-4
+2026-07-26 03:10:45 - __main__ - INFO - ✅ LISA fine-tuning complete!

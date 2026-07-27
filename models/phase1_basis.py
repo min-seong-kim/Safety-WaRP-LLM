@@ -275,7 +275,12 @@ class Phase1BasisBuilder:
         """
         import json
         
-        circuit_breakers_path = './data/circuit_breakers_train.json'
+        # --circuit_breakers_path 를 존중한다 (기본값은 기존 하드코딩과 동일).
+        # 예전에는 인자를 무시하고 항상 ./data/... 를 읽어, 다른 안전 데이터를 지정해도
+        # 조용히 무시되는 함정이 있었다.
+        circuit_breakers_path = getattr(
+            self.args, 'circuit_breakers_path', './data/circuit_breakers_train.json'
+        ) or './data/circuit_breakers_train.json'
         self.logger.info(f"Loading circuit_breakers from {circuit_breakers_path}...")
         
         try:

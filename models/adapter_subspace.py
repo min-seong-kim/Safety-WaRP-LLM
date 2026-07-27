@@ -286,14 +286,23 @@ class AdapterSubspaceProjector:
     """
 
     def __init__(self, model, subspaces, adapter_name="default",
-                 project_exp_avg=False, logger_=None):
+                 project_exp_avg=False, logger_=None, subspace_key="Q_S"):
+        """
+        Args:
+            subspace_key: payload 안에서 보호 subspace 를 담은 키 이름.
+                `adapter_subspace_lora` 는 "Q_S" (safety adapter 의 compact-SVD right
+                singular vectors), `adapter_aware_wsr_projected_lora` 는 "U_S"
+                (WSR activation basis 의 선택된 column) 를 쓴다. 투영 수학은 동일하므로
+                (`A ← A − (A·S)Sᵀ`, S 는 n×k orthonormal) 이 클래스를 공유한다.
+        """
         self.model = model
         self.adapter_name = adapter_name
         self.project_exp_avg = project_exp_avg
         self.log = logger_ or logger
+        self.subspace_key = subspace_key
         self.count = 0            # ProjectionCallback 과 동일한 인터페이스
         self._hooks = []
-        self._entries = []        # [(key, module_name, A_param, Q_S_tensor)]
+        self._entries = []        # [(key, module_name, A_param, S_tensor)]
         self._unconstrained = []  # subspace artifact 가 없어 제약 미적용인 target
 
         for name, module in model.named_modules():
@@ -306,15 +315,16 @@ class AdapterSubspaceProjector:
             if key is None:
                 continue
             payload = subspaces.get(key)
-            if payload is None or payload.get("Q_S") is None or payload["Q_S"].numel() == 0:
+            sk = self.subspace_key
+            if payload is None or payload.get(sk) is None or payload[sk].numel() == 0:
                 self._unconstrained.append((key, name))
                 continue
 
             A_param = lora_A[self.adapter_name].weight
-            Q = payload["Q_S"].to(device=A_param.device, dtype=torch.float32).contiguous()
+            Q = payload[sk].to(device=A_param.device, dtype=torch.float32).contiguous()
             if Q.shape[0] != A_param.shape[1]:
                 raise ValueError(
-                    f"{name}: Q_S in_dim {Q.shape[0]} != lora_A in_dim {A_param.shape[1]}")
+                    f"{name}: {sk} in_dim {Q.shape[0]} != lora_A in_dim {A_param.shape[1]}")
             self._entries.append((key, name, A_param, Q))
 
         if not self._entries:

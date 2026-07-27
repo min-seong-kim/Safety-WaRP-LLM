@@ -19,14 +19,19 @@ TS=$(date +%Y%m%d_%H%M%S)
 exec > >(tee -a "logs/adapter_subspace_lora_${TS}.log") 2>&1
 
 # ═══════════════════ config ═══════════════════
-HBPY=/home/gokms0509/anaconda3/envs/hb/bin/python
-# ⚠️ SLURM 환경: CUDA_VISIBLE_DEVICES 를 여기서 설정하지 않는다.
-#    sbatch --gres=gpu:N 으로 할당받은 GPU 를 스케줄러가 알아서 노출한다.
-#    (scripts/sbatch_adapter_subspace_lora.sh 로 제출할 것)
+# python 인터프리터. 환경마다 다르므로 env 로 덮어쓸 수 있게 둔다:
+#   HBPY=/path/to/python bash scripts/run_adapter_subspace_lora.sh
+#   구 SLURM 박스: /home/gokms0509/anaconda3/envs/hb/bin/python
+#   Vast 박스   : /venv/hb/bin/python  (torch 2.10+cu128 / transformers 4.57.3 / peft 0.18.1)
+HBPY=${HBPY:-/venv/hb/bin/python}
+# ⚠️ CUDA_VISIBLE_DEVICES 를 여기서 설정하지 않는다.
+#    SLURM 박스: sbatch --gres=gpu:N 으로 할당받은 GPU 를 스케줄러가 노출한다.
+#    단일 GPU 박스(Vast 등): unset 이면 torch 가 그냥 GPU 0 을 쓴다. 하드코딩할 이유가 없다.
 # export CUDA_VISIBLE_DEVICES=0
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 export TOKENIZERS_PARALLELISM=false
 echo "CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-<unset: 스케줄러/전체 GPU>}"
+echo "HBPY=${HBPY}"
 
 BASE_MODEL="meta-llama/Llama-2-7b-chat-hf"        # ⚠️ safety 이전의 BASE 모델
 SAFETY_DATA="./data/circuit_breakers_train.json"
@@ -60,7 +65,16 @@ SELECTION_LIST=(
   "energy90:--adapter_subspace_energy 0.90"
   "energy99:--adapter_subspace_energy 0.99"
 )
-TRAIN_SELECTIONS=(all_effective topk8 topk4)
+# 2026-07-25 Stage 1 스펙트럼 확인 후 확정 (topk8 → energy90 교체).
+#   all_effective (k=16,   100%)  헤드라인. A_s 행공간 전체에 직교 = 최대 제약.
+#                                 그래도 4096 중 16 차원(0.4%)뿐이라 capacity 비용이 사실상 0.
+#   topk4         (k=4,   89.2%)  고정·균일 예산 대조군.
+#   energy90      (k~4.5, 91.5%)  topk4 와 예산이 맞춰진 적응적 대조군. 층별 k 가 1~12 로
+#                                 달라지므로(early 5.7 / late 3.5, attn_k 5.8 / attn_v 3.0)
+#                                 "예산 크기가 아니라 배분 방식이 중요한가"를 깨끗하게 묻는다.
+# 제외: topk8(95.1%)·energy99(99.2%) 는 all_effective(100%) 와 차이가 작아 정보량이 적다.
+# 하한 탐침이 필요하면 topk2(81.7%) 를 4번째로 추가.
+TRAIN_SELECTIONS=(all_effective topk4 energy90)
 
 # 1 = Stage 1(Q_S 추출)까지만 하고 종료. 스펙트럼을 본 뒤 TRAIN_SELECTIONS 를 정하기 위함.
 # env 로도 덮어쓸 수 있다:  STOP_AFTER_STAGE1=1 bash scripts/run_adapter_subspace_lora.sh

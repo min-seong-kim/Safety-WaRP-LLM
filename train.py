@@ -17,9 +17,10 @@ Safety-WaRP-LLM: 완전히 수정된 버전 (원본 FSCIL-WaRP 방식)
 import os
 import argparse
 import logging
+from contextlib import contextmanager
 from datetime import datetime
 
-from utils import setup_logger, set_seed
+from utils import setup_logger, set_seed, ResourceProfiler
 
 
 def parse_args():
@@ -55,7 +56,48 @@ def parse_args():
     parser.add_argument('--only_prompt', action='store_true',
                         help='Phase 1에서 response 없이 prompt(harmful question)만 사용하여 basis 구성. '
                              'instruct 모델은 user turn만, plain 모델은 question만 입력.')
-    
+
+    # ───────────────────────────────────────────────────────────────────
+    # WSR-Tune vs ActSVD mask-structure ablation (rebuttal 실험)
+    #   설계 문서: wsr_actsvd_ablation_spec.md
+    #   Phase 1: --basis_side 로 입력측(WSR) / 출력측(ActSVD) 기저를 선택
+    #   Phase 2/3: --ablation_arm 으로 A/B/C/D arm을 선택 (basis+mask 구조만 달라짐)
+    # ───────────────────────────────────────────────────────────────────
+    parser.add_argument('--basis_side', type=str, default=None,
+                        choices=['input', 'output'],
+                        help='[ablation] Phase 1 기저 방향. input=X_in X_in^T 고유기저(WSR-Tune, n×n), '
+                             'output=W X_in 의 left singular vectors(ActSVD, m×m). '
+                             '미지정 시 기존 Phase1BasisBuilder(=input, 레거시 경로) 사용.')
+    parser.add_argument('--basis_token_scope', type=str, default='all',
+                        choices=['all', 'response'],
+                        help='[ablation] 기저 구성에 쓸 토큰 범위. all=패딩 제외 전체(기존 동작, '
+                             '논문 Table 2/5 재현용 기본값), response=응답 토큰만(spec §2).')
+    parser.add_argument('--basis_save_dtype', type=str, default='bfloat16',
+                        choices=['float32', 'bfloat16'],
+                        help='[ablation] 기저 저장 dtype. Phase 2/3이 어차피 모델 dtype으로 '
+                             '캐스팅하므로 bf16 저장이 기본 (spec §6: 디스크/메모리 절감).')
+    parser.add_argument('--gram_dtype', type=str, default='float32',
+                        choices=['float32', 'bfloat16'],
+                        help='[ablation] 활성화 Gram 누적 dtype. 기본 float32(정확), '
+                             'bfloat16=레거시 Phase 1과 동일(메모리 절반).')
+    parser.add_argument('--ablation_arm', type=str, default=None,
+                        choices=['A', 'B', 'C', 'D', 'D_perm'],
+                        help='[ablation] Phase 2/3 arm. A=원본공간+entry, B=ActSVD출력기저+row, '
+                             'C=safety입력기저+column, D=WSR-Tune(입력기저+entry), '
+                             'D_perm=signed-permutation V sanity arm. '
+                             '모든 arm이 safety 데이터(circuit_breakers)만 사용한다.')
+    parser.add_argument('--mask_unit', type=str, default=None,
+                        choices=['entry', 'row', 'column'],
+                        help='[ablation] arm 기본 마스크 단위를 덮어씀 (교차 조합 실험용).')
+    parser.add_argument('--structured_agg', type=str, default='l2',
+                        choices=['l2', 'sum', 'mean'],
+                        help='[ablation] row/column 마스크의 집계 방식 (기본 L2).')
+    parser.add_argument('--structured_rank', type=str, default='grad',
+                        choices=['grad', 'spectral'],
+                        help='[ablation] row/column 랭킹 기준. grad=safety gradient 크기(기본, '
+                             'arm 간 유일 변수를 basis/구조로 유지), spectral=기저 특이값 순서'
+                             '(ActSVD 원논문 기준을 그대로 옮긴 변형).')
+
     # Phase 2 설정
     parser.add_argument('--basis_dir', type=str, default=None,
                         help='Phase 1의 basis 디렉토리 경로 (Phase 2, 3에서 사용)')
@@ -188,7 +230,7 @@ def parse_args():
     parser.add_argument('--no_masks', action='store_true',
                         help='Phase 3에서 Phase 2 마스크 없이 실행 (freeze 없음, 모든 파라미터 학습 가능)')
     parser.add_argument('--safety_mix_ratio', type=float, default=0.0,
-                        help='Phase 3에서 safety dataset 혼합 비율 (0.0=미사용, 0.05=downstream 대비 5%)')
+                        help='Phase 3에서 safety dataset 혼합 비율 (0.0=미사용, 0.05=downstream 대비 5%%)')
     parser.add_argument('--gradient_checkpointing', action='store_true',
                         help='Phase 3에서 gradient checkpointing 사용 (비교 실험 시 freeze/non-freeze 동일하게 설정 권장)')
 
@@ -251,6 +293,15 @@ def parse_args():
     parser.add_argument('--debug', action='store_true',
                         help='디버그 모드')
 
+    # 리소스 프로파일링 (phase별 소요 시간 / VRAM)
+    parser.add_argument('--profile_json', type=str, default=None,
+                        help='시간/VRAM 프로파일 요약 JSON 저장 경로 '
+                             '(미지정 시 log_dir/phase{N}_{timestamp}_profile.json)')
+    parser.add_argument('--profile_interval', type=float, default=0.5,
+                        help='디바이스 VRAM 샘플링 주기(초). 0 이하면 샘플러 비활성화')
+    parser.add_argument('--no_profile', action='store_true',
+                        help='시간/VRAM 프로파일링 비활성화')
+
     # W&B 설정
     parser.add_argument('--wandb_project', type=str, default='Safety-WaRP-LLM',
                         help='W&B 프로젝트 이름 (--no_wandb로 비활성화 가능)')
@@ -262,12 +313,53 @@ def parse_args():
     return parser.parse_args()
 
 
-def run_phase1(args, logger):
+class _NullProfiler:
+    """--no_profile 일 때 쓰는 no-op 프로파일러 (호출부를 그대로 유지)."""
+
+    @contextmanager
+    def stage(self, name):
+        yield
+
+    def finalize(self, *a, **kw):
+        return None
+
+
+def _make_profiler(args, logger, timestamp):
+    """Phase별 시간/VRAM 프로파일러 생성 (--no_profile 이면 no-op)."""
+    if getattr(args, 'no_profile', False):
+        return _NullProfiler()
+    json_path = getattr(args, 'profile_json', None) or os.path.join(
+        args.log_dir, f"phase{args.phase}_{timestamp}_profile.json"
+    )
+    interval = getattr(args, 'profile_interval', 0.5)
+    return ResourceProfiler(
+        logger=logger,
+        label=f"Phase {args.phase}",
+        json_path=json_path,
+        sample_interval=interval if interval and interval > 0 else 0.5,
+        meta={
+            'phase': args.phase,
+            'model': args.phase0_model_dir or args.model_name,
+            'layer_type': args.layer_type,
+            'target_layers': args.target_layers,
+            'batch_size': args.batch_size,
+            'dtype': args.dtype,
+            'keep_ratio': getattr(args, 'keep_ratio', None),
+            'epochs': getattr(args, 'epochs', None),
+            'learning_rate': getattr(args, 'utility_lr', None),
+            'gradient_accumulation_steps': getattr(args, 'gradient_accumulation_steps', None),
+            'phase3_dataset': getattr(args, 'phase3_dataset', None),
+        },
+    )
+
+
+def run_phase1(args, logger, profiler=None):
     """
     Phase 1: Basis Construction
-    
+
     ✅ 수정: Φ @ Φ^T 방식으로 SVD
     """
+    profiler = profiler or _NullProfiler()
     logger.info("="*70)
     logger.info("Starting Phase 1: Basis Construction")
     logger.info("="*70)
@@ -277,29 +369,40 @@ def run_phase1(args, logger):
         logger.error("Phase 1 requires --phase0_model_dir (trained model from Phase 0)")
         raise ValueError("Missing --phase0_model_dir")
     
-    from models.phase1_basis import Phase1BasisBuilder
-    
-    builder = Phase1BasisBuilder(args, logger)
-    
+    if getattr(args, 'basis_side', None) or getattr(args, 'basis_token_scope', 'all') != 'all':
+        # [ablation] 입력측/출력측(ActSVD) 기저 빌더
+        from models.actsvd_basis import ActSVDBasisBuilder
+        if not getattr(args, 'basis_side', None):
+            args.basis_side = 'input'
+        builder = ActSVDBasisBuilder(args, logger)
+    else:
+        from models.phase1_basis import Phase1BasisBuilder
+        builder = Phase1BasisBuilder(args, logger)
+
     # Phase 0 모델 로드
     args.model_name = args.phase0_model_dir
-    builder.load_model()
-    
+    with profiler.stage('load_model'):
+        builder.load_model()
+
     # 안전 데이터 로드 (circuit_breakers 또는 wikipedia)
-    builder.load_safety_data()
-    
+    with profiler.stage('load_data'):
+        builder.load_safety_data()
+
     # ✅ Phase 1에서는 WaRP module 불필요!
     # 단순히 activation만 수집하면 되므로 원본 모델 그대로 사용
-    
+
     # ✅ Incremental Gram matrix accumulation (hook 등록 + 누적)
-    builder.collect_activations_and_accumulate_gram()
-    
+    with profiler.stage('collect_activations_gram'):
+        builder.collect_activations_and_accumulate_gram()
+
     # SVD 계산 (✅ 누적된 Gram matrix에서 직접 계산)
-    builder.compute_svd()
-    
+    with profiler.stage('compute_svd'):
+        builder.compute_svd()
+
     # Basis 저장
-    builder.save_basis()
-    
+    with profiler.stage('save_basis'):
+        builder.save_basis()
+
     logger.info("="*70)
     logger.info(f"Phase 1 Completed!")
     logger.info(f"Basis saved to: {builder.checkpoint_dir}")
@@ -308,12 +411,13 @@ def run_phase1(args, logger):
     logger.info("="*70)
 
 
-def run_phase2(args, logger):
+def run_phase2(args, logger, profiler=None):
     """
     Phase 2: Importance Scoring
-    
+
     ✅ 완전 재작성: model.eval() + gradient만 계산
     """
+    profiler = profiler or _NullProfiler()
     logger.info("="*70)
     logger.info("Starting Phase 2: Importance Scoring (Fixed)")
     logger.info("="*70)
@@ -323,11 +427,20 @@ def run_phase2(args, logger):
         logger.error("Phase 2 requires --phase0_model_dir")
         raise ValueError("Missing --phase0_model_dir")
 
-    if (not args.no_rotation) and (not args.original_space_mask) and args.basis_dir is None:
+    ablation_arm = getattr(args, 'ablation_arm', None)
+    if ablation_arm:
+        from models.wsr_ablation_masks import arm_spec as _arm_spec
+        if _arm_spec(ablation_arm)['basis_side'] is not None and args.basis_dir is None:
+            logger.error(f"Phase 2 arm {ablation_arm} requires --basis_dir")
+            raise ValueError("Missing --basis_dir")
+    elif (not args.no_rotation) and (not args.original_space_mask) and args.basis_dir is None:
         logger.error("Phase 2 requires --basis_dir")
         raise ValueError("Missing --basis_dir")
 
-    if args.original_space_mask:
+    if ablation_arm:
+        from models.phase2_importance_ablation import Phase2AblationImportanceScorer
+        scorer = Phase2AblationImportanceScorer(args, logger, args.basis_dir, args.phase0_model_dir)
+    elif args.original_space_mask:
         from models.phase2_importance_original_space import Phase2ImportanceOriginalSpace
         scorer = Phase2ImportanceOriginalSpace(args, logger, args.basis_dir, args.phase0_model_dir)
     elif args.no_rotation:
@@ -341,22 +454,28 @@ def run_phase2(args, logger):
         scorer = Phase2ImportanceScorer(args, logger, args.basis_dir, args.phase0_model_dir)
     
     # Basis 로드
-    scorer.load_basis()
-    
+    with profiler.stage('load_basis'):
+        scorer.load_basis()
+
     # Phase 0 모델 로드
-    scorer.load_model()
-    
+    with profiler.stage('load_model'):
+        scorer.load_model()
+
     # WaRP 모듈로 변환
-    scorer.convert_to_warp_modules()
-    
+    with profiler.stage('convert_to_warp_modules'):
+        scorer.convert_to_warp_modules()
+
     # 가중치 재매개변수화
-    scorer.reparameterize_weights()
-    
+    with profiler.stage('reparameterize_weights'):
+        scorer.reparameterize_weights()
+
     # 안전 데이터 로드
-    scorer.load_safety_data()
-    
+    with profiler.stage('load_data'):
+        scorer.load_safety_data()
+
     # ✅ Importance 계산 (eval 모드, optimizer.step 없음!)
-    scorer.compute_importance()
+    with profiler.stage('compute_importance'):
+        scorer.compute_importance()
 
     use_two_mask = getattr(args, 'two_mask', False)
 
@@ -366,14 +485,18 @@ def run_phase2(args, logger):
         logger.info(f"  adapt_dataset: {getattr(args, 'adapt_dataset_phase2', 'gsm8k')}")
         logger.info(f"  adapt_samples: {getattr(args, 'adapt_samples_phase2', 0)} (0=all)")
         logger.info("="*70)
-        scorer.load_adapt_data()
-        scorer.compute_adapt_importance()
+        with profiler.stage('load_adapt_data'):
+            scorer.load_adapt_data()
+        with profiler.stage('compute_adapt_importance'):
+            scorer.compute_adapt_importance()
 
     # 마스크 생성
-    scorer.generate_masks(keep_ratio=args.keep_ratio, two_mask=use_two_mask)
-    
+    with profiler.stage('generate_masks'):
+        scorer.generate_masks(keep_ratio=args.keep_ratio, two_mask=use_two_mask)
+
     # 마스크 저장
-    masks_dir = scorer.save_masks(two_mask=use_two_mask)
+    with profiler.stage('save_masks'):
+        masks_dir = scorer.save_masks(two_mask=use_two_mask)
     
     logger.info("="*70)
     logger.info(f"Phase 2 Completed!")
@@ -383,12 +506,13 @@ def run_phase2(args, logger):
     logger.info("="*70)
 
 
-def run_phase3(args, logger):
+def run_phase3(args, logger, profiler=None):
     """
     Phase 3: Incremental Learning
-    
+
     ✅ 수정: WaRP 모듈 사용, 마스크 적용
     """
+    profiler = profiler or _NullProfiler()
     logger.info("="*70)
     logger.info("Starting Phase 3: Incremental Learning (Fixed)")
     logger.info(f"Mode: {'non_freeze_warp' if args.non_freeze else 'freeze_warp'}")
@@ -399,15 +523,23 @@ def run_phase3(args, logger):
         logger.error("Phase 3 requires --phase0_model_dir")
         raise ValueError("Missing --phase0_model_dir")
     
-    if (not args.no_rotation) and (not args.original_space_mask) and args.basis_dir is None:
+    ablation_arm = getattr(args, 'ablation_arm', None)
+    if ablation_arm:
+        from models.wsr_ablation_masks import arm_spec as _arm_spec
+        if _arm_spec(ablation_arm)['basis_side'] is not None and args.basis_dir is None:
+            logger.error(f"Phase 3 arm {ablation_arm} requires --basis_dir")
+            raise ValueError("Missing --basis_dir")
+    elif (not args.no_rotation) and (not args.original_space_mask) and args.basis_dir is None:
         logger.error("Phase 3 requires --basis_dir")
         raise ValueError("Missing --basis_dir")
-    
+
     if args.masks_dir is None and not getattr(args, 'no_masks', False):
         logger.error("Phase 3 requires --masks_dir (or use --no_masks to skip masking)")
         raise ValueError("Missing --masks_dir")
-    
-    if args.original_space_mask:
+
+    if ablation_arm:
+        from models.phase3_ablation import Phase3AblationLearner as Phase3Learner
+    elif args.original_space_mask:
         if args.use_lora:
             from models.phase3_extra_learning_lora import Phase3LoRAMaskedLearner as Phase3Learner
         else:
@@ -430,22 +562,29 @@ def run_phase3(args, logger):
     )
     
     # Basis 로드
-    learner.load_basis()
-    
+    with profiler.stage('load_basis'):
+        learner.load_basis()
+
     # 마스크 로드
-    learner.load_masks()
-    
+    with profiler.stage('load_masks'):
+        learner.load_masks()
+
     # Phase 0 모델 로드 + WaRP 모듈 변환
-    learner.load_model()
-    
+    with profiler.stage('load_model'):
+        learner.load_model()
+
     # WaRP 모듈 설정 (basis, mask)
-    learner.setup_warp_modules()
-    
+    with profiler.stage('setup_warp_modules'):
+        learner.setup_warp_modules()
+
     # GSM8K 데이터 로드
-    learner.load_utility_data()
-    
+    with profiler.stage('load_data'):
+        learner.load_utility_data()
+
     # ✅ 훈련 (WaRP 모듈이 자동으로 마스킹 적용)
-    final_model_path = learner.train()
+    #    train() 내부에 학습 + 복원(de-linearize) + 저장이 모두 포함된다.
+    with profiler.stage('train_and_save'):
+        final_model_path = learner.train()
     
     logger.info("="*70)
     logger.info(f"Phase 3 Completed!")
@@ -491,18 +630,25 @@ def main():
         except Exception as e:
             logger.warning(f"W&B 초기화 실패 (로깅 없이 계속): {e}")
 
+    # 시간/VRAM 프로파일러 (phase 전체 + 단계별)
+    profiler = _make_profiler(args, logger, timestamp)
+
     # Phase별 실행
-    if args.phase == 0:
-        run_phase0(args, logger)
-    elif args.phase == 1:
-        run_phase1(args, logger)
-    elif args.phase == 2:
-        run_phase2(args, logger)
-    elif args.phase == 3:
-        run_phase3(args, logger)
-    else:
-        raise ValueError(f"Invalid phase: {args.phase}")
-    
+    try:
+        if args.phase == 0:
+            run_phase0(args, logger)
+        elif args.phase == 1:
+            run_phase1(args, logger, profiler)
+        elif args.phase == 2:
+            run_phase2(args, logger, profiler)
+        elif args.phase == 3:
+            run_phase3(args, logger, profiler)
+        else:
+            raise ValueError(f"Invalid phase: {args.phase}")
+    finally:
+        # 실패해도 그 시점까지의 시간/VRAM 요약은 남긴다
+        profiler.finalize()
+
     logger.info("="*70)
     logger.info("All tasks completed successfully!")
     logger.info("="*70)

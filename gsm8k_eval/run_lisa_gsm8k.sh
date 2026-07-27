@@ -13,8 +13,13 @@ cd "$(dirname "$0")"
 
 # export CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-2,3}
 
+# python 인터프리터. env 로 덮어쓸 수 있다. 구 박스는 conda env `hb`,
+# Vast 박스는 /venv/hb/bin/python (conda 자체가 없어 `conda run` 은 실패한다).
+PY=${PY:-/venv/hb/bin/python}
+
 MODEL_PATH=${MODEL_PATH:-kmseong/llama2_7b-chat-Safety-FT-lr5e-5}
-SAFETY_DATA=${SAFETY_DATA:-/home/gokms0509/Safety-WaRP-LLM/data/circuit_breakers_train.json}
+# 저장소 상대 경로. 이 스크립트는 <repo>/gsm8k_eval/ 에 있으므로 루트는 한 단계 위.
+SAFETY_DATA=${SAFETY_DATA:-"$(cd .. && pwd)/data/circuit_breakers_train.json"}
 OUTPUT_DIR=${OUTPUT_DIR:-./lisa_gsm8k_llama2_7b_chat_lr5e-5}
 
 # ---- LISA / BSO hyper-parameters ----
@@ -30,7 +35,7 @@ BATCH=${BATCH:-4}
 GRAD_ACCUM=${GRAD_ACCUM:-4}
 MAXLEN=${MAXLEN:-1024}
 
-conda run -n hb --no-capture-output python finetune_gsm8k_lisa.py \
+"$PY" finetune_gsm8k_lisa.py \
     --model_path "${MODEL_PATH}" \
     --output_dir "${OUTPUT_DIR}" \
     --safety_data_path "${SAFETY_DATA}" \

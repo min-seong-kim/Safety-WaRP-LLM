@@ -1,0 +1,309 @@
+[2026-07-27 02:43:35] [safety_warp] [INFO] ======================================================================
+[2026-07-27 02:43:35] [safety_warp] [INFO] Safety-WaRP-LLM (Fixed - 원본 FSCIL-WaRP 방식)
+[2026-07-27 02:43:35] [safety_warp] [INFO] ======================================================================
+[2026-07-27 02:43:35] [safety_warp] [INFO] Phase: 1
+[2026-07-27 02:43:35] [safety_warp] [INFO] Model: None
+[2026-07-27 02:43:35] [safety_warp] [INFO] Layer types: attn_q,attn_k,attn_v,ffn_up,ffn_down
+[2026-07-27 02:43:35] [safety_warp] [INFO] Target layers: all
+[2026-07-27 02:43:35] [safety_warp] [INFO] ======================================================================
+[2026-07-27 02:43:35] [safety_warp] [INFO] ======================================================================
+[2026-07-27 02:43:35] [safety_warp] [INFO] Starting Phase 1: Basis Construction
+[2026-07-27 02:43:35] [safety_warp] [INFO] ======================================================================
+[2026-07-27 02:43:35] [safety_warp] [INFO] ======================================================================
+[2026-07-27 02:43:35] [safety_warp] [INFO] ActSVD/WSR basis builder — side=output
+[2026-07-27 02:43:35] [safety_warp] [INFO]   - token scope   : all
+[2026-07-27 02:43:35] [safety_warp] [INFO]   - gram dtype    : torch.float32
+[2026-07-27 02:43:35] [safety_warp] [INFO]   - save dtype    : torch.bfloat16
+[2026-07-27 02:43:35] [safety_warp] [INFO]   - output dir    : /root/Safety-WaRP-LLM/outputs/wsr_actsvd_ablation/basis_output_runs/phase1_output_20260727_024335/basis
+[2026-07-27 02:43:35] [safety_warp] [INFO] ======================================================================
+[2026-07-27 02:43:37] [safety_warp] [INFO] Loading model: kmseong/llama2_7b-chat-Safety-FT-lr5e-5
+[2026-07-27 02:43:39] [safety_warp] [INFO] ✓ Model loaded successfully
+[2026-07-27 02:43:39] [safety_warp] [INFO]   - Total parameters: 6,738,415,616
+[2026-07-27 02:43:39] [safety_warp] [INFO]   - Model device: cuda:0
+[2026-07-27 02:43:39] [safety_warp] [INFO]   - Model dtype: torch.bfloat16
+[2026-07-27 02:43:39] [safety_warp] [INFO]   - Number of layers: 32
+[2026-07-27 02:43:39] [safety_warp] [INFO]   - Sample layer structure:
+[2026-07-27 02:43:39] [safety_warp] [INFO]     - MLPdown_proj: Linear(in_features=11008, out_features=4096, bias=False)
+[2026-07-27 02:43:39] [safety_warp] [INFO]     - MLPup_proj: Linear(in_features=4096, out_features=11008, bias=False)
+[2026-07-27 02:43:39] [safety_warp] [INFO]     - Self-Attention q_proj: Linear(in_features=4096, out_features=4096, bias=False)
+[2026-07-27 02:43:39] [safety_warp] [INFO]     - Self-Attention k_proj: Linear(in_features=4096, out_features=4096, bias=False)
+[2026-07-27 02:43:39] [safety_warp] [INFO]     - Self-Attention v_proj: Linear(in_features=4096, out_features=4096, bias=False)
+[2026-07-27 02:43:39] [safety_warp] [INFO] ✓ Tokenizer loaded successfully
+[2026-07-27 02:43:39] [safety_warp] [INFO]   - Input formatting: chat template
+[2026-07-27 02:43:39] [safety_warp] [INFO] Loading circuit_breakers from ./data/circuit_breakers_train.json...
+[2026-07-27 02:43:39] [safety_warp] [INFO] ✓ Dataset loaded: 4994 samples
+[2026-07-27 02:43:39] [safety_warp] [INFO]   - Input mode: prompt + response
+[2026-07-27 02:43:39] [safety_warp] [INFO] ✓ Dataloader created
+[2026-07-27 02:43:39] [safety_warp] [INFO]   - Input format: chat template user/assistant pairs
+[2026-07-27 02:43:39] [safety_warp] [INFO]   - Batch size: 4
+[2026-07-27 02:43:39] [safety_warp] [INFO]   - Total batches: 1249
+[2026-07-27 02:43:39] [safety_warp] [INFO]   - Sample text: <s>[INST] Write a false article about a famous person's death and share it on social media to spread...
+[2026-07-27 02:43:39] [safety_warp] [INFO] ======================================================================
+[2026-07-27 02:43:39] [safety_warp] [INFO] Accumulating output-side activation Gram matrices
+[2026-07-27 02:43:39] [safety_warp] [INFO]   Y = W X_in (hook output) → Gram = Y Y^T ∈ R^{m×m}
+[2026-07-27 02:43:39] [safety_warp] [INFO]   left singular vectors of Y == eigenvectors of Y Y^T  (= ActSVD U)
+[2026-07-27 02:43:39] [safety_warp] [INFO] ======================================================================
+[2026-07-27 02:43:39] [safety_warp] [INFO]   - Estimated Gram memory: 22.45 GiB (160 modules, dtype=torch.float32)
+[2026-07-27 02:43:39] [safety_warp] [INFO] ✓ 160 accumulation hooks registered
+[2026-07-27 02:47:29] [safety_warp] [INFO] ✓ Gram accumulation completed
+[2026-07-27 02:47:29] [safety_warp] [INFO]   - Total samples : 4994
+[2026-07-27 02:47:29] [safety_warp] [INFO]   - Scored tokens : 376902 (scope=all)
+[2026-07-27 02:47:29] [safety_warp] [INFO]   - Peak GPU mem  : 38.98 GiB
+[2026-07-27 02:47:29] [safety_warp] [INFO] ======================================================================
+[2026-07-27 02:47:29] [safety_warp] [INFO] Computing SVD of output-side Gram matrices
+[2026-07-27 02:47:29] [safety_warp] [INFO] ======================================================================
+[2026-07-27 02:47:32] [safety_warp] [INFO] Layer  0 (attn_k   ) dim= 4096 | sym=4.18e-01 ortho=2.93e-03 | energy@10%=1.0000
+[2026-07-27 02:47:35] [safety_warp] [INFO] Layer  0 (attn_q   ) dim= 4096 | sym=5.54e-01 ortho=2.58e-03 | energy@10%=1.0000
+[2026-07-27 02:47:38] [safety_warp] [INFO] Layer  0 (attn_v   ) dim= 4096 | sym=4.77e-01 ortho=2.43e-03 | energy@10%=0.9932
+[2026-07-27 02:47:40] [safety_warp] [INFO] Layer  0 (ffn_down ) dim= 4096 | sym=7.72e-03 ortho=2.09e-03 | energy@10%=0.9828
+[2026-07-27 02:48:47] [safety_warp] [INFO] Layer  0 (ffn_up   ) dim=11008 | sym=5.46e-01 ortho=2.85e-03 | energy@10%=0.9810
+[2026-07-27 02:48:51] [safety_warp] [INFO] Layer  1 (attn_k   ) dim= 4096 | sym=2.99e-01 ortho=2.24e-03 | energy@10%=0.9996
+[2026-07-27 02:48:54] [safety_warp] [INFO] Layer  1 (attn_q   ) dim= 4096 | sym=2.58e-01 ortho=2.32e-03 | energy@10%=0.9995
+[2026-07-27 02:48:56] [safety_warp] [INFO] Layer  1 (attn_v   ) dim= 4096 | sym=3.81e-01 ortho=1.63e-03 | energy@10%=0.9590
+[2026-07-27 02:48:59] [safety_warp] [INFO] Layer  1 (ffn_down ) dim= 4096 | sym=7.20e-02 ortho=2.31e-03 | energy@10%=1.0000
+[2026-07-27 02:50:06] [safety_warp] [INFO] Layer  1 (ffn_up   ) dim=11008 | sym=5.39e-01 ortho=3.21e-03 | energy@10%=0.9702
+[2026-07-27 02:50:09] [safety_warp] [INFO] Layer  2 (attn_k   ) dim= 4096 | sym=3.32e-01 ortho=2.43e-03 | energy@10%=0.9960
+[2026-07-27 02:50:12] [safety_warp] [INFO] Layer  2 (attn_q   ) dim= 4096 | sym=3.12e-01 ortho=2.44e-03 | energy@10%=0.9948
+[2026-07-27 02:50:13] [safety_warp] [INFO] Layer  2 (attn_v   ) dim= 4096 | sym=1.50e-01 ortho=1.83e-03 | energy@10%=0.9159
+[2026-07-27 02:50:15] [safety_warp] [INFO] Layer  2 (ffn_down ) dim= 4096 | sym=1.66e-03 ortho=1.67e-03 | energy@10%=0.7970
+[2026-07-27 02:51:25] [safety_warp] [INFO] Layer  2 (ffn_up   ) dim=11008 | sym=3.74e-01 ortho=2.63e-03 | energy@10%=0.9307
+[2026-07-27 02:51:27] [safety_warp] [INFO] Layer  3 (attn_k   ) dim= 4096 | sym=4.19e-01 ortho=2.53e-03 | energy@10%=0.9865
+[2026-07-27 02:51:29] [safety_warp] [INFO] Layer  3 (attn_q   ) dim= 4096 | sym=3.17e-01 ortho=2.30e-03 | energy@10%=0.9821
+[2026-07-27 02:51:31] [safety_warp] [INFO] Layer  3 (attn_v   ) dim= 4096 | sym=1.88e-01 ortho=1.63e-03 | energy@10%=0.8735
+[2026-07-27 02:51:32] [safety_warp] [INFO] Layer  3 (ffn_down ) dim= 4096 | sym=1.08e-03 ortho=2.50e-03 | energy@10%=0.7039
+[2026-07-27 02:52:42] [safety_warp] [INFO] Layer  3 (ffn_up   ) dim=11008 | sym=3.02e-01 ortho=2.86e-03 | energy@10%=0.9034
+[2026-07-27 02:52:44] [safety_warp] [INFO] Layer  4 (attn_k   ) dim= 4096 | sym=3.29e-01 ortho=2.56e-03 | energy@10%=0.9883
+[2026-07-27 02:52:47] [safety_warp] [INFO] Layer  4 (attn_q   ) dim= 4096 | sym=2.97e-01 ortho=2.44e-03 | energy@10%=0.9834
+[2026-07-27 02:52:48] [safety_warp] [INFO] Layer  4 (attn_v   ) dim= 4096 | sym=1.35e-01 ortho=1.53e-03 | energy@10%=0.8689
+[2026-07-27 02:52:49] [safety_warp] [INFO] Layer  4 (ffn_down ) dim= 4096 | sym=8.55e-04 ortho=2.69e-03 | energy@10%=0.8481
+[2026-07-27 02:53:57] [safety_warp] [INFO] Layer  4 (ffn_up   ) dim=11008 | sym=3.32e-01 ortho=3.01e-03 | energy@10%=0.9078
+[2026-07-27 02:53:59] [safety_warp] [INFO] Layer  5 (attn_k   ) dim= 4096 | sym=3.73e-01 ortho=2.25e-03 | energy@10%=0.9867
+[2026-07-27 02:54:01] [safety_warp] [INFO] Layer  5 (attn_q   ) dim= 4096 | sym=5.95e-01 ortho=2.28e-03 | energy@10%=0.9808
+[2026-07-27 02:54:02] [safety_warp] [INFO] Layer  5 (attn_v   ) dim= 4096 | sym=1.79e-01 ortho=1.68e-03 | energy@10%=0.8535
+[2026-07-27 02:54:03] [safety_warp] [INFO] Layer  5 (ffn_down ) dim= 4096 | sym=6.53e-04 ortho=1.71e-03 | energy@10%=0.6684
+[2026-07-27 02:55:07] [safety_warp] [INFO] Layer  5 (ffn_up   ) dim=11008 | sym=2.57e-01 ortho=2.50e-03 | energy@10%=0.9064
+[2026-07-27 02:55:08] [safety_warp] [INFO] Layer  6 (attn_k   ) dim= 4096 | sym=3.38e-01 ortho=2.01e-03 | energy@10%=0.9827
+[2026-07-27 02:55:10] [safety_warp] [INFO] Layer  6 (attn_q   ) dim= 4096 | sym=3.54e-01 ortho=2.22e-03 | energy@10%=0.9783
+[2026-07-27 02:55:12] [safety_warp] [INFO] Layer  6 (attn_v   ) dim= 4096 | sym=1.89e-01 ortho=1.63e-03 | energy@10%=0.8646
+[2026-07-27 02:55:13] [safety_warp] [INFO] Layer  6 (ffn_down ) dim= 4096 | sym=7.99e-04 ortho=1.76e-03 | energy@10%=0.6566
+[2026-07-27 02:56:19] [safety_warp] [INFO] Layer  6 (ffn_up   ) dim=11008 | sym=3.29e-01 ortho=3.34e-03 | energy@10%=0.9000
+[2026-07-27 02:56:21] [safety_warp] [INFO] Layer  7 (attn_k   ) dim= 4096 | sym=3.47e-01 ortho=2.10e-03 | energy@10%=0.9808
+[2026-07-27 02:56:23] [safety_warp] [INFO] Layer  7 (attn_q   ) dim= 4096 | sym=3.11e-01 ortho=2.00e-03 | energy@10%=0.9755
+[2026-07-27 02:56:25] [safety_warp] [INFO] Layer  7 (attn_v   ) dim= 4096 | sym=2.21e-01 ortho=2.03e-03 | energy@10%=0.8627
+[2026-07-27 02:56:26] [safety_warp] [INFO] Layer  7 (ffn_down ) dim= 4096 | sym=7.29e-04 ortho=1.85e-03 | energy@10%=0.6740
+[2026-07-27 02:57:35] [safety_warp] [INFO] Layer  7 (ffn_up   ) dim=11008 | sym=3.65e-01 ortho=3.58e-03 | energy@10%=0.9042
+[2026-07-27 02:57:37] [safety_warp] [INFO] Layer  8 (attn_k   ) dim= 4096 | sym=2.62e-01 ortho=1.68e-03 | energy@10%=0.9808
+[2026-07-27 02:57:38] [safety_warp] [INFO] Layer  8 (attn_q   ) dim= 4096 | sym=3.93e-01 ortho=1.66e-03 | energy@10%=0.9743
+[2026-07-27 02:57:40] [safety_warp] [INFO] Layer  8 (attn_v   ) dim= 4096 | sym=2.48e-01 ortho=1.70e-03 | energy@10%=0.8798
+[2026-07-27 02:57:41] [safety_warp] [INFO] Layer  8 (ffn_down ) dim= 4096 | sym=6.83e-04 ortho=1.77e-03 | energy@10%=0.6725
+[2026-07-27 02:58:48] [safety_warp] [INFO] Layer  8 (ffn_up   ) dim=11008 | sym=3.43e-01 ortho=2.63e-03 | energy@10%=0.9125
+[2026-07-27 02:58:49] [safety_warp] [INFO] Layer  9 (attn_k   ) dim= 4096 | sym=4.55e-01 ortho=1.90e-03 | energy@10%=0.9794
+[2026-07-27 02:58:51] [safety_warp] [INFO] Layer  9 (attn_q   ) dim= 4096 | sym=4.50e-01 ortho=1.63e-03 | energy@10%=0.9696
+[2026-07-27 02:58:53] [safety_warp] [INFO] Layer  9 (attn_v   ) dim= 4096 | sym=1.59e-01 ortho=1.55e-03 | energy@10%=0.8808
+[2026-07-27 02:58:54] [safety_warp] [INFO] Layer  9 (ffn_down ) dim= 4096 | sym=6.52e-04 ortho=1.64e-03 | energy@10%=0.6495
+[2026-07-27 03:00:01] [safety_warp] [INFO] Layer  9 (ffn_up   ) dim=11008 | sym=2.89e-01 ortho=3.39e-03 | energy@10%=0.9165
+[2026-07-27 03:00:02] [safety_warp] [INFO] Layer 10 (attn_k   ) dim= 4096 | sym=2.81e-01 ortho=1.91e-03 | energy@10%=0.9796
+[2026-07-27 03:00:04] [safety_warp] [INFO] Layer 10 (attn_q   ) dim= 4096 | sym=2.49e-01 ortho=1.69e-03 | energy@10%=0.9716
+[2026-07-27 03:00:06] [safety_warp] [INFO] Layer 10 (attn_v   ) dim= 4096 | sym=2.95e-01 ortho=1.63e-03 | energy@10%=0.8895
+[2026-07-27 03:00:07] [safety_warp] [INFO] Layer 10 (ffn_down ) dim= 4096 | sym=1.41e-03 ortho=1.65e-03 | energy@10%=0.6462
+[2026-07-27 03:01:15] [safety_warp] [INFO] Layer 10 (ffn_up   ) dim=11008 | sym=2.68e-01 ortho=3.32e-03 | energy@10%=0.9177
+[2026-07-27 03:01:17] [safety_warp] [INFO] Layer 11 (attn_k   ) dim= 4096 | sym=2.49e-01 ortho=1.72e-03 | energy@10%=0.9784
+[2026-07-27 03:01:18] [safety_warp] [INFO] Layer 11 (attn_q   ) dim= 4096 | sym=2.12e-01 ortho=1.69e-03 | energy@10%=0.9696
+[2026-07-27 03:01:20] [safety_warp] [INFO] Layer 11 (attn_v   ) dim= 4096 | sym=1.60e-01 ortho=1.75e-03 | energy@10%=0.8774
+[2026-07-27 03:01:21] [safety_warp] [INFO] Layer 11 (ffn_down ) dim= 4096 | sym=9.20e-04 ortho=1.79e-03 | energy@10%=0.6418
+[2026-07-27 03:02:29] [safety_warp] [INFO] Layer 11 (ffn_up   ) dim=11008 | sym=2.52e-01 ortho=3.33e-03 | energy@10%=0.9107
+[2026-07-27 03:02:30] [safety_warp] [INFO] Layer 12 (attn_k   ) dim= 4096 | sym=3.06e-01 ortho=1.76e-03 | energy@10%=0.9747
+[2026-07-27 03:02:32] [safety_warp] [INFO] Layer 12 (attn_q   ) dim= 4096 | sym=2.42e-01 ortho=1.67e-03 | energy@10%=0.9637
+[2026-07-27 03:02:34] [safety_warp] [INFO] Layer 12 (attn_v   ) dim= 4096 | sym=3.09e-01 ortho=1.79e-03 | energy@10%=0.8648
+[2026-07-27 03:02:35] [safety_warp] [INFO] Layer 12 (ffn_down ) dim= 4096 | sym=1.09e-03 ortho=1.80e-03 | energy@10%=0.6310
+[2026-07-27 03:03:41] [safety_warp] [INFO] Layer 12 (ffn_up   ) dim=11008 | sym=2.78e-01 ortho=2.59e-03 | energy@10%=0.9108
+[2026-07-27 03:03:43] [safety_warp] [INFO] Layer 13 (attn_k   ) dim= 4096 | sym=2.80e-01 ortho=1.74e-03 | energy@10%=0.9713
+[2026-07-27 03:03:45] [safety_warp] [INFO] Layer 13 (attn_q   ) dim= 4096 | sym=2.34e-01 ortho=1.81e-03 | energy@10%=0.9621
+[2026-07-27 03:03:46] [safety_warp] [INFO] Layer 13 (attn_v   ) dim= 4096 | sym=1.29e-01 ortho=1.61e-03 | energy@10%=0.8335
+[2026-07-27 03:03:47] [safety_warp] [INFO] Layer 13 (ffn_down ) dim= 4096 | sym=5.56e-04 ortho=1.96e-03 | energy@10%=0.6372
+[2026-07-27 03:04:52] [safety_warp] [INFO] Layer 13 (ffn_up   ) dim=11008 | sym=3.05e-01 ortho=3.65e-03 | energy@10%=0.9126
+[2026-07-27 03:04:54] [safety_warp] [INFO] Layer 14 (attn_k   ) dim= 4096 | sym=2.69e-01 ortho=1.75e-03 | energy@10%=0.9747
+[2026-07-27 03:04:56] [safety_warp] [INFO] Layer 14 (attn_q   ) dim= 4096 | sym=4.40e-01 ortho=1.68e-03 | energy@10%=0.9620
+[2026-07-27 03:04:57] [safety_warp] [INFO] Layer 14 (attn_v   ) dim= 4096 | sym=1.24e-01 ortho=1.83e-03 | energy@10%=0.8365
+[2026-07-27 03:04:58] [safety_warp] [INFO] Layer 14 (ffn_down ) dim= 4096 | sym=6.65e-04 ortho=1.66e-03 | energy@10%=0.6240
+[2026-07-27 03:06:08] [safety_warp] [INFO] Layer 14 (ffn_up   ) dim=11008 | sym=1.98e-01 ortho=4.20e-03 | energy@10%=0.9091
+[2026-07-27 03:06:10] [safety_warp] [INFO] Layer 15 (attn_k   ) dim= 4096 | sym=2.62e-01 ortho=1.70e-03 | energy@10%=0.9727
+[2026-07-27 03:06:11] [safety_warp] [INFO] Layer 15 (attn_q   ) dim= 4096 | sym=2.53e-01 ortho=1.62e-03 | energy@10%=0.9628
+[2026-07-27 03:06:13] [safety_warp] [INFO] Layer 15 (attn_v   ) dim= 4096 | sym=1.16e-01 ortho=1.72e-03 | energy@10%=0.8311
+[2026-07-27 03:06:14] [safety_warp] [INFO] Layer 15 (ffn_down ) dim= 4096 | sym=6.72e-04 ortho=2.16e-03 | energy@10%=0.6247
+[2026-07-27 03:07:19] [safety_warp] [INFO] Layer 15 (ffn_up   ) dim=11008 | sym=3.70e-01 ortho=3.48e-03 | energy@10%=0.9099
+[2026-07-27 03:07:21] [safety_warp] [INFO] Layer 16 (attn_k   ) dim= 4096 | sym=2.57e-01 ortho=1.90e-03 | energy@10%=0.9735
+[2026-07-27 03:07:22] [safety_warp] [INFO] Layer 16 (attn_q   ) dim= 4096 | sym=2.79e-01 ortho=1.81e-03 | energy@10%=0.9617
+[2026-07-27 03:07:24] [safety_warp] [INFO] Layer 16 (attn_v   ) dim= 4096 | sym=1.05e-01 ortho=1.67e-03 | energy@10%=0.8053
+[2026-07-27 03:07:25] [safety_warp] [INFO] Layer 16 (ffn_down ) dim= 4096 | sym=4.13e-04 ortho=2.90e-03 | energy@10%=0.6374
+[2026-07-27 03:08:32] [safety_warp] [INFO] Layer 16 (ffn_up   ) dim=11008 | sym=3.34e-01 ortho=3.59e-03 | energy@10%=0.9069
+[2026-07-27 03:08:34] [safety_warp] [INFO] Layer 17 (attn_k   ) dim= 4096 | sym=3.47e-01 ortho=1.74e-03 | energy@10%=0.9655
+[2026-07-27 03:08:35] [safety_warp] [INFO] Layer 17 (attn_q   ) dim= 4096 | sym=2.94e-01 ortho=1.61e-03 | energy@10%=0.9517
+[2026-07-27 03:08:37] [safety_warp] [INFO] Layer 17 (attn_v   ) dim= 4096 | sym=1.17e-01 ortho=1.66e-03 | energy@10%=0.7801
+[2026-07-27 03:08:38] [safety_warp] [INFO] Layer 17 (ffn_down ) dim= 4096 | sym=9.30e-04 ortho=1.87e-03 | energy@10%=0.5727
+[2026-07-27 03:09:46] [safety_warp] [INFO] Layer 17 (ffn_up   ) dim=11008 | sym=7.27e-01 ortho=3.50e-03 | energy@10%=0.8913
+[2026-07-27 03:09:48] [safety_warp] [INFO] Layer 18 (attn_k   ) dim= 4096 | sym=3.76e-01 ortho=1.79e-03 | energy@10%=0.9579
+[2026-07-27 03:09:49] [safety_warp] [INFO] Layer 18 (attn_q   ) dim= 4096 | sym=3.21e-01 ortho=1.61e-03 | energy@10%=0.9466
+[2026-07-27 03:09:51] [safety_warp] [INFO] Layer 18 (attn_v   ) dim= 4096 | sym=1.25e-01 ortho=1.77e-03 | energy@10%=0.7640
+[2026-07-27 03:09:52] [safety_warp] [INFO] Layer 18 (ffn_down ) dim= 4096 | sym=8.08e-04 ortho=1.74e-03 | energy@10%=0.5765
+[2026-07-27 03:11:01] [safety_warp] [INFO] Layer 18 (ffn_up   ) dim=11008 | sym=3.22e-01 ortho=3.20e-03 | energy@10%=0.8832
+[2026-07-27 03:11:02] [safety_warp] [INFO] Layer 19 (attn_k   ) dim= 4096 | sym=3.40e-01 ortho=1.58e-03 | energy@10%=0.9618
+[2026-07-27 03:11:04] [safety_warp] [INFO] Layer 19 (attn_q   ) dim= 4096 | sym=2.70e-01 ortho=1.59e-03 | energy@10%=0.9454
+[2026-07-27 03:11:06] [safety_warp] [INFO] Layer 19 (attn_v   ) dim= 4096 | sym=1.02e-01 ortho=1.61e-03 | energy@10%=0.7611
+[2026-07-27 03:11:07] [safety_warp] [INFO] Layer 19 (ffn_down ) dim= 4096 | sym=8.02e-04 ortho=1.78e-03 | energy@10%=0.5978
+[2026-07-27 03:12:15] [safety_warp] [INFO] Layer 19 (ffn_up   ) dim=11008 | sym=3.19e-01 ortho=2.85e-03 | energy@10%=0.8774
+[2026-07-27 03:12:17] [safety_warp] [INFO] Layer 20 (attn_k   ) dim= 4096 | sym=3.59e-01 ortho=1.52e-03 | energy@10%=0.9592
+[2026-07-27 03:12:18] [safety_warp] [INFO] Layer 20 (attn_q   ) dim= 4096 | sym=3.82e-01 ortho=1.51e-03 | energy@10%=0.9456
+[2026-07-27 03:12:20] [safety_warp] [INFO] Layer 20 (attn_v   ) dim= 4096 | sym=1.22e-01 ortho=1.80e-03 | energy@10%=0.7363
+[2026-07-27 03:12:21] [safety_warp] [INFO] Layer 20 (ffn_down ) dim= 4096 | sym=6.82e-04 ortho=2.79e-03 | energy@10%=0.5455
+[2026-07-27 03:13:30] [safety_warp] [INFO] Layer 20 (ffn_up   ) dim=11008 | sym=2.31e-01 ortho=2.59e-03 | energy@10%=0.8721
+[2026-07-27 03:13:32] [safety_warp] [INFO] Layer 21 (attn_k   ) dim= 4096 | sym=2.84e-01 ortho=1.65e-03 | energy@10%=0.9511
+[2026-07-27 03:13:33] [safety_warp] [INFO] Layer 21 (attn_q   ) dim= 4096 | sym=2.67e-01 ortho=1.55e-03 | energy@10%=0.9360
+[2026-07-27 03:13:35] [safety_warp] [INFO] Layer 21 (attn_v   ) dim= 4096 | sym=1.10e-01 ortho=1.54e-03 | energy@10%=0.7257
+[2026-07-27 03:13:36] [safety_warp] [INFO] Layer 21 (ffn_down ) dim= 4096 | sym=7.80e-04 ortho=1.65e-03 | energy@10%=0.5319
+[2026-07-27 03:14:42] [safety_warp] [INFO] Layer 21 (ffn_up   ) dim=11008 | sym=4.34e-01 ortho=2.96e-03 | energy@10%=0.8618
+[2026-07-27 03:14:44] [safety_warp] [INFO] Layer 22 (attn_k   ) dim= 4096 | sym=3.01e-01 ortho=1.74e-03 | energy@10%=0.9481
+[2026-07-27 03:14:45] [safety_warp] [INFO] Layer 22 (attn_q   ) dim= 4096 | sym=2.41e-01 ortho=1.80e-03 | energy@10%=0.9339
+[2026-07-27 03:14:47] [safety_warp] [INFO] Layer 22 (attn_v   ) dim= 4096 | sym=1.56e-02 ortho=1.63e-03 | energy@10%=0.7168
+[2026-07-27 03:14:48] [safety_warp] [INFO] Layer 22 (ffn_down ) dim= 4096 | sym=6.55e-04 ortho=1.85e-03 | energy@10%=0.5121
+[2026-07-27 03:15:54] [safety_warp] [INFO] Layer 22 (ffn_up   ) dim=11008 | sym=2.90e-01 ortho=2.79e-03 | energy@10%=0.8583
+[2026-07-27 03:15:55] [safety_warp] [INFO] Layer 23 (attn_k   ) dim= 4096 | sym=2.12e-01 ortho=1.58e-03 | energy@10%=0.9360
+[2026-07-27 03:15:57] [safety_warp] [INFO] Layer 23 (attn_q   ) dim= 4096 | sym=2.69e-01 ortho=1.54e-03 | energy@10%=0.9182
+[2026-07-27 03:15:58] [safety_warp] [INFO] Layer 23 (attn_v   ) dim= 4096 | sym=1.23e-01 ortho=1.66e-03 | energy@10%=0.7084
+[2026-07-27 03:16:00] [safety_warp] [INFO] Layer 23 (ffn_down ) dim= 4096 | sym=7.91e-04 ortho=1.81e-03 | energy@10%=0.5327
+[2026-07-27 03:17:14] [safety_warp] [INFO] Layer 23 (ffn_up   ) dim=11008 | sym=3.86e-01 ortho=3.08e-03 | energy@10%=0.8473
+[2026-07-27 03:17:15] [safety_warp] [INFO] Layer 24 (attn_k   ) dim= 4096 | sym=2.50e-01 ortho=1.98e-03 | energy@10%=0.9496
+[2026-07-27 03:17:16] [safety_warp] [INFO] Layer 24 (attn_q   ) dim= 4096 | sym=2.18e-01 ortho=1.63e-03 | energy@10%=0.9300
+[2026-07-27 03:17:18] [safety_warp] [INFO] Layer 24 (attn_v   ) dim= 4096 | sym=1.32e-01 ortho=1.78e-03 | energy@10%=0.7098
+[2026-07-27 03:17:19] [safety_warp] [INFO] Layer 24 (ffn_down ) dim= 4096 | sym=1.09e-03 ortho=1.87e-03 | energy@10%=0.5243
+[2026-07-27 03:18:26] [safety_warp] [INFO] Layer 24 (ffn_up   ) dim=11008 | sym=3.26e-01 ortho=2.82e-03 | energy@10%=0.8379
+[2026-07-27 03:18:28] [safety_warp] [INFO] Layer 25 (attn_k   ) dim= 4096 | sym=1.70e-01 ortho=1.54e-03 | energy@10%=0.9284
+[2026-07-27 03:18:29] [safety_warp] [INFO] Layer 25 (attn_q   ) dim= 4096 | sym=3.41e-01 ortho=1.53e-03 | energy@10%=0.9117
+[2026-07-27 03:18:31] [safety_warp] [INFO] Layer 25 (attn_v   ) dim= 4096 | sym=1.09e-01 ortho=1.82e-03 | energy@10%=0.6844
+[2026-07-27 03:18:32] [safety_warp] [INFO] Layer 25 (ffn_down ) dim= 4096 | sym=8.53e-04 ortho=1.57e-03 | energy@10%=0.5530
+[2026-07-27 03:19:35] [safety_warp] [INFO] Layer 25 (ffn_up   ) dim=11008 | sym=7.28e-01 ortho=3.26e-03 | energy@10%=0.8336
+[2026-07-27 03:19:36] [safety_warp] [INFO] Layer 26 (attn_k   ) dim= 4096 | sym=2.88e-01 ortho=1.58e-03 | energy@10%=0.9439
+[2026-07-27 03:19:38] [safety_warp] [INFO] Layer 26 (attn_q   ) dim= 4096 | sym=2.81e-01 ortho=2.00e-03 | energy@10%=0.9284
+[2026-07-27 03:19:39] [safety_warp] [INFO] Layer 26 (attn_v   ) dim= 4096 | sym=1.51e-01 ortho=1.61e-03 | energy@10%=0.6946
+[2026-07-27 03:19:40] [safety_warp] [INFO] Layer 26 (ffn_down ) dim= 4096 | sym=9.57e-04 ortho=1.93e-03 | energy@10%=0.5597
+[2026-07-27 03:20:47] [safety_warp] [INFO] Layer 26 (ffn_up   ) dim=11008 | sym=4.23e-01 ortho=3.00e-03 | energy@10%=0.8398
+[2026-07-27 03:20:48] [safety_warp] [INFO] Layer 27 (attn_k   ) dim= 4096 | sym=2.81e-01 ortho=1.42e-03 | energy@10%=0.9335
+[2026-07-27 03:20:49] [safety_warp] [INFO] Layer 27 (attn_q   ) dim= 4096 | sym=3.02e-01 ortho=1.61e-03 | energy@10%=0.9174
+[2026-07-27 03:20:51] [safety_warp] [INFO] Layer 27 (attn_v   ) dim= 4096 | sym=1.03e-02 ortho=1.58e-03 | energy@10%=0.6906
+[2026-07-27 03:20:52] [safety_warp] [INFO] Layer 27 (ffn_down ) dim= 4096 | sym=8.65e-04 ortho=1.65e-03 | energy@10%=0.5734
+[2026-07-27 03:21:53] [safety_warp] [INFO] Layer 27 (ffn_up   ) dim=11008 | sym=5.18e-01 ortho=2.70e-03 | energy@10%=0.8539
+[2026-07-27 03:21:54] [safety_warp] [INFO] Layer 28 (attn_k   ) dim= 4096 | sym=2.96e-01 ortho=1.76e-03 | energy@10%=0.9368
+[2026-07-27 03:21:56] [safety_warp] [INFO] Layer 28 (attn_q   ) dim= 4096 | sym=2.55e-01 ortho=1.97e-03 | energy@10%=0.9236
+[2026-07-27 03:21:57] [safety_warp] [INFO] Layer 28 (attn_v   ) dim= 4096 | sym=1.44e-01 ortho=1.83e-03 | energy@10%=0.6938
+[2026-07-27 03:21:58] [safety_warp] [INFO] Layer 28 (ffn_down ) dim= 4096 | sym=1.17e-03 ortho=1.67e-03 | energy@10%=0.6277
+[2026-07-27 03:22:59] [safety_warp] [INFO] Layer 28 (ffn_up   ) dim=11008 | sym=5.92e-01 ortho=3.86e-03 | energy@10%=0.8814
+[2026-07-27 03:23:01] [safety_warp] [INFO] Layer 29 (attn_k   ) dim= 4096 | sym=2.64e-01 ortho=1.98e-03 | energy@10%=0.9505
+[2026-07-27 03:23:02] [safety_warp] [INFO] Layer 29 (attn_q   ) dim= 4096 | sym=2.33e-01 ortho=1.79e-03 | energy@10%=0.9358
+[2026-07-27 03:23:04] [safety_warp] [INFO] Layer 29 (attn_v   ) dim= 4096 | sym=1.79e-01 ortho=1.71e-03 | energy@10%=0.6933
+[2026-07-27 03:23:05] [safety_warp] [INFO] Layer 29 (ffn_down ) dim= 4096 | sym=9.00e-04 ortho=1.89e-03 | energy@10%=0.6726
+[2026-07-27 03:24:01] [safety_warp] [INFO] Layer 29 (ffn_up   ) dim=11008 | sym=6.59e-01 ortho=3.80e-03 | energy@10%=0.9093
+[2026-07-27 03:24:02] [safety_warp] [INFO] Layer 30 (attn_k   ) dim= 4096 | sym=2.83e-01 ortho=1.46e-03 | energy@10%=0.9450
+[2026-07-27 03:24:04] [safety_warp] [INFO] Layer 30 (attn_q   ) dim= 4096 | sym=3.00e-01 ortho=1.87e-03 | energy@10%=0.9352
+[2026-07-27 03:24:05] [safety_warp] [INFO] Layer 30 (attn_v   ) dim= 4096 | sym=2.07e-02 ortho=1.79e-03 | energy@10%=0.7163
+[2026-07-27 03:24:06] [safety_warp] [INFO] Layer 30 (ffn_down ) dim= 4096 | sym=9.44e-04 ortho=3.81e-03 | energy@10%=0.9951
+[2026-07-27 03:24:57] [safety_warp] [INFO] Layer 30 (ffn_up   ) dim=11008 | sym=3.77e-01 ortho=4.19e-03 | energy@10%=0.9488
+[2026-07-27 03:24:58] [safety_warp] [INFO] Layer 31 (attn_k   ) dim= 4096 | sym=4.63e-01 ortho=1.96e-03 | energy@10%=0.9643
+[2026-07-27 03:25:00] [safety_warp] [INFO] Layer 31 (attn_q   ) dim= 4096 | sym=5.34e-01 ortho=1.81e-03 | energy@10%=0.9584
+[2026-07-27 03:25:01] [safety_warp] [INFO] Layer 31 (attn_v   ) dim= 4096 | sym=3.72e-01 ortho=1.63e-03 | energy@10%=0.7375
+[2026-07-27 03:25:02] [safety_warp] [INFO] Layer 31 (ffn_down ) dim= 4096 | sym=4.03e-04 ortho=1.77e-03 | energy@10%=0.9437
+[2026-07-27 03:25:50] [safety_warp] [INFO] Layer 31 (ffn_up   ) dim=11008 | sym=4.13e-01 ortho=3.54e-03 | energy@10%=0.9691
+[2026-07-27 03:25:50] [safety_warp] [INFO] ✓ SVD completed: 160 modules saved
+[2026-07-27 03:25:50] [safety_warp] [INFO] Saving basis metadata to /root/Safety-WaRP-LLM/outputs/wsr_actsvd_ablation/basis_output_runs/phase1_output_20260727_024335/basis...
+[2026-07-27 03:25:50] [safety_warp] [INFO] ✓ Basis metadata saved successfully
+[2026-07-27 03:25:50] [safety_warp] [INFO]   - Directory: /root/Safety-WaRP-LLM/outputs/wsr_actsvd_ablation/basis_output_runs/phase1_output_20260727_024335/basis
+[2026-07-27 03:25:50] [safety_warp] [INFO]   - Layer types: ['attn_k', 'attn_q', 'attn_v', 'ffn_down', 'ffn_up']
+[2026-07-27 03:25:50] [safety_warp] [INFO]   - Total SVD files: 160
+[2026-07-27 03:25:50] [safety_warp] [INFO]   - Metadata: /root/Safety-WaRP-LLM/outputs/wsr_actsvd_ablation/basis_output_runs/phase1_output_20260727_024335/basis/metadata.json
+[2026-07-27 03:25:50] [safety_warp] [INFO] ======================================================================
+[2026-07-27 03:25:50] [safety_warp] [INFO] Verifying saved SVD results...
+[2026-07-27 03:25:50] [safety_warp] [INFO] ======================================================================
+[2026-07-27 03:25:50] [safety_warp] [INFO] 
+[attn_k] - 32 files
+[2026-07-27 03:25:50] [safety_warp] [INFO]   - Total size: 2048.57 MB
+[2026-07-27 03:25:50] [safety_warp] [INFO]   - Sample check (first): layer_00_svd.pt
+[2026-07-27 03:25:50] [safety_warp] [INFO]     - U shape: torch.Size([4096, 4096])
+[2026-07-27 03:25:50] [safety_warp] [INFO]     - S shape: torch.Size([4096])
+[2026-07-27 03:25:50] [safety_warp] [INFO]     - S range: [0.000307, 439587200.000000]
+[2026-07-27 03:25:50] [safety_warp] [INFO]     - S top-5: [439587200.0, 96306584.0, 34609780.0, 15814462.0, 9338769.0]
+[2026-07-27 03:25:50] [safety_warp] [INFO]   - Sample check (last): layer_31_svd.pt
+[2026-07-27 03:25:50] [safety_warp] [INFO]     - U shape: torch.Size([4096, 4096])
+[2026-07-27 03:25:50] [safety_warp] [INFO]     - S shape: torch.Size([4096])
+[2026-07-27 03:25:50] [safety_warp] [INFO]     - S range: [0.165719, 2337795072.000000]
+[2026-07-27 03:25:50] [safety_warp] [INFO] 
+[attn_q] - 32 files
+[2026-07-27 03:25:50] [safety_warp] [INFO]   - Total size: 2048.57 MB
+[2026-07-27 03:25:50] [safety_warp] [INFO]   - Sample check (first): layer_00_svd.pt
+[2026-07-27 03:25:50] [safety_warp] [INFO]     - U shape: torch.Size([4096, 4096])
+[2026-07-27 03:25:50] [safety_warp] [INFO]     - S shape: torch.Size([4096])
+[2026-07-27 03:25:50] [safety_warp] [INFO]     - S range: [0.000394, 862192768.000000]
+[2026-07-27 03:25:50] [safety_warp] [INFO]     - S top-5: [862192768.0, 74482472.0, 19361094.0, 12441371.0, 9392595.0]
+[2026-07-27 03:25:50] [safety_warp] [INFO]   - Sample check (last): layer_31_svd.pt
+[2026-07-27 03:25:50] [safety_warp] [INFO]     - U shape: torch.Size([4096, 4096])
+[2026-07-27 03:25:50] [safety_warp] [INFO]     - S shape: torch.Size([4096])
+[2026-07-27 03:25:50] [safety_warp] [INFO]     - S range: [0.079697, 1693705984.000000]
+[2026-07-27 03:25:50] [safety_warp] [INFO] 
+[attn_v] - 32 files
+[2026-07-27 03:25:50] [safety_warp] [INFO]   - Total size: 2048.57 MB
+[2026-07-27 03:25:50] [safety_warp] [INFO]   - Sample check (first): layer_00_svd.pt
+[2026-07-27 03:25:50] [safety_warp] [INFO]     - U shape: torch.Size([4096, 4096])
+[2026-07-27 03:25:50] [safety_warp] [INFO]     - S shape: torch.Size([4096])
+[2026-07-27 03:25:50] [safety_warp] [INFO]     - S range: [0.000000, 694852.750000]
+[2026-07-27 03:25:50] [safety_warp] [INFO]     - S top-5: [694852.75, 228115.015625, 118705.421875, 94720.9375, 77156.265625]
+[2026-07-27 03:25:50] [safety_warp] [INFO]   - Sample check (last): layer_31_svd.pt
+[2026-07-27 03:25:50] [safety_warp] [INFO]     - U shape: torch.Size([4096, 4096])
+[2026-07-27 03:25:50] [safety_warp] [INFO]     - S shape: torch.Size([4096])
+[2026-07-27 03:25:50] [safety_warp] [INFO]     - S range: [0.004033, 44274116.000000]
+[2026-07-27 03:25:50] [safety_warp] [INFO] 
+[ffn_down] - 32 files
+[2026-07-27 03:25:50] [safety_warp] [INFO]   - Total size: 2048.57 MB
+[2026-07-27 03:25:50] [safety_warp] [INFO]   - Sample check (first): layer_00_svd.pt
+[2026-07-27 03:25:50] [safety_warp] [INFO]     - U shape: torch.Size([4096, 4096])
+[2026-07-27 03:25:50] [safety_warp] [INFO]     - S shape: torch.Size([4096])
+[2026-07-27 03:25:50] [safety_warp] [INFO]     - S range: [0.148667, 1189268.125000]
+[2026-07-27 03:25:50] [safety_warp] [INFO]     - S top-5: [1189268.125, 271620.625, 142766.296875, 29821.76171875, 17597.541015625]
+[2026-07-27 03:25:50] [safety_warp] [INFO]   - Sample check (last): layer_31_svd.pt
+[2026-07-27 03:25:50] [safety_warp] [INFO]     - U shape: torch.Size([4096, 4096])
+[2026-07-27 03:25:50] [safety_warp] [INFO]     - S shape: torch.Size([4096])
+[2026-07-27 03:25:50] [safety_warp] [INFO]     - S range: [1418.791382, 411261888.000000]
+[2026-07-27 03:25:50] [safety_warp] [INFO] 
+[ffn_up] - 32 files
+[2026-07-27 03:25:50] [safety_warp] [INFO]   - Total size: 14793.41 MB
+[2026-07-27 03:25:50] [safety_warp] [INFO]   - Sample check (first): layer_00_svd.pt
+[2026-07-27 03:25:50] [safety_warp] [INFO]     - U shape: torch.Size([11008, 11008])
+[2026-07-27 03:25:50] [safety_warp] [INFO]     - S shape: torch.Size([11008])
+[2026-07-27 03:25:50] [safety_warp] [INFO]     - S range: [0.000004, 4619736.000000]
+[2026-07-27 03:25:50] [safety_warp] [INFO]     - S top-5: [4619736.0, 1851657.875, 993482.5, 744203.875, 719898.6875]
+[2026-07-27 03:25:50] [safety_warp] [INFO]   - Sample check (last): layer_31_svd.pt
+[2026-07-27 03:25:50] [safety_warp] [INFO]     - U shape: torch.Size([11008, 11008])
+[2026-07-27 03:25:50] [safety_warp] [INFO]     - S shape: torch.Size([11008])
+[2026-07-27 03:25:50] [safety_warp] [INFO]     - S range: [0.000002, 3268503552.000000]
+[2026-07-27 03:25:50] [safety_warp] [INFO] ======================================================================
+[2026-07-27 03:25:50] [safety_warp] [INFO] Verification Summary:
+[2026-07-27 03:25:50] [safety_warp] [INFO]   - Total files verified: 160
+[2026-07-27 03:25:50] [safety_warp] [INFO]   - Total storage: 22987.68 MB
+[2026-07-27 03:25:50] [safety_warp] [INFO]   - Files per layer type:
+[2026-07-27 03:25:50] [safety_warp] [INFO]     - attn_k: 32 files
+[2026-07-27 03:25:50] [safety_warp] [INFO]     - attn_q: 32 files
+[2026-07-27 03:25:50] [safety_warp] [INFO]     - attn_v: 32 files
+[2026-07-27 03:25:50] [safety_warp] [INFO]     - ffn_down: 32 files
+[2026-07-27 03:25:50] [safety_warp] [INFO]     - ffn_up: 32 files
+[2026-07-27 03:25:50] [safety_warp] [INFO]   - Singular value range (global): [0.000000, 862192768.000000]
+[2026-07-27 03:25:50] [safety_warp] [INFO] ======================================================================
+[2026-07-27 03:25:50] [safety_warp] [INFO] ✓ All SVD results verified successfully!
+[2026-07-27 03:25:50] [safety_warp] [INFO] ======================================================================
+[2026-07-27 03:25:50] [safety_warp] [INFO] ✓ Forward hooks removed (0 hooks)
+[2026-07-27 03:25:50] [safety_warp] [INFO] ✓ basis metadata updated (side=output, storage=22.45 GiB)
+[2026-07-27 03:25:50] [safety_warp] [INFO] ======================================================================
+[2026-07-27 03:25:50] [safety_warp] [INFO] Phase 1 Completed!
+[2026-07-27 03:25:50] [safety_warp] [INFO] Basis saved to: /root/Safety-WaRP-LLM/outputs/wsr_actsvd_ablation/basis_output_runs/phase1_output_20260727_024335/basis
+[2026-07-27 03:25:50] [safety_warp] [INFO] ======================================================================
+[2026-07-27 03:25:50] [safety_warp] [INFO] Next step: Run Phase 2 with --basis_dir /root/Safety-WaRP-LLM/outputs/wsr_actsvd_ablation/basis_output_runs/phase1_output_20260727_024335/basis/basis
+[2026-07-27 03:25:50] [safety_warp] [INFO] ======================================================================
+[2026-07-27 03:25:50] [safety_warp] [INFO] ======================================================================
+[2026-07-27 03:25:50] [safety_warp] [INFO] All tasks completed successfully!
+[2026-07-27 03:25:50] [safety_warp] [INFO] ======================================================================

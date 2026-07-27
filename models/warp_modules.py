@@ -163,11 +163,16 @@ class LinearWaRP(WaRPModule):
                     self.basis_coeff,
                 )
 
+            # UT_forward = U (입력측 기저), UT_backward = V^T (출력측 기저)
+            # 둘 다 비어 있으면 항등 기저(=원본 공간) → coeff 자체가 weight.
+            # (WSR/ActSVD ablation의 arm A와 arm B가 각각 이 두 경로를 쓴다.
+            #  기존 경로인 "UT_forward만 존재"는 동작이 바뀌지 않는다.)
+            weight = coeff
+            if self.UT_forward.numel() > 0:
+                weight = weight @ self.UT_forward.t()
             if self.UT_backward.numel() > 0:
-                weight = self.UT_backward.t() @ coeff @ self.UT_forward.t()
-            else:
-                weight = coeff @ self.UT_forward.t()
-            
+                weight = self.UT_backward.t() @ weight
+
             # ✅ Device 맞춤 (input과 같은 device로)
             if weight.device != input.device:
                 weight = weight.to(input.device)
@@ -295,11 +300,19 @@ def restore_weight(model):
             # W = basis_coeff @ V^T
             # ✅ UT_forward.t() 추가: V → V^T로 변환
             # (UT_backward.t() = I이므로 생략 가능하지만 일관성 유지)
+            # forward()와 동일한 규약: 비어 있는 쪽은 항등 기저로 취급
+            weight_restored = module.basis_coeff.data
+            transformed = False
+            if UT_forward.numel() > 0:
+                weight_restored = weight_restored @ UT_forward.t()
+                transformed = True
             if UT_backward.numel() > 0:
-                weight_restored = UT_backward.t() @ module.basis_coeff.data @ UT_forward.t()
-            else:
-                weight_restored = module.basis_coeff.data @ UT_forward.t()
-            
+                weight_restored = UT_backward.t() @ weight_restored
+                transformed = True
+            if not transformed:
+                # 항등 기저: basis_coeff와 storage를 공유하지 않도록 복사
+                weight_restored = weight_restored.clone()
+
             # 원본 weight 업데이트
             module.weight.data = weight_restored.data
             
@@ -351,6 +364,28 @@ def restore_to_linear(model):
 
     logger.info(f"✓ Restored {len(replacements)} LinearWaRP → nn.Linear")
     return model
+
+
+def make_signed_permutation(dim, seed=0, dtype=torch.float32, device='cpu'):
+    """
+    부호 있는 치환 행렬 P ∈ R^{dim×dim} 생성 (WSR/ActSVD ablation의 sanity arm 용).
+
+    각 행/열에 정확히 하나의 ±1만 존재하므로 P는 직교(P^T P = I)이고,
+    V = P 로 재파라미터화하면 W̃ = P^T W U 는 D arm의 W̃ = W U 의 **행 relabeling +
+    부호 반전**일 뿐이다. importance |∂L/∂W̃| 는 절댓값이라 부호가 지워지므로
+    entry mask도 같은 행 치환이 되고, 학습 결과는 D와 정확히 일치해야 한다.
+    (spec §3 "Sanity arm" / §8 항목 3)
+
+    Returns:
+        (P, perm, signs) — P는 dense (dim×dim), perm/signs는 재현용 1D 텐서
+    """
+    g = torch.Generator(device='cpu').manual_seed(int(seed))
+    perm = torch.randperm(dim, generator=g)
+    signs = (torch.randint(0, 2, (dim,), generator=g) * 2 - 1).to(torch.float32)
+
+    P = torch.zeros((dim, dim), dtype=torch.float32)
+    P[perm, torch.arange(dim)] = signs
+    return P.to(dtype=dtype, device=device), perm, signs
 
 
 # Warped modules 매핑 (원본 WaRP와 동일한 패턴)

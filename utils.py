@@ -379,3 +379,311 @@ This model follows the Llama-3.1 Community License Agreement.
         logger.error(f"Failed to upload model: {str(e)}", exc_info=True)
         return False
 
+
+
+# ============================================================================
+# Resource profiling: phase/stage별 소요 시간 + VRAM 측정
+# ----------------------------------------------------------------------------
+#   두 종류의 메모리를 함께 기록한다.
+#     1) torch allocator 기준 (프로세스 정확값)
+#          - alloc    : torch.cuda.max_memory_allocated  (실제 텐서)
+#          - reserved : torch.cuda.max_memory_reserved   (caching allocator 예약)
+#     2) 디바이스 기준 (백그라운드 샘플러, total - free)
+#          - CUDA context / cuBLAS workspace / NCCL 버퍼 등 torch 밖 사용량 포함
+#            → nvidia-smi 로 보이는 값과 대응. 실험 재현 시 필요한 GPU 용량 기준.
+#   사용 예:
+#       prof = ResourceProfiler(logger, label="Phase 1", json_path="logs/p1_profile.json")
+#       with prof.stage("load_model"):
+#           builder.load_model()
+#       ...
+#       prof.finalize()   # 요약 테이블 로깅 + JSON 저장
+# ============================================================================
+
+import time as _time
+import threading as _threading
+from contextlib import contextmanager as _contextmanager
+
+_GB = 1024.0 ** 3
+
+
+def format_duration(seconds):
+    """초 → 'HH:MM:SS' 문자열"""
+    seconds = int(round(seconds))
+    h, rem = divmod(seconds, 3600)
+    m, s = divmod(rem, 60)
+    return f"{h:02d}:{m:02d}:{s:02d}"
+
+
+class _GPUMemorySampler:
+    """
+    백그라운드 스레드로 각 visible GPU의 사용량(total - free)을 주기적으로 기록.
+    (t, {device: used_bytes}) 타임라인을 남겨서, 임의 구간의 peak를 사후 계산한다.
+    """
+
+    def __init__(self, interval=0.5):
+        self.interval = interval
+        self.samples = []          # [(timestamp, {dev: used_bytes})]
+        self.total_bytes = {}      # {dev: total_bytes}
+        self._stop = _threading.Event()
+        self._thread = None
+        self.available = torch.cuda.is_available()
+
+    def _sample_once(self):
+        snapshot = {}
+        for dev in range(torch.cuda.device_count()):
+            try:
+                free, total = torch.cuda.mem_get_info(dev)
+            except Exception:
+                continue
+            snapshot[dev] = total - free
+            self.total_bytes[dev] = total
+        if snapshot:
+            self.samples.append((_time.time(), snapshot))
+
+    def _run(self):
+        while not self._stop.is_set():
+            try:
+                self._sample_once()
+            except Exception:
+                pass
+            self._stop.wait(self.interval)
+
+    def start(self):
+        if not self.available or self._thread is not None:
+            return
+        self._sample_once()
+        self._thread = _threading.Thread(target=self._run, daemon=True,
+                                         name='gpu-mem-sampler')
+        self._thread.start()
+
+    def stop(self):
+        if self._thread is None:
+            return
+        self._stop.set()
+        self._thread.join(timeout=2 * self.interval + 1.0)
+        self._thread = None
+        try:
+            self._sample_once()
+        except Exception:
+            pass
+
+    def peak_between(self, t0, t1):
+        """
+        구간 [t0, t1] 내 디바이스별 peak 사용량 (bytes).
+        구간이 샘플링 주기보다 짧아 샘플이 하나도 없으면, 시간적으로 가장 가까운
+        샘플 하나로 대체한다 (0으로 보고되는 것을 방지).
+        """
+        peak = {}
+        for ts, snapshot in self.samples:
+            if ts < t0 or ts > t1:
+                continue
+            for dev, used in snapshot.items():
+                if used > peak.get(dev, 0):
+                    peak[dev] = used
+        if not peak and self.samples:
+            mid = (t0 + t1) / 2.0
+            _, nearest = min(self.samples, key=lambda x: abs(x[0] - mid))
+            peak = dict(nearest)
+        return peak
+
+
+class ResourceProfiler:
+    """
+    Phase 단위 실행 시간 / VRAM 프로파일러.
+
+    Args:
+        logger: 로거 (None이면 print)
+        label: 프로파일 대상 이름 (예: "Phase 1")
+        json_path: 요약 JSON 저장 경로 (None이면 저장 안 함)
+        sample_interval: 디바이스 메모리 샘플링 주기(초)
+        meta: JSON에 함께 남길 메타데이터 dict (설정값 등)
+    """
+
+    def __init__(self, logger=None, label="run", json_path=None,
+                 sample_interval=0.5, meta=None):
+        self.logger = logger
+        self.label = label
+        self.json_path = json_path
+        self.meta = dict(meta or {})
+        self.stages = []
+        self.t_start = _time.time()
+        self.cuda = torch.cuda.is_available()
+        self.sampler = _GPUMemorySampler(interval=sample_interval)
+        self.sampler.start()
+        # 프로파일 시작 시점 디바이스 사용량 (다른 프로세스 + CUDA context).
+        # GPU를 단독 점유하지 않는 환경에서 "이 실험이 추가로 쓴 VRAM"을 보려면
+        # peak_device - baseline (= *_delta_gb) 을 보면 된다.
+        self.device_baseline = max(
+            self.sampler.peak_between(self.t_start - 5.0, _time.time()).values(),
+            default=0,
+        )
+        self._gpu_names = {}
+        if self.cuda:
+            for dev in range(torch.cuda.device_count()):
+                try:
+                    self._gpu_names[dev] = torch.cuda.get_device_name(dev)
+                except Exception:
+                    self._gpu_names[dev] = f"cuda:{dev}"
+
+    # ---------------------------------------------------------------- log
+    def _log(self, msg):
+        if self.logger is not None:
+            self.logger.info(msg)
+        else:
+            print(msg)
+
+    # -------------------------------------------------------------- stage
+    @_contextmanager
+    def stage(self, name):
+        """한 단계(stage)의 wall-clock 시간과 VRAM peak을 기록하는 컨텍스트 매니저."""
+        if self.cuda:
+            torch.cuda.synchronize()
+            torch.cuda.reset_peak_memory_stats()
+        t0 = _time.time()
+        self._log(f"[PROFILE] ▶ {self.label} / {name} 시작")
+        status = 'ok'
+        try:
+            yield
+        except BaseException:
+            status = 'failed'
+            raise
+        finally:
+            if self.cuda:
+                try:
+                    torch.cuda.synchronize()
+                except Exception:
+                    pass
+            t1 = _time.time()
+            record = self._record(name, t0, t1, status)
+            self.stages.append(record)
+            self._log(
+                f"[PROFILE] ■ {self.label} / {name} {status} | "
+                f"time={format_duration(record['seconds'])} ({record['seconds']:.1f}s) | "
+                f"torch_alloc_peak={record['torch_alloc_peak_gb']:.2f}GB | "
+                f"torch_reserved_peak={record['torch_reserved_peak_gb']:.2f}GB | "
+                f"device_peak={record['device_peak_gb']:.2f}GB"
+            )
+
+    def _record(self, name, t0, t1, status):
+        alloc_peak, reserved_peak = {}, {}
+        if self.cuda:
+            for dev in range(torch.cuda.device_count()):
+                try:
+                    alloc_peak[dev] = torch.cuda.max_memory_allocated(dev)
+                    reserved_peak[dev] = torch.cuda.max_memory_reserved(dev)
+                except Exception:
+                    pass
+        device_peak = self.sampler.peak_between(t0, t1)
+        return {
+            'stage': name,
+            'status': status,
+            'seconds': t1 - t0,
+            'duration': format_duration(t1 - t0),
+            'torch_alloc_peak_gb': max(alloc_peak.values(), default=0) / _GB,
+            'torch_reserved_peak_gb': max(reserved_peak.values(), default=0) / _GB,
+            'device_peak_gb': max(device_peak.values(), default=0) / _GB,
+            'device_delta_gb': max(
+                max(device_peak.values(), default=0) - self.device_baseline, 0) / _GB,
+            'per_device': {
+                str(dev): {
+                    'torch_alloc_peak_gb': alloc_peak.get(dev, 0) / _GB,
+                    'torch_reserved_peak_gb': reserved_peak.get(dev, 0) / _GB,
+                    'device_peak_gb': device_peak.get(dev, 0) / _GB,
+                }
+                for dev in set(list(alloc_peak.keys()) + list(device_peak.keys()))
+            },
+        }
+
+    # ------------------------------------------------------------ summary
+    def summary(self):
+        total_seconds = _time.time() - self.t_start
+        device_peak_all = self.sampler.peak_between(self.t_start, _time.time())
+        return {
+            'label': self.label,
+            'total_seconds': total_seconds,
+            'total_duration': format_duration(total_seconds),
+            'peak_torch_alloc_gb': max(
+                (s['torch_alloc_peak_gb'] for s in self.stages), default=0.0),
+            'peak_torch_reserved_gb': max(
+                (s['torch_reserved_peak_gb'] for s in self.stages), default=0.0),
+            'peak_device_gb': max(device_peak_all.values(), default=0) / _GB,
+            'device_baseline_gb': self.device_baseline / _GB,
+            'peak_device_delta_gb': max(
+                max(device_peak_all.values(), default=0) - self.device_baseline, 0) / _GB,
+            'gpu_total_gb': {
+                str(dev): tot / _GB for dev, tot in self.sampler.total_bytes.items()
+            },
+            'gpu_names': {str(k): v for k, v in self._gpu_names.items()},
+            'cuda_visible_devices': os.environ.get('CUDA_VISIBLE_DEVICES', ''),
+            'stages': self.stages,
+            'meta': self.meta,
+        }
+
+    def log_summary(self):
+        s = self.summary()
+        self._log("=" * 78)
+        self._log(f"[PROFILE] {self.label} 리소스 요약 (시간 / VRAM)")
+        self._log("=" * 78)
+        self._log(f"{'stage':<28}{'time':>12}{'torch_alloc':>14}"
+                  f"{'torch_resv':>13}{'device':>11}{'device-base':>13}")
+        self._log("-" * 91)
+        for st in self.stages:
+            flag = '' if st['status'] == 'ok' else ' (failed)'
+            self._log(
+                f"{st['stage'][:26] + flag:<28}"
+                f"{st['duration']:>12}"
+                f"{st['torch_alloc_peak_gb']:>13.2f}G"
+                f"{st['torch_reserved_peak_gb']:>12.2f}G"
+                f"{st['device_peak_gb']:>10.2f}G"
+                f"{st['device_delta_gb']:>12.2f}G"
+            )
+        self._log("-" * 91)
+        self._log(
+            f"{'TOTAL':<28}{s['total_duration']:>12}"
+            f"{s['peak_torch_alloc_gb']:>13.2f}G"
+            f"{s['peak_torch_reserved_gb']:>12.2f}G"
+            f"{s['peak_device_gb']:>10.2f}G"
+            f"{s['peak_device_delta_gb']:>12.2f}G"
+        )
+        for dev, tot in s['gpu_total_gb'].items():
+            self._log(f"  GPU {dev} ({s['gpu_names'].get(dev, '?')}): "
+                      f"capacity {tot:.1f}GB")
+        self._log(f"  device baseline (프로파일 시작 시점 사용량, 타 프로세스 포함): "
+                  f"{s['device_baseline_gb']:.2f}GB")
+        self._log("  torch_alloc/torch_resv = 이 프로세스의 torch allocator 기준, "
+                  "device = nvidia-smi 기준 전체 사용량")
+        self._log("=" * 78)
+        return s
+
+    def save(self):
+        if not self.json_path:
+            return None
+        try:
+            os.makedirs(os.path.dirname(os.path.abspath(self.json_path)), exist_ok=True)
+            with open(self.json_path, 'w') as f:
+                json.dump(self.summary(), f, indent=2)
+            self._log(f"[PROFILE] 요약 저장: {self.json_path}")
+            return self.json_path
+        except Exception as e:
+            self._log(f"[PROFILE] 요약 저장 실패: {e}")
+            return None
+
+    def finalize(self, wandb_log=True):
+        """샘플러 정지 → 요약 로깅 → JSON 저장 (+ W&B summary 기록)."""
+        self.sampler.stop()
+        s = self.log_summary()
+        self.save()
+        if wandb_log:
+            try:
+                import wandb
+                if wandb.run is not None:
+                    wandb.run.summary[f"{self.label}/total_seconds"] = s['total_seconds']
+                    wandb.run.summary[f"{self.label}/peak_torch_alloc_gb"] = s['peak_torch_alloc_gb']
+                    wandb.run.summary[f"{self.label}/peak_torch_reserved_gb"] = s['peak_torch_reserved_gb']
+                    wandb.run.summary[f"{self.label}/peak_device_gb"] = s['peak_device_gb']
+                    for st in self.stages:
+                        wandb.run.summary[f"{self.label}/stage/{st['stage']}/seconds"] = st['seconds']
+                        wandb.run.summary[f"{self.label}/stage/{st['stage']}/device_peak_gb"] = st['device_peak_gb']
+            except Exception:
+                pass
+        return s

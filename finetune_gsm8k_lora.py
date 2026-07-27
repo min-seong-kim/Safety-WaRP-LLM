@@ -58,7 +58,8 @@ def parse_args():
     ap = argparse.ArgumentParser()
     ap.add_argument("--method", required=True,
                     choices=["lora", "original_projected_lora", "wsr_lora", "wsr_lora_nou",
-                             "safe_lora", "adapter_subspace_lora"])
+                             "safe_lora", "adapter_subspace_lora",
+                             "adapter_aware_wsr_projected_lora"])
     ap.add_argument("--model_name", required=True)
     ap.add_argument("--output_dir", required=True)
     ap.add_argument("--safety_data_path", default="./data/circuit_breakers_train.json")
@@ -80,6 +81,8 @@ def parse_args():
                     help="safety LoRA adapter 디렉토리 (B_s, A_s). --model_name 은 base 모델이어야 함")
     ap.add_argument("--adapter_subspace_dir", default=None,
                     help="build_adapter_subspace.py 가 만든 Q_S artifact 디렉토리")
+    ap.add_argument("--adapter_wsr_subspace_dir", default=None,
+                    help="build_adapter_wsr_subspace.py 가 만든 U_S artifact 디렉토리")
     ap.add_argument("--safety_adapter_mode", default="merge", choices=["merge", "keep"],
                     help="merge=safety adapter 를 base 에 병합 후 downstream adapter 1개 학습 / "
                          "keep=safety adapter 를 frozen 으로 유지하고 두 adapter 를 동시 활성화")
@@ -341,6 +344,65 @@ def _setup_adapter_subspace(model, args, target_modules, dtype):
     return model, projector, downstream_name, info
 
 
+def _setup_adapter_wsr_column(model, args, target_modules, dtype):
+    """이미 병합된 W_safe 위에 U_S-제약 downstream LoRA를 구성한다."""
+    from peft import LoraConfig, get_peft_model
+    from models.adapter_subspace import AdapterSubspaceProjector
+    from models.adapter_wsr_column import load_subspaces, read_report
+
+    if not args.adapter_wsr_subspace_dir:
+        raise ValueError(
+            "adapter_aware_wsr_projected_lora requires --adapter_wsr_subspace_dir")
+    subspaces = load_subspaces(args.adapter_wsr_subspace_dir)
+    if not subspaces:
+        raise ValueError(f"no U_S artifacts found in {args.adapter_wsr_subspace_dir}")
+    report = read_report(args.adapter_wsr_subspace_dir)
+    logger.info(f"[adapter_wsr_column] loaded U_S for {len(subspaces)} modules from "
+                f"{args.adapter_wsr_subspace_dir}")
+    if report:
+        logger.info(f"  protected_k: min={report['k_min']} max={report['k_max']} "
+                    f"mean={report['k_mean']:.2f} | mode={report['importance_mode']}")
+
+    cfg = LoraConfig(r=args.lora_r, lora_alpha=args.lora_alpha,
+                     lora_dropout=args.lora_dropout, bias="none",
+                     task_type="CAUSAL_LM", target_modules=target_modules)
+    model = get_peft_model(model, cfg)
+    if args.lora_param_dtype == "float32" and dtype != torch.float32:
+        n_cast = 0
+        for name, param in model.named_parameters():
+            if "lora_" in name and param.requires_grad:
+                param.data = param.data.float()
+                n_cast += 1
+        logger.info(f"[adapter_wsr_column] downstream LoRA params → fp32 ({n_cast} tensors)")
+    model.print_trainable_parameters()
+
+    projector = AdapterSubspaceProjector(
+        model, subspaces, adapter_name="default",
+        project_exp_avg=args.project_optimizer_exp_avg, logger_=logger,
+        subspace_key="U_S")
+    if projector.unconstrained_targets:
+        msg = (f"U_S가 없어 제약이 걸리지 않는 target module "
+               f"{len(projector.unconstrained_targets)}개: "
+               f"{projector.unconstrained_targets[:5]}")
+        if args.require_safety_adapter_for_all_targets:
+            raise ValueError(msg + " (--require_safety_adapter_for_all_targets)")
+        logger.warning(msg + " → 일반 LoRA로 학습됩니다.")
+    projector.register_grad_hooks()
+    info = {
+        "adapter_wsr_subspace_dir": args.adapter_wsr_subspace_dir,
+        "starting_safety_merged_model": args.model_name,
+        "lora_param_dtype": args.lora_param_dtype,
+        "num_constrained_modules": projector.num_constrained,
+        "num_unconstrained_targets": len(projector.unconstrained_targets),
+        "subspace_report": {
+            key: report.get(key) for key in
+            ("num_modules", "importance_mode", "k_min", "k_max", "k_mean",
+             "max_subspace_orthogonality_error")
+        } if report else None,
+    }
+    return model, projector, "default", info
+
+
 def build_gsm8k(tokenizer, args):
     ds = load_dataset(args.dataset_name, args.dataset_subset, split="train")
     if args.gsm8k_samples > 0:
@@ -375,6 +437,9 @@ def main():
     if args.method == "adapter_subspace_lora":
         logger.info("⚠️ method=adapter_subspace_lora: --model_name 은 BASE 모델이어야 하며 "
                     f"safety 는 --safety_adapter_path 로 얹습니다 (model_name={args.model_name})")
+    elif args.method == "adapter_aware_wsr_projected_lora":
+        logger.info("method=adapter_aware_wsr_projected_lora: --model_name은 safety LoRA가 "
+                    f"이미 병합된 W_safe여야 합니다 (model_name={args.model_name})")
 
     # ───────────── method setup ─────────────
     if args.method == "wsr_lora":
@@ -423,6 +488,10 @@ def main():
         logger.info(f"trainable params (WSR-LoRA-noU): {trainable:,}")
     elif args.method == "adapter_subspace_lora":
         model, projector, downstream_adapter, subspace_info = _setup_adapter_subspace(
+            model, args, target_modules, dtype)
+        projection_cb = AdapterSubspaceCallback(projector, args.verify_every_steps, logger)
+    elif args.method == "adapter_aware_wsr_projected_lora":
+        model, projector, downstream_adapter, subspace_info = _setup_adapter_wsr_column(
             model, args, target_modules, dtype)
         projection_cb = AdapterSubspaceCallback(projector, args.verify_every_steps, logger)
     else:
@@ -477,14 +546,20 @@ def main():
 
     # ───────────── adapter_subspace 제약 검증 (§10 A–E) ─────────────
     if projector is not None:
-        from models.adapter_subspace import load_subspaces
-        subspaces = load_subspaces(args.adapter_subspace_dir)
+        if args.method == "adapter_aware_wsr_projected_lora":
+            from models.adapter_wsr_column import load_subspaces
+            subspaces = load_subspaces(args.adapter_wsr_subspace_dir)
+            subspace_label = "adapter_wsr_column"
+        else:
+            from models.adapter_subspace import load_subspaces
+            subspaces = load_subspaces(args.adapter_subspace_dir)
+            subspace_label = "adapter_subspace"
         rows, agg = projector.verify(subspaces=subspaces, check_mapping=True)
         subspace_verify = {"aggregate": agg, "per_layer": rows}
         with open(os.path.join(args.output_dir, "subspace_verification.json"), "w") as f:
             json.dump(subspace_verify, f, indent=2)
         logger.info("=" * 70)
-        logger.info("[adapter_subspace] constraint verification")
+        logger.info(f"[{subspace_label}] constraint verification")
         for field, label in (("constraint_A", "A  ‖A_d Q_S‖/‖A_d‖        "),
                              ("constraint_delta", "B  ‖ΔW_d Q_S‖/‖ΔW_d‖     "),
                              ("mapping_drift", "C  ‖W_final Q−W_safe Q‖/‖·‖"),
@@ -501,6 +576,12 @@ def main():
                            "학습 여지가 없을 수 있습니다 (top_k/energy 를 낮춰보세요).")
         logger.info("=" * 70)
         projector.remove_grad_hooks()
+
+    adapter_dir = None
+    if args.method in ("adapter_subspace_lora", "adapter_aware_wsr_projected_lora"):
+        adapter_dir = os.path.join(args.output_dir, "adapter")
+        model.save_pretrained(adapter_dir, safe_serialization=True)
+        logger.info(f"✓ PEFT adapter saved: {adapter_dir}")
 
     safelora_stats = None
     if args.method == "safe_lora":
@@ -546,7 +627,7 @@ def main():
     summary = {"method": args.method, "model_name": args.model_name, "lr": args.learning_rate,
                "lora_r": args.lora_r, "lora_alpha": args.lora_alpha, "keep_ratio": args.keep_ratio,
                "direction_keep_ratio": args.direction_keep_ratio, "epochs": args.epochs,
-               "merged_dir": merged_dir, "hf_repo_id": args.hf_repo_id,
+               "adapter_dir": adapter_dir, "merged_dir": merged_dir, "hf_repo_id": args.hf_repo_id,
                "projection_calls": projection_cb.count if projection_cb else None,
                "safelora": safelora_stats,
                "adapter_subspace": subspace_info,

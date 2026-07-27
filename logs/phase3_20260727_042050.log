@@ -1,0 +1,239 @@
+[2026-07-27 04:20:50] [safety_warp] [INFO] ======================================================================
+[2026-07-27 04:20:50] [safety_warp] [INFO] Safety-WaRP-LLM (Fixed - 원본 FSCIL-WaRP 방식)
+[2026-07-27 04:20:50] [safety_warp] [INFO] ======================================================================
+[2026-07-27 04:20:50] [safety_warp] [INFO] Phase: 3
+[2026-07-27 04:20:50] [safety_warp] [INFO] Model: None
+[2026-07-27 04:20:50] [safety_warp] [INFO] Layer types: attn_q,attn_k,attn_v,ffn_up,ffn_down
+[2026-07-27 04:20:50] [safety_warp] [INFO] Target layers: all
+[2026-07-27 04:20:50] [safety_warp] [INFO] ======================================================================
+[2026-07-27 04:20:50] [safety_warp] [INFO] ======================================================================
+[2026-07-27 04:20:50] [safety_warp] [INFO] Starting Phase 3: Incremental Learning (Fixed)
+[2026-07-27 04:20:50] [safety_warp] [INFO] Mode: freeze_warp
+[2026-07-27 04:20:50] [safety_warp] [INFO] ======================================================================
+[2026-07-27 04:20:50] [safety_warp] [INFO] ======================================================================
+[2026-07-27 04:20:50] [safety_warp] [INFO] Phase 3 ablation arm B: ActSVD output basis + row (rank) freezing
+[2026-07-27 04:20:50] [safety_warp] [INFO]   - basis side : output
+[2026-07-27 04:20:50] [safety_warp] [INFO]   - V (output) : basis
+[2026-07-27 04:20:50] [safety_warp] [INFO]   - mask unit  : row
+[2026-07-27 04:20:50] [safety_warp] [INFO] ======================================================================
+[2026-07-27 04:20:50] [safety_warp] [INFO] Loading basis from /root/Safety-WaRP-LLM/outputs/wsr_actsvd_ablation/basis_output_runs/phase1_output_20260727_024335/basis...
+[2026-07-27 04:21:01] [safety_warp] [INFO] ✓ Basis loaded: 160 combinations
+[2026-07-27 04:21:01] [safety_warp] [INFO] Loading masks from /root/Safety-WaRP-LLM/outputs/wsr_actsvd_ablation/arm_B/phase2_runs/phase2_armB_20260727_042036/checkpoints/masks...
+[2026-07-27 04:21:01] [safety_warp] [INFO] ✓ Mask metadata loaded:
+[2026-07-27 04:21:01] [safety_warp] [INFO]   - Keep ratio: 0.1
+[2026-07-27 04:21:09] [safety_warp] [INFO] ✓ Masks loaded: 160 combinations
+[2026-07-27 04:21:09] [safety_warp] [INFO] ✓ mask metadata: arm=B unit=row rank_by=grad total_frozen=449953792
+[2026-07-27 04:21:11] [safety_warp] [INFO] Loading Phase 0 model from kmseong/llama2_7b-chat-Safety-FT-lr5e-5...
+[2026-07-27 04:21:13] [safety_warp] [INFO] ✓ Model loaded
+[2026-07-27 04:21:13] [safety_warp] [INFO] Converting to WaRP modules...
+[2026-07-27 04:21:13] [safety_warp] [INFO] ✓ Tokenizer loaded
+[2026-07-27 04:21:13] [safety_warp] [INFO]   - Input formatting: chat template
+[2026-07-27 04:21:13] [safety_warp] [INFO] ======================================================================
+[2026-07-27 04:21:13] [safety_warp] [INFO] Setting up WaRP modules — ablation arm B
+[2026-07-27 04:21:13] [safety_warp] [INFO] ======================================================================
+[2026-07-27 04:21:15] [safety_warp] [INFO] [phase3/armB] reparameterized 160 modules (side=output, V=basis) | reconstruction rel-err mean=4.113e-03 worst=6.392e-03 @ ffn_up/layer_14
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  0 (attn_q   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  0 (attn_k   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  0 (attn_v   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  0 (ffn_up   ) coeff=(11008, 4096) frozen=4,509,696 (10.00%) | frozen output directions: 1101/11008
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  0 (ffn_down ) coeff=(4096, 11008) frozen=4,513,280 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  1 (attn_q   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  1 (attn_k   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  1 (attn_v   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  1 (ffn_up   ) coeff=(11008, 4096) frozen=4,509,696 (10.00%) | frozen output directions: 1101/11008
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  1 (ffn_down ) coeff=(4096, 11008) frozen=4,513,280 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  2 (attn_q   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  2 (attn_k   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  2 (attn_v   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  2 (ffn_up   ) coeff=(11008, 4096) frozen=4,509,696 (10.00%) | frozen output directions: 1101/11008
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  2 (ffn_down ) coeff=(4096, 11008) frozen=4,513,280 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  3 (attn_q   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  3 (attn_k   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  3 (attn_v   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  3 (ffn_up   ) coeff=(11008, 4096) frozen=4,509,696 (10.00%) | frozen output directions: 1101/11008
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  3 (ffn_down ) coeff=(4096, 11008) frozen=4,513,280 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  4 (attn_q   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  4 (attn_k   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  4 (attn_v   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  4 (ffn_up   ) coeff=(11008, 4096) frozen=4,509,696 (10.00%) | frozen output directions: 1101/11008
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  4 (ffn_down ) coeff=(4096, 11008) frozen=4,513,280 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  5 (attn_q   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  5 (attn_k   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  5 (attn_v   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  5 (ffn_up   ) coeff=(11008, 4096) frozen=4,509,696 (10.00%) | frozen output directions: 1101/11008
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  5 (ffn_down ) coeff=(4096, 11008) frozen=4,513,280 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  6 (attn_q   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  6 (attn_k   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  6 (attn_v   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  6 (ffn_up   ) coeff=(11008, 4096) frozen=4,509,696 (10.00%) | frozen output directions: 1101/11008
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  6 (ffn_down ) coeff=(4096, 11008) frozen=4,513,280 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  7 (attn_q   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  7 (attn_k   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  7 (attn_v   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  7 (ffn_up   ) coeff=(11008, 4096) frozen=4,509,696 (10.00%) | frozen output directions: 1101/11008
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  7 (ffn_down ) coeff=(4096, 11008) frozen=4,513,280 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  8 (attn_q   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  8 (attn_k   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  8 (attn_v   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  8 (ffn_up   ) coeff=(11008, 4096) frozen=4,509,696 (10.00%) | frozen output directions: 1101/11008
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  8 (ffn_down ) coeff=(4096, 11008) frozen=4,513,280 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  9 (attn_q   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  9 (attn_k   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  9 (attn_v   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  9 (ffn_up   ) coeff=(11008, 4096) frozen=4,509,696 (10.00%) | frozen output directions: 1101/11008
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer  9 (ffn_down ) coeff=(4096, 11008) frozen=4,513,280 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer 10 (attn_q   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer 10 (attn_k   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer 10 (attn_v   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer 10 (ffn_up   ) coeff=(11008, 4096) frozen=4,509,696 (10.00%) | frozen output directions: 1101/11008
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer 10 (ffn_down ) coeff=(4096, 11008) frozen=4,513,280 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer 11 (attn_q   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer 11 (attn_k   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer 11 (attn_v   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer 11 (ffn_up   ) coeff=(11008, 4096) frozen=4,509,696 (10.00%) | frozen output directions: 1101/11008
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer 11 (ffn_down ) coeff=(4096, 11008) frozen=4,513,280 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer 12 (attn_q   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer 12 (attn_k   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer 12 (attn_v   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer 12 (ffn_up   ) coeff=(11008, 4096) frozen=4,509,696 (10.00%) | frozen output directions: 1101/11008
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer 12 (ffn_down ) coeff=(4096, 11008) frozen=4,513,280 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer 13 (attn_q   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer 13 (attn_k   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer 13 (attn_v   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer 13 (ffn_up   ) coeff=(11008, 4096) frozen=4,509,696 (10.00%) | frozen output directions: 1101/11008
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer 13 (ffn_down ) coeff=(4096, 11008) frozen=4,513,280 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer 14 (attn_q   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer 14 (attn_k   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer 14 (attn_v   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer 14 (ffn_up   ) coeff=(11008, 4096) frozen=4,509,696 (10.00%) | frozen output directions: 1101/11008
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer 14 (ffn_down ) coeff=(4096, 11008) frozen=4,513,280 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer 15 (attn_q   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer 15 (attn_k   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer 15 (attn_v   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer 15 (ffn_up   ) coeff=(11008, 4096) frozen=4,509,696 (10.00%) | frozen output directions: 1101/11008
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer 15 (ffn_down ) coeff=(4096, 11008) frozen=4,513,280 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer 16 (attn_q   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer 16 (attn_k   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:15] [safety_warp] [INFO] Layer 16 (attn_v   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 16 (ffn_up   ) coeff=(11008, 4096) frozen=4,509,696 (10.00%) | frozen output directions: 1101/11008
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 16 (ffn_down ) coeff=(4096, 11008) frozen=4,513,280 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 17 (attn_q   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 17 (attn_k   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 17 (attn_v   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 17 (ffn_up   ) coeff=(11008, 4096) frozen=4,509,696 (10.00%) | frozen output directions: 1101/11008
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 17 (ffn_down ) coeff=(4096, 11008) frozen=4,513,280 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 18 (attn_q   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 18 (attn_k   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 18 (attn_v   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 18 (ffn_up   ) coeff=(11008, 4096) frozen=4,509,696 (10.00%) | frozen output directions: 1101/11008
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 18 (ffn_down ) coeff=(4096, 11008) frozen=4,513,280 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 19 (attn_q   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 19 (attn_k   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 19 (attn_v   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 19 (ffn_up   ) coeff=(11008, 4096) frozen=4,509,696 (10.00%) | frozen output directions: 1101/11008
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 19 (ffn_down ) coeff=(4096, 11008) frozen=4,513,280 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 20 (attn_q   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 20 (attn_k   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 20 (attn_v   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 20 (ffn_up   ) coeff=(11008, 4096) frozen=4,509,696 (10.00%) | frozen output directions: 1101/11008
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 20 (ffn_down ) coeff=(4096, 11008) frozen=4,513,280 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 21 (attn_q   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 21 (attn_k   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 21 (attn_v   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 21 (ffn_up   ) coeff=(11008, 4096) frozen=4,509,696 (10.00%) | frozen output directions: 1101/11008
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 21 (ffn_down ) coeff=(4096, 11008) frozen=4,513,280 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 22 (attn_q   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 22 (attn_k   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 22 (attn_v   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 22 (ffn_up   ) coeff=(11008, 4096) frozen=4,509,696 (10.00%) | frozen output directions: 1101/11008
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 22 (ffn_down ) coeff=(4096, 11008) frozen=4,513,280 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 23 (attn_q   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 23 (attn_k   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 23 (attn_v   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 23 (ffn_up   ) coeff=(11008, 4096) frozen=4,509,696 (10.00%) | frozen output directions: 1101/11008
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 23 (ffn_down ) coeff=(4096, 11008) frozen=4,513,280 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 24 (attn_q   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 24 (attn_k   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 24 (attn_v   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 24 (ffn_up   ) coeff=(11008, 4096) frozen=4,509,696 (10.00%) | frozen output directions: 1101/11008
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 24 (ffn_down ) coeff=(4096, 11008) frozen=4,513,280 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 25 (attn_q   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 25 (attn_k   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 25 (attn_v   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 25 (ffn_up   ) coeff=(11008, 4096) frozen=4,509,696 (10.00%) | frozen output directions: 1101/11008
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 25 (ffn_down ) coeff=(4096, 11008) frozen=4,513,280 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 26 (attn_q   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 26 (attn_k   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 26 (attn_v   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 26 (ffn_up   ) coeff=(11008, 4096) frozen=4,509,696 (10.00%) | frozen output directions: 1101/11008
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 26 (ffn_down ) coeff=(4096, 11008) frozen=4,513,280 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 27 (attn_q   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 27 (attn_k   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 27 (attn_v   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 27 (ffn_up   ) coeff=(11008, 4096) frozen=4,509,696 (10.00%) | frozen output directions: 1101/11008
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 27 (ffn_down ) coeff=(4096, 11008) frozen=4,513,280 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 28 (attn_q   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 28 (attn_k   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 28 (attn_v   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 28 (ffn_up   ) coeff=(11008, 4096) frozen=4,509,696 (10.00%) | frozen output directions: 1101/11008
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 28 (ffn_down ) coeff=(4096, 11008) frozen=4,513,280 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 29 (attn_q   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 29 (attn_k   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 29 (attn_v   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 29 (ffn_up   ) coeff=(11008, 4096) frozen=4,509,696 (10.00%) | frozen output directions: 1101/11008
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 29 (ffn_down ) coeff=(4096, 11008) frozen=4,513,280 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 30 (attn_q   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 30 (attn_k   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 30 (attn_v   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 30 (ffn_up   ) coeff=(11008, 4096) frozen=4,509,696 (10.00%) | frozen output directions: 1101/11008
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 30 (ffn_down ) coeff=(4096, 11008) frozen=4,513,280 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 31 (attn_q   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 31 (attn_k   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 31 (attn_v   ) coeff=(4096, 4096) frozen=1,679,360 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 31 (ffn_up   ) coeff=(11008, 4096) frozen=4,509,696 (10.00%) | frozen output directions: 1101/11008
+[2026-07-27 04:21:16] [safety_warp] [INFO] Layer 31 (ffn_down ) coeff=(4096, 11008) frozen=4,513,280 (10.01%) | frozen output directions: 410/4096
+[2026-07-27 04:21:16] [safety_warp] [INFO] ======================================================================
+[2026-07-27 04:21:16] [safety_warp] [INFO] ✓ arm B: 160 modules (reparameterized 160)
+[2026-07-27 04:21:16] [safety_warp] [INFO] ✓ frozen scalars: 449,953,792 / 4,496,293,888 (10.007%)
+[2026-07-27 04:21:16] [safety_warp] [INFO]   forward: W = V @ where(mask, coeff.detach(), coeff) @ U^T
+[2026-07-27 04:21:16] [safety_warp] [INFO] ======================================================================
+[2026-07-27 04:21:16] [safety_warp] [INFO] [WaRP-Monitor] verification probes registered
+[2026-07-27 04:21:16] [safety_warp] [INFO]   - modules: 160
+[2026-07-27 04:21:16] [safety_warp] [INFO]   - masked probes: 640
+[2026-07-27 04:21:16] [safety_warp] [INFO]   - trainable probes: 640
+[2026-07-27 04:21:16] [safety_warp] [INFO] Loading GSM8K dataset...
+[2026-07-27 04:21:16] [safety_warp] [INFO] ✓ Using all 7473 samples (gsm8k_samples=0 or not specified)
+[2026-07-27 04:21:20] [safety_warp] [INFO] ✓ Dataset created (7473 samples)
+[2026-07-27 04:21:20] [safety_warp] [INFO] ======================================================================
+[2026-07-27 04:21:20] [safety_warp] [INFO] Phase 3: Incremental Learning with GSM8K (Trainer/SFT)
+[2026-07-27 04:21:20] [safety_warp] [INFO] ======================================================================
+[2026-07-27 04:21:20] [safety_warp] [WARNING] Strict mask freeze를 위해 freeze 모드 Phase 3에서 weight_decay를 0.0으로 강제합니다 (requested=0.01).
+[2026-07-27 04:21:20] [safety_warp] [INFO] Parameter freeze status:
+[2026-07-27 04:21:20] [safety_warp] [INFO]   - Total params: 6,738,415,616
+[2026-07-27 04:21:20] [safety_warp] [INFO]   - Trainable params: 4,496,293,888
+[2026-07-27 04:21:20] [safety_warp] [INFO]   - Frozen params: 2,242,121,728
+[2026-07-27 04:21:20] [safety_warp] [INFO]   - Trainable ratio: 66.73%
+[2026-07-27 04:21:20] [safety_warp] [INFO] Training configuration:
+[2026-07-27 04:21:20] [safety_warp] [INFO]   - Epochs: 3
+[2026-07-27 04:21:20] [safety_warp] [INFO]   - Learning rate: 5e-05
+[2026-07-27 04:21:20] [safety_warp] [INFO]   - Weight decay (requested): 0.01
+[2026-07-27 04:21:20] [safety_warp] [INFO]   - Weight decay (effective): 0.0
+[2026-07-27 04:21:20] [safety_warp] [INFO]   - Warmup ratio: 0.1
+[2026-07-27 04:21:20] [safety_warp] [INFO]   - Batch size: 2
+[2026-07-27 04:21:20] [safety_warp] [INFO]   - Gradient accumulation steps: 8
+[2026-07-27 04:21:20] [safety_warp] [INFO]   - Effective batch size: 16
+[2026-07-27 04:21:20] [safety_warp] [INFO]   - Max gradient norm: 1.0
+[2026-07-27 04:21:20] [safety_warp] [INFO]   - Optimizer: adamw_torch
+[2026-07-27 04:21:20] [safety_warp] [INFO]   - LR scheduler: cosine
+[2026-07-27 04:21:20] [safety_warp] [INFO]   - Checkpoint directory: /root/Safety-WaRP-LLM/outputs/wsr_actsvd_ablation/arm_B/phase3_runs/phase3_20260727_042120
+[2026-07-27 04:21:20] [safety_warp] [INFO] ======================================================================
+[2026-07-27 04:21:21] [safety_warp] [INFO] [WaRP-GradCheck] one-batch gradient sanity
+[2026-07-27 04:21:21] [safety_warp] [INFO]   - loss: 1.531767
+[2026-07-27 04:21:21] [safety_warp] [INFO]   - masked(=1) grad |mean|: 0.000000e+00, nonzero ratio: 0.00%
+[2026-07-27 04:21:21] [safety_warp] [INFO]   - trainable(=0) grad |mean|: 1.643689e-04, nonzero ratio: 100.00%
+[2026-07-27 04:21:21] [safety_warp] [INFO] ✓ Trainer initialized
+[2026-07-27 04:21:21] [safety_warp] [INFO] Starting training...
+[2026-07-27 04:21:21] [safety_warp] [INFO]   WaRP forward will automatically apply masking:
+[2026-07-27 04:21:21] [safety_warp] [INFO]     W = V @ (basis_coeff * mask).detach() + basis_coeff * (1-mask) @ U
+[2026-07-27 04:21:21] [safety_warp] [INFO]     mask=1: gradient 차단 (frozen)
+[2026-07-27 04:21:21] [safety_warp] [INFO]     mask=0: gradient 흐름 (trainable)

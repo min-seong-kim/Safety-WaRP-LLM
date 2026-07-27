@@ -1,0 +1,223 @@
+[2026-07-27 03:25:53] [safety_warp] [INFO] ======================================================================
+[2026-07-27 03:25:53] [safety_warp] [INFO] Safety-WaRP-LLM (Fixed - 원본 FSCIL-WaRP 방식)
+[2026-07-27 03:25:53] [safety_warp] [INFO] ======================================================================
+[2026-07-27 03:25:53] [safety_warp] [INFO] Phase: 2
+[2026-07-27 03:25:53] [safety_warp] [INFO] Model: None
+[2026-07-27 03:25:53] [safety_warp] [INFO] Layer types: attn_q,attn_k,attn_v,ffn_up,ffn_down
+[2026-07-27 03:25:53] [safety_warp] [INFO] Target layers: all
+[2026-07-27 03:25:53] [safety_warp] [INFO] ======================================================================
+[2026-07-27 03:25:53] [safety_warp] [INFO] ======================================================================
+[2026-07-27 03:25:53] [safety_warp] [INFO] Starting Phase 2: Importance Scoring (Fixed)
+[2026-07-27 03:25:53] [safety_warp] [INFO] ======================================================================
+[2026-07-27 03:25:53] [safety_warp] [INFO] ======================================================================
+[2026-07-27 03:25:53] [safety_warp] [INFO] Phase 2 ablation arm A: original space + entry mask
+[2026-07-27 03:25:53] [safety_warp] [INFO]   - basis side  : None
+[2026-07-27 03:25:53] [safety_warp] [INFO]   - V (output)  : identity
+[2026-07-27 03:25:53] [safety_warp] [INFO]   - mask unit   : entry
+[2026-07-27 03:25:53] [safety_warp] [INFO]   - rank by     : grad
+[2026-07-27 03:25:53] [safety_warp] [INFO]   - note        : 논문 Table 5 'Original space + important mask FT' 재현 대상 (JB≈9.17 / GSM8K≈40.41)
+[2026-07-27 03:25:53] [safety_warp] [INFO] ======================================================================
+[2026-07-27 03:25:53] [safety_warp] [INFO] arm A: 재파라미터화 없음 (U=V=I) — basis 로드 생략
+[2026-07-27 03:25:55] [safety_warp] [INFO] Loading Phase 0 trained model from kmseong/llama2_7b-chat-Safety-FT-lr5e-5...
+[2026-07-27 03:25:57] [safety_warp] [INFO] ✓ Phase 0 model loaded
+[2026-07-27 03:25:57] [safety_warp] [INFO] ✓ Tokenizer loaded
+[2026-07-27 03:25:57] [safety_warp] [INFO]   - Input formatting: chat template
+[2026-07-27 03:25:57] [safety_warp] [INFO] Converting to WaRP modules...
+[2026-07-27 03:25:57] [safety_warp] [INFO] ✓ Conversion completed
+[2026-07-27 03:25:57] [safety_warp] [INFO] [phase2/armA] reparameterized 160 modules (side=None, V=identity) | reconstruction rel-err mean=0.000e+00 worst=0.000e+00 @ attn_q/layer_00
+[2026-07-27 03:25:57] [safety_warp] [INFO] Loading circuit_breakers data from /root/Safety-WaRP-LLM/data/circuit_breakers_train.json...
+[2026-07-27 03:25:57] [safety_warp] [INFO] ✓ Loaded 4994 samples
+[2026-07-27 03:25:57] [safety_warp] [INFO] ✓ Dataloader created (2497 batches)
+[2026-07-27 03:25:57] [safety_warp] [INFO]   - Input format: chat template user/assistant pairs
+[2026-07-27 03:25:57] [safety_warp] [INFO] ======================================================================
+[2026-07-27 03:25:57] [safety_warp] [INFO] Phase 2: Importance Scoring (Per-layer keep_ratio)
+[2026-07-27 03:25:57] [safety_warp] [INFO] ======================================================================
+[2026-07-27 03:25:57] [safety_warp] [INFO] ✅ model.eval() 모드 - 파라미터 업데이트 없음
+[2026-07-27 03:25:57] [safety_warp] [INFO] ✅ Gradient만 계산하여 importance 측정
+[2026-07-27 03:25:57] [safety_warp] [INFO] ======================================================================
+[2026-07-27 03:25:57] [safety_warp] [INFO] ✓ Model set to eval mode (파라미터 변경 없음)
+[2026-07-27 03:25:57] [safety_warp] [INFO] ✓ Found 160 WaRP modules
+[2026-07-27 03:25:57] [safety_warp] [INFO] ✓ Trainable params in Phase 2: 4,496,293,888/6,738,415,616 (66.73%)
+[2026-07-27 03:30:35] [safety_warp] [INFO] ======================================================================
+[2026-07-27 03:30:35] [safety_warp] [INFO] ✓ Importance computation completed
+[2026-07-27 03:30:35] [safety_warp] [INFO]   - Total samples: 4994
+[2026-07-27 03:30:35] [safety_warp] [INFO]   - Total tokens: 239979
+[2026-07-27 03:30:35] [safety_warp] [INFO]   ⚠️  파라미터는 변경되지 않음 (optimizer.step 없음)
+[2026-07-27 03:30:35] [safety_warp] [INFO] ======================================================================
+[2026-07-27 03:30:42] [safety_warp] [INFO] ======================================================================
+[2026-07-27 03:30:42] [safety_warp] [INFO] arm A: generating entry masks (ρ=0.1, rank_by=grad)
+[2026-07-27 03:30:42] [safety_warp] [INFO] ======================================================================
+[2026-07-27 03:30:42] [safety_warp] [INFO] Layer  0 (attn_k   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:42] [safety_warp] [INFO] Layer  0 (attn_q   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:42] [safety_warp] [INFO] Layer  0 (attn_v   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:42] [safety_warp] [INFO] Layer  0 (ffn_down ) shape=(4096, 11008) frozen=4,508,877 (10.00%)
+[2026-07-27 03:30:42] [safety_warp] [INFO] Layer  0 (ffn_up   ) shape=(11008, 4096) frozen=4,508,877 (10.00%)
+[2026-07-27 03:30:42] [safety_warp] [INFO] Layer  1 (attn_k   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:43] [safety_warp] [INFO] Layer  1 (attn_q   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:43] [safety_warp] [INFO] Layer  1 (attn_v   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:43] [safety_warp] [INFO] Layer  1 (ffn_down ) shape=(4096, 11008) frozen=4,508,877 (10.00%)
+[2026-07-27 03:30:43] [safety_warp] [INFO] Layer  1 (ffn_up   ) shape=(11008, 4096) frozen=4,508,877 (10.00%)
+[2026-07-27 03:30:43] [safety_warp] [INFO] Layer  2 (attn_k   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:43] [safety_warp] [INFO] Layer  2 (attn_q   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:44] [safety_warp] [INFO] Layer  2 (attn_v   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:44] [safety_warp] [INFO] Layer  2 (ffn_down ) shape=(4096, 11008) frozen=4,508,877 (10.00%)
+[2026-07-27 03:30:44] [safety_warp] [INFO] Layer  2 (ffn_up   ) shape=(11008, 4096) frozen=4,508,877 (10.00%)
+[2026-07-27 03:30:44] [safety_warp] [INFO] Layer  3 (attn_k   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:44] [safety_warp] [INFO] Layer  3 (attn_q   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:45] [safety_warp] [INFO] Layer  3 (attn_v   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:45] [safety_warp] [INFO] Layer  3 (ffn_down ) shape=(4096, 11008) frozen=4,508,877 (10.00%)
+[2026-07-27 03:30:45] [safety_warp] [INFO] Layer  3 (ffn_up   ) shape=(11008, 4096) frozen=4,508,877 (10.00%)
+[2026-07-27 03:30:45] [safety_warp] [INFO] Layer  4 (attn_k   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:45] [safety_warp] [INFO] Layer  4 (attn_q   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:45] [safety_warp] [INFO] Layer  4 (attn_v   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:46] [safety_warp] [INFO] Layer  4 (ffn_down ) shape=(4096, 11008) frozen=4,508,877 (10.00%)
+[2026-07-27 03:30:46] [safety_warp] [INFO] Layer  4 (ffn_up   ) shape=(11008, 4096) frozen=4,508,877 (10.00%)
+[2026-07-27 03:30:46] [safety_warp] [INFO] Layer  5 (attn_k   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:46] [safety_warp] [INFO] Layer  5 (attn_q   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:46] [safety_warp] [INFO] Layer  5 (attn_v   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:47] [safety_warp] [INFO] Layer  5 (ffn_down ) shape=(4096, 11008) frozen=4,508,877 (10.00%)
+[2026-07-27 03:30:47] [safety_warp] [INFO] Layer  5 (ffn_up   ) shape=(11008, 4096) frozen=4,508,877 (10.00%)
+[2026-07-27 03:30:47] [safety_warp] [INFO] Layer  6 (attn_k   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:47] [safety_warp] [INFO] Layer  6 (attn_q   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:47] [safety_warp] [INFO] Layer  6 (attn_v   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:48] [safety_warp] [INFO] Layer  6 (ffn_down ) shape=(4096, 11008) frozen=4,508,877 (10.00%)
+[2026-07-27 03:30:48] [safety_warp] [INFO] Layer  6 (ffn_up   ) shape=(11008, 4096) frozen=4,508,877 (10.00%)
+[2026-07-27 03:30:48] [safety_warp] [INFO] Layer  7 (attn_k   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:48] [safety_warp] [INFO] Layer  7 (attn_q   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:48] [safety_warp] [INFO] Layer  7 (attn_v   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:48] [safety_warp] [INFO] Layer  7 (ffn_down ) shape=(4096, 11008) frozen=4,508,877 (10.00%)
+[2026-07-27 03:30:49] [safety_warp] [INFO] Layer  7 (ffn_up   ) shape=(11008, 4096) frozen=4,508,877 (10.00%)
+[2026-07-27 03:30:49] [safety_warp] [INFO] Layer  8 (attn_k   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:49] [safety_warp] [INFO] Layer  8 (attn_q   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:49] [safety_warp] [INFO] Layer  8 (attn_v   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:49] [safety_warp] [INFO] Layer  8 (ffn_down ) shape=(4096, 11008) frozen=4,508,877 (10.00%)
+[2026-07-27 03:30:50] [safety_warp] [INFO] Layer  8 (ffn_up   ) shape=(11008, 4096) frozen=4,508,877 (10.00%)
+[2026-07-27 03:30:50] [safety_warp] [INFO] Layer  9 (attn_k   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:50] [safety_warp] [INFO] Layer  9 (attn_q   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:50] [safety_warp] [INFO] Layer  9 (attn_v   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:50] [safety_warp] [INFO] Layer  9 (ffn_down ) shape=(4096, 11008) frozen=4,508,877 (10.00%)
+[2026-07-27 03:30:50] [safety_warp] [INFO] Layer  9 (ffn_up   ) shape=(11008, 4096) frozen=4,508,877 (10.00%)
+[2026-07-27 03:30:51] [safety_warp] [INFO] Layer 10 (attn_k   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:51] [safety_warp] [INFO] Layer 10 (attn_q   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:51] [safety_warp] [INFO] Layer 10 (attn_v   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:51] [safety_warp] [INFO] Layer 10 (ffn_down ) shape=(4096, 11008) frozen=4,508,877 (10.00%)
+[2026-07-27 03:30:51] [safety_warp] [INFO] Layer 10 (ffn_up   ) shape=(11008, 4096) frozen=4,508,877 (10.00%)
+[2026-07-27 03:30:52] [safety_warp] [INFO] Layer 11 (attn_k   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:52] [safety_warp] [INFO] Layer 11 (attn_q   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:52] [safety_warp] [INFO] Layer 11 (attn_v   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:52] [safety_warp] [INFO] Layer 11 (ffn_down ) shape=(4096, 11008) frozen=4,508,877 (10.00%)
+[2026-07-27 03:30:52] [safety_warp] [INFO] Layer 11 (ffn_up   ) shape=(11008, 4096) frozen=4,508,877 (10.00%)
+[2026-07-27 03:30:52] [safety_warp] [INFO] Layer 12 (attn_k   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:53] [safety_warp] [INFO] Layer 12 (attn_q   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:53] [safety_warp] [INFO] Layer 12 (attn_v   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:53] [safety_warp] [INFO] Layer 12 (ffn_down ) shape=(4096, 11008) frozen=4,508,877 (10.00%)
+[2026-07-27 03:30:53] [safety_warp] [INFO] Layer 12 (ffn_up   ) shape=(11008, 4096) frozen=4,508,877 (10.00%)
+[2026-07-27 03:30:53] [safety_warp] [INFO] Layer 13 (attn_k   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:53] [safety_warp] [INFO] Layer 13 (attn_q   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:53] [safety_warp] [INFO] Layer 13 (attn_v   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:54] [safety_warp] [INFO] Layer 13 (ffn_down ) shape=(4096, 11008) frozen=4,508,877 (10.00%)
+[2026-07-27 03:30:54] [safety_warp] [INFO] Layer 13 (ffn_up   ) shape=(11008, 4096) frozen=4,508,877 (10.00%)
+[2026-07-27 03:30:54] [safety_warp] [INFO] Layer 14 (attn_k   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:54] [safety_warp] [INFO] Layer 14 (attn_q   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:54] [safety_warp] [INFO] Layer 14 (attn_v   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:55] [safety_warp] [INFO] Layer 14 (ffn_down ) shape=(4096, 11008) frozen=4,508,877 (10.00%)
+[2026-07-27 03:30:55] [safety_warp] [INFO] Layer 14 (ffn_up   ) shape=(11008, 4096) frozen=4,508,877 (10.00%)
+[2026-07-27 03:30:55] [safety_warp] [INFO] Layer 15 (attn_k   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:55] [safety_warp] [INFO] Layer 15 (attn_q   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:55] [safety_warp] [INFO] Layer 15 (attn_v   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:56] [safety_warp] [INFO] Layer 15 (ffn_down ) shape=(4096, 11008) frozen=4,508,877 (10.00%)
+[2026-07-27 03:30:56] [safety_warp] [INFO] Layer 15 (ffn_up   ) shape=(11008, 4096) frozen=4,508,877 (10.00%)
+[2026-07-27 03:30:56] [safety_warp] [INFO] Layer 16 (attn_k   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:56] [safety_warp] [INFO] Layer 16 (attn_q   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:56] [safety_warp] [INFO] Layer 16 (attn_v   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:56] [safety_warp] [INFO] Layer 16 (ffn_down ) shape=(4096, 11008) frozen=4,508,877 (10.00%)
+[2026-07-27 03:30:57] [safety_warp] [INFO] Layer 16 (ffn_up   ) shape=(11008, 4096) frozen=4,508,877 (10.00%)
+[2026-07-27 03:30:57] [safety_warp] [INFO] Layer 17 (attn_k   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:57] [safety_warp] [INFO] Layer 17 (attn_q   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:57] [safety_warp] [INFO] Layer 17 (attn_v   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:57] [safety_warp] [INFO] Layer 17 (ffn_down ) shape=(4096, 11008) frozen=4,508,877 (10.00%)
+[2026-07-27 03:30:58] [safety_warp] [INFO] Layer 17 (ffn_up   ) shape=(11008, 4096) frozen=4,508,877 (10.00%)
+[2026-07-27 03:30:58] [safety_warp] [INFO] Layer 18 (attn_k   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:58] [safety_warp] [INFO] Layer 18 (attn_q   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:58] [safety_warp] [INFO] Layer 18 (attn_v   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:58] [safety_warp] [INFO] Layer 18 (ffn_down ) shape=(4096, 11008) frozen=4,508,877 (10.00%)
+[2026-07-27 03:30:59] [safety_warp] [INFO] Layer 18 (ffn_up   ) shape=(11008, 4096) frozen=4,508,877 (10.00%)
+[2026-07-27 03:30:59] [safety_warp] [INFO] Layer 19 (attn_k   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:59] [safety_warp] [INFO] Layer 19 (attn_q   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:59] [safety_warp] [INFO] Layer 19 (attn_v   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:30:59] [safety_warp] [INFO] Layer 19 (ffn_down ) shape=(4096, 11008) frozen=4,508,877 (10.00%)
+[2026-07-27 03:30:59] [safety_warp] [INFO] Layer 19 (ffn_up   ) shape=(11008, 4096) frozen=4,508,877 (10.00%)
+[2026-07-27 03:31:00] [safety_warp] [INFO] Layer 20 (attn_k   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:31:00] [safety_warp] [INFO] Layer 20 (attn_q   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:31:00] [safety_warp] [INFO] Layer 20 (attn_v   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:31:00] [safety_warp] [INFO] Layer 20 (ffn_down ) shape=(4096, 11008) frozen=4,508,877 (10.00%)
+[2026-07-27 03:31:00] [safety_warp] [INFO] Layer 20 (ffn_up   ) shape=(11008, 4096) frozen=4,508,877 (10.00%)
+[2026-07-27 03:31:00] [safety_warp] [INFO] Layer 21 (attn_k   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:31:00] [safety_warp] [INFO] Layer 21 (attn_q   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:31:01] [safety_warp] [INFO] Layer 21 (attn_v   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:31:01] [safety_warp] [INFO] Layer 21 (ffn_down ) shape=(4096, 11008) frozen=4,508,877 (10.00%)
+[2026-07-27 03:31:01] [safety_warp] [INFO] Layer 21 (ffn_up   ) shape=(11008, 4096) frozen=4,508,877 (10.00%)
+[2026-07-27 03:31:01] [safety_warp] [INFO] Layer 22 (attn_k   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:31:01] [safety_warp] [INFO] Layer 22 (attn_q   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:31:01] [safety_warp] [INFO] Layer 22 (attn_v   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:31:02] [safety_warp] [INFO] Layer 22 (ffn_down ) shape=(4096, 11008) frozen=4,508,877 (10.00%)
+[2026-07-27 03:31:02] [safety_warp] [INFO] Layer 22 (ffn_up   ) shape=(11008, 4096) frozen=4,508,877 (10.00%)
+[2026-07-27 03:31:02] [safety_warp] [INFO] Layer 23 (attn_k   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:31:02] [safety_warp] [INFO] Layer 23 (attn_q   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:31:02] [safety_warp] [INFO] Layer 23 (attn_v   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:31:03] [safety_warp] [INFO] Layer 23 (ffn_down ) shape=(4096, 11008) frozen=4,508,877 (10.00%)
+[2026-07-27 03:31:03] [safety_warp] [INFO] Layer 23 (ffn_up   ) shape=(11008, 4096) frozen=4,508,877 (10.00%)
+[2026-07-27 03:31:03] [safety_warp] [INFO] Layer 24 (attn_k   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:31:03] [safety_warp] [INFO] Layer 24 (attn_q   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:31:03] [safety_warp] [INFO] Layer 24 (attn_v   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:31:03] [safety_warp] [INFO] Layer 24 (ffn_down ) shape=(4096, 11008) frozen=4,508,877 (10.00%)
+[2026-07-27 03:31:04] [safety_warp] [INFO] Layer 24 (ffn_up   ) shape=(11008, 4096) frozen=4,508,877 (10.00%)
+[2026-07-27 03:31:04] [safety_warp] [INFO] Layer 25 (attn_k   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:31:04] [safety_warp] [INFO] Layer 25 (attn_q   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:31:04] [safety_warp] [INFO] Layer 25 (attn_v   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:31:04] [safety_warp] [INFO] Layer 25 (ffn_down ) shape=(4096, 11008) frozen=4,508,877 (10.00%)
+[2026-07-27 03:31:05] [safety_warp] [INFO] Layer 25 (ffn_up   ) shape=(11008, 4096) frozen=4,508,877 (10.00%)
+[2026-07-27 03:31:05] [safety_warp] [INFO] Layer 26 (attn_k   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:31:05] [safety_warp] [INFO] Layer 26 (attn_q   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:31:05] [safety_warp] [INFO] Layer 26 (attn_v   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:31:05] [safety_warp] [INFO] Layer 26 (ffn_down ) shape=(4096, 11008) frozen=4,508,877 (10.00%)
+[2026-07-27 03:31:05] [safety_warp] [INFO] Layer 26 (ffn_up   ) shape=(11008, 4096) frozen=4,508,877 (10.00%)
+[2026-07-27 03:31:06] [safety_warp] [INFO] Layer 27 (attn_k   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:31:06] [safety_warp] [INFO] Layer 27 (attn_q   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:31:06] [safety_warp] [INFO] Layer 27 (attn_v   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:31:06] [safety_warp] [INFO] Layer 27 (ffn_down ) shape=(4096, 11008) frozen=4,508,877 (10.00%)
+[2026-07-27 03:31:06] [safety_warp] [INFO] Layer 27 (ffn_up   ) shape=(11008, 4096) frozen=4,508,877 (10.00%)
+[2026-07-27 03:31:07] [safety_warp] [INFO] Layer 28 (attn_k   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:31:07] [safety_warp] [INFO] Layer 28 (attn_q   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:31:07] [safety_warp] [INFO] Layer 28 (attn_v   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:31:07] [safety_warp] [INFO] Layer 28 (ffn_down ) shape=(4096, 11008) frozen=4,508,877 (10.00%)
+[2026-07-27 03:31:07] [safety_warp] [INFO] Layer 28 (ffn_up   ) shape=(11008, 4096) frozen=4,508,877 (10.00%)
+[2026-07-27 03:31:07] [safety_warp] [INFO] Layer 29 (attn_k   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:31:08] [safety_warp] [INFO] Layer 29 (attn_q   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:31:08] [safety_warp] [INFO] Layer 29 (attn_v   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:31:08] [safety_warp] [INFO] Layer 29 (ffn_down ) shape=(4096, 11008) frozen=4,508,877 (10.00%)
+[2026-07-27 03:31:08] [safety_warp] [INFO] Layer 29 (ffn_up   ) shape=(11008, 4096) frozen=4,508,877 (10.00%)
+[2026-07-27 03:31:08] [safety_warp] [INFO] Layer 30 (attn_k   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:31:08] [safety_warp] [INFO] Layer 30 (attn_q   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:31:09] [safety_warp] [INFO] Layer 30 (attn_v   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:31:09] [safety_warp] [INFO] Layer 30 (ffn_down ) shape=(4096, 11008) frozen=4,508,877 (10.00%)
+[2026-07-27 03:31:09] [safety_warp] [INFO] Layer 30 (ffn_up   ) shape=(11008, 4096) frozen=4,508,877 (10.00%)
+[2026-07-27 03:31:09] [safety_warp] [INFO] Layer 31 (attn_k   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:31:09] [safety_warp] [INFO] Layer 31 (attn_q   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:31:09] [safety_warp] [INFO] Layer 31 (attn_v   ) shape=(4096, 4096) frozen=1,677,722 (10.00%)
+[2026-07-27 03:31:10] [safety_warp] [INFO] Layer 31 (ffn_down ) shape=(4096, 11008) frozen=4,508,877 (10.00%)
+[2026-07-27 03:31:10] [safety_warp] [INFO] Layer 31 (ffn_up   ) shape=(11008, 4096) frozen=4,508,877 (10.00%)
+[2026-07-27 03:31:12] [safety_warp] [INFO] ======================================================================
+[2026-07-27 03:31:12] [safety_warp] [INFO] arm A total frozen = 449,629,440 / 4,496,293,888 (10.000%)
+[2026-07-27 03:31:12] [safety_warp] [INFO] budget check: total_rel_err=+0.0000%, worst_layer_rel_err=0.0000%, tol=±1.0%, rounding_floor=0.0000% → OK
+[2026-07-27 03:31:12] [safety_warp] [INFO] ======================================================================
+[2026-07-27 03:31:23] [safety_warp] [INFO] ✓ arm A masks saved to: /root/Safety-WaRP-LLM/outputs/wsr_actsvd_ablation/arm_A/phase2_runs/phase2_armA_20260727_033112/checkpoints/masks
+[2026-07-27 03:31:23] [safety_warp] [INFO] ======================================================================
+[2026-07-27 03:31:23] [safety_warp] [INFO] Phase 2 Completed!
+[2026-07-27 03:31:23] [safety_warp] [INFO] Masks saved to: /root/Safety-WaRP-LLM/outputs/wsr_actsvd_ablation/arm_A/phase2_runs/phase2_armA_20260727_033112/checkpoints/masks
+[2026-07-27 03:31:23] [safety_warp] [INFO] ======================================================================
+[2026-07-27 03:31:23] [safety_warp] [INFO] Next step: Run Phase 3 with --masks_dir /root/Safety-WaRP-LLM/outputs/wsr_actsvd_ablation/arm_A/phase2_runs/phase2_armA_20260727_033112/checkpoints/masks
+[2026-07-27 03:31:23] [safety_warp] [INFO] ======================================================================
+[2026-07-27 03:31:23] [safety_warp] [INFO] ======================================================================
+[2026-07-27 03:31:23] [safety_warp] [INFO] All tasks completed successfully!
+[2026-07-27 03:31:23] [safety_warp] [INFO] ======================================================================

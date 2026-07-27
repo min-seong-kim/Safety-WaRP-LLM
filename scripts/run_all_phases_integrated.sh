@@ -9,7 +9,7 @@ source /home/yonsei_jong/miniconda3/etc/profile.d/conda.sh
 conda activate hb
 set -e  # Exit on error
 set -o pipefail  # Ensure failures are not hidden by tee pipelines
-export CUDA_VISIBLE_DEVICES=3
+export CUDA_VISIBLE_DEVICES=0
 
 echo "========================================================================"
 echo "Safety-WaRP-LLM: Complete Training Pipeline (Integrated)"
@@ -108,6 +108,40 @@ TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 mkdir -p $BASE_OUTPUT_DIR
 mkdir -p $LOG_DIR
 
+# ========================================================================
+# Resource accounting (phase별 소요 시간 / VRAM)
+#   - wall-clock: 아래 bash 타이머 (파이썬 기동/모델 다운로드 포함)
+#   - 시간/VRAM 상세: train.py 가 --profile_json 경로에 저장하는 요약 JSON
+#     (stage별 시간, torch alloc/reserved peak, 디바이스 peak)
+# ========================================================================
+PROFILE_DIR="$LOG_DIR/profile_${TIMESTAMP}"
+mkdir -p "$PROFILE_DIR"
+PHASE_TIMES=()   # "label|seconds|profile_json" 형식
+
+fmt_hms() {
+    local s=$1
+    printf '%02d:%02d:%02d' $((s/3600)) $(((s%3600)/60)) $((s%60))
+}
+
+record_phase_time() {
+    # record_phase_time <label> <start_SECONDS> <profile_json|->
+    local label="$1" start="$2" pjson="$3"
+    local elapsed=$((SECONDS - start))
+    PHASE_TIMES+=("${label}|${elapsed}|${pjson}")
+    echo ""
+    echo "⏱  ${label} wall-clock: $(fmt_hms $elapsed)  (${elapsed}s)"
+    if [ "$pjson" != "-" ] && [ -f "$pjson" ]; then
+        python - "$pjson" <<'PYEOF'
+import json, sys
+d = json.load(open(sys.argv[1]))
+print(f"🖥  peak VRAM: device={d['peak_device_gb']:.2f}GB  "
+      f"torch_reserved={d['peak_torch_reserved_gb']:.2f}GB  "
+      f"torch_alloc={d['peak_torch_alloc_gb']:.2f}GB")
+PYEOF
+    fi
+    echo ""
+}
+
 echo "Configuration:"
 echo "  Phase 0 Model: $PHASE0_MODEL"
 echo "  Phase 1 Dataset: $PHASE1_DATASET (samples=$PHASE1_SAMPLES)"
@@ -156,6 +190,9 @@ else
         exit 1
     fi
 
+    PHASE1_PROFILE_JSON="$PROFILE_DIR/phase1.json"
+    PHASE1_START=$SECONDS
+
     python train.py \
         --phase 1 \
         --phase0_model_dir "$PHASE0_MODEL" \
@@ -169,7 +206,10 @@ else
         --device $DEVICE \
         --dtype $DTYPE \
         --seed 42 \
+        --profile_json "$PHASE1_PROFILE_JSON" \
         2>&1 | tee $LOG_DIR/phase1_${TIMESTAMP}.log
+
+    record_phase_time "Phase 1" "$PHASE1_START" "$PHASE1_PROFILE_JSON"
 
     # Phase 1 출력 경로 추출 (최신 phase1 디렉토리 찾기)
     PHASE1_OUTPUT_DIR=$(find $BASE_OUTPUT_DIR -maxdepth 1 -name "phase1_*" -type d -printf '%T@ %p\n' | sort -rn | head -1 | cut -d' ' -f2-)
@@ -250,6 +290,9 @@ for KEEP_RATIO in "${KEEP_RATIO_LIST[@]}"; do
     echo "========================================================================"
     echo ""
 
+    PHASE2_PROFILE_JSON="$PROFILE_DIR/phase2_kr${KR_SAFE}.json"
+    PHASE2_START=$SECONDS
+
     python train.py \
         --phase 2 \
         --phase0_model_dir "$PHASE0_MODEL" \
@@ -267,8 +310,11 @@ for KEEP_RATIO in "${KEEP_RATIO_LIST[@]}"; do
         --dtype $DTYPE \
         --seed 42 \
         --perlayer \
+        --profile_json "$PHASE2_PROFILE_JSON" \
         $TWO_MASK_ARG \
         2>&1 | tee $LOG_DIR/phase2_kr${KR_SAFE}_${TIMESTAMP}.log
+
+    record_phase_time "Phase 2 (kr=$KEEP_RATIO)" "$PHASE2_START" "$PHASE2_PROFILE_JSON"
 
     PHASE2_OUTPUT_DIR=$(find $BASE_OUTPUT_DIR -maxdepth 1 -name "phase2_*" -type d -printf '%T@ %p\n' | sort -rn | head -1 | cut -d' ' -f2-)
     PHASE2_MASKS_DIR="$PHASE2_OUTPUT_DIR/checkpoints/masks"
@@ -304,6 +350,9 @@ for KEEP_RATIO in "${KEEP_RATIO_LIST[@]}"; do
             SAFEINSTR_ARG=""
         fi
 
+        PHASE3_PROFILE_JSON="$PROFILE_DIR/phase3_kr${KR_SAFE}_lr${LR_SAFE}.json"
+        PHASE3_START=$SECONDS
+
         if [ "$PHASE3_DATASET" = "mmlu" ]; then
             PHASE3_OUTPUT_DIR="$BASE_OUTPUT_DIR/phase3_mmlu_kr${KR_SAFE}_lr${LR_SAFE}_${TIMESTAMP}"
             python mmlu_eval/finetune_mmlu_full_params.py \
@@ -322,6 +371,9 @@ for KEEP_RATIO in "${KEEP_RATIO_LIST[@]}"; do
                 --safety_mix_ratio "$SAFEINSTR_RATIO" \
                 --safety_data_path "$CIRCUIT_BREAKERS_PATH" \
                 2>&1 | tee $LOG_DIR/phase3_kr${KR_SAFE}_lr${LR_SAFE}_${TIMESTAMP}.log
+
+            # mmlu 경로는 train.py 를 쓰지 않으므로 wall-clock 만 기록
+            PHASE3_PROFILE_JSON="-"
         else
             python train.py \
                 --phase 3 \
@@ -343,11 +395,14 @@ for KEEP_RATIO in "${KEEP_RATIO_LIST[@]}"; do
                 --non_freeze \
                 --constrained_sft \
                 --csft_bias_factor 10 --csft_bias_length 3 --csft_first_token_bias_factor 3 \
+                --profile_json "$PHASE3_PROFILE_JSON" \
                 $SAFEINSTR_ARG \
                 2>&1 | tee $LOG_DIR/phase3_kr${KR_SAFE}_lr${LR_SAFE}_${TIMESTAMP}.log
 
             PHASE3_OUTPUT_DIR=$(find $BASE_OUTPUT_DIR -maxdepth 1 -name "phase3_*" -type d -printf '%T@ %p\n' | sort -rn | head -1 | cut -d' ' -f2-)
         fi
+
+        record_phase_time "Phase 3 (kr=$KEEP_RATIO, lr=$LEARNING_RATE)" "$PHASE3_START" "$PHASE3_PROFILE_JSON"
 
         if [ ! -d "$PHASE3_OUTPUT_DIR" ]; then
             echo "WARNING: Phase 3 (kr=$KEEP_RATIO, LR=$LEARNING_RATE) output not found"
@@ -387,6 +442,76 @@ for KEEP_RATIO in "${KEEP_RATIO_LIST[@]}"; do
         echo "  Phase 3 (kr=$KEEP_RATIO, LR=$LEARNING_RATE): $LOG_DIR/phase3_kr${KR_SAFE}_lr${LR_SAFE}_${TIMESTAMP}.log"
     done
 done
+echo ""
+echo "========================================================================"
+echo "Resource Summary (phase별 소요 시간 / peak VRAM)"
+echo "========================================================================"
+python - "$PROFILE_DIR/pipeline_resource_summary.json" "${PHASE_TIMES[@]}" <<'PYEOF'
+import json, os, sys
+
+out_path, entries = sys.argv[1], sys.argv[2:]
+
+
+def hms(sec):
+    sec = int(round(sec))
+    return f"{sec//3600:02d}:{(sec%3600)//60:02d}:{sec%60:02d}"
+
+
+rows, total = [], 0.0
+for e in entries:
+    label, secs, pjson = e.split('|', 2)
+    secs = float(secs)
+    total += secs
+    row = {'phase': label, 'wall_seconds': secs, 'wall_clock': hms(secs),
+           'profile_json': None if pjson == '-' else pjson}
+    if pjson != '-' and os.path.isfile(pjson):
+        d = json.load(open(pjson))
+        row.update({
+            'peak_device_gb': d['peak_device_gb'],
+            'peak_device_delta_gb': d.get('peak_device_delta_gb', d['peak_device_gb']),
+            'peak_torch_reserved_gb': d['peak_torch_reserved_gb'],
+            'peak_torch_alloc_gb': d['peak_torch_alloc_gb'],
+            'inner_seconds': d['total_seconds'],
+            'stages': [{'stage': s['stage'], 'duration': s['duration'],
+                        'device_peak_gb': s['device_peak_gb']} for s in d['stages']],
+        })
+    rows.append(row)
+
+hdr = (f"{'phase':<34}{'wall-clock':>12}{'device':>10}{'device-base':>13}"
+       f"{'torch_resv':>13}{'torch_alloc':>13}")
+print(hdr)
+print('-' * len(hdr))
+for r in rows:
+    dev = f"{r['peak_device_gb']:.2f}G" if 'peak_device_gb' in r else '-'
+    dlt = f"{r['peak_device_delta_gb']:.2f}G" if 'peak_device_delta_gb' in r else '-'
+    res = f"{r['peak_torch_reserved_gb']:.2f}G" if 'peak_torch_reserved_gb' in r else '-'
+    alc = f"{r['peak_torch_alloc_gb']:.2f}G" if 'peak_torch_alloc_gb' in r else '-'
+    print(f"{r['phase'][:33]:<34}{r['wall_clock']:>12}{dev:>10}{dlt:>13}{res:>13}{alc:>13}")
+print('-' * len(hdr))
+peak = max([r.get('peak_device_gb', 0.0) for r in rows] + [0.0])
+peak_delta = max([r.get('peak_device_delta_gb', 0.0) for r in rows] + [0.0])
+print(f"{'TOTAL':<34}{hms(total):>12}{peak:>9.2f}G{peak_delta:>12.2f}G")
+print("  device = nvidia-smi 기준 전체 사용량, device-base = 프로파일 시작 시점 대비 증가분")
+print("  (GPU 단독 점유 시 두 값 차이는 CUDA context 정도)")
+print()
+for r in rows:
+    if not r.get('stages'):
+        continue
+    print(f"[{r['phase']}] stage breakdown:")
+    for s in r['stages']:
+        print(f"    {s['stage']:<28}{s['duration']:>10}   peak {s['device_peak_gb']:.2f}GB")
+    print()
+
+os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
+with open(out_path, 'w') as f:
+    json.dump({'phases': rows, 'total_wall_seconds': total,
+               'total_wall_clock': hms(total), 'peak_device_gb': peak}, f, indent=2)
+print(f"Saved: {out_path}")
+PYEOF
+echo ""
+echo "  Per-phase profile JSON: $PROFILE_DIR/"
+echo ""
+
 echo ""
 echo "Configuration:"
 echo "  - Phase 1/2 Dataset: $PHASE1_DATASET"

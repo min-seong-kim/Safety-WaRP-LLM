@@ -68,6 +68,24 @@ python train.py --phase 1 --phase0_model_dir <hf_or_local> --safety_dataset circ
 `mmlu` is special-cased in the integrated script: Phase 3 for MMLU runs `mmlu_eval/finetune_mmlu_full_params.py`
 directly instead of `train.py`.
 
+### Time / VRAM profiling
+
+`train.py` profiles every phase by default (`utils.ResourceProfiler`): each sub-step (`load_model`,
+`compute_importance`, `train_and_save`, …) is logged as `[PROFILE] ■ Phase N / <stage> … time=… |
+torch_alloc_peak=… | torch_reserved_peak=… | device_peak=…`, followed by a per-phase summary table.
+Three memory numbers, deliberately: `torch_alloc`/`torch_resv` are this process's allocator peaks;
+`device` is nvidia-smi-style total usage from a background sampler (catches CUDA context, cuBLAS
+workspaces, and other processes), and `device-base` subtracts the usage present when the phase started.
+Phase 3's train loop additionally logs elapsed/ETA/VRAM every `--logging_steps` (`ResourceLogCallback`
+in `phase3_extra_learning_non_freeze.py`) and writes `train_seconds` / `train_peak_*_gb` into the
+checkpoint's `metadata.json`.
+
+- `--profile_json PATH` (default `log_dir/phase{N}_{ts}_profile.json`), `--profile_interval` (sampling
+  period, default 0.5s), `--no_profile` to disable.
+- `run_all_phases_integrated.sh` also times each phase with bash wall-clock (includes python startup /
+  model download), writes per-phase JSONs to `logs/profile_<TIMESTAMP>/`, and prints a pipeline-wide
+  time × peak-VRAM table plus stage breakdown at the end (`pipeline_resource_summary.json`).
+
 ## Layer types
 
 `--layer_type` accepts a comma-separated list of: `ffn_down`, `ffn_up`, `attn_q`, `attn_k`, `attn_v` (LLaMA module
@@ -116,6 +134,49 @@ elementwise `1/√v` breaks linearity, so projecting gradients alone does not ke
 
 **See `wsr_lora_status.md`** for what has actually been trained/uploaded, current results, and the
 environment-migration checklist. `wsr_lora_comparison.md` is the older pre-implementation spec.
+
+## Rebuttal experiment: WSR-Tune vs ActSVD mask-structure ablation
+
+Answers the reviewer question "how is this different from ActSVD (Wei et al. 2024)?" by running
+ActSVD-style **rank freezing** and WSR-Tune's **entry freezing** inside the *same* Phase 1/2/3
+pipeline, changing only the coordinate basis and the mask granularity. Spec: `wsr_actsvd_ablation_spec.md`.
+
+**The distinction that must not be blurred:** ActSVD SVDs the *output* `W X_in` and takes **left**
+singular vectors `U_out ∈ R^{m×m}` (output space, applied by left-multiply `Ŵ = U_out U_outᵀ W`);
+WSR-Tune eigendecomposes the *input* covariance `X_in X_inᵀ` giving `U_in ∈ R^{n×n}` (input space,
+right-multiply `W̃ = W U_in`). In WSR-Tune's `W̃ = Vᵀ W U` framework, ActSVD is **V = U_out with
+row masking**, never column masking on U.
+
+| arm | basis | mask unit | flag |
+|---|---|---|---|
+| A | original (U=V=I) | entry | `--ablation_arm A` (no `--basis_dir`) |
+| B | `V = U_out` (ActSVD) | **row** | `--ablation_arm B` + output-side basis |
+| C | `U = U_in` | column | `--ablation_arm C` |
+| D | `U = U_in` | entry | `--ablation_arm D` (= WSR-Tune) |
+| D_perm | `U = U_in`, `V` = signed permutation | entry | sanity: must equal D exactly |
+
+**Every arm uses safety data only** (`circuit_breakers`) — same setup as the paper: does a
+safety-tuned model keep its safety through downstream FT. Wei et al.'s utility disentanglement
+`(I−Π^u)Π^s` (spec §4) is deliberately *not* implemented; pulling in a utility corpus would break
+the premise that the only variable across arms is basis/mask structure.
+
+Driver: `bash scripts/run_wsr_actsvd_ablation.sh` (resumable; `STOP_AFTER_MASKS=1` halts before
+training). Smoke test on a tiny random LLaMA: `bash scripts/_smoke_wsr_actsvd.sh` (~5 min).
+Report/budget cross-check: `python wsr_actsvd_ablation_report.py --root outputs/wsr_actsvd_ablation`.
+
+- New code: `models/actsvd_basis.py` (both basis sides, `--basis_side {input,output}`),
+  `models/wsr_ablation_masks.py` (arm specs, entry/row/column masks, budget accounting),
+  `models/wsr_ablation_reparam.py` (Phase 2/3 공용 좌표계 세팅), `models/phase2_importance_ablation.py`,
+  `models/phase3_ablation.py`, `tests/test_wsr_actsvd_ablation.py`.
+- `LinearWaRP` now treats an **empty** `UT_forward`/`UT_backward` as an identity basis, which is what
+  makes arm A (both empty) and arm B (only `UT_backward`) expressible. Existing paths are unchanged.
+- **Budget matching is the fairness gate**: every arm freezes the same number of scalars
+  (`row: k=round(ρ·m)`, `column: k=round(ρ·n)`, entry: `round(ρ·m·n)`) — 449.6M ± 0.07% at ρ=0.1 on
+  Llama-2-7B. `budget_report.json` per arm; the report tool cross-checks and refuses to call an
+  unmatched comparison fair.
+- **Known confound**: arm A's reparameterization is exact (identity), while B/C/D carry the ~3e-3
+  bf16 basis round-trip that the published WSR-Tune also has. B-vs-C-vs-D is clean; A-vs-rest has this
+  small extra term. Flagged automatically in the report.
 
 ## Evaluation
 

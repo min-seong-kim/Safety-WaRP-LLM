@@ -43,6 +43,10 @@ import logging
 import wandb
 import torch
 import torch.nn as nn
+
+# 이 파일은 <repo>/gsm8k_eval/ 에 있으므로 repo 루트는 한 단계 위.
+_REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+_DEFAULT_SAFETY_DATA = os.path.join(_REPO_ROOT, "data", "circuit_breakers_train.json")
 from torch.utils.data import DataLoader, RandomSampler
 from datasets import load_dataset, Dataset as HFDataset
 from transformers import (
@@ -118,8 +122,10 @@ def parse_args():
     p.add_argument("--hf_token", type=str, default=None)
 
     # --- LISA / BSO ---
+    # 기본값을 이 저장소 기준 상대 경로로 잡는다. 구 박스의 절대 경로
+    # (/home/gokms0509/...) 를 하드코딩하면 다른 환경에서 곧바로 FileNotFoundError 가 난다.
     p.add_argument("--safety_data_path", type=str,
-                   default="/home/gokms0509/Safety-WaRP-LLM/data/circuit_breakers_train.json",
+                   default=_DEFAULT_SAFETY_DATA,
                    help="alignment(safety) 데이터 JSON (prompt / llama3_output 필드 사용)")
     p.add_argument("--guide_data_num", type=int, default=4994,
                    help="alignment 데이터에서 사용할 안전 예시 개수 (0 이면 BSO 비활성 = 순수 SFT)")
@@ -595,12 +601,22 @@ def main():
     logger.info(f"✅ Saved to {args.output_dir}")
 
     if args.upload_name:
+        # ⚠️ 원래 `from upload_sn_tuned_model import upload_to_huggingface` 였으나 그 모듈은
+        #    이 저장소에 존재하지 않는다 → 항상 ModuleNotFoundError 로 떨어져 except 에 잡히고
+        #    "Upload failed" 한 줄만 남긴 채 업로드가 조용히 건너뛰어졌다.
+        #    저장소 표준 패턴(create_repo + upload_folder)으로 직접 호출한다.
         try:
-            from upload_sn_tuned_model import upload_to_huggingface
-            upload_to_huggingface(args.output_dir, args.upload_name, args.hf_token)
+            from huggingface_hub import HfApi
+            api = HfApi(token=args.hf_token)   # None 이면 HF_TOKEN / HF_HOME/token 으로 폴백
+            api.create_repo(args.upload_name, repo_type="model", exist_ok=True, private=False)
+            api.upload_folder(folder_path=args.output_dir, repo_id=args.upload_name,
+                              repo_type="model",
+                              ignore_patterns=["*.lock", "checkpoint-*/*", "cache/*", "*.log"])
             logger.info(f"✅ Uploaded: https://huggingface.co/{args.upload_name}")
         except Exception as e:
-            logger.error(f"Upload failed: {e}")
+            # non-fatal: 모델은 이미 output_dir 에 저장돼 있으니 나중에 재업로드하면 된다.
+            logger.error(f"PUSH_FAILED repo={args.upload_name} dir={args.output_dir} "
+                         f"err={type(e).__name__}: {str(e)[:200]}")
 
     logger.info("✅ LISA fine-tuning complete!")
     wandb.finish()

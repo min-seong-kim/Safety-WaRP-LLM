@@ -13,6 +13,7 @@ Phase 3: Incremental Learning (Non-Freeze Variant)
 
 import os
 import json
+import time
 import torch
 from datetime import datetime
 from dataclasses import dataclass
@@ -51,6 +52,95 @@ class WaRPMaskRestoreCallback(TrainerCallback):
             with torch.no_grad():
                 module.basis_coeff.data[mask] = frozen_vals
         return control
+
+
+class ResourceLogCallback(TrainerCallback):
+    """
+    학습 루프의 소요 시간 / VRAM을 주기적으로 로그에 남기는 콜백.
+
+    - log_every steps마다: 경과 시간, 남은 시간 추정(ETA), torch allocated/reserved peak,
+      디바이스 사용량(total - free, nvidia-smi 기준).
+    - 학습 종료 후 `.summary()` 로 train 구간만의 시간/peak VRAM을 얻어 metadata에 기록한다.
+    """
+
+    _GB = 1024.0 ** 3
+
+    def __init__(self, logger, log_every=50):
+        self.logger = logger
+        self.log_every = max(1, int(log_every))
+        self.t_start = None
+        self.t_end = None
+        self.peak_alloc = 0
+        self.peak_reserved = 0
+        self.peak_device = 0
+        self.cuda = torch.cuda.is_available()
+
+    def _device_used(self):
+        used = 0
+        if not self.cuda:
+            return 0
+        for dev in range(torch.cuda.device_count()):
+            try:
+                free, total = torch.cuda.mem_get_info(dev)
+            except Exception:
+                continue
+            used = max(used, total - free)
+        return used
+
+    def _refresh(self):
+        if not self.cuda:
+            return
+        for dev in range(torch.cuda.device_count()):
+            self.peak_alloc = max(self.peak_alloc, torch.cuda.max_memory_allocated(dev))
+            self.peak_reserved = max(self.peak_reserved, torch.cuda.max_memory_reserved(dev))
+        self.peak_device = max(self.peak_device, self._device_used())
+
+    def on_train_begin(self, args, state, control, **kwargs):
+        if self.cuda:
+            torch.cuda.reset_peak_memory_stats()
+        self.t_start = time.time()
+        self.logger.info("[PROFILE][train] 학습 시작 (시간/VRAM 측정 시작)")
+        return control
+
+    def on_step_end(self, args, state, control, **kwargs):
+        self._refresh()
+        step = int(state.global_step)
+        if step % self.log_every != 0:
+            return control
+        elapsed = time.time() - self.t_start
+        total = int(state.max_steps) if state.max_steps else 0
+        eta = (elapsed / step) * (total - step) if step and total else 0.0
+        self.logger.info(
+            f"[PROFILE][train] step {step}/{total or '?'} | "
+            f"elapsed={elapsed/60:.1f}min | eta={eta/60:.1f}min | "
+            f"alloc_peak={self.peak_alloc/self._GB:.2f}GB | "
+            f"reserved_peak={self.peak_reserved/self._GB:.2f}GB | "
+            f"device={self._device_used()/self._GB:.2f}GB "
+            f"(peak {self.peak_device/self._GB:.2f}GB)"
+        )
+        return control
+
+    def on_train_end(self, args, state, control, **kwargs):
+        self._refresh()
+        self.t_end = time.time()
+        s = self.summary()
+        self.logger.info(
+            f"[PROFILE][train] 학습 종료 | time={s['train_seconds']/60:.1f}min "
+            f"({s['train_seconds']:.0f}s) | "
+            f"alloc_peak={s['train_peak_alloc_gb']:.2f}GB | "
+            f"reserved_peak={s['train_peak_reserved_gb']:.2f}GB | "
+            f"device_peak={s['train_peak_device_gb']:.2f}GB"
+        )
+        return control
+
+    def summary(self):
+        end = self.t_end or time.time()
+        return {
+            'train_seconds': (end - self.t_start) if self.t_start else 0.0,
+            'train_peak_alloc_gb': self.peak_alloc / self._GB,
+            'train_peak_reserved_gb': self.peak_reserved / self._GB,
+            'train_peak_device_gb': self.peak_device / self._GB,
+        }
 
 
 # =====================================================================
@@ -356,6 +446,12 @@ class Phase3IncrementalLearnerNonFreeze(Phase3IncrementalLearner):
                 f"for post-step weight-decay restore"
             )
 
+            # 학습 루프 시간/VRAM 측정 콜백 (logging_steps 주기로 로그)
+            resource_callback = ResourceLogCallback(
+                self.logger,
+                log_every=getattr(self.args, 'logging_steps', 10) or 10,
+            )
+
             if use_constrained:
                 trainer = ConstrainedSFTTrainer(
                     model=self.model,
@@ -363,7 +459,7 @@ class Phase3IncrementalLearnerNonFreeze(Phase3IncrementalLearner):
                     train_dataset=self.dataset,
                     data_collator=data_collator,
                     tokenizer=self.tokenizer,
-                    callbacks=[restore_callback],
+                    callbacks=[restore_callback, resource_callback],
                     csft_beta=getattr(self.args, 'csft_beta', 0.1),
                     csft_bias_factor=getattr(self.args, 'csft_bias_factor', 20.0),
                     csft_first_token_bias_factor=getattr(self.args, 'csft_first_token_bias_factor', 5.0),
@@ -385,7 +481,7 @@ class Phase3IncrementalLearnerNonFreeze(Phase3IncrementalLearner):
                     train_dataset=self.dataset,
                     data_collator=data_collator,
                     tokenizer=self.tokenizer,
-                    callbacks=[restore_callback],
+                    callbacks=[restore_callback, resource_callback],
                 )
 
             if phase3_dataset == 'safety':
@@ -462,6 +558,8 @@ class Phase3IncrementalLearnerNonFreeze(Phase3IncrementalLearner):
                 'total_params': total_params,
                 'timestamp': timestamp,
             }
+            # 학습 루프 소요 시간 / peak VRAM (train 구간만)
+            metadata.update(resource_callback.summary())
 
             metadata_path = os.path.join(checkpoint_dir, 'metadata.json')
             with open(metadata_path, 'w') as f:

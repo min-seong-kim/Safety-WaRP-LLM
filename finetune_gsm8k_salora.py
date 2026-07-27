@@ -139,6 +139,30 @@ def main():
     dtype = {"float32": torch.float32, "float16": torch.float16, "bfloat16": torch.bfloat16}[args.dtype]
     layer_types = [x.strip() for x in args.layer_type.split(",")]
 
+    # ⚠️ 교체 대상을 실제로 정하는 건 --layer_type 하나뿐이다(switch_to_salora 인자).
+    #    --target_modules 는 summary.json 에 기록만 되므로, 둘이 어긋나면 "q,k,v,up,down 을
+    #    돌렸다"고 착각한 채 실제로는 q,v 만(혹은 그 반대) 학습되는 사고가 난다.
+    #    조용히 무시하지 말고 여기서 잡는다. (HANDOFF_lora_experiments.md §5 cosmetic bug)
+    _PROJ_TO_LAYER_TYPE = {
+        "q_proj": "attn_q", "k_proj": "attn_k", "v_proj": "attn_v", "o_proj": "attn_o",
+        "up_proj": "ffn_up", "down_proj": "ffn_down", "gate_proj": "ffn_gate",
+    }
+    if args.target_modules:
+        projs = [x.strip() for x in args.target_modules.split(",") if x.strip()]
+        unknown = [p for p in projs if p not in _PROJ_TO_LAYER_TYPE]
+        if unknown:
+            raise ValueError(f"--target_modules 에 알 수 없는 이름: {unknown} "
+                             f"(가능: {sorted(_PROJ_TO_LAYER_TYPE)})")
+        implied = {_PROJ_TO_LAYER_TYPE[p] for p in projs}
+        if implied != set(layer_types):
+            raise ValueError(
+                "--target_modules 와 --layer_type 이 불일치합니다. 실제 교체 대상은 "
+                "--layer_type 이므로 그대로 두면 조용히 틀린 실험이 됩니다.\n"
+                f"  --target_modules {args.target_modules} → {sorted(implied)}\n"
+                f"  --layer_type     {args.layer_type} → {sorted(set(layer_types))}\n"
+                "둘을 맞추거나, 의도한 쪽 하나만 지정하세요.")
+    logger.info(f"SaLoRA 교체 대상 layer_types={layer_types} (target_modules 와 정합성 확인됨)")
+
     tok = AutoTokenizer.from_pretrained(args.model_name)
     if tok.pad_token is None:
         tok.pad_token = tok.eos_token
