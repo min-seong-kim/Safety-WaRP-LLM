@@ -202,10 +202,20 @@ def _collect_gram(model, modules, batches, device):
 
 
 @torch.no_grad()
-def _top_eigvecs(gram_sym, q, niter=20):
-    """대칭 PSD 행렬 M 의 top-q 고유벡터 (out×q). M = W·G·Wᵀ 에 사용."""
-    q = min(q, gram_sym.shape[0] - 1)
-    U, S, V = torch.svd_lowrank(gram_sym, q=q, niter=niter)
+def _top_eigvecs(gram_sym, q, niter=20, oversample=10):
+    """대칭 PSD 행렬 M 의 top-q 고유벡터 (out×q). M = W·G·Wᵀ 에 사용.
+
+    randomized SVD 는 sketch 크기를 목표 랭크와 같게 잡으면 상위 고유공간 추정이
+    부정확하다(끝 열일수록 오차가 크다). 표준 관례대로 q+oversample 로 뽑은 뒤
+    앞 q 개만 취한다. oversample=0 이면 종전(부정확) 동작.
+
+    주의: 기본값을 0 이 아닌 10 으로 두었으므로, 이 함수를 쓰는 새 run 은 종전 run 과
+    수치적으로 동일하지 않다. 기존 SaLoRA 체크포인트와 비교할 때는 태그를 분리할 것.
+    """
+    n = gram_sym.shape[0]
+    q = min(q, n - 1)
+    q_eff = min(q + max(0, oversample), n - 1)
+    U, S, V = torch.svd_lowrank(gram_sym, q=q_eff, niter=niter)
     return U[:, :q].contiguous()
 
 
