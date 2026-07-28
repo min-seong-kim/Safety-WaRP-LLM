@@ -1,0 +1,16 @@
+========================================================================
+Hugging Face 업로드 + 검증 + 정리
+========================================================================
+  로컬 : /home/edgeai_lab/Safety-WaRP-LLM/checkpoints/phase3_original_space_20260728_140920/final_model
+  repo : kmseong/llama2_7b_chat-OrigSpace-kr0.1-gsm8k_harmfulmix10p_lr5e-5  (public)
+  삭제 : 검증 성공 시 삭제
+  파일 : 11개, 12.56 GiB
+
+Traceback (most recent call last):
+  File "/home/edgeai_lab/Safety-WaRP-LLM/scripts/upload_and_cleanup_phase3.py", line 218, in <module>
+    main()
+  File "/home/edgeai_lab/Safety-WaRP-LLM/scripts/upload_and_cleanup_phase3.py", line 172, in main
+    (model_dir / "README.md").write_text(build_readme(args, meta), encoding="utf-8")
+  File "/home/edgeai_lab/Safety-WaRP-LLM/scripts/upload_and_cleanup_phase3.py", line 64, in build_readme
+    stats = f"""
+TypeError: unsupported format string passed to NoneType.__format__

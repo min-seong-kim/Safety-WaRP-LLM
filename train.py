@@ -231,6 +231,12 @@ def parse_args():
                         help='Phase 3에서 Phase 2 마스크 없이 실행 (freeze 없음, 모든 파라미터 학습 가능)')
     parser.add_argument('--safety_mix_ratio', type=float, default=0.0,
                         help='Phase 3에서 safety dataset 혼합 비율 (0.0=미사용, 0.05=downstream 대비 5%%)')
+    parser.add_argument('--mix_response_field', type=str, default='llama3_output',
+                        help='혼합 데이터에서 응답으로 쓸 JSON 필드명. '
+                             'llama3_output=거부 응답(SafeInstr, 기본값), output=유해 응답(harmful FT 공격 실험). '
+                             'prompt 필드는 --mix_prompt_field 로 변경')
+    parser.add_argument('--mix_prompt_field', type=str, default='prompt',
+                        help='혼합 데이터에서 질문으로 쓸 JSON 필드명 (기본 prompt)')
     parser.add_argument('--gradient_checkpointing', action='store_true',
                         help='Phase 3에서 gradient checkpointing 사용 (비교 실험 시 freeze/non-freeze 동일하게 설정 권장)')
 

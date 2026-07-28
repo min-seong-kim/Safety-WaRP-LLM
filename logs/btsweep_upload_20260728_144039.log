@@ -1,0 +1,48 @@
+========================================================================
+Hugging Face 업로드 + 검증 + 정리
+========================================================================
+  로컬 : /home/edgeai_lab/Safety-WaRP-LLM/checkpoints/phase3_non_freeze_20260728_150701/final_model
+  repo : kmseong/llama2_7b_chat-WaRP-beavertails-kr0.01_lr5e-5  (public)
+  삭제 : 검증 성공 시 삭제
+  파일 : 11개, 12.56 GiB
+
+repo 준비: kmseong/llama2_7b_chat-WaRP-beavertails-kr0.01_lr5e-5
+업로드 중... (13GB 급이면 수 분 소요)
+Traceback (most recent call last):
+  File "/home/edgeai_lab/miniconda3/envs/hb/lib/python3.10/site-packages/huggingface_hub/utils/_http.py", line 402, in hf_raise_for_status
+    response.raise_for_status()
+  File "/home/edgeai_lab/miniconda3/envs/hb/lib/python3.10/site-packages/requests/models.py", line 1026, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 400 Client Error: Bad Request for url: https://huggingface.co/api/validate-yaml
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/edgeai_lab/miniconda3/envs/hb/lib/python3.10/site-packages/huggingface_hub/hf_api.py", line 9666, in _validate_yaml
+    hf_raise_for_status(response)
+  File "/home/edgeai_lab/miniconda3/envs/hb/lib/python3.10/site-packages/huggingface_hub/utils/_http.py", line 458, in hf_raise_for_status
+    raise _format(BadRequestError, message, response) from e
+huggingface_hub.errors.BadRequestError: (Request ID: Root=1-6a684ec1-243816a90d7d4a1a783cfa4f;f82eaadf-15c4-48e4-ac52-e01bc97a61a0)
+
+Bad request:
+"tags[4]" must be a string
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/edgeai_lab/Safety-WaRP-LLM/scripts/upload_and_cleanup_phase3.py", line 233, in <module>
+    main()
+  File "/home/edgeai_lab/Safety-WaRP-LLM/scripts/upload_and_cleanup_phase3.py", line 195, in main
+    api.upload_folder(
+  File "/home/edgeai_lab/miniconda3/envs/hb/lib/python3.10/site-packages/huggingface_hub/utils/_validators.py", line 114, in _inner_fn
+    return fn(*args, **kwargs)
+  File "/home/edgeai_lab/miniconda3/envs/hb/lib/python3.10/site-packages/huggingface_hub/hf_api.py", line 1687, in _inner
+    return fn(self, *args, **kwargs)
+  File "/home/edgeai_lab/miniconda3/envs/hb/lib/python3.10/site-packages/huggingface_hub/hf_api.py", line 4911, in upload_folder
+    add_operations = self._prepare_upload_folder_additions(
+  File "/home/edgeai_lab/miniconda3/envs/hb/lib/python3.10/site-packages/huggingface_hub/hf_api.py", line 9605, in _prepare_upload_folder_additions
+    self._validate_yaml(
+  File "/home/edgeai_lab/miniconda3/envs/hb/lib/python3.10/site-packages/huggingface_hub/hf_api.py", line 9670, in _validate_yaml
+    raise ValueError(f"Invalid metadata in README.md.\n{message}") from e
+ValueError: Invalid metadata in README.md.
+- "tags[4]" must be a string

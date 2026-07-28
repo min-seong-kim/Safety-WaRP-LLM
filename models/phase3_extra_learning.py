@@ -1322,9 +1322,18 @@ class Phase3IncrementalLearner:
             circuit_breakers_path = getattr(
                 self.args, 'circuit_breakers_path', './data/circuit_breakers_train.json'
             )
+            # 응답 필드 선택:
+            #   llama3_output = 거부 응답 (SafeInstr, 안전성 강화)  ← 기본값
+            #   output        = 유해 응답 (harmful fine-tuning 공격 실험)
+            prompt_field = getattr(self.args, 'mix_prompt_field', 'prompt') or 'prompt'
+            response_field = getattr(self.args, 'mix_response_field', 'llama3_output') or 'llama3_output'
             self.logger.info(
                 f"[safeInstr] Mixing safety data: {ratio*100:.1f}% of main ({n_main}) "
                 f"= {n_safety} safety samples from {circuit_breakers_path}"
+            )
+            self.logger.info(
+                f"[safeInstr] fields: prompt='{prompt_field}', response='{response_field}'"
+                + ("  ⚠️ 유해 응답 학습 (harmful FT 공격 설정)" if response_field == 'output' else "")
             )
 
             with open(circuit_breakers_path, 'r', encoding='utf-8') as f:
@@ -1341,14 +1350,27 @@ class Phase3IncrementalLearner:
                 )
 
             max_length = getattr(self.args, 'max_length', 1024)
-            tokenized_safety = []
+            tokenized_safety, skipped = [], 0
             for item in safety_data:
-                harmful_prompt = item.get("prompt", "")
-                safe_response = item.get("llama3_output", "")
+                mix_prompt = item.get(prompt_field, "")
+                mix_response = item.get(response_field, "")
+                if not mix_prompt or not mix_response:
+                    skipped += 1
+                    continue
                 tokenized_safety.append(
                     self._tokenize_question_answer_example(
-                        harmful_prompt, safe_response, max_length=max_length
+                        mix_prompt, mix_response, max_length=max_length
                     )
+                )
+            if skipped:
+                self.logger.warning(
+                    f"[safeInstr] {skipped}개 샘플을 건너뜀 "
+                    f"('{prompt_field}' 또는 '{response_field}' 필드가 비어 있음)"
+                )
+            if not tokenized_safety:
+                raise ValueError(
+                    f"[safeInstr] 혼합할 샘플이 0개입니다. "
+                    f"'{prompt_field}'/'{response_field}' 필드명이 {circuit_breakers_path} 와 맞는지 확인하세요."
                 )
 
             safety_dataset = HFDataset.from_dict({

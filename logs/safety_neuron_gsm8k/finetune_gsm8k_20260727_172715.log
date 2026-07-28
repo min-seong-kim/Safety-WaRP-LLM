@@ -1,0 +1,239 @@
+2026-07-27 17:27:15 - __main__ - INFO - 
+======================================================================
+2026-07-27 17:27:15 - __main__ - INFO -   🚀 Full Parameter GSM8K Fine-tuning (SN-Tuned Model)
+2026-07-27 17:27:15 - __main__ - INFO - ======================================================================
+
+2026-07-27 17:27:15 - __main__ - INFO - Log file: ./logs/safety_neuron_gsm8k/finetune_gsm8k_20260727_172715.log
+2026-07-27 17:27:15 - __main__ - INFO - ⚙️  Configuration:
+2026-07-27 17:27:15 - __main__ - INFO -    ├─ SN-Tuned model: kmseong/llama2_7b-chat-Safety-FT-lr5e-5
+2026-07-27 17:27:15 - __main__ - INFO -    ├─ Input formatting: chat template
+2026-07-27 17:27:15 - __main__ - INFO -    ├─ Training samples: 7473
+2026-07-27 17:27:15 - __main__ - INFO -    ├─ Batch size: 2
+2026-07-27 17:27:15 - __main__ - INFO -    ├─ Gradient accumulation: 8
+2026-07-27 17:27:15 - __main__ - INFO -    ├─ Epochs: 3
+2026-07-27 17:27:15 - __main__ - INFO -    ├─ Learning rate: 5e-05
+2026-07-27 17:27:15 - __main__ - INFO -    ├─ Weight decay: 0.01
+2026-07-27 17:27:15 - __main__ - INFO -    ├─ Optimizer: AdamW (torch)
+2026-07-27 17:27:15 - __main__ - INFO -    ├─ Warmup ratio: 0.1
+2026-07-27 17:27:15 - __main__ - INFO -    ├─ Max length: 1024
+2026-07-27 17:27:15 - __main__ - INFO -    ├─ Dtype: bf16
+2026-07-27 17:27:15 - __main__ - INFO -    └─ Output dir: ./checkpoints/baseline_fullft_gsm8k_lr5e-5_20260727_172711
+
+2026-07-27 17:27:16 - __main__ - INFO - [PROFILE] ▶ Baseline FullFT / load_model 시작
+2026-07-27 17:27:16 - __main__ - INFO - 
+======================================================================
+2026-07-27 17:27:16 - __main__ - INFO -   [1/4] Loading Tokenizer
+2026-07-27 17:27:16 - __main__ - INFO - ======================================================================
+
+2026-07-27 17:27:16 - __main__ - INFO - Attempting to load tokenizer (local files only)...
+2026-07-27 17:27:16 - __main__ - INFO - ✓ Tokenizer loaded from local files
+2026-07-27 17:27:16 - __main__ - INFO - ✅ Tokenizer loaded successfully
+2026-07-27 17:27:16 - __main__ - INFO -    ├─ Tokenizer type: LlamaTokenizerFast
+2026-07-27 17:27:16 - __main__ - INFO -    ├─ Vocab size: 32000
+2026-07-27 17:27:16 - __main__ - INFO -    └─ Pad token: </s>
+2026-07-27 17:27:16 - __main__ - INFO - 
+======================================================================
+2026-07-27 17:27:16 - __main__ - INFO -   [2/4] Loading Model (bf16)
+2026-07-27 17:27:16 - __main__ - INFO - ======================================================================
+
+2026-07-27 17:27:16 - __main__ - INFO - ✓ Disabled cuDNN SDPA backend
+2026-07-27 17:27:16 - __main__ - INFO - attn_implementation=eager (강제)
+2026-07-27 17:27:16 - __main__ - INFO - Attempting to load model (local files only)...
+2026-07-27 17:27:17 - __main__ - INFO - ✓ Model loaded from local files
+2026-07-27 17:27:17 - __main__ - INFO - ✅ Model loaded successfully
+2026-07-27 17:27:17 - __main__ - INFO -    ├─ Model size: 6.74B parameters
+2026-07-27 17:27:17 - __main__ - INFO -    ├─ Trainable: 6.74B (100.00%)
+2026-07-27 17:27:17 - __main__ - INFO -    ├─ Dtype: torch.bfloat16
+2026-07-27 17:27:17 - __main__ - INFO -    └─ Gradient checkpointing: Disabled
+2026-07-27 17:27:17 - __main__ - INFO - [PROFILE] ■ Baseline FullFT / load_model ok | time=00:00:01 (1.2s) | torch_alloc_peak=12.55GB | torch_reserved_peak=12.56GB | device_peak=12.94GB
+2026-07-27 17:27:17 - __main__ - INFO - [PROFILE] ▶ Baseline FullFT / load_data 시작
+2026-07-27 17:27:17 - __main__ - INFO - 
+======================================================================
+2026-07-27 17:27:17 - __main__ - INFO -   [3/4] Loading GSM8K Dataset
+2026-07-27 17:27:17 - __main__ - INFO - ======================================================================
+
+2026-07-27 17:27:25 - __main__ - INFO - ✅ Datasets loaded
+2026-07-27 17:27:25 - __main__ - INFO -    ├─ Train: 7473 samples
+2026-07-27 17:27:25 - __main__ - INFO - 
+======================================================================
+2026-07-27 17:27:25 - __main__ - INFO -   [3.5/4] Preprocessing Data
+2026-07-27 17:27:25 - __main__ - INFO - ======================================================================
+
+2026-07-27 17:27:26 - __main__ - INFO - [PROFILE] ■ Baseline FullFT / load_data ok | time=00:00:09 (8.7s) | torch_alloc_peak=12.55GB | torch_reserved_peak=12.56GB | device_peak=13.17GB
+2026-07-27 17:27:26 - __main__ - INFO - [PROFILE] ▶ Baseline FullFT / train_and_save 시작
+2026-07-27 17:27:26 - __main__ - INFO - 
+======================================================================
+2026-07-27 17:27:26 - __main__ - INFO -   [4/4] Training with Trainer + AdamW
+2026-07-27 17:27:26 - __main__ - INFO - ======================================================================
+
+2026-07-27 17:27:30 - __main__ - INFO - Starting training...
+2026-07-27 17:27:30 - __main__ - INFO - [PROFILE][train] 학습 시작 (시간/VRAM 측정 시작)
+2026-07-27 17:27:37 - __main__ - INFO - [PROFILE][train] step 10/1404 | elapsed=0.1min | eta=15.9min | alloc_peak=62.77GB | reserved_peak=64.48GB | device=65.31GB (peak 65.31GB)
+2026-07-27 17:27:43 - __main__ - INFO - [PROFILE][train] step 20/1404 | elapsed=0.2min | eta=14.5min | alloc_peak=62.77GB | reserved_peak=64.60GB | device=65.43GB (peak 65.43GB)
+2026-07-27 17:27:48 - __main__ - INFO - [PROFILE][train] step 30/1404 | elapsed=0.3min | eta=13.9min | alloc_peak=62.77GB | reserved_peak=64.60GB | device=65.43GB (peak 65.43GB)
+2026-07-27 17:27:54 - __main__ - INFO - [PROFILE][train] step 40/1404 | elapsed=0.4min | eta=13.6min | alloc_peak=62.77GB | reserved_peak=64.65GB | device=65.49GB (peak 65.49GB)
+2026-07-27 17:28:00 - __main__ - INFO - [PROFILE][train] step 50/1404 | elapsed=0.5min | eta=13.3min | alloc_peak=62.77GB | reserved_peak=64.65GB | device=65.49GB (peak 65.49GB)
+2026-07-27 17:28:05 - __main__ - INFO - [PROFILE][train] step 60/1404 | elapsed=0.6min | eta=13.2min | alloc_peak=62.77GB | reserved_peak=64.65GB | device=65.49GB (peak 65.49GB)
+2026-07-27 17:28:11 - __main__ - INFO - [PROFILE][train] step 70/1404 | elapsed=0.7min | eta=12.9min | alloc_peak=62.77GB | reserved_peak=64.65GB | device=65.49GB (peak 65.49GB)
+2026-07-27 17:28:16 - __main__ - INFO - [PROFILE][train] step 80/1404 | elapsed=0.8min | eta=12.8min | alloc_peak=62.77GB | reserved_peak=64.65GB | device=65.49GB (peak 65.49GB)
+2026-07-27 17:28:22 - __main__ - INFO - [PROFILE][train] step 90/1404 | elapsed=0.9min | eta=12.6min | alloc_peak=62.77GB | reserved_peak=64.65GB | device=65.49GB (peak 65.49GB)
+2026-07-27 17:28:28 - __main__ - INFO - [PROFILE][train] step 100/1404 | elapsed=1.0min | eta=12.5min | alloc_peak=62.77GB | reserved_peak=64.65GB | device=65.49GB (peak 65.49GB)
+2026-07-27 17:28:33 - __main__ - INFO - [PROFILE][train] step 110/1404 | elapsed=1.1min | eta=12.4min | alloc_peak=62.77GB | reserved_peak=64.67GB | device=65.51GB (peak 65.51GB)
+2026-07-27 17:28:39 - __main__ - INFO - [PROFILE][train] step 120/1404 | elapsed=1.1min | eta=12.2min | alloc_peak=62.77GB | reserved_peak=64.67GB | device=65.51GB (peak 65.51GB)
+2026-07-27 17:28:44 - __main__ - INFO - [PROFILE][train] step 130/1404 | elapsed=1.2min | eta=12.1min | alloc_peak=62.77GB | reserved_peak=64.67GB | device=65.51GB (peak 65.51GB)
+2026-07-27 17:28:50 - __main__ - INFO - [PROFILE][train] step 140/1404 | elapsed=1.3min | eta=12.0min | alloc_peak=62.77GB | reserved_peak=64.67GB | device=65.51GB (peak 65.51GB)
+2026-07-27 17:28:55 - __main__ - INFO - [PROFILE][train] step 150/1404 | elapsed=1.4min | eta=11.9min | alloc_peak=62.77GB | reserved_peak=64.67GB | device=65.51GB (peak 65.51GB)
+2026-07-27 17:29:01 - __main__ - INFO - [PROFILE][train] step 160/1404 | elapsed=1.5min | eta=11.8min | alloc_peak=62.77GB | reserved_peak=64.67GB | device=65.51GB (peak 65.51GB)
+2026-07-27 17:29:07 - __main__ - INFO - [PROFILE][train] step 170/1404 | elapsed=1.6min | eta=11.7min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:29:12 - __main__ - INFO - [PROFILE][train] step 180/1404 | elapsed=1.7min | eta=11.6min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:29:18 - __main__ - INFO - [PROFILE][train] step 190/1404 | elapsed=1.8min | eta=11.4min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:29:23 - __main__ - INFO - [PROFILE][train] step 200/1404 | elapsed=1.9min | eta=11.3min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:29:29 - __main__ - INFO - [PROFILE][train] step 210/1404 | elapsed=2.0min | eta=11.2min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:29:34 - __main__ - INFO - [PROFILE][train] step 220/1404 | elapsed=2.1min | eta=11.1min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:29:40 - __main__ - INFO - [PROFILE][train] step 230/1404 | elapsed=2.2min | eta=11.0min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:29:45 - __main__ - INFO - [PROFILE][train] step 240/1404 | elapsed=2.3min | eta=10.9min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:29:51 - __main__ - INFO - [PROFILE][train] step 250/1404 | elapsed=2.3min | eta=10.8min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:29:57 - __main__ - INFO - [PROFILE][train] step 260/1404 | elapsed=2.4min | eta=10.7min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:30:02 - __main__ - INFO - [PROFILE][train] step 270/1404 | elapsed=2.5min | eta=10.6min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:30:08 - __main__ - INFO - [PROFILE][train] step 280/1404 | elapsed=2.6min | eta=10.5min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:30:13 - __main__ - INFO - [PROFILE][train] step 290/1404 | elapsed=2.7min | eta=10.4min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:30:19 - __main__ - INFO - [PROFILE][train] step 300/1404 | elapsed=2.8min | eta=10.3min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:30:24 - __main__ - INFO - [PROFILE][train] step 310/1404 | elapsed=2.9min | eta=10.2min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:30:30 - __main__ - INFO - [PROFILE][train] step 320/1404 | elapsed=3.0min | eta=10.1min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:30:35 - __main__ - INFO - [PROFILE][train] step 330/1404 | elapsed=3.1min | eta=10.0min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:30:41 - __main__ - INFO - [PROFILE][train] step 340/1404 | elapsed=3.2min | eta=10.0min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:30:46 - __main__ - INFO - [PROFILE][train] step 350/1404 | elapsed=3.3min | eta=9.8min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:30:52 - __main__ - INFO - [PROFILE][train] step 360/1404 | elapsed=3.4min | eta=9.8min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:30:58 - __main__ - INFO - [PROFILE][train] step 370/1404 | elapsed=3.5min | eta=9.7min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:31:03 - __main__ - INFO - [PROFILE][train] step 380/1404 | elapsed=3.6min | eta=9.6min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:31:09 - __main__ - INFO - [PROFILE][train] step 390/1404 | elapsed=3.6min | eta=9.5min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:31:14 - __main__ - INFO - [PROFILE][train] step 400/1404 | elapsed=3.7min | eta=9.4min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:31:20 - __main__ - INFO - [PROFILE][train] step 410/1404 | elapsed=3.8min | eta=9.3min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:31:25 - __main__ - INFO - [PROFILE][train] step 420/1404 | elapsed=3.9min | eta=9.2min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:31:31 - __main__ - INFO - [PROFILE][train] step 430/1404 | elapsed=4.0min | eta=9.1min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:31:36 - __main__ - INFO - [PROFILE][train] step 440/1404 | elapsed=4.1min | eta=9.0min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:31:42 - __main__ - INFO - [PROFILE][train] step 450/1404 | elapsed=4.2min | eta=8.9min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:31:48 - __main__ - INFO - [PROFILE][train] step 460/1404 | elapsed=4.3min | eta=8.8min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:31:53 - __main__ - INFO - [PROFILE][train] step 470/1404 | elapsed=4.4min | eta=8.7min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:31:58 - __main__ - INFO - [PROFILE][train] step 480/1404 | elapsed=4.5min | eta=8.6min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:32:04 - __main__ - INFO - [PROFILE][train] step 490/1404 | elapsed=4.6min | eta=8.5min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:32:09 - __main__ - INFO - [PROFILE][train] step 500/1404 | elapsed=4.7min | eta=8.4min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:32:15 - __main__ - INFO - [PROFILE][train] step 510/1404 | elapsed=4.7min | eta=8.3min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:32:21 - __main__ - INFO - [PROFILE][train] step 520/1404 | elapsed=4.8min | eta=8.2min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:32:26 - __main__ - INFO - [PROFILE][train] step 530/1404 | elapsed=4.9min | eta=8.1min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:32:32 - __main__ - INFO - [PROFILE][train] step 540/1404 | elapsed=5.0min | eta=8.0min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:32:37 - __main__ - INFO - [PROFILE][train] step 550/1404 | elapsed=5.1min | eta=8.0min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:32:43 - __main__ - INFO - [PROFILE][train] step 560/1404 | elapsed=5.2min | eta=7.9min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:32:49 - __main__ - INFO - [PROFILE][train] step 570/1404 | elapsed=5.3min | eta=7.8min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:32:54 - __main__ - INFO - [PROFILE][train] step 580/1404 | elapsed=5.4min | eta=7.7min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:33:00 - __main__ - INFO - [PROFILE][train] step 590/1404 | elapsed=5.5min | eta=7.6min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:33:05 - __main__ - INFO - [PROFILE][train] step 600/1404 | elapsed=5.6min | eta=7.5min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:33:11 - __main__ - INFO - [PROFILE][train] step 610/1404 | elapsed=5.7min | eta=7.4min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:33:16 - __main__ - INFO - [PROFILE][train] step 620/1404 | elapsed=5.8min | eta=7.3min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:33:21 - __main__ - INFO - [PROFILE][train] step 630/1404 | elapsed=5.9min | eta=7.2min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:33:27 - __main__ - INFO - [PROFILE][train] step 640/1404 | elapsed=5.9min | eta=7.1min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:33:32 - __main__ - INFO - [PROFILE][train] step 650/1404 | elapsed=6.0min | eta=7.0min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:33:38 - __main__ - INFO - [PROFILE][train] step 660/1404 | elapsed=6.1min | eta=6.9min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:33:44 - __main__ - INFO - [PROFILE][train] step 670/1404 | elapsed=6.2min | eta=6.8min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:33:49 - __main__ - INFO - [PROFILE][train] step 680/1404 | elapsed=6.3min | eta=6.7min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:33:55 - __main__ - INFO - [PROFILE][train] step 690/1404 | elapsed=6.4min | eta=6.6min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:34:00 - __main__ - INFO - [PROFILE][train] step 700/1404 | elapsed=6.5min | eta=6.5min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:34:06 - __main__ - INFO - [PROFILE][train] step 710/1404 | elapsed=6.6min | eta=6.4min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:34:11 - __main__ - INFO - [PROFILE][train] step 720/1404 | elapsed=6.7min | eta=6.3min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:34:17 - __main__ - INFO - [PROFILE][train] step 730/1404 | elapsed=6.8min | eta=6.3min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:34:22 - __main__ - INFO - [PROFILE][train] step 740/1404 | elapsed=6.9min | eta=6.2min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:34:28 - __main__ - INFO - [PROFILE][train] step 750/1404 | elapsed=7.0min | eta=6.1min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:34:33 - __main__ - INFO - [PROFILE][train] step 760/1404 | elapsed=7.1min | eta=6.0min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:34:39 - __main__ - INFO - [PROFILE][train] step 770/1404 | elapsed=7.1min | eta=5.9min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:34:45 - __main__ - INFO - [PROFILE][train] step 780/1404 | elapsed=7.2min | eta=5.8min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:34:50 - __main__ - INFO - [PROFILE][train] step 790/1404 | elapsed=7.3min | eta=5.7min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:34:56 - __main__ - INFO - [PROFILE][train] step 800/1404 | elapsed=7.4min | eta=5.6min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:35:01 - __main__ - INFO - [PROFILE][train] step 810/1404 | elapsed=7.5min | eta=5.5min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:35:07 - __main__ - INFO - [PROFILE][train] step 820/1404 | elapsed=7.6min | eta=5.4min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:35:12 - __main__ - INFO - [PROFILE][train] step 830/1404 | elapsed=7.7min | eta=5.3min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:35:18 - __main__ - INFO - [PROFILE][train] step 840/1404 | elapsed=7.8min | eta=5.2min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:35:23 - __main__ - INFO - [PROFILE][train] step 850/1404 | elapsed=7.9min | eta=5.1min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:35:29 - __main__ - INFO - [PROFILE][train] step 860/1404 | elapsed=8.0min | eta=5.0min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:35:34 - __main__ - INFO - [PROFILE][train] step 870/1404 | elapsed=8.1min | eta=5.0min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:35:40 - __main__ - INFO - [PROFILE][train] step 880/1404 | elapsed=8.2min | eta=4.9min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:35:45 - __main__ - INFO - [PROFILE][train] step 890/1404 | elapsed=8.3min | eta=4.8min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:35:51 - __main__ - INFO - [PROFILE][train] step 900/1404 | elapsed=8.3min | eta=4.7min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:35:57 - __main__ - INFO - [PROFILE][train] step 910/1404 | elapsed=8.4min | eta=4.6min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:36:02 - __main__ - INFO - [PROFILE][train] step 920/1404 | elapsed=8.5min | eta=4.5min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:36:08 - __main__ - INFO - [PROFILE][train] step 930/1404 | elapsed=8.6min | eta=4.4min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:36:13 - __main__ - INFO - [PROFILE][train] step 940/1404 | elapsed=8.7min | eta=4.3min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:36:18 - __main__ - INFO - [PROFILE][train] step 950/1404 | elapsed=8.8min | eta=4.2min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:36:24 - __main__ - INFO - [PROFILE][train] step 960/1404 | elapsed=8.9min | eta=4.1min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:36:29 - __main__ - INFO - [PROFILE][train] step 970/1404 | elapsed=9.0min | eta=4.0min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:36:35 - __main__ - INFO - [PROFILE][train] step 980/1404 | elapsed=9.1min | eta=3.9min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:36:40 - __main__ - INFO - [PROFILE][train] step 990/1404 | elapsed=9.2min | eta=3.8min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:36:46 - __main__ - INFO - [PROFILE][train] step 1000/1404 | elapsed=9.3min | eta=3.7min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:36:51 - __main__ - INFO - [PROFILE][train] step 1010/1404 | elapsed=9.3min | eta=3.6min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:36:57 - __main__ - INFO - [PROFILE][train] step 1020/1404 | elapsed=9.4min | eta=3.6min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:37:02 - __main__ - INFO - [PROFILE][train] step 1030/1404 | elapsed=9.5min | eta=3.5min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:37:08 - __main__ - INFO - [PROFILE][train] step 1040/1404 | elapsed=9.6min | eta=3.4min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:37:13 - __main__ - INFO - [PROFILE][train] step 1050/1404 | elapsed=9.7min | eta=3.3min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:37:18 - __main__ - INFO - [PROFILE][train] step 1060/1404 | elapsed=9.8min | eta=3.2min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:37:24 - __main__ - INFO - [PROFILE][train] step 1070/1404 | elapsed=9.9min | eta=3.1min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:37:29 - __main__ - INFO - [PROFILE][train] step 1080/1404 | elapsed=10.0min | eta=3.0min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:37:35 - __main__ - INFO - [PROFILE][train] step 1090/1404 | elapsed=10.1min | eta=2.9min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:37:41 - __main__ - INFO - [PROFILE][train] step 1100/1404 | elapsed=10.2min | eta=2.8min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:37:46 - __main__ - INFO - [PROFILE][train] step 1110/1404 | elapsed=10.3min | eta=2.7min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:37:52 - __main__ - INFO - [PROFILE][train] step 1120/1404 | elapsed=10.4min | eta=2.6min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:37:57 - __main__ - INFO - [PROFILE][train] step 1130/1404 | elapsed=10.5min | eta=2.5min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:38:03 - __main__ - INFO - [PROFILE][train] step 1140/1404 | elapsed=10.5min | eta=2.4min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:38:09 - __main__ - INFO - [PROFILE][train] step 1150/1404 | elapsed=10.6min | eta=2.4min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:38:14 - __main__ - INFO - [PROFILE][train] step 1160/1404 | elapsed=10.7min | eta=2.3min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:38:19 - __main__ - INFO - [PROFILE][train] step 1170/1404 | elapsed=10.8min | eta=2.2min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:38:25 - __main__ - INFO - [PROFILE][train] step 1180/1404 | elapsed=10.9min | eta=2.1min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:38:31 - __main__ - INFO - [PROFILE][train] step 1190/1404 | elapsed=11.0min | eta=2.0min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:38:36 - __main__ - INFO - [PROFILE][train] step 1200/1404 | elapsed=11.1min | eta=1.9min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:38:42 - __main__ - INFO - [PROFILE][train] step 1210/1404 | elapsed=11.2min | eta=1.8min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:38:47 - __main__ - INFO - [PROFILE][train] step 1220/1404 | elapsed=11.3min | eta=1.7min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:38:53 - __main__ - INFO - [PROFILE][train] step 1230/1404 | elapsed=11.4min | eta=1.6min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:38:58 - __main__ - INFO - [PROFILE][train] step 1240/1404 | elapsed=11.5min | eta=1.5min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:39:04 - __main__ - INFO - [PROFILE][train] step 1250/1404 | elapsed=11.6min | eta=1.4min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:39:10 - __main__ - INFO - [PROFILE][train] step 1260/1404 | elapsed=11.7min | eta=1.3min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:39:15 - __main__ - INFO - [PROFILE][train] step 1270/1404 | elapsed=11.8min | eta=1.2min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:39:21 - __main__ - INFO - [PROFILE][train] step 1280/1404 | elapsed=11.8min | eta=1.1min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:39:26 - __main__ - INFO - [PROFILE][train] step 1290/1404 | elapsed=11.9min | eta=1.1min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:39:32 - __main__ - INFO - [PROFILE][train] step 1300/1404 | elapsed=12.0min | eta=1.0min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:39:37 - __main__ - INFO - [PROFILE][train] step 1310/1404 | elapsed=12.1min | eta=0.9min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:39:43 - __main__ - INFO - [PROFILE][train] step 1320/1404 | elapsed=12.2min | eta=0.8min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:39:48 - __main__ - INFO - [PROFILE][train] step 1330/1404 | elapsed=12.3min | eta=0.7min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:39:54 - __main__ - INFO - [PROFILE][train] step 1340/1404 | elapsed=12.4min | eta=0.6min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:39:59 - __main__ - INFO - [PROFILE][train] step 1350/1404 | elapsed=12.5min | eta=0.5min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:40:05 - __main__ - INFO - [PROFILE][train] step 1360/1404 | elapsed=12.6min | eta=0.4min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:40:10 - __main__ - INFO - [PROFILE][train] step 1370/1404 | elapsed=12.7min | eta=0.3min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:40:16 - __main__ - INFO - [PROFILE][train] step 1380/1404 | elapsed=12.8min | eta=0.2min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:40:22 - __main__ - INFO - [PROFILE][train] step 1390/1404 | elapsed=12.9min | eta=0.1min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:40:27 - __main__ - INFO - [PROFILE][train] step 1400/1404 | elapsed=13.0min | eta=0.0min | alloc_peak=62.77GB | reserved_peak=64.73GB | device=65.57GB (peak 65.57GB)
+2026-07-27 17:40:29 - __main__ - INFO - [PROFILE][train] 학습 종료 | time=13.0min (779s) | alloc_peak=62.77GB | reserved_peak=65.01GB | device_peak=65.85GB
+2026-07-27 17:40:29 - __main__ - INFO - 
+======================================================================
+2026-07-27 17:40:29 - __main__ - INFO -   Saving Fine-tuned Model
+2026-07-27 17:40:29 - __main__ - INFO - ======================================================================
+
+2026-07-27 17:40:38 - __main__ - INFO - ✅ Fine-tuned model saved successfully to ./checkpoints/baseline_fullft_gsm8k_lr5e-5_20260727_172711
+2026-07-27 17:40:38 - __main__ - INFO - ✅ Config saved to: ./checkpoints/baseline_fullft_gsm8k_lr5e-5_20260727_172711/finetune_config.json
+2026-07-27 17:40:38 - __main__ - INFO - [PROFILE] ■ Baseline FullFT / train_and_save ok | time=00:13:12 (792.1s) | torch_alloc_peak=62.77GB | torch_reserved_peak=65.01GB | device_peak=65.85GB
+2026-07-27 17:40:38 - __main__ - INFO - ==============================================================================
+2026-07-27 17:40:38 - __main__ - INFO - [PROFILE] Baseline FullFT 리소스 요약 (시간 / VRAM)
+2026-07-27 17:40:38 - __main__ - INFO - ==============================================================================
+2026-07-27 17:40:38 - __main__ - INFO - stage                               time   torch_alloc   torch_resv     device  device-base
+2026-07-27 17:40:38 - __main__ - INFO - -------------------------------------------------------------------------------------------
+2026-07-27 17:40:38 - __main__ - INFO - load_model                      00:00:01        12.55G       12.56G     12.94G       12.33G
+2026-07-27 17:40:38 - __main__ - INFO - load_data                       00:00:09        12.55G       12.56G     13.17G       12.56G
+2026-07-27 17:40:38 - __main__ - INFO - train_and_save                  00:13:12        62.77G       65.01G     65.85G       65.24G
+2026-07-27 17:40:38 - __main__ - INFO - -------------------------------------------------------------------------------------------
+2026-07-27 17:40:38 - __main__ - INFO - TOTAL                           00:13:23        62.77G       65.01G     65.85G       65.24G
+2026-07-27 17:40:38 - __main__ - INFO -   GPU 0 (NVIDIA B200): capacity 178.4GB
+2026-07-27 17:40:38 - __main__ - INFO -   device baseline (프로파일 시작 시점 사용량, 타 프로세스 포함): 0.61GB
+2026-07-27 17:40:38 - __main__ - INFO -   torch_alloc/torch_resv = 이 프로세스의 torch allocator 기준, device = nvidia-smi 기준 전체 사용량
+2026-07-27 17:40:38 - __main__ - INFO - ==============================================================================
+2026-07-27 17:40:38 - __main__ - INFO - [PROFILE] 요약 저장: ./logs/profile_baseline_20260727_172711/baseline_fullft.json
+2026-07-27 17:40:38 - __main__ - INFO - 
+======================================================================
+2026-07-27 17:40:38 - __main__ - INFO -   ✅ Fine-tuning Complete!
+2026-07-27 17:40:38 - __main__ - INFO - ======================================================================
+

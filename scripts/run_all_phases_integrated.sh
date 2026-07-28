@@ -5,11 +5,19 @@
 # 
 # run_phase1_basis.sh, run_phase2_importance.sh, run_phase3_learning.sh를 통합
 # 한 번에 모든 phase를 순차적으로 실행
-source /home/yonsei_jong/miniconda3/etc/profile.d/conda.sh
-conda activate hb
+# conda 환경 활성화 (conda 설치 경로는 머신마다 다르므로 자동 탐지)
+CONDA_ENV_NAME="${CONDA_ENV_NAME:-hb}"
+_CONDA_BASE="$(conda info --base 2>/dev/null || true)"
+if [ -n "$_CONDA_BASE" ] && [ -f "$_CONDA_BASE/etc/profile.d/conda.sh" ]; then
+    source "$_CONDA_BASE/etc/profile.d/conda.sh"
+    conda activate "$CONDA_ENV_NAME"
+else
+    echo "⚠️  conda.sh 를 찾지 못했습니다. 현재 python 을 그대로 사용합니다: $(command -v python)"
+fi
 set -e  # Exit on error
 set -o pipefail  # Ensure failures are not hidden by tee pipelines
-export CUDA_VISIBLE_DEVICES=0
+# SLURM 환경에서는 스케줄러가 지정한 값을 그대로 쓰도록 덮어쓰지 않는다
+export CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-0}"
 
 echo "========================================================================"
 echo "Safety-WaRP-LLM: Complete Training Pipeline (Integrated)"
@@ -31,7 +39,10 @@ PHASE0_MODEL="kmseong/llama2_7b-chat-Safety-FT-lr5e-5"
 PHASE1_DATASET="circuit_breakers"
 PHASE1_SAMPLES=4994
 # 기존 basis가 있으면 Phase 1 스킵 (빈 문자열이면 Phase 1 수행)
-PHASE1_BASIS_DIR_OVERRIDE=""
+#   재사용 조건: PHASE0_MODEL / LAYER_TYPE / TARGET_LAYERS / PHASE1_DATASET / PHASE1_SAMPLES 가
+#   basis/metadata.json 과 모두 일치해야 한다. 하나라도 다르면 basis를 다시 만들어야 한다.
+#   아래 basis: 20260727 생성, circuit_breakers 4994샘플, 5 layer_type x 32 layer = 160 조합
+PHASE1_BASIS_DIR_OVERRIDE="./checkpoints/phase1_20260727_155833/basis"
 
 
 # Phase 2: Importance Scoring
@@ -107,6 +118,63 @@ TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 
 mkdir -p $BASE_OUTPUT_DIR
 mkdir -p $LOG_DIR
+
+# ========================================================================
+# W&B (Weights & Biases)
+#   train.py 는 W&B 로깅이 기본 ON 이고 --no_wandb 로만 끈다.
+#   ResourceProfiler.finalize() 가 phase별 시간 / peak VRAM 을 run summary 로 올리고,
+#   Phase 3 는 HF Trainer 의 report_to="wandb" 로 step별 loss/VRAM 도 올린다.
+#
+#   인증(둘 중 하나, 최초 1회만):
+#     wandb login                      # ~/.netrc 에 저장
+#     export WANDB_API_KEY=<your_key>  # 이 스크립트 실행 전
+#   인증이 안 되어 있으면 train.py 는 경고만 남기고 로깅 없이 계속 진행하므로,
+#   아래 preflight 에서 미리 잡아서 실패시킨다.
+# ========================================================================
+# ========================================================================
+# Hugging Face 업로드 + 로컬 정리
+#   각 Phase 3 가 끝날 때마다 final_model 을 Hub 에 올리고, 원격 파일 목록/크기가
+#   로컬과 전부 일치하는지 검증한 뒤에만 로컬을 삭제한다 (13GB/모델 회수).
+#   검증 실패 시 삭제하지 않고 파이프라인이 멈춘다.
+#   최종 repo 이름: ${HF_REPO_PREFIX}-kr<KEEP_RATIO>_lr<LR>
+#   사전 조건: hf auth whoami 로 로그인 확인 (hf auth login 은 쓰지 말 것)
+# ========================================================================
+UPLOAD_TO_HF=1
+HF_REPO_PREFIX="kmseong/llama2_7b_chat-WaRP-all_layers-csft"
+HF_PRIVATE=0                                      # 1 이면 private repo 로 생성
+HF_UPLOADED=()
+
+if [ "$HF_PRIVATE" = "1" ]; then HF_PRIVATE_ARG="--private"; else HF_PRIVATE_ARG=""; fi
+
+if [ "$UPLOAD_TO_HF" = "1" ]; then
+    if ! hf auth whoami >/dev/null 2>&1; then
+        echo "❌ Hugging Face 로그인이 되어 있지 않습니다. 'hf auth login' 후 다시 실행하세요."
+        echo "   (업로드 없이 돌리려면 UPLOAD_TO_HF=0)"
+        exit 1
+    fi
+    echo "✅ HF: $(hf auth whoami 2>/dev/null | tr -d '\n')  prefix=$HF_REPO_PREFIX  private=$HF_PRIVATE"
+fi
+
+USE_WANDB=1                                       # 0 → 모든 phase 에 --no_wandb
+WANDB_PROJECT="Safety-WaRP-LLM"
+export WANDB_RUN_GROUP="pipeline_${TIMESTAMP}"    # phase1/2/3 를 한 그룹으로 묶음
+export WANDB_TAGS="${PHASE1_DATASET},${PHASE3_DATASET},${LAYER_TYPE}"
+
+if [ "$USE_WANDB" = "1" ]; then
+    if ! python -c "import sys, wandb; sys.exit(0 if wandb.api.api_key else 1)" 2>/dev/null; then
+        echo "❌ W&B 인증이 되어 있지 않습니다."
+        echo "   다음 중 하나를 먼저 실행하세요:"
+        echo "     wandb login"
+        echo "     export WANDB_API_KEY=<your_key>"
+        echo "   (W&B 없이 돌리려면 이 스크립트에서 USE_WANDB=0 으로 설정)"
+        exit 1
+    fi
+    WANDB_ARG="--wandb_project $WANDB_PROJECT"
+    echo "✅ W&B: project=$WANDB_PROJECT  group=$WANDB_RUN_GROUP"
+else
+    WANDB_ARG="--no_wandb"
+    echo "ℹ️  W&B 로깅 비활성화 (USE_WANDB=0)"
+fi
 
 # ========================================================================
 # Resource accounting (phase별 소요 시간 / VRAM)
@@ -207,6 +275,7 @@ else
         --dtype $DTYPE \
         --seed 42 \
         --profile_json "$PHASE1_PROFILE_JSON" \
+        $WANDB_ARG --wandb_run_name "p1_${PHASE1_DATASET}_${TIMESTAMP}" \
         2>&1 | tee $LOG_DIR/phase1_${TIMESTAMP}.log
 
     record_phase_time "Phase 1" "$PHASE1_START" "$PHASE1_PROFILE_JSON"
@@ -311,6 +380,7 @@ for KEEP_RATIO in "${KEEP_RATIO_LIST[@]}"; do
         --seed 42 \
         --perlayer \
         --profile_json "$PHASE2_PROFILE_JSON" \
+        $WANDB_ARG --wandb_run_name "p2_kr${KR_SAFE}_${TIMESTAMP}" \
         $TWO_MASK_ARG \
         2>&1 | tee $LOG_DIR/phase2_kr${KR_SAFE}_${TIMESTAMP}.log
 
@@ -370,6 +440,9 @@ for KEEP_RATIO in "${KEEP_RATIO_LIST[@]}"; do
                 --max_length 1024 \
                 --safety_mix_ratio "$SAFEINSTR_RATIO" \
                 --safety_data_path "$CIRCUIT_BREAKERS_PATH" \
+                --report_to "$([ "$USE_WANDB" = "1" ] && echo wandb || echo none)" \
+                --wandb_project "$WANDB_PROJECT" \
+                --wandb_run_name "p3_mmlu_kr${KR_SAFE}_lr${LR_SAFE}_${TIMESTAMP}" \
                 2>&1 | tee $LOG_DIR/phase3_kr${KR_SAFE}_lr${LR_SAFE}_${TIMESTAMP}.log
 
             # mmlu 경로는 train.py 를 쓰지 않으므로 wall-clock 만 기록
@@ -396,6 +469,7 @@ for KEEP_RATIO in "${KEEP_RATIO_LIST[@]}"; do
                 --constrained_sft \
                 --csft_bias_factor 10 --csft_bias_length 3 --csft_first_token_bias_factor 3 \
                 --profile_json "$PHASE3_PROFILE_JSON" \
+                $WANDB_ARG --wandb_run_name "p3_${PHASE3_DATASET}_kr${KR_SAFE}_lr${LR_SAFE}_${TIMESTAMP}" \
                 $SAFEINSTR_ARG \
                 2>&1 | tee $LOG_DIR/phase3_kr${KR_SAFE}_lr${LR_SAFE}_${TIMESTAMP}.log
 
@@ -409,6 +483,30 @@ for KEEP_RATIO in "${KEEP_RATIO_LIST[@]}"; do
         else
             echo "Phase 3 (kr=$KEEP_RATIO, LR=$LEARNING_RATE) completed: $PHASE3_OUTPUT_DIR"
             PHASE3_OUTPUT_DIRS+=("kr${KEEP_RATIO}_lr${LEARNING_RATE}:$PHASE3_OUTPUT_DIR")
+
+            # ----------------------------------------------------------
+            # HF 업로드 + 검증 후 로컬 final_model 삭제 (디스크 회수)
+            #   업로드가 검증되지 않으면 스크립트가 실패로 멈춘다 (set -e).
+            #   검증 실패 시 로컬 모델은 그대로 남으므로 데이터 유실은 없다.
+            #   metadata.json 은 남긴다 (시간/VRAM 프로파일 기록).
+            # ----------------------------------------------------------
+            if [ "$UPLOAD_TO_HF" = "1" ] && [ "$PHASE3_DATASET" != "mmlu" ]; then
+                HF_REPO="${HF_REPO_PREFIX}-kr${KEEP_RATIO}_lr${LEARNING_RATE}"
+                echo ""
+                echo "── HF 업로드: $HF_REPO ──"
+                python scripts/upload_and_cleanup_phase3.py \
+                    --model_dir "$PHASE3_OUTPUT_DIR/final_model" \
+                    --repo_name "$HF_REPO" \
+                    --base_model "$PHASE0_MODEL" \
+                    --keep_ratio "$KEEP_RATIO" \
+                    --learning_rate "$LEARNING_RATE" \
+                    --dataset "$PHASE3_DATASET" \
+                    --metadata_json "$PHASE3_OUTPUT_DIR/metadata.json" \
+                    $HF_PRIVATE_ARG \
+                    --delete_after_verify \
+                    2>&1 | tee -a $LOG_DIR/hf_upload_${TIMESTAMP}.log
+                HF_UPLOADED+=("kr${KEEP_RATIO}_lr${LEARNING_RATE}:$HF_REPO")
+            fi
         fi
         echo ""
     done
@@ -429,8 +527,20 @@ echo "Phase 3 Models (keep_ratio x LR):"
 for entry in "${PHASE3_OUTPUT_DIRS[@]}"; do
     label="${entry%%:*}"
     dir="${entry#*:}"
-    echo "  [$label]  $dir/final_model"
+    if [ -d "$dir/final_model" ]; then
+        echo "  [$label]  $dir/final_model"
+    else
+        echo "  [$label]  $dir  (final_model 은 HF 업로드 후 삭제됨)"
+    fi
 done
+
+if [ ${#HF_UPLOADED[@]} -gt 0 ]; then
+    echo ""
+    echo "Hugging Face 업로드 완료:"
+    for entry in "${HF_UPLOADED[@]}"; do
+        echo "  [${entry%%:*}]  https://huggingface.co/${entry#*:}"
+    done
+fi
 echo ""
 echo "Logs:"
 echo "  Phase 1: $LOG_DIR/phase1_${TIMESTAMP}.log"

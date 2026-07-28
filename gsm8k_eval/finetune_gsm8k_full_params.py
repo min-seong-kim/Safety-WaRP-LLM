@@ -65,6 +65,14 @@ except ImportError:
 #    import 하는 쪽의 device 설정까지 덮어쓴다.
 # os.environ["CUDA_VISIBLE_DEVICES"] = "2,3"
 
+# 저장소 루트를 import 경로에 추가 (utils.ResourceProfiler / models.* 재사용용).
+# gsm8k_eval/ 안에서 실행돼도 루트 모듈을 찾을 수 있게 한다.
+import sys as _sys
+_REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if _REPO_ROOT not in _sys.path:
+    _sys.path.insert(0, _REPO_ROOT)
+
+
 def parse_args():
     p = argparse.ArgumentParser(description='Full Parameter Finetune SN-Tuned Model on GSM8K')
     
@@ -112,6 +120,17 @@ def parse_args():
                     help="wandb entity (미지정 시 로그인 계정의 기본 entity 사용)")
     p.add_argument("--wandb_project", type=str, default="GSM8K Full Finetuning")
     p.add_argument("--num_workers", type=int, default=4)
+    # --- Phase 3 (WaRP) 와의 시간/VRAM 비교를 위한 옵션 ---
+    p.add_argument("--attn_implementation", type=str, default=None,
+                   help="attention 구현 강제 (eager|sdpa|flash_attention_2). "
+                        "Phase 3 는 eager 를 쓰므로 비교 실험에서는 eager 로 맞춘다. "
+                        "미지정 시 transformers 기본값(sdpa)")
+    p.add_argument("--profile_json", type=str, default=None,
+                   help="시간/VRAM 프로파일 요약 JSON 경로 (train.py 의 --profile_json 과 동일 포맷)")
+    p.add_argument("--profile_interval", type=float, default=0.5,
+                   help="디바이스 VRAM 샘플링 주기(초)")
+    p.add_argument("--no_profile", action="store_true",
+                   help="시간/VRAM 프로파일링 비활성화")
     p.add_argument("--cache_dir", type=str, default='./cache')
     p.add_argument("--upload_name", type=str, default=None,
                     help="Optional Hugging Face repo id (e.g., username/model-name). If set, upload after training")
@@ -137,6 +156,64 @@ def parse_args():
                     help="LoRA를 적용할 모듈 이름 목록")
 
     return p.parse_args()
+
+def _make_baseline_profiler(args, logger):
+    """
+    train.py 의 _make_profiler 와 동일한 ResourceProfiler 를 만든다.
+    (WaRP Phase 3 결과와 같은 JSON 포맷 / 같은 stage 이름으로 비교 가능하게 함)
+    --no_profile 이면 아무것도 하지 않는 no-op 을 돌려준다.
+    """
+    if getattr(args, 'no_profile', False):
+        from contextlib import contextmanager
+
+        class _Null:
+            @contextmanager
+            def stage(self, name):
+                yield
+
+            def finalize(self, *a, **k):
+                return {}
+
+        return _Null()
+
+    from utils import ResourceProfiler
+    json_path = args.profile_json or os.path.join(
+        args.output_dir, f"baseline_fullft_{datetime.now().strftime('%Y%m%d_%H%M%S')}_profile.json"
+    )
+    interval = getattr(args, 'profile_interval', 0.5)
+    return ResourceProfiler(
+        logger=logger,
+        label="Baseline FullFT",
+        json_path=json_path,
+        sample_interval=interval if interval and interval > 0 else 0.5,
+        meta={
+            'method': 'full_finetune_baseline',
+            'model': args.model_path,
+            'dataset': 'gsm8k',
+            'num_train_samples': args.num_train_samples,
+            'batch_size': args.batch_size,
+            'grad_accum': args.grad_accum,
+            'effective_batch_size': args.batch_size * args.grad_accum,
+            'epochs': args.epochs,
+            'learning_rate': args.learning_rate,
+            'max_length': args.max_length,
+            'dtype': 'bfloat16' if args.bf16 else ('float16' if args.fp16 else 'float32'),
+            'attn_implementation': args.attn_implementation or 'default(sdpa)',
+            'gradient_checkpointing': args.gradient_checkpointing,
+            'lora': args.lora,
+        },
+    )
+
+
+def _make_resource_callback(logger, log_every):
+    """Phase 3 와 동일한 학습 루프 리소스 로깅 콜백 (실패 시 None)."""
+    try:
+        from models.phase3_extra_learning_non_freeze import ResourceLogCallback
+        return ResourceLogCallback(logger, log_every=log_every)
+    except Exception as e:  # 콜백이 없어도 프로파일러 stage 는 그대로 동작한다
+        logger.warning(f"ResourceLogCallback 사용 불가 (step별 VRAM 로깅 생략): {e}")
+        return None
+
 
 def _select_first_n(ds, n: int):
     if n is None or n <= 0:
@@ -332,6 +409,24 @@ def main():
     logger.info(f"   ├─ Dtype: bf16")
     logger.info(f"   └─ Output dir: {args.output_dir}\n")
 
+    # ------------------------------------------------------------------
+    # 시간 / VRAM 프로파일러 (train.py 의 Phase 3 와 동일한 stage 구성·JSON 포맷)
+    #   load_model -> load_data -> train_and_save
+    # ------------------------------------------------------------------
+    profiler = _make_baseline_profiler(args, logger)
+    _stages = []
+
+    def _stage_begin(name):
+        cm = profiler.stage(name)
+        cm.__enter__()
+        _stages.append(cm)
+
+    def _stage_end():
+        if _stages:
+            _stages.pop().__exit__(None, None, None)
+
+    _stage_begin('load_model')
+
     # Load tokenizer
     logger.info(f"\n{'='*70}")
     logger.info(f"  [1/4] Loading Tokenizer")
@@ -385,10 +480,16 @@ def main():
     except Exception as _e:
         logger.warning(f"Could not toggle cuDNN SDPA backend: {_e}")
     dtype = torch.bfloat16 if args.bf16 else (torch.float16 if args.fp16 else None)
-    
+
     model = None
     load_error = None
-    
+
+    # Phase 3 와 동일 조건으로 맞추기 위한 추가 인자 (미지정 시 기존 동작 유지)
+    _extra_load_kwargs = {}
+    if args.attn_implementation:
+        _extra_load_kwargs["attn_implementation"] = args.attn_implementation
+        logger.info(f"attn_implementation={args.attn_implementation} (강제)")
+
     # 시도 1: local_files_only=True (권장)
     try:
         logger.info("Attempting to load model (local files only)...")
@@ -398,13 +499,14 @@ def main():
             device_map="auto",
             local_files_only=True,
             trust_remote_code=False,
+            **_extra_load_kwargs,
         )
         logger.info("✓ Model loaded from local files")
     except Exception as e:
         load_error = str(e)
         logger.warning(f"Failed to load with local_files_only: {e}")
         logger.info("Attempting to load from HuggingFace Hub...")
-        
+
         # 시도 2: Hub에서 로드 (fallback)
         try:
             model = AutoModelForCausalLM.from_pretrained(
@@ -412,6 +514,7 @@ def main():
                 torch_dtype=dtype,
                 device_map="auto",
                 trust_remote_code=False,
+                **_extra_load_kwargs,
             )
             logger.info("✓ Model loaded from HuggingFace Hub")
         except Exception as e2:
@@ -424,6 +527,10 @@ def main():
 
     if args.gradient_checkpointing:
         model.gradient_checkpointing_enable()
+
+    # Phase 3 (models/phase3_extra_learning.py) 와 동일하게 학습 중 KV cache 비활성화.
+    # 켜져 있으면 forward 마다 past_key_values 를 할당해 VRAM 비교가 왜곡된다.
+    if hasattr(model.config, "use_cache"):
         model.config.use_cache = False
 
     # LoRA 적용
@@ -450,6 +557,9 @@ def main():
     logger.info(f"   ├─ Trainable: {trainable_params / 1e9:.2f}B ({100 * trainable_params / total_params:.2f}%)")
     logger.info(f"   ├─ Dtype: {model.dtype}")
     logger.info(f"   └─ Gradient checkpointing: {'Enabled' if args.gradient_checkpointing else 'Disabled'}")
+
+    _stage_end()          # load_model 종료
+    _stage_begin('load_data')
 
     # Load dataset
     logger.info(f"\n{'='*70}")
@@ -534,6 +644,9 @@ def main():
         logger.info(f"✅ Safety data mixed: {len(safety_tok)} samples (ratio={args.safety_mix_ratio})")
         logger.info(f"   Total training samples: {len(train_tok)} (GSM8K {len(train_ds)} + Safety {len(safety_tok)})")
 
+    _stage_end()          # load_data 종료
+    _stage_begin('train_and_save')
+
     # Training
     logger.info(f"\n{'='*70}")
     logger.info(f"  [4/4] Training with Trainer + AdamW")
@@ -605,9 +718,14 @@ def main():
         data_collator=data_collator,
     )
 
+    # Phase 3 와 동일한 학습 루프 시간/VRAM 로깅 (step마다 elapsed/ETA/peak VRAM)
+    res_cb = _make_resource_callback(logger, args.logging_steps)
+    if res_cb is not None:
+        trainer.add_callback(res_cb)
+
     logger.info("Starting training...")
-    trainer.train()
-    
+    train_result = trainer.train()
+
     # Save model
     logger.info(f"\n{'='*70}")
     logger.info(f"  Saving Fine-tuned Model")
@@ -644,13 +762,25 @@ def main():
         'trainer_type': 'Trainer',
         'safety_mix_ratio': args.safety_mix_ratio,
         'safety_data_path': args.safety_data_path if args.safety_mix_ratio > 0 else None,
+        'attn_implementation': args.attn_implementation or 'default(sdpa)',
     }
-    
+
+    # Phase 3 의 metadata.json 과 같은 키로 학습 구간 시간/VRAM 기록
+    config['train_seconds'] = float(train_result.metrics.get('train_runtime', 0.0))
+    if res_cb is not None:
+        _rs = res_cb.summary()
+        config['train_peak_alloc_gb'] = _rs.get('train_peak_alloc_gb')
+        config['train_peak_reserved_gb'] = _rs.get('train_peak_reserved_gb')
+        config['train_peak_device_gb'] = _rs.get('train_peak_device_gb')
+
     config_path = os.path.join(args.output_dir, 'finetune_config.json')
     with open(config_path, 'w') as f:
         json.dump(config, f, indent=2)
-    
+
     logger.info(f"✅ Config saved to: {config_path}")
+
+    _stage_end()          # train_and_save 종료
+    profiler.finalize()
 
     if args.upload_name:
         logger.info(f"\nStarting upload to Hugging Face: {args.upload_name}")

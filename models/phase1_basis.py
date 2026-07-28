@@ -841,8 +841,16 @@ class Phase1BasisBuilder:
                     total_files += len(files)
             
             # 메타데이터 저장
+            # 어떤 데이터로 만든 basis 인지 반드시 남긴다.
+            #   data/circuit_breakers_train.json 과 data/beavertails_cb_train.json 은
+            #   스키마도 개수(4994)도 같아서, 경로를 기록해두지 않으면 나중에 구분할 수 없다.
             metadata = {
                 'model_name': self.args.model_name,
+                'safety_dataset': getattr(self.args, 'safety_dataset', None),
+                'dataset_path': getattr(self.args, 'circuit_breakers_path', None),
+                'only_prompt': bool(getattr(self.args, 'only_prompt', False)),
+                'input_fields': ('prompt only' if getattr(self.args, 'only_prompt', False)
+                                 else 'prompt + llama3_output (refusal)'),
                 'layer_types': sorted(list(layer_types_saved)),
                 'target_layers': self.args.target_layers,
                 'num_layers_saved': total_files,

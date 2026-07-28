@@ -1,0 +1,17 @@
+[2026-07-27 15:43:43] [safety_warp] [INFO] ======================================================================
+[2026-07-27 15:43:43] [safety_warp] [INFO] Safety-WaRP-LLM (Fixed - 원본 FSCIL-WaRP 방식)
+[2026-07-27 15:43:43] [safety_warp] [INFO] ======================================================================
+[2026-07-27 15:43:43] [safety_warp] [INFO] Phase: 1
+[2026-07-27 15:43:43] [safety_warp] [INFO] Model: None
+[2026-07-27 15:43:43] [safety_warp] [INFO] Layer types: attn_q,attn_k,attn_v,ffn_down,ffn_up
+[2026-07-27 15:43:43] [safety_warp] [INFO] Target layers: all
+[2026-07-27 15:43:43] [safety_warp] [INFO] ======================================================================
+[2026-07-27 15:43:43] [safety_warp] [WARNING] W&B 초기화 실패 (로깅 없이 계속): api_key not configured (no-tty). call wandb.login(key=[your_api_key])
+[2026-07-27 15:43:45] [safety_warp] [INFO] ======================================================================
+[2026-07-27 15:43:45] [safety_warp] [INFO] Starting Phase 1: Basis Construction
+[2026-07-27 15:43:45] [safety_warp] [INFO] ======================================================================
+[2026-07-27 15:43:45] [safety_warp] [INFO] [PROFILE] ▶ Phase 1 / load_model 시작
+[2026-07-27 15:43:46] [safety_warp] [INFO] Loading model: kmseong/llama2_7b-chat-Safety-FT-lr5e-5
+`torch_dtype` is deprecated! Use `dtype` instead!
+Fetching 3 files:   0%|          | 0/3 [00:00<?, ?it/s]Fetching 3 files:  33%|███▎      | 1/3 [00:29<00:58, 29.11s/it]Fetching 3 files: 100%|██████████| 3/3 [00:29<00:00,  9.70s/it]
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards:  33%|███▎      | 1/3 [00:00<00:00,  2.36it/s]

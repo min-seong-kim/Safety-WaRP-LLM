@@ -1,0 +1,417 @@
+[2026-07-28 18:13:15] [safety_warp] [INFO] ======================================================================
+[2026-07-28 18:13:15] [safety_warp] [INFO] Safety-WaRP-LLM (Fixed - 원본 FSCIL-WaRP 방식)
+[2026-07-28 18:13:15] [safety_warp] [INFO] ======================================================================
+[2026-07-28 18:13:15] [safety_warp] [INFO] Phase: 2
+[2026-07-28 18:13:15] [safety_warp] [INFO] Model: None
+[2026-07-28 18:13:15] [safety_warp] [INFO] Layer types: attn_q,attn_k,attn_v,ffn_down,ffn_up
+[2026-07-28 18:13:15] [safety_warp] [INFO] Target layers: all
+[2026-07-28 18:13:15] [safety_warp] [INFO] ======================================================================
+[2026-07-28 18:13:17] [safety_warp] [INFO] ✓ W&B initialized: project=Safety-WaRP-LLM, run=p2_bt_kr0_30__20260728_154515
+[2026-07-28 18:13:18] [safety_warp] [INFO] ======================================================================
+[2026-07-28 18:13:18] [safety_warp] [INFO] Starting Phase 2: Importance Scoring (Fixed)
+[2026-07-28 18:13:18] [safety_warp] [INFO] ======================================================================
+[2026-07-28 18:13:19] [safety_warp] [INFO] [PROFILE] ▶ Phase 2 / load_basis 시작
+[2026-07-28 18:13:19] [safety_warp] [INFO] Loading basis from ./checkpoints/phase1_20260728_144045/basis...
+[2026-07-28 18:13:19] [safety_warp] [INFO] ✓ Metadata loaded:
+[2026-07-28 18:13:19] [safety_warp] [INFO]   - Layer types: ['attn_k', 'attn_q', 'attn_v', 'ffn_down', 'ffn_up']
+[2026-07-28 18:13:30] [safety_warp] [INFO] ✓ Basis loaded: 160 (layer, type) combinations
+[2026-07-28 18:13:30] [safety_warp] [INFO] [PROFILE] ■ Phase 2 / load_basis ok | time=00:00:11 (11.5s) | torch_alloc_peak=0.00GB | torch_reserved_peak=0.00GB | device_peak=0.61GB
+[2026-07-28 18:13:30] [safety_warp] [INFO] [PROFILE] ▶ Phase 2 / load_model 시작
+[2026-07-28 18:13:32] [safety_warp] [INFO] Loading Phase 0 trained model from kmseong/llama2_7b-chat-Safety-FT-lr5e-5...
+[2026-07-28 18:13:34] [safety_warp] [INFO] ✓ Phase 0 model loaded
+[2026-07-28 18:13:35] [safety_warp] [INFO] ✓ Tokenizer loaded
+[2026-07-28 18:13:35] [safety_warp] [INFO]   - Input formatting: chat template
+[2026-07-28 18:13:35] [safety_warp] [INFO] [PROFILE] ■ Phase 2 / load_model ok | time=00:00:05 (4.6s) | torch_alloc_peak=12.55GB | torch_reserved_peak=12.56GB | device_peak=13.17GB
+[2026-07-28 18:13:35] [safety_warp] [INFO] [PROFILE] ▶ Phase 2 / convert_to_warp_modules 시작
+[2026-07-28 18:13:35] [safety_warp] [INFO] Converting to WaRP modules...
+[2026-07-28 18:13:35] [safety_warp] [INFO] ✓ Conversion completed
+[2026-07-28 18:13:35] [safety_warp] [INFO] [PROFILE] ■ Phase 2 / convert_to_warp_modules ok | time=00:00:00 (0.1s) | torch_alloc_peak=25.20GB | torch_reserved_peak=25.41GB | device_peak=13.17GB
+[2026-07-28 18:13:35] [safety_warp] [INFO] [PROFILE] ▶ Phase 2 / reparameterize_weights 시작
+[2026-07-28 18:13:35] [safety_warp] [INFO] Reparameterizing weights to basis space...
+[2026-07-28 18:13:35] [safety_warp] [INFO] ======================================================================
+[2026-07-28 18:13:54] [safety_warp] [INFO] ======================================================================
+[2026-07-28 18:13:54] [safety_warp] [INFO] ✓ Reparameterization completed: 160 modules
+[2026-07-28 18:13:54] [safety_warp] [INFO] [PROFILE] ■ Phase 2 / reparameterize_weights ok | time=00:00:19 (19.2s) | torch_alloc_peak=36.71GB | torch_reserved_peak=38.67GB | device_peak=38.99GB
+[2026-07-28 18:13:54] [safety_warp] [INFO] [PROFILE] ▶ Phase 2 / load_data 시작
+[2026-07-28 18:13:54] [safety_warp] [INFO] Loading circuit_breakers data from ./data/beavertails_cb_train.json...
+[2026-07-28 18:13:54] [safety_warp] [INFO] ✓ Loaded 4994 samples
+[2026-07-28 18:13:54] [safety_warp] [INFO] ✓ Dataloader created (2497 batches)
+[2026-07-28 18:13:54] [safety_warp] [INFO]   - Input format: chat template user/assistant pairs
+[2026-07-28 18:13:54] [safety_warp] [INFO] [PROFILE] ■ Phase 2 / load_data ok | time=00:00:00 (0.0s) | torch_alloc_peak=36.34GB | torch_reserved_peak=38.67GB | device_peak=39.44GB
+[2026-07-28 18:13:54] [safety_warp] [INFO] [PROFILE] ▶ Phase 2 / compute_importance 시작
+[2026-07-28 18:13:54] [safety_warp] [INFO] ======================================================================
+[2026-07-28 18:13:54] [safety_warp] [INFO] Phase 2: Importance Scoring (Per-layer keep_ratio)
+[2026-07-28 18:13:54] [safety_warp] [INFO] ======================================================================
+[2026-07-28 18:13:54] [safety_warp] [INFO] ✅ model.eval() 모드 - 파라미터 업데이트 없음
+[2026-07-28 18:13:54] [safety_warp] [INFO] ✅ Gradient만 계산하여 importance 측정
+[2026-07-28 18:13:54] [safety_warp] [INFO] ======================================================================
+[2026-07-28 18:13:54] [safety_warp] [INFO] ✓ Model set to eval mode (파라미터 변경 없음)
+[2026-07-28 18:13:54] [safety_warp] [INFO] ✓ Found 160 WaRP modules
+[2026-07-28 18:13:54] [safety_warp] [INFO] ✓ Trainable params in Phase 2: 4,496,293,888/6,738,415,616 (66.73%)
+[2026-07-28 18:21:30] [safety_warp] [INFO] ======================================================================
+[2026-07-28 18:21:30] [safety_warp] [INFO] ✓ Importance computation completed
+[2026-07-28 18:21:30] [safety_warp] [INFO]   - Total samples: 4994
+[2026-07-28 18:21:30] [safety_warp] [INFO]   - Total tokens: 1194665
+[2026-07-28 18:21:30] [safety_warp] [INFO]   ⚠️  파라미터는 변경되지 않음 (optimizer.step 없음)
+[2026-07-28 18:21:30] [safety_warp] [INFO] ======================================================================
+[2026-07-28 18:21:45] [safety_warp] [INFO] [PROFILE] ■ Phase 2 / compute_importance ok | time=00:07:51 (471.2s) | torch_alloc_peak=70.90GB | torch_reserved_peak=72.46GB | device_peak=73.30GB
+[2026-07-28 18:21:45] [safety_warp] [INFO] [PROFILE] ▶ Phase 2 / generate_masks 시작
+[2026-07-28 18:21:45] [safety_warp] [INFO] ======================================================================
+[2026-07-28 18:21:45] [safety_warp] [INFO] Generating masks per-layer (keep_ratio=0.3)
+[2026-07-28 18:21:45] [safety_warp] [INFO] ======================================================================
+[2026-07-28 18:21:46] [safety_warp] [INFO] Layer 0 (attn_q):
+[2026-07-28 18:21:46] [safety_warp] [INFO]   - Frozen: 5038825.0/16777216 (30.03%)
+[2026-07-28 18:21:46] [safety_warp] [INFO] Layer 0 (attn_k):
+[2026-07-28 18:21:46] [safety_warp] [INFO]   - Frozen: 5045433.0/16777216 (30.07%)
+[2026-07-28 18:21:46] [safety_warp] [INFO] Layer 0 (attn_v):
+[2026-07-28 18:21:46] [safety_warp] [INFO]   - Frozen: 5033902.0/16777216 (30.00%)
+[2026-07-28 18:21:46] [safety_warp] [INFO] Layer 0 (ffn_down):
+[2026-07-28 18:21:46] [safety_warp] [INFO]   - Frozen: 13541665.0/45088768 (30.03%)
+[2026-07-28 18:21:47] [safety_warp] [INFO] Layer 0 (ffn_up):
+[2026-07-28 18:21:47] [safety_warp] [INFO]   - Frozen: 13575288.0/45088768 (30.11%)
+[2026-07-28 18:21:47] [safety_warp] [INFO] Layer 1 (attn_q):
+[2026-07-28 18:21:47] [safety_warp] [INFO]   - Frozen: 5065804.0/16777216 (30.19%)
+[2026-07-28 18:21:47] [safety_warp] [INFO] Layer 1 (attn_k):
+[2026-07-28 18:21:47] [safety_warp] [INFO]   - Frozen: 5087318.0/16777216 (30.32%)
+[2026-07-28 18:21:48] [safety_warp] [INFO] Layer 1 (attn_v):
+[2026-07-28 18:21:48] [safety_warp] [INFO]   - Frozen: 5033951.0/16777216 (30.00%)
+[2026-07-28 18:21:48] [safety_warp] [INFO] Layer 1 (ffn_down):
+[2026-07-28 18:21:48] [safety_warp] [INFO]   - Frozen: 13572029.0/45088768 (30.10%)
+[2026-07-28 18:21:49] [safety_warp] [INFO] Layer 1 (ffn_up):
+[2026-07-28 18:21:49] [safety_warp] [INFO]   - Frozen: 13552597.0/45088768 (30.06%)
+[2026-07-28 18:21:49] [safety_warp] [INFO] Layer 2 (attn_q):
+[2026-07-28 18:21:49] [safety_warp] [INFO]   - Frozen: 5076871.0/16777216 (30.26%)
+[2026-07-28 18:21:49] [safety_warp] [INFO] Layer 2 (attn_k):
+[2026-07-28 18:21:49] [safety_warp] [INFO]   - Frozen: 5033941.0/16777216 (30.00%)
+[2026-07-28 18:21:49] [safety_warp] [INFO] Layer 2 (attn_v):
+[2026-07-28 18:21:49] [safety_warp] [INFO]   - Frozen: 5036312.0/16777216 (30.02%)
+[2026-07-28 18:21:50] [safety_warp] [INFO] Layer 2 (ffn_down):
+[2026-07-28 18:21:50] [safety_warp] [INFO]   - Frozen: 13868695.0/45088768 (30.76%)
+[2026-07-28 18:21:50] [safety_warp] [INFO] Layer 2 (ffn_up):
+[2026-07-28 18:21:50] [safety_warp] [INFO]   - Frozen: 13541845.0/45088768 (30.03%)
+[2026-07-28 18:21:51] [safety_warp] [INFO] Layer 3 (attn_q):
+[2026-07-28 18:21:51] [safety_warp] [INFO]   - Frozen: 5037011.0/16777216 (30.02%)
+[2026-07-28 18:21:51] [safety_warp] [INFO] Layer 3 (attn_k):
+[2026-07-28 18:21:51] [safety_warp] [INFO]   - Frozen: 5039865.0/16777216 (30.04%)
+[2026-07-28 18:21:51] [safety_warp] [INFO] Layer 3 (attn_v):
+[2026-07-28 18:21:51] [safety_warp] [INFO]   - Frozen: 5154768.0/16777216 (30.72%)
+[2026-07-28 18:21:52] [safety_warp] [INFO] Layer 3 (ffn_down):
+[2026-07-28 18:21:52] [safety_warp] [INFO]   - Frozen: 13788184.0/45088768 (30.58%)
+[2026-07-28 18:21:52] [safety_warp] [INFO] Layer 3 (ffn_up):
+[2026-07-28 18:21:52] [safety_warp] [INFO]   - Frozen: 14044446.0/45088768 (31.15%)
+[2026-07-28 18:21:52] [safety_warp] [INFO] Layer 4 (attn_q):
+[2026-07-28 18:21:52] [safety_warp] [INFO]   - Frozen: 5036045.0/16777216 (30.02%)
+[2026-07-28 18:21:52] [safety_warp] [INFO] Layer 4 (attn_k):
+[2026-07-28 18:21:52] [safety_warp] [INFO]   - Frozen: 5038791.0/16777216 (30.03%)
+[2026-07-28 18:21:53] [safety_warp] [INFO] Layer 4 (attn_v):
+[2026-07-28 18:21:53] [safety_warp] [INFO]   - Frozen: 5096734.0/16777216 (30.38%)
+[2026-07-28 18:21:53] [safety_warp] [INFO] Layer 4 (ffn_down):
+[2026-07-28 18:21:53] [safety_warp] [INFO]   - Frozen: 13586957.0/45088768 (30.13%)
+[2026-07-28 18:21:54] [safety_warp] [INFO] Layer 4 (ffn_up):
+[2026-07-28 18:21:54] [safety_warp] [INFO]   - Frozen: 13830695.0/45088768 (30.67%)
+[2026-07-28 18:21:54] [safety_warp] [INFO] Layer 5 (attn_q):
+[2026-07-28 18:21:54] [safety_warp] [INFO]   - Frozen: 5055950.0/16777216 (30.14%)
+[2026-07-28 18:21:54] [safety_warp] [INFO] Layer 5 (attn_k):
+[2026-07-28 18:21:54] [safety_warp] [INFO]   - Frozen: 5058212.0/16777216 (30.15%)
+[2026-07-28 18:21:55] [safety_warp] [INFO] Layer 5 (attn_v):
+[2026-07-28 18:21:55] [safety_warp] [INFO]   - Frozen: 5050580.0/16777216 (30.10%)
+[2026-07-28 18:21:55] [safety_warp] [INFO] Layer 5 (ffn_down):
+[2026-07-28 18:21:55] [safety_warp] [INFO]   - Frozen: 13564152.0/45088768 (30.08%)
+[2026-07-28 18:21:56] [safety_warp] [INFO] Layer 5 (ffn_up):
+[2026-07-28 18:21:56] [safety_warp] [INFO]   - Frozen: 13922644.0/45088768 (30.88%)
+[2026-07-28 18:21:56] [safety_warp] [INFO] Layer 6 (attn_q):
+[2026-07-28 18:21:56] [safety_warp] [INFO]   - Frozen: 5269086.0/16777216 (31.41%)
+[2026-07-28 18:21:56] [safety_warp] [INFO] Layer 6 (attn_k):
+[2026-07-28 18:21:56] [safety_warp] [INFO]   - Frozen: 5045317.0/16777216 (30.07%)
+[2026-07-28 18:21:56] [safety_warp] [INFO] Layer 6 (attn_v):
+[2026-07-28 18:21:56] [safety_warp] [INFO]   - Frozen: 5041543.0/16777216 (30.05%)
+[2026-07-28 18:21:57] [safety_warp] [INFO] Layer 6 (ffn_down):
+[2026-07-28 18:21:57] [safety_warp] [INFO]   - Frozen: 13578261.0/45088768 (30.11%)
+[2026-07-28 18:21:57] [safety_warp] [INFO] Layer 6 (ffn_up):
+[2026-07-28 18:21:57] [safety_warp] [INFO]   - Frozen: 13760744.0/45088768 (30.52%)
+[2026-07-28 18:21:58] [safety_warp] [INFO] Layer 7 (attn_q):
+[2026-07-28 18:21:58] [safety_warp] [INFO]   - Frozen: 5088976.0/16777216 (30.33%)
+[2026-07-28 18:21:58] [safety_warp] [INFO] Layer 7 (attn_k):
+[2026-07-28 18:21:58] [safety_warp] [INFO]   - Frozen: 5261267.0/16777216 (31.36%)
+[2026-07-28 18:21:58] [safety_warp] [INFO] Layer 7 (attn_v):
+[2026-07-28 18:21:58] [safety_warp] [INFO]   - Frozen: 5037593.0/16777216 (30.03%)
+[2026-07-28 18:21:59] [safety_warp] [INFO] Layer 7 (ffn_down):
+[2026-07-28 18:21:59] [safety_warp] [INFO]   - Frozen: 13616187.0/45088768 (30.20%)
+[2026-07-28 18:21:59] [safety_warp] [INFO] Layer 7 (ffn_up):
+[2026-07-28 18:21:59] [safety_warp] [INFO]   - Frozen: 13729187.0/45088768 (30.45%)
+[2026-07-28 18:21:59] [safety_warp] [INFO] Layer 8 (attn_q):
+[2026-07-28 18:21:59] [safety_warp] [INFO]   - Frozen: 5071180.0/16777216 (30.23%)
+[2026-07-28 18:22:00] [safety_warp] [INFO] Layer 8 (attn_k):
+[2026-07-28 18:22:00] [safety_warp] [INFO]   - Frozen: 5159405.0/16777216 (30.75%)
+[2026-07-28 18:22:00] [safety_warp] [INFO] Layer 8 (attn_v):
+[2026-07-28 18:22:00] [safety_warp] [INFO]   - Frozen: 5045998.0/16777216 (30.08%)
+[2026-07-28 18:22:00] [safety_warp] [INFO] Layer 8 (ffn_down):
+[2026-07-28 18:22:00] [safety_warp] [INFO]   - Frozen: 13543521.0/45088768 (30.04%)
+[2026-07-28 18:22:01] [safety_warp] [INFO] Layer 8 (ffn_up):
+[2026-07-28 18:22:01] [safety_warp] [INFO]   - Frozen: 13684225.0/45088768 (30.35%)
+[2026-07-28 18:22:01] [safety_warp] [INFO] Layer 9 (attn_q):
+[2026-07-28 18:22:01] [safety_warp] [INFO]   - Frozen: 5124439.0/16777216 (30.54%)
+[2026-07-28 18:22:01] [safety_warp] [INFO] Layer 9 (attn_k):
+[2026-07-28 18:22:01] [safety_warp] [INFO]   - Frozen: 5078965.0/16777216 (30.27%)
+[2026-07-28 18:22:01] [safety_warp] [INFO] Layer 9 (attn_v):
+[2026-07-28 18:22:01] [safety_warp] [INFO]   - Frozen: 5263660.0/16777216 (31.37%)
+[2026-07-28 18:22:02] [safety_warp] [INFO] Layer 9 (ffn_down):
+[2026-07-28 18:22:02] [safety_warp] [INFO]   - Frozen: 13546329.0/45088768 (30.04%)
+[2026-07-28 18:22:02] [safety_warp] [INFO] Layer 9 (ffn_up):
+[2026-07-28 18:22:02] [safety_warp] [INFO]   - Frozen: 13697452.0/45088768 (30.38%)
+[2026-07-28 18:22:03] [safety_warp] [INFO] Layer 10 (attn_q):
+[2026-07-28 18:22:03] [safety_warp] [INFO]   - Frozen: 5041849.0/16777216 (30.05%)
+[2026-07-28 18:22:03] [safety_warp] [INFO] Layer 10 (attn_k):
+[2026-07-28 18:22:03] [safety_warp] [INFO]   - Frozen: 5058790.0/16777216 (30.15%)
+[2026-07-28 18:22:03] [safety_warp] [INFO] Layer 10 (attn_v):
+[2026-07-28 18:22:03] [safety_warp] [INFO]   - Frozen: 5051202.0/16777216 (30.11%)
+[2026-07-28 18:22:04] [safety_warp] [INFO] Layer 10 (ffn_down):
+[2026-07-28 18:22:04] [safety_warp] [INFO]   - Frozen: 13565235.0/45088768 (30.09%)
+[2026-07-28 18:22:04] [safety_warp] [INFO] Layer 10 (ffn_up):
+[2026-07-28 18:22:04] [safety_warp] [INFO]   - Frozen: 13643338.0/45088768 (30.26%)
+[2026-07-28 18:22:04] [safety_warp] [INFO] Layer 11 (attn_q):
+[2026-07-28 18:22:04] [safety_warp] [INFO]   - Frozen: 5068906.0/16777216 (30.21%)
+[2026-07-28 18:22:05] [safety_warp] [INFO] Layer 11 (attn_k):
+[2026-07-28 18:22:05] [safety_warp] [INFO]   - Frozen: 5083249.0/16777216 (30.30%)
+[2026-07-28 18:22:05] [safety_warp] [INFO] Layer 11 (attn_v):
+[2026-07-28 18:22:05] [safety_warp] [INFO]   - Frozen: 5036905.0/16777216 (30.02%)
+[2026-07-28 18:22:05] [safety_warp] [INFO] Layer 11 (ffn_down):
+[2026-07-28 18:22:05] [safety_warp] [INFO]   - Frozen: 13608409.0/45088768 (30.18%)
+[2026-07-28 18:22:06] [safety_warp] [INFO] Layer 11 (ffn_up):
+[2026-07-28 18:22:06] [safety_warp] [INFO]   - Frozen: 13541745.0/45088768 (30.03%)
+[2026-07-28 18:22:06] [safety_warp] [INFO] Layer 12 (attn_q):
+[2026-07-28 18:22:06] [safety_warp] [INFO]   - Frozen: 5047072.0/16777216 (30.08%)
+[2026-07-28 18:22:06] [safety_warp] [INFO] Layer 12 (attn_k):
+[2026-07-28 18:22:06] [safety_warp] [INFO]   - Frozen: 5053604.0/16777216 (30.12%)
+[2026-07-28 18:22:06] [safety_warp] [INFO] Layer 12 (attn_v):
+[2026-07-28 18:22:06] [safety_warp] [INFO]   - Frozen: 5044625.0/16777216 (30.07%)
+[2026-07-28 18:22:07] [safety_warp] [INFO] Layer 12 (ffn_down):
+[2026-07-28 18:22:07] [safety_warp] [INFO]   - Frozen: 13544820.0/45088768 (30.04%)
+[2026-07-28 18:22:07] [safety_warp] [INFO] Layer 12 (ffn_up):
+[2026-07-28 18:22:07] [safety_warp] [INFO]   - Frozen: 13600427.0/45088768 (30.16%)
+[2026-07-28 18:22:08] [safety_warp] [INFO] Layer 13 (attn_q):
+[2026-07-28 18:22:08] [safety_warp] [INFO]   - Frozen: 5040959.0/16777216 (30.05%)
+[2026-07-28 18:22:08] [safety_warp] [INFO] Layer 13 (attn_k):
+[2026-07-28 18:22:08] [safety_warp] [INFO]   - Frozen: 5103743.0/16777216 (30.42%)
+[2026-07-28 18:22:08] [safety_warp] [INFO] Layer 13 (attn_v):
+[2026-07-28 18:22:08] [safety_warp] [INFO]   - Frozen: 5054247.0/16777216 (30.13%)
+[2026-07-28 18:22:09] [safety_warp] [INFO] Layer 13 (ffn_down):
+[2026-07-28 18:22:09] [safety_warp] [INFO]   - Frozen: 13538595.0/45088768 (30.03%)
+[2026-07-28 18:22:09] [safety_warp] [INFO] Layer 13 (ffn_up):
+[2026-07-28 18:22:09] [safety_warp] [INFO]   - Frozen: 13597203.0/45088768 (30.16%)
+[2026-07-28 18:22:09] [safety_warp] [INFO] Layer 14 (attn_q):
+[2026-07-28 18:22:09] [safety_warp] [INFO]   - Frozen: 5036799.0/16777216 (30.02%)
+[2026-07-28 18:22:09] [safety_warp] [INFO] Layer 14 (attn_k):
+[2026-07-28 18:22:09] [safety_warp] [INFO]   - Frozen: 5042335.0/16777216 (30.05%)
+[2026-07-28 18:22:09] [safety_warp] [INFO] Layer 14 (attn_v):
+[2026-07-28 18:22:09] [safety_warp] [INFO]   - Frozen: 5040935.0/16777216 (30.05%)
+[2026-07-28 18:22:10] [safety_warp] [INFO] Layer 14 (ffn_down):
+[2026-07-28 18:22:10] [safety_warp] [INFO]   - Frozen: 13533850.0/45088768 (30.02%)
+[2026-07-28 18:22:10] [safety_warp] [INFO] Layer 14 (ffn_up):
+[2026-07-28 18:22:10] [safety_warp] [INFO]   - Frozen: 13622396.0/45088768 (30.21%)
+[2026-07-28 18:22:11] [safety_warp] [INFO] Layer 15 (attn_q):
+[2026-07-28 18:22:11] [safety_warp] [INFO]   - Frozen: 5052575.0/16777216 (30.12%)
+[2026-07-28 18:22:11] [safety_warp] [INFO] Layer 15 (attn_k):
+[2026-07-28 18:22:11] [safety_warp] [INFO]   - Frozen: 5060778.0/16777216 (30.16%)
+[2026-07-28 18:22:11] [safety_warp] [INFO] Layer 15 (attn_v):
+[2026-07-28 18:22:11] [safety_warp] [INFO]   - Frozen: 5044152.0/16777216 (30.07%)
+[2026-07-28 18:22:11] [safety_warp] [INFO] Layer 15 (ffn_down):
+[2026-07-28 18:22:11] [safety_warp] [INFO]   - Frozen: 13559993.0/45088768 (30.07%)
+[2026-07-28 18:22:12] [safety_warp] [INFO] Layer 15 (ffn_up):
+[2026-07-28 18:22:12] [safety_warp] [INFO]   - Frozen: 13636427.0/45088768 (30.24%)
+[2026-07-28 18:22:12] [safety_warp] [INFO] Layer 16 (attn_q):
+[2026-07-28 18:22:12] [safety_warp] [INFO]   - Frozen: 5051193.0/16777216 (30.11%)
+[2026-07-28 18:22:12] [safety_warp] [INFO] Layer 16 (attn_k):
+[2026-07-28 18:22:12] [safety_warp] [INFO]   - Frozen: 5059396.0/16777216 (30.16%)
+[2026-07-28 18:22:13] [safety_warp] [INFO] Layer 16 (attn_v):
+[2026-07-28 18:22:13] [safety_warp] [INFO]   - Frozen: 5055935.0/16777216 (30.14%)
+[2026-07-28 18:22:13] [safety_warp] [INFO] Layer 16 (ffn_down):
+[2026-07-28 18:22:13] [safety_warp] [INFO]   - Frozen: 13740915.0/45088768 (30.48%)
+[2026-07-28 18:22:14] [safety_warp] [INFO] Layer 16 (ffn_up):
+[2026-07-28 18:22:14] [safety_warp] [INFO]   - Frozen: 13567024.0/45088768 (30.09%)
+[2026-07-28 18:22:14] [safety_warp] [INFO] Layer 17 (attn_q):
+[2026-07-28 18:22:14] [safety_warp] [INFO]   - Frozen: 5037764.0/16777216 (30.03%)
+[2026-07-28 18:22:14] [safety_warp] [INFO] Layer 17 (attn_k):
+[2026-07-28 18:22:14] [safety_warp] [INFO]   - Frozen: 5045365.0/16777216 (30.07%)
+[2026-07-28 18:22:14] [safety_warp] [INFO] Layer 17 (attn_v):
+[2026-07-28 18:22:14] [safety_warp] [INFO]   - Frozen: 5045876.0/16777216 (30.08%)
+[2026-07-28 18:22:15] [safety_warp] [INFO] Layer 17 (ffn_down):
+[2026-07-28 18:22:15] [safety_warp] [INFO]   - Frozen: 13527587.0/45088768 (30.00%)
+[2026-07-28 18:22:15] [safety_warp] [INFO] Layer 17 (ffn_up):
+[2026-07-28 18:22:15] [safety_warp] [INFO]   - Frozen: 13540901.0/45088768 (30.03%)
+[2026-07-28 18:22:15] [safety_warp] [INFO] Layer 18 (attn_q):
+[2026-07-28 18:22:15] [safety_warp] [INFO]   - Frozen: 5065262.0/16777216 (30.19%)
+[2026-07-28 18:22:16] [safety_warp] [INFO] Layer 18 (attn_k):
+[2026-07-28 18:22:16] [safety_warp] [INFO]   - Frozen: 5054932.0/16777216 (30.13%)
+[2026-07-28 18:22:16] [safety_warp] [INFO] Layer 18 (attn_v):
+[2026-07-28 18:22:16] [safety_warp] [INFO]   - Frozen: 5084218.0/16777216 (30.30%)
+[2026-07-28 18:22:16] [safety_warp] [INFO] Layer 18 (ffn_down):
+[2026-07-28 18:22:16] [safety_warp] [INFO]   - Frozen: 13589385.0/45088768 (30.14%)
+[2026-07-28 18:22:17] [safety_warp] [INFO] Layer 18 (ffn_up):
+[2026-07-28 18:22:17] [safety_warp] [INFO]   - Frozen: 13652015.0/45088768 (30.28%)
+[2026-07-28 18:22:17] [safety_warp] [INFO] Layer 19 (attn_q):
+[2026-07-28 18:22:17] [safety_warp] [INFO]   - Frozen: 5053942.0/16777216 (30.12%)
+[2026-07-28 18:22:17] [safety_warp] [INFO] Layer 19 (attn_k):
+[2026-07-28 18:22:17] [safety_warp] [INFO]   - Frozen: 5073999.0/16777216 (30.24%)
+[2026-07-28 18:22:18] [safety_warp] [INFO] Layer 19 (attn_v):
+[2026-07-28 18:22:18] [safety_warp] [INFO]   - Frozen: 5076254.0/16777216 (30.26%)
+[2026-07-28 18:22:18] [safety_warp] [INFO] Layer 19 (ffn_down):
+[2026-07-28 18:22:18] [safety_warp] [INFO]   - Frozen: 13599332.0/45088768 (30.16%)
+[2026-07-28 18:22:19] [safety_warp] [INFO] Layer 19 (ffn_up):
+[2026-07-28 18:22:19] [safety_warp] [INFO]   - Frozen: 13548937.0/45088768 (30.05%)
+[2026-07-28 18:22:19] [safety_warp] [INFO] Layer 20 (attn_q):
+[2026-07-28 18:22:19] [safety_warp] [INFO]   - Frozen: 5057776.0/16777216 (30.15%)
+[2026-07-28 18:22:19] [safety_warp] [INFO] Layer 20 (attn_k):
+[2026-07-28 18:22:19] [safety_warp] [INFO]   - Frozen: 5051763.0/16777216 (30.11%)
+[2026-07-28 18:22:19] [safety_warp] [INFO] Layer 20 (attn_v):
+[2026-07-28 18:22:19] [safety_warp] [INFO]   - Frozen: 5283076.0/16777216 (31.49%)
+[2026-07-28 18:22:20] [safety_warp] [INFO] Layer 20 (ffn_down):
+[2026-07-28 18:22:20] [safety_warp] [INFO]   - Frozen: 13564141.0/45088768 (30.08%)
+[2026-07-28 18:22:20] [safety_warp] [INFO] Layer 20 (ffn_up):
+[2026-07-28 18:22:20] [safety_warp] [INFO]   - Frozen: 13670549.0/45088768 (30.32%)
+[2026-07-28 18:22:20] [safety_warp] [INFO] Layer 21 (attn_q):
+[2026-07-28 18:22:20] [safety_warp] [INFO]   - Frozen: 5065520.0/16777216 (30.19%)
+[2026-07-28 18:22:21] [safety_warp] [INFO] Layer 21 (attn_k):
+[2026-07-28 18:22:21] [safety_warp] [INFO]   - Frozen: 5039679.0/16777216 (30.04%)
+[2026-07-28 18:22:21] [safety_warp] [INFO] Layer 21 (attn_v):
+[2026-07-28 18:22:21] [safety_warp] [INFO]   - Frozen: 5425387.0/16777216 (32.34%)
+[2026-07-28 18:22:21] [safety_warp] [INFO] Layer 21 (ffn_down):
+[2026-07-28 18:22:21] [safety_warp] [INFO]   - Frozen: 13630073.0/45088768 (30.23%)
+[2026-07-28 18:22:22] [safety_warp] [INFO] Layer 21 (ffn_up):
+[2026-07-28 18:22:22] [safety_warp] [INFO]   - Frozen: 13720251.0/45088768 (30.43%)
+[2026-07-28 18:22:22] [safety_warp] [INFO] Layer 22 (attn_q):
+[2026-07-28 18:22:22] [safety_warp] [INFO]   - Frozen: 5051160.0/16777216 (30.11%)
+[2026-07-28 18:22:22] [safety_warp] [INFO] Layer 22 (attn_k):
+[2026-07-28 18:22:22] [safety_warp] [INFO]   - Frozen: 5123560.0/16777216 (30.54%)
+[2026-07-28 18:22:22] [safety_warp] [INFO] Layer 22 (attn_v):
+[2026-07-28 18:22:22] [safety_warp] [INFO]   - Frozen: 5055038.0/16777216 (30.13%)
+[2026-07-28 18:22:23] [safety_warp] [INFO] Layer 22 (ffn_down):
+[2026-07-28 18:22:23] [safety_warp] [INFO]   - Frozen: 13554728.0/45088768 (30.06%)
+[2026-07-28 18:22:24] [safety_warp] [INFO] Layer 22 (ffn_up):
+[2026-07-28 18:22:24] [safety_warp] [INFO]   - Frozen: 13655623.0/45088768 (30.29%)
+[2026-07-28 18:22:24] [safety_warp] [INFO] Layer 23 (attn_q):
+[2026-07-28 18:22:24] [safety_warp] [INFO]   - Frozen: 5090556.0/16777216 (30.34%)
+[2026-07-28 18:22:24] [safety_warp] [INFO] Layer 23 (attn_k):
+[2026-07-28 18:22:24] [safety_warp] [INFO]   - Frozen: 5090029.0/16777216 (30.34%)
+[2026-07-28 18:22:24] [safety_warp] [INFO] Layer 23 (attn_v):
+[2026-07-28 18:22:24] [safety_warp] [INFO]   - Frozen: 5036036.0/16777216 (30.02%)
+[2026-07-28 18:22:25] [safety_warp] [INFO] Layer 23 (ffn_down):
+[2026-07-28 18:22:25] [safety_warp] [INFO]   - Frozen: 13685532.0/45088768 (30.35%)
+[2026-07-28 18:22:26] [safety_warp] [INFO] Layer 23 (ffn_up):
+[2026-07-28 18:22:26] [safety_warp] [INFO]   - Frozen: 13749154.0/45088768 (30.49%)
+[2026-07-28 18:22:26] [safety_warp] [INFO] Layer 24 (attn_q):
+[2026-07-28 18:22:26] [safety_warp] [INFO]   - Frozen: 5055346.0/16777216 (30.13%)
+[2026-07-28 18:22:26] [safety_warp] [INFO] Layer 24 (attn_k):
+[2026-07-28 18:22:26] [safety_warp] [INFO]   - Frozen: 5125872.0/16777216 (30.55%)
+[2026-07-28 18:22:26] [safety_warp] [INFO] Layer 24 (attn_v):
+[2026-07-28 18:22:26] [safety_warp] [INFO]   - Frozen: 5037086.0/16777216 (30.02%)
+[2026-07-28 18:22:26] [safety_warp] [INFO] Layer 24 (ffn_down):
+[2026-07-28 18:22:26] [safety_warp] [INFO]   - Frozen: 13656571.0/45088768 (30.29%)
+[2026-07-28 18:22:27] [safety_warp] [INFO] Layer 24 (ffn_up):
+[2026-07-28 18:22:27] [safety_warp] [INFO]   - Frozen: 14140136.0/45088768 (31.36%)
+[2026-07-28 18:22:27] [safety_warp] [INFO] Layer 25 (attn_q):
+[2026-07-28 18:22:27] [safety_warp] [INFO]   - Frozen: 5043111.0/16777216 (30.06%)
+[2026-07-28 18:22:27] [safety_warp] [INFO] Layer 25 (attn_k):
+[2026-07-28 18:22:27] [safety_warp] [INFO]   - Frozen: 5057436.0/16777216 (30.14%)
+[2026-07-28 18:22:28] [safety_warp] [INFO] Layer 25 (attn_v):
+[2026-07-28 18:22:28] [safety_warp] [INFO]   - Frozen: 5037525.0/16777216 (30.03%)
+[2026-07-28 18:22:28] [safety_warp] [INFO] Layer 25 (ffn_down):
+[2026-07-28 18:22:28] [safety_warp] [INFO]   - Frozen: 13844354.0/45088768 (30.70%)
+[2026-07-28 18:22:29] [safety_warp] [INFO] Layer 25 (ffn_up):
+[2026-07-28 18:22:29] [safety_warp] [INFO]   - Frozen: 13765183.0/45088768 (30.53%)
+[2026-07-28 18:22:29] [safety_warp] [INFO] Layer 26 (attn_q):
+[2026-07-28 18:22:29] [safety_warp] [INFO]   - Frozen: 5044993.0/16777216 (30.07%)
+[2026-07-28 18:22:29] [safety_warp] [INFO] Layer 26 (attn_k):
+[2026-07-28 18:22:29] [safety_warp] [INFO]   - Frozen: 5109361.0/16777216 (30.45%)
+[2026-07-28 18:22:29] [safety_warp] [INFO] Layer 26 (attn_v):
+[2026-07-28 18:22:29] [safety_warp] [INFO]   - Frozen: 5046527.0/16777216 (30.08%)
+[2026-07-28 18:22:30] [safety_warp] [INFO] Layer 26 (ffn_down):
+[2026-07-28 18:22:30] [safety_warp] [INFO]   - Frozen: 13717138.0/45088768 (30.42%)
+[2026-07-28 18:22:30] [safety_warp] [INFO] Layer 26 (ffn_up):
+[2026-07-28 18:22:30] [safety_warp] [INFO]   - Frozen: 13533587.0/45088768 (30.02%)
+[2026-07-28 18:22:30] [safety_warp] [INFO] Layer 27 (attn_q):
+[2026-07-28 18:22:30] [safety_warp] [INFO]   - Frozen: 5043627.0/16777216 (30.06%)
+[2026-07-28 18:22:31] [safety_warp] [INFO] Layer 27 (attn_k):
+[2026-07-28 18:22:31] [safety_warp] [INFO]   - Frozen: 5101423.0/16777216 (30.41%)
+[2026-07-28 18:22:31] [safety_warp] [INFO] Layer 27 (attn_v):
+[2026-07-28 18:22:31] [safety_warp] [INFO]   - Frozen: 5036400.0/16777216 (30.02%)
+[2026-07-28 18:22:31] [safety_warp] [INFO] Layer 27 (ffn_down):
+[2026-07-28 18:22:31] [safety_warp] [INFO]   - Frozen: 13758276.0/45088768 (30.51%)
+[2026-07-28 18:22:32] [safety_warp] [INFO] Layer 27 (ffn_up):
+[2026-07-28 18:22:32] [safety_warp] [INFO]   - Frozen: 13559441.0/45088768 (30.07%)
+[2026-07-28 18:22:32] [safety_warp] [INFO] Layer 28 (attn_q):
+[2026-07-28 18:22:32] [safety_warp] [INFO]   - Frozen: 5059365.0/16777216 (30.16%)
+[2026-07-28 18:22:32] [safety_warp] [INFO] Layer 28 (attn_k):
+[2026-07-28 18:22:32] [safety_warp] [INFO]   - Frozen: 5091900.0/16777216 (30.35%)
+[2026-07-28 18:22:32] [safety_warp] [INFO] Layer 28 (attn_v):
+[2026-07-28 18:22:32] [safety_warp] [INFO]   - Frozen: 5039672.0/16777216 (30.04%)
+[2026-07-28 18:22:33] [safety_warp] [INFO] Layer 28 (ffn_down):
+[2026-07-28 18:22:33] [safety_warp] [INFO]   - Frozen: 14803768.0/45088768 (32.83%)
+[2026-07-28 18:22:33] [safety_warp] [INFO] Layer 28 (ffn_up):
+[2026-07-28 18:22:33] [safety_warp] [INFO]   - Frozen: 13614432.0/45088768 (30.19%)
+[2026-07-28 18:22:33] [safety_warp] [INFO] Layer 29 (attn_q):
+[2026-07-28 18:22:33] [safety_warp] [INFO]   - Frozen: 5037759.0/16777216 (30.03%)
+[2026-07-28 18:22:34] [safety_warp] [INFO] Layer 29 (attn_k):
+[2026-07-28 18:22:34] [safety_warp] [INFO]   - Frozen: 5034150.0/16777216 (30.01%)
+[2026-07-28 18:22:34] [safety_warp] [INFO] Layer 29 (attn_v):
+[2026-07-28 18:22:34] [safety_warp] [INFO]   - Frozen: 5103739.0/16777216 (30.42%)
+[2026-07-28 18:22:34] [safety_warp] [INFO] Layer 29 (ffn_down):
+[2026-07-28 18:22:34] [safety_warp] [INFO]   - Frozen: 14096218.0/45088768 (31.26%)
+[2026-07-28 18:22:35] [safety_warp] [INFO] Layer 29 (ffn_up):
+[2026-07-28 18:22:35] [safety_warp] [INFO]   - Frozen: 13611652.0/45088768 (30.19%)
+[2026-07-28 18:22:35] [safety_warp] [INFO] Layer 30 (attn_q):
+[2026-07-28 18:22:35] [safety_warp] [INFO]   - Frozen: 5097522.0/16777216 (30.38%)
+[2026-07-28 18:22:35] [safety_warp] [INFO] Layer 30 (attn_k):
+[2026-07-28 18:22:35] [safety_warp] [INFO]   - Frozen: 5126341.0/16777216 (30.56%)
+[2026-07-28 18:22:35] [safety_warp] [INFO] Layer 30 (attn_v):
+[2026-07-28 18:22:35] [safety_warp] [INFO]   - Frozen: 5035257.0/16777216 (30.01%)
+[2026-07-28 18:22:36] [safety_warp] [INFO] Layer 30 (ffn_down):
+[2026-07-28 18:22:36] [safety_warp] [INFO]   - Frozen: 13695932.0/45088768 (30.38%)
+[2026-07-28 18:22:37] [safety_warp] [INFO] Layer 30 (ffn_up):
+[2026-07-28 18:22:37] [safety_warp] [INFO]   - Frozen: 13598350.0/45088768 (30.16%)
+[2026-07-28 18:22:37] [safety_warp] [INFO] Layer 31 (attn_q):
+[2026-07-28 18:22:37] [safety_warp] [INFO]   - Frozen: 5066116.0/16777216 (30.20%)
+[2026-07-28 18:22:37] [safety_warp] [INFO] Layer 31 (attn_k):
+[2026-07-28 18:22:37] [safety_warp] [INFO]   - Frozen: 5103064.0/16777216 (30.42%)
+[2026-07-28 18:22:37] [safety_warp] [INFO] Layer 31 (attn_v):
+[2026-07-28 18:22:37] [safety_warp] [INFO]   - Frozen: 5097457.0/16777216 (30.38%)
+[2026-07-28 18:22:38] [safety_warp] [INFO] Layer 31 (ffn_down):
+[2026-07-28 18:22:38] [safety_warp] [INFO]   - Frozen: 13555607.0/45088768 (30.06%)
+[2026-07-28 18:22:38] [safety_warp] [INFO] Layer 31 (ffn_up):
+[2026-07-28 18:22:38] [safety_warp] [INFO]   - Frozen: 13546617.0/45088768 (30.04%)
+[2026-07-28 18:22:38] [safety_warp] [INFO] ======================================================================
+[2026-07-28 18:22:38] [safety_warp] [INFO] ✓ Masks generated for 160 modules
+[2026-07-28 18:22:40] [safety_warp] [INFO] [PROFILE] ■ Phase 2 / generate_masks ok | time=00:00:55 (54.8s) | torch_alloc_peak=36.35GB | torch_reserved_peak=60.67GB | device_peak=61.51GB
+[2026-07-28 18:22:40] [safety_warp] [INFO] [PROFILE] ▶ Phase 2 / save_masks 시작
+[2026-07-28 18:23:27] [safety_warp] [INFO] ✓ Masks saved to: ./checkpoints/phase2_20260728_182240/checkpoints/masks
+[2026-07-28 18:23:27] [safety_warp] [INFO] ✓ Metadata saved to: ./checkpoints/phase2_20260728_182240/checkpoints/masks/metadata.json
+[2026-07-28 18:23:27] [safety_warp] [INFO] [PROFILE] ■ Phase 2 / save_masks ok | time=00:00:47 (46.8s) | torch_alloc_peak=36.35GB | torch_reserved_peak=60.67GB | device_peak=61.51GB
+[2026-07-28 18:23:27] [safety_warp] [INFO] ======================================================================
+[2026-07-28 18:23:27] [safety_warp] [INFO] Phase 2 Completed!
+[2026-07-28 18:23:27] [safety_warp] [INFO] Masks saved to: ./checkpoints/phase2_20260728_182240/checkpoints/masks
+[2026-07-28 18:23:27] [safety_warp] [INFO] ======================================================================
+[2026-07-28 18:23:27] [safety_warp] [INFO] Next step: Run Phase 3 with --masks_dir ./checkpoints/phase2_20260728_182240/checkpoints/masks
+[2026-07-28 18:23:27] [safety_warp] [INFO] ======================================================================
+[2026-07-28 18:23:27] [safety_warp] [INFO] ==============================================================================
+[2026-07-28 18:23:27] [safety_warp] [INFO] [PROFILE] Phase 2 리소스 요약 (시간 / VRAM)
+[2026-07-28 18:23:27] [safety_warp] [INFO] ==============================================================================
+[2026-07-28 18:23:27] [safety_warp] [INFO] stage                               time   torch_alloc   torch_resv     device  device-base
+[2026-07-28 18:23:27] [safety_warp] [INFO] -------------------------------------------------------------------------------------------
+[2026-07-28 18:23:27] [safety_warp] [INFO] load_basis                      00:00:11         0.00G        0.00G      0.61G        0.00G
+[2026-07-28 18:23:27] [safety_warp] [INFO] load_model                      00:00:05        12.55G       12.56G     13.17G       12.56G
+[2026-07-28 18:23:27] [safety_warp] [INFO] convert_to_warp_modules         00:00:00        25.20G       25.41G     13.17G       12.56G
+[2026-07-28 18:23:27] [safety_warp] [INFO] reparameterize_weights          00:00:19        36.71G       38.67G     38.99G       38.38G
+[2026-07-28 18:23:27] [safety_warp] [INFO] load_data                       00:00:00        36.34G       38.67G     39.44G       38.83G
+[2026-07-28 18:23:27] [safety_warp] [INFO] compute_importance              00:07:51        70.90G       72.46G     73.30G       72.69G
+[2026-07-28 18:23:27] [safety_warp] [INFO] generate_masks                  00:00:55        36.35G       60.67G     61.51G       60.89G
+[2026-07-28 18:23:27] [safety_warp] [INFO] save_masks                      00:00:47        36.35G       60.67G     61.51G       60.89G
+[2026-07-28 18:23:27] [safety_warp] [INFO] -------------------------------------------------------------------------------------------
+[2026-07-28 18:23:27] [safety_warp] [INFO] TOTAL                           00:10:10        70.90G       72.46G     73.30G       72.69G
+[2026-07-28 18:23:27] [safety_warp] [INFO]   GPU 0 (NVIDIA B200): capacity 178.4GB
+[2026-07-28 18:23:27] [safety_warp] [INFO]   device baseline (프로파일 시작 시점 사용량, 타 프로세스 포함): 0.61GB
+[2026-07-28 18:23:27] [safety_warp] [INFO]   torch_alloc/torch_resv = 이 프로세스의 torch allocator 기준, device = nvidia-smi 기준 전체 사용량
+[2026-07-28 18:23:27] [safety_warp] [INFO] ==============================================================================
+[2026-07-28 18:23:27] [safety_warp] [INFO] [PROFILE] 요약 저장: ./logs/profile_btsweep_20260728_154515/phase2_kr0_30_.json
+[2026-07-28 18:23:27] [safety_warp] [INFO] ======================================================================
+[2026-07-28 18:23:27] [safety_warp] [INFO] All tasks completed successfully!
+[2026-07-28 18:23:27] [safety_warp] [INFO] ======================================================================
