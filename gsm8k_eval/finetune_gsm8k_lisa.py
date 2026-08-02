@@ -47,6 +47,11 @@ import torch.nn as nn
 # 이 파일은 <repo>/gsm8k_eval/ 에 있으므로 repo 루트는 한 단계 위.
 _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _DEFAULT_SAFETY_DATA = os.path.join(_REPO_ROOT, "data", "circuit_breakers_train.json")
+# data/local_task_dataset.py 를 import 하려면 repo 루트가 path 에 있어야 한다
+# (이 스크립트를 gsm8k_eval/ 안에서 직접 실행하는 경우 대비).
+import sys
+if _REPO_ROOT not in sys.path:
+    sys.path.insert(0, _REPO_ROOT)
 from torch.utils.data import DataLoader, RandomSampler
 from datasets import load_dataset, Dataset as HFDataset
 from transformers import (
@@ -87,6 +92,12 @@ def parse_args():
     p.add_argument("--num_train_samples", type=int, default=7473)
     p.add_argument("--num_eval_samples", type=int, default=0)
     p.add_argument("--seed", type=int, default=42)
+
+    # 로컬 JSON 다운스트림 태스크(SST-2 / AG News). 지정하면 GSM8K 대신 이 파일로 학습한다.
+    p.add_argument("--task_data_path", type=str, default=None,
+                   help="data/sst2_train_8k_seed42.json 같은 로컬 태스크 JSON. "
+                        "지정 시 --dataset_name(GSM8K) 대신 사용")
+    p.add_argument("--task_samples", type=int, default=0, help="0=전체")
 
     # training
     p.add_argument("--batch_size", type=int, default=4)
@@ -412,7 +423,9 @@ def main():
     logger.info(f"   ├─ BSO: {'ON' if bso_on else 'OFF (순수 SFT)'}  rho={args.rho} "
                 f"align_step={args.alignment_step} finetune_step={args.finetune_step}")
     logger.info(f"   ├─ Safety(alignment) data: {args.safety_data_path} (guide_data_num={args.guide_data_num})")
-    logger.info(f"   ├─ Downstream: GSM8K ({args.num_train_samples} samples), clean (no poison)")
+    downstream_desc = (f"{args.task_data_path} (로컬 태스크 JSON)" if args.task_data_path
+                       else f"GSM8K ({args.num_train_samples} samples)")
+    logger.info(f"   ├─ Downstream: {downstream_desc}, clean (no poison)")
     logger.info(f"   ├─ LR: {args.learning_rate}  epochs: {args.epochs}  "
                 f"eff.batch: {args.batch_size * args.grad_accum}")
     logger.info(f"   └─ Output dir: {args.output_dir}\n")
@@ -463,28 +476,40 @@ def main():
     logger.info(f"✅ Model loaded ({total_params/1e9:.2f}B total, "
                 f"{trainable_params/1e6:.1f}M trainable = {100*trainable_params/total_params:.2f}%)")
 
-    # --- downstream (GSM8K) ---
-    logger.info("[3/4] Loading & tokenizing GSM8K (downstream/finetune)")
-    train_ds = load_dataset(args.dataset_name, args.dataset_subset,
-                            split=args.train_split, cache_dir=args.cache_dir)
-    train_ds = _select_first_n(train_ds, args.num_train_samples)
-
-    eval_ds = None
-    if args.num_eval_samples and args.num_eval_samples > 0:
-        eval_ds = load_dataset(args.dataset_name, args.dataset_subset,
-                               split=args.eval_split, cache_dir=args.cache_dir)
-        eval_ds = _select_first_n(eval_ds, args.num_eval_samples)
-
-    def preprocess_gsm8k(ex):
-        return tokenize_sft_example(ex["question"], ex["answer"], tokenizer, args.max_length, model_path)
-
-    train_tok = train_ds.map(preprocess_gsm8k, remove_columns=train_ds.column_names,
-                             num_proc=max(1, args.num_workers), desc="Tokenizing GSM8K")
+    # --- downstream (GSM8K 또는 로컬 태스크 JSON) ---
     eval_tok = None
-    if eval_ds is not None:
-        eval_tok = eval_ds.map(preprocess_gsm8k, remove_columns=eval_ds.column_names,
-                               num_proc=max(1, args.num_workers), desc="Tokenizing eval")
-    logger.info(f"✅ GSM8K train: {len(train_tok)} samples")
+    if args.task_data_path:
+        from data.local_task_dataset import build_task_dataset, infer_task_name
+        task_name = infer_task_name(args.task_data_path)
+        logger.info(f"[3/4] Loading & tokenizing 로컬 태스크 '{task_name}' "
+                    f"({args.task_data_path}) — downstream/finetune")
+        train_tok = build_task_dataset(args.task_data_path, tokenizer, args.max_length,
+                                       model_path, tokenize_sft_example,
+                                       max_samples=args.task_samples,
+                                       desc=f"Tokenizing {task_name}")
+        # 로컬 태스크는 eval split 을 쓰지 않는다(학습 중 eval 없음, 평가는 별도 하네스).
+        logger.info(f"✅ {task_name} train: {len(train_tok)} samples")
+    else:
+        logger.info("[3/4] Loading & tokenizing GSM8K (downstream/finetune)")
+        train_ds = load_dataset(args.dataset_name, args.dataset_subset,
+                                split=args.train_split, cache_dir=args.cache_dir)
+        train_ds = _select_first_n(train_ds, args.num_train_samples)
+
+        eval_ds = None
+        if args.num_eval_samples and args.num_eval_samples > 0:
+            eval_ds = load_dataset(args.dataset_name, args.dataset_subset,
+                                   split=args.eval_split, cache_dir=args.cache_dir)
+            eval_ds = _select_first_n(eval_ds, args.num_eval_samples)
+
+        def preprocess_gsm8k(ex):
+            return tokenize_sft_example(ex["question"], ex["answer"], tokenizer, args.max_length, model_path)
+
+        train_tok = train_ds.map(preprocess_gsm8k, remove_columns=train_ds.column_names,
+                                 num_proc=max(1, args.num_workers), desc="Tokenizing GSM8K")
+        if eval_ds is not None:
+            eval_tok = eval_ds.map(preprocess_gsm8k, remove_columns=eval_ds.column_names,
+                                   num_proc=max(1, args.num_workers), desc="Tokenizing eval")
+        logger.info(f"✅ GSM8K train: {len(train_tok)} samples")
 
     # --- alignment (circuit_breakers safety responses) ---
     alignment_tok = None
@@ -554,7 +579,8 @@ def main():
                    "lora": args.lora, "lora_r": args.lora_r, "lora_alpha": args.lora_alpha,
                    "rho": args.rho, "alignment_step": args.alignment_step,
                    "finetune_step": args.finetune_step, "guide_data_num": args.guide_data_num,
-                   "safety_data_path": args.safety_data_path, "dataset": "gsm8k",
+                   "safety_data_path": args.safety_data_path,
+                   "dataset": (args.task_data_path or "gsm8k"),
                    "bso": bso_on,
                })
 
@@ -581,13 +607,13 @@ def main():
         'base_model': model_path,
         'method': 'LISA (Bi-State Optimization)',
         'fine_tuning_type': 'LoRA' if args.lora else 'Full Parameter',
-        'dataset': 'GSM8K (clean, no poison)',
+        'dataset': (args.task_data_path if args.task_data_path else 'GSM8K (clean, no poison)'),
         'safety_data_path': args.safety_data_path,
         'guide_data_num': args.guide_data_num,
         'rho': args.rho,
         'alignment_step': args.alignment_step,
         'finetune_step': args.finetune_step,
-        'num_train_samples': args.num_train_samples,
+        'num_train_samples': len(train_tok),
         'batch_size': args.batch_size, 'grad_accum': args.grad_accum,
         'learning_rate': args.learning_rate, 'weight_decay': args.weight_decay,
         'warmup_ratio': args.warmup_ratio, 'epochs': args.epochs,

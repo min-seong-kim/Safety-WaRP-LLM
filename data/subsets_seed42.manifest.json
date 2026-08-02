@@ -1,0 +1,57 @@
+{
+  "sampling_seed": 42,
+  "files": {
+    "agnews_train_8k_seed42.json": {
+      "dataset_id": "fancyzhx/ag_news",
+      "split": "train",
+      "dataset_fingerprint": "2bc1e2be15d7f2ee",
+      "sampling": "stratified",
+      "rows": 8000,
+      "class_distribution": {
+        "Business": 2000,
+        "Sci/Tech": 2000,
+        "Sports": 2000,
+        "World": 2000
+      },
+      "sha256": "d7765307365891f3f9a2d0d93e7270a985cce8056be7b69af6713a49bfda9a94"
+    },
+    "agnews_test_1k_seed42.json": {
+      "dataset_id": "fancyzhx/ag_news",
+      "split": "test",
+      "dataset_fingerprint": "0ebcc57b6aea2fc9",
+      "sampling": "stratified",
+      "rows": 1000,
+      "class_distribution": {
+        "Business": 250,
+        "Sci/Tech": 250,
+        "Sports": 250,
+        "World": 250
+      },
+      "sha256": "f02bec8de1b9635be6da0adf1645083745a16f3fe1f3ef98b19802087537c95c"
+    },
+    "sst2_train_8k_seed42.json": {
+      "dataset_id": "stanfordnlp/sst2",
+      "split": "train",
+      "dataset_fingerprint": "e7e6610fdbb3c277",
+      "sampling": "stratified",
+      "rows": 8000,
+      "class_distribution": {
+        "negative": 3537,
+        "positive": 4463
+      },
+      "sha256": "fc2c1a98f2497e69ca07750352540a6245b8d7851b68874b44818f66d8d9d087"
+    },
+    "sst2_validation_full.json": {
+      "dataset_id": "stanfordnlp/sst2",
+      "split": "validation",
+      "dataset_fingerprint": "c1ddc6497ec97f98",
+      "sampling": "full",
+      "rows": 872,
+      "class_distribution": {
+        "negative": 428,
+        "positive": 444
+      },
+      "sha256": "ab3345fb4cfa2f5573880a629436be1b0646af2ae126c27ca5919cf96ed7c361"
+    }
+  }
+}

@@ -7,6 +7,8 @@
   original_projected_lora  : ΔW = s·BA(I−EEᵀ)          (A[:, safe_cols]=0, optimizer.step 후 재투영)
   wsr_lora                 : ΔW = [(1−M)∘(s·BA)] Uᵀ    (basis 공간 element freeze, forward 사전제약)
   safe_lora                : 표준 LoRA 학습 후 lora_B ← C·B (C=VVᵀ/‖V‖, cos≤thr 레이어만) 사후 투영
+  asft                     : 표준 LoRA 학습 + 매 step L += λ·Σ‖(I−C)BA‖²_F  (AsFT, arXiv:2506.08473)
+                             C 는 safe_lora 와 동일한 행렬. 사후 투영 대신 연속적인 벌점.
   adapter_subspace_lora    : ΔW_d^⊥ = s·B_d A_d (I−Q_S Q_Sᵀ)
                              Q_S = safety LoRA adapter ΔW_s=s_s B_s A_s 의 right singular vectors.
                              safety adapter 는 고정, downstream adapter 만 학습하며 A_d Q_S = 0 유지.
@@ -58,7 +60,7 @@ def parse_args():
     ap = argparse.ArgumentParser()
     ap.add_argument("--method", required=True,
                     choices=["lora", "original_projected_lora", "wsr_lora", "wsr_lora_nou",
-                             "safe_lora", "adapter_subspace_lora",
+                             "safe_lora", "asft", "adapter_subspace_lora",
                              "adapter_aware_wsr_projected_lora"])
     ap.add_argument("--model_name", required=True)
     ap.add_argument("--output_dir", required=True)
@@ -76,6 +78,18 @@ def parse_args():
     ap.add_argument("--safelora_num_proj_layers", type=int, default=10)
     ap.add_argument("--safelora_load_dtype", default="float32", choices=["float32", "bfloat16", "float16"],
                     help="base/aligned 로드 dtype (기본 float32=공식 구현과 동일)")
+    # asft (AsFT, arXiv:2506.08473) — 학습 중 subspace 정규화
+    ap.add_argument("--asft_lambda_reg", type=float, default=1.0,
+                    help="정규화 계수 λ (참조 구현 scripts/*/AsFT_reg1_p_0.1.sh 기본값 1)")
+    ap.add_argument("--asft_base_model", default=None,
+                    help="alignment direction V=W_aligned−W_base 의 base 모델 "
+                         "(기본: --safelora_base_model — 두 방법이 같은 V 를 쓰도록)")
+    ap.add_argument("--asft_aligned_model", default=None,
+                    help="aligned 모델 (기본: --safelora_aligned_model 또는 --model_name)")
+    ap.add_argument("--asft_store_dtype", default="float32", choices=["float32", "bfloat16"],
+                    help="V 를 GPU 에 상주시킬 dtype. float32=참조 구현과 동일 정밀도")
+    ap.add_argument("--asft_check_equiv", action="store_true",
+                    help="첫 step 에 참조 구현 원식과 등가성 대조 로그를 남긴다")
     # adapter_subspace_lora
     ap.add_argument("--safety_adapter_path", default=None,
                     help="safety LoRA adapter 디렉토리 (B_s, A_s). --model_name 은 base 모델이어야 함")
@@ -106,6 +120,11 @@ def parse_args():
     ap.add_argument("--dataset_name", default="openai/gsm8k")
     ap.add_argument("--dataset_subset", default="main")
     ap.add_argument("--gsm8k_samples", type=int, default=0)
+    # 로컬 JSON 다운스트림 태스크(SST-2 / AG News). 지정하면 GSM8K 대신 이 파일로 학습한다.
+    ap.add_argument("--task_data_path", default=None,
+                    help="data/sst2_train_8k_seed42.json 같은 로컬 태스크 JSON. "
+                         "지정 시 --dataset_name(GSM8K) 대신 사용")
+    ap.add_argument("--task_samples", type=int, default=0, help="0=전체")
     ap.add_argument("--learning_rate", type=float, default=1e-4)
     ap.add_argument("--epochs", type=int, default=3)
     ap.add_argument("--batch_size", type=int, default=2)
@@ -211,6 +230,35 @@ class ProjectionCallback(TrainerCallback):
 
 
 # ───────────────── adapter_subspace 투영 콜백 ─────────────────
+class AsFTTrainer(Trainer):
+    """AsFT: L = L_SFT + λ·Σ_l ‖(I−Ĉ_l)·B_l A_l‖²_F  (arXiv:2506.08473).
+
+    SafeLoRA(사후 1회 투영)와 달리 매 step loss 에 벌점으로 들어간다. 정규화항은
+    models/asft_baseline.AsFTRegularizer 가 계산하고(수식/등가변형 설명은 그 docstring 참조),
+    여기서는 loss 합산과 로깅만 담당한다.
+    """
+
+    def __init__(self, *a, asft_reg=None, asft_check_equiv=False, **kw):
+        super().__init__(*a, **kw)
+        assert asft_reg is not None
+        self.asft_reg = asft_reg
+        self.asft_check_equiv = asft_check_equiv
+        self._asft_reg_last = 0.0
+
+    def compute_loss(self, model, inputs, return_outputs=False, **kwargs):
+        loss, outputs = super().compute_loss(model, inputs, return_outputs=True, **kwargs)
+        reg = self.asft_reg.loss(check_equiv=self.asft_check_equiv)
+        self._asft_reg_last = float(reg.detach())
+        loss = loss + reg.to(loss.dtype)
+        return (loss, outputs) if return_outputs else loss
+
+    def log(self, logs, *a, **kw):
+        # 총 loss 만 보면 SFT 항과 정규화항을 구분할 수 없다 → 별도 필드로 남긴다.
+        if "loss" in logs:
+            logs["asft_reg"] = round(self._asft_reg_last, 6)
+        return super().log(logs, *a, **kw)
+
+
 class AdapterSubspaceCallback(TrainerCallback):
     """downstream lora_A 를 매 step 후 Q_S 의 직교보공간으로 재투영.
 
@@ -415,6 +463,19 @@ def build_gsm8k(tokenizer, args):
     return tok_ds
 
 
+def build_train_dataset(tokenizer, args):
+    """--task_data_path 가 있으면 로컬 JSON 태스크, 없으면 기존 GSM8K 경로."""
+    if args.task_data_path:
+        from data.local_task_dataset import build_task_dataset, infer_task_name
+        task = infer_task_name(args.task_data_path)
+        logger.info(f"downstream = 로컬 태스크 '{task}' ({args.task_data_path})")
+        return build_task_dataset(args.task_data_path, tokenizer, args.max_length,
+                                  args.model_name, tokenize_sft_example,
+                                  max_samples=args.task_samples,
+                                  desc=f"tokenizing {task}")
+    return build_gsm8k(tokenizer, args)
+
+
 def main():
     args = parse_args()
     os.makedirs(args.output_dir, exist_ok=True)
@@ -508,12 +569,34 @@ def main():
                 raise ValueError(f"no safe_cols found in {args.safecols_dir}")
             projection_cb = ProjectionCallback(model, safecols)
 
+    # ───────────── AsFT: alignment direction 준비 ─────────────
+    # 학습 자체는 표준 LoRA 와 동일하고, 매 step loss 에 subspace 정규화항이 더해진다.
+    asft_reg = None
+    asft_info = None
+    if args.method == "asft":
+        from models.asft_baseline import AsFTRegularizer, build_alignment_dirs
+        asft_base = args.asft_base_model or args.safelora_base_model
+        asft_aligned = (args.asft_aligned_model or args.safelora_aligned_model
+                        or args.model_name)
+        logger.info(f"[AsFT] base={asft_base} aligned={asft_aligned} λ={args.asft_lambda_reg}")
+        dirs = build_alignment_dirs(
+            asft_base, asft_aligned, target_modules,
+            device=("cuda" if torch.cuda.is_available() else "cpu"),
+            load_dtype=torch.float32,
+            store_dtype={"float32": torch.float32, "bfloat16": torch.bfloat16}[args.asft_store_dtype],
+            logger=logger)
+        asft_reg = AsFTRegularizer(model, dirs, args.asft_lambda_reg, logger)
+        asft_info = {"base_model": asft_base, "aligned_model": asft_aligned,
+                     "lambda_reg": args.asft_lambda_reg,
+                     "num_layers": len(asft_reg.pairs),
+                     "store_dtype": args.asft_store_dtype}
+
     if args.gradient_checkpointing:
         model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
         if hasattr(model, "enable_input_require_grads"):
             model.enable_input_require_grads()
 
-    train_ds = build_gsm8k(tok, args)
+    train_ds = build_train_dataset(tok, args)
     collator = DataCollatorForCausalLMWithPadding(tokenizer=tok)
 
     targs = TrainingArguments(
@@ -535,10 +618,21 @@ def main():
         gradient_checkpointing=args.gradient_checkpointing,
         remove_unused_columns=False,
     )
-    trainer = Trainer(model=model, args=targs, train_dataset=train_ds, data_collator=collator,
-                      callbacks=[projection_cb] if projection_cb else None)
+    trainer_cls = AsFTTrainer if asft_reg is not None else Trainer
+    trainer_kw = {}
+    if asft_reg is not None:
+        trainer_kw = {"asft_reg": asft_reg, "asft_check_equiv": args.asft_check_equiv}
+    trainer = trainer_cls(model=model, args=targs, train_dataset=train_ds, data_collator=collator,
+                          callbacks=[projection_cb] if projection_cb else None, **trainer_kw)
     trainer.train()
     logger.info("✓ training done")
+
+    if asft_reg is not None:
+        # V 들이 GPU 에 수십 GB 상주한다 → merge/save 전에 반드시 해제
+        asft_info["final_reg_loss"] = trainer._asft_reg_last
+        logger.info(f"[AsFT] final reg term = {trainer._asft_reg_last:.6e}")
+        asft_reg.free()
+        del dirs
 
     # ───────────── dense 저장 ─────────────
     if projection_cb is not None:
@@ -614,7 +708,12 @@ def main():
     # sanity generation
     try:
         merged.eval()
-        q = "Natalia sold clips to 48 friends in April, and half as many in May. How many total?"
+        # sanity 프롬프트는 학습한 태스크에 맞춘다 (GSM8K 질문을 분류 모델에 던지면 의미가 없다).
+        if args.task_data_path:
+            from data.local_task_dataset import load_task_pairs
+            q = load_task_pairs(args.task_data_path, 1)[0][0]
+        else:
+            q = "Natalia sold clips to 48 friends in April, and half as many in May. How many total?"
         msgs = [{"role": "user", "content": q}]
         text = tok.apply_chat_template(msgs, tokenize=False, add_generation_prompt=True)
         ii = tok(text, return_tensors="pt").to(next(merged.parameters()).device)
@@ -625,11 +724,13 @@ def main():
         logger.warning(f"sanity gen failed: {e}")
 
     summary = {"method": args.method, "model_name": args.model_name, "lr": args.learning_rate,
+               "downstream": (args.task_data_path or f"{args.dataset_name}/{args.dataset_subset}"),
                "lora_r": args.lora_r, "lora_alpha": args.lora_alpha, "keep_ratio": args.keep_ratio,
                "direction_keep_ratio": args.direction_keep_ratio, "epochs": args.epochs,
                "adapter_dir": adapter_dir, "merged_dir": merged_dir, "hf_repo_id": args.hf_repo_id,
                "projection_calls": projection_cb.count if projection_cb else None,
                "safelora": safelora_stats,
+               "asft": asft_info,
                "adapter_subspace": subspace_info,
                "adapter_subspace_verify": subspace_verify["aggregate"] if subspace_verify else None}
     json.dump(summary, open(os.path.join(args.output_dir, "summary.json"), "w"), indent=2)

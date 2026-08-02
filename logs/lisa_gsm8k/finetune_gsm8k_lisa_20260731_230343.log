@@ -1,0 +1,29 @@
+2026-07-31 23:03:43 - __main__ - INFO - 
+======================================================================
+2026-07-31 23:03:43 - __main__ - INFO -   🚀 LISA (Bi-State Optimization) GSM8K Fine-tuning
+2026-07-31 23:03:43 - __main__ - INFO - ======================================================================
+
+2026-07-31 23:03:43 - __main__ - INFO - Log file: ./logs/lisa_gsm8k/finetune_gsm8k_lisa_20260731_230343.log
+2026-07-31 23:03:43 - __main__ - INFO - ⚙️  Configuration:
+2026-07-31 23:03:43 - __main__ - INFO -    ├─ Base model: /tmp/claude-3954/-home-edgeai-lab-Safety-WaRP-LLM/dd8442d2-6595-4abc-9eb7-e1bf1b494502/scratchpad/tiny/aligned
+2026-07-31 23:03:43 - __main__ - INFO -    ├─ Input formatting: base plain prompt
+2026-07-31 23:03:43 - __main__ - INFO -    ├─ Tuning: LoRA (r=16, alpha=32)
+2026-07-31 23:03:43 - __main__ - INFO -    ├─ BSO: ON  rho=1.0 align_step=4 finetune_step=8
+2026-07-31 23:03:43 - __main__ - INFO -    ├─ Safety(alignment) data: data/circuit_breakers_train.json (guide_data_num=32)
+2026-07-31 23:03:43 - __main__ - INFO -    ├─ Downstream: data/agnews_train_8k_seed42.json (로컬 태스크 JSON), clean (no poison)
+2026-07-31 23:03:43 - __main__ - INFO -    ├─ LR: 0.0002  epochs: 1  eff.batch: 4
+2026-07-31 23:03:43 - __main__ - INFO -    └─ Output dir: /tmp/claude-3954/-home-edgeai-lab-Safety-WaRP-LLM/dd8442d2-6595-4abc-9eb7-e1bf1b494502/scratchpad/smoke/lisa
+
+2026-07-31 23:03:43 - __main__ - INFO - [1/4] Loading tokenizer
+2026-07-31 23:03:43 - __main__ - INFO - ✅ Tokenizer loaded (vocab=32000, pad=</s>)
+2026-07-31 23:03:43 - __main__ - INFO - [2/4] Loading model (bf16)
+2026-07-31 23:03:45 - __main__ - INFO - ✓ LoRA applied: r=16, alpha=32, targets=['q_proj', 'k_proj', 'v_proj', 'up_proj', 'down_proj']
+2026-07-31 23:03:45 - __main__ - INFO - ✅ Model loaded (0.00B total, 0.0M trainable = 0.58%)
+2026-07-31 23:03:45 - __main__ - INFO - [3/4] Loading & tokenizing 로컬 태스크 'agnews' (data/agnews_train_8k_seed42.json) — downstream/finetune
+2026-07-31 23:03:45 - __main__ - INFO - ✅ agnews train: 64 samples
+2026-07-31 23:03:45 - __main__ - INFO - ✅ Alignment(safety) data: 32 samples (from data/circuit_breakers_train.json)
+2026-07-31 23:03:45 - __main__ - INFO - [4/4] Training with LISA BSO
+2026-07-31 23:03:45 - __main__ - INFO - Starting training...
+2026-07-31 23:03:46 - __main__ - INFO - Saving model
+2026-07-31 23:03:46 - __main__ - INFO - ✅ Saved to /tmp/claude-3954/-home-edgeai-lab-Safety-WaRP-LLM/dd8442d2-6595-4abc-9eb7-e1bf1b494502/scratchpad/smoke/lisa
+2026-07-31 23:03:46 - __main__ - INFO - ✅ LISA fine-tuning complete!

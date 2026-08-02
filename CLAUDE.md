@@ -119,6 +119,7 @@ system the update lives in and how it is constrained*. Single entry point `finet
 | `wsr_lora_nou` | `(1−M)∘(s·BA)` | original / element | full | `--mask_dir` |
 | `safe_lora` | post-hoc `B←C·B` | output space / layer | r | base+aligned models |
 | `adapter_subspace_lora` | `s·BA(I−Q_SQ_Sᵀ)` | rotated / **direction** | r | `--safety_adapter_path --adapter_subspace_dir` |
+| `asft` | `s·BA` + loss penalty | output space / layer | r | base+aligned models |
 
 SaLoRA has its own runner (`finetune_gsm8k_salora.py`). Element-wise `wsr_lora` breaks rank-r, so it saves via
 dense fold (`restore_wsr_lora_to_linear`) instead of `merge_and_unload`.
@@ -131,6 +132,29 @@ from touching `Q_S` (`A_d Q_S = 0`), giving `W_final Q_S = W_safe Q_S` exactly. 
 1 Q_S extraction → 2 downstream → 3 control; `STOP_AFTER_STAGE1=1` halts after Stage 1; completed stages are
 skipped on re-run). Both a gradient hook **and** a post-`optimizer.step()` reprojection are required — AdamW's
 elementwise `1/√v` breaks linearity, so projecting gradients alone does not keep the update in the subspace.
+
+**AsFT** (`--method asft`, arXiv:2506.08473) is the training-time counterpart of SafeLoRA. It reuses the *same*
+matrix `Ĉ = VVᵀ/‖V‖_F` (`V = W_aligned − W_base`) but, instead of projecting `lora_B` once after training, adds
+`λ·Σ_l ‖(I−Ĉ_l)·B_l A_l‖²_F` to the loss every step (`AsFTTrainer` in `finetune_gsm8k_lora.py`,
+`models/asft_baseline.py`). Ported from the reference impl at `/home/edgeai_lab/AsFT`
+(`utils/AsFT_train_utils.py:99-119`), keeping its quirks deliberately: `ΔW = BA` **without** the `s=α/r` scaling,
+and `Ĉ` divided by `‖V‖_F` (not `‖V‖²`, so it is not a true projector). λ default 1.0 = the reference's
+`AsFT_reg1_p_0.1.sh`. The reference materializes `Ĉ` (11008² for `up_proj` → >15 GB fp32); we store `V` instead and
+use the identity `‖(I−Ĉ)BA‖²_F = trace((XᵀX)(AAᵀ))`, `X = B − V(VᵀB)/‖V‖_F` — same value, r×r cost. Verified
+to `rel_err≈4e-7` against the reference formula at runtime (`--asft_check_equiv`, logged at the first step where
+`B≠0`).
+
+### Downstream tasks beyond GSM8K: local task JSON
+
+`data/local_task_dataset.py` lets the LoRA-family and LISA runners train on any local
+`[{"question": ..., "response": ...}]` JSON via `--task_data_path`, bypassing GSM8K. Registered files:
+`sst2`/`agnews` (8k seed42 subsets, `data/subsets_seed42.manifest.json`) and `arc`/`medqa`
+(`scripts/prepare_qa_task_data.py`, which imports the prompt builders from `arc_eval/`+`medqa_eval/` so the
+training format matches those eval harnesses exactly). MedQA first needs
+`python medqa_eval/prepare_medqa_dataset.py --output_dir ./data` (its default `--output_dir` is a stale
+`/home/yonsei_jong` path). Runners: `scripts/run_lisa_safelora_cls.sh` (sst2/agnews × lisa/safelora) and
+`scripts/run_lisa_safelora_asft_qa.sh` (arc/medqa × lisa/safelora/asft), both resumable and matched at
+r=16/α=32/batch16/3ep. Upload with the paired `scripts/upload_*.sh`.
 
 **See `wsr_lora_status.md`** for what has actually been trained/uploaded, current results, and the
 environment-migration checklist. `wsr_lora_comparison.md` is the older pre-implementation spec.
