@@ -1,0 +1,11 @@
+════════ upload plan (8) ════════
+  ✓ agnews_fullft_lr1e-5_ep1                                               -> kmseong/llama2_7b-chat-agnews-fullft-lr1e-5-ep1
+  ✓ agnews_safeinstr0.1_lr1e-5_ep1                                         -> kmseong/llama2_7b-chat-agnews-safeinstr0.1-lr1e-5-ep1-cb
+  ✓ agnews_fullft_lr1e-5_ep1-SafeDelta-s0.4                                -> kmseong/llama2_7b-chat-agnews-safedelta-lr1e-5-ep1-cb-s0.4
+  ✓ agnews_resta_gamma0.5_lr1e-5_ep1                                       -> kmseong/llama2_7b-chat-agnews-resta-lr1e-5-ep1-gamma0.5
+  ✓ sst2_fullft_lr1e-5_ep1                                                 -> kmseong/llama2_7b-chat-sst2-fullft-lr1e-5-ep1
+  ✓ sst2_safeinstr0.1_lr1e-5_ep1                                           -> kmseong/llama2_7b-chat-sst2-safeinstr0.1-lr1e-5-ep1-cb
+  ✓ sst2_fullft_lr1e-5_ep1-SafeDelta-s0.4                                  -> kmseong/llama2_7b-chat-sst2-safedelta-lr1e-5-ep1-cb-s0.4
+  ✓ sst2_resta_gamma0.5_lr1e-5_ep1                                         -> kmseong/llama2_7b-chat-sst2-resta-lr1e-5-ep1-gamma0.5
+
+DRY_RUN=1 — 업로드하지 않음

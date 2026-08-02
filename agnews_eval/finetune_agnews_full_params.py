@@ -43,7 +43,11 @@ from transformers import (
     TrainingArguments,
     set_seed,
 )
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+# ⚠️ import 시점에 CUDA_VISIBLE_DEVICES 를 박아두면 이 모듈을 import 하는 모든 스크립트가
+#    오염되고(= 할당받지 않은 GPU 를 잡거나 다중 GPU 스케줄이 깨진다), SLURM 환경에서는
+#    스케줄러가 설정한 값을 덮어쓴다. phase0_SSFT.py / gsm8k_eval 과 동일하게 비활성화한다.
+#    GPU 지정은 호출하는 셸에서 하라. 되살리지 말 것.
+# os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 try:
     from peft import LoraConfig, TaskType, get_peft_model

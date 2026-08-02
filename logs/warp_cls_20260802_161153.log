@@ -1,0 +1,19 @@
+════════════════════════════════════════════════════════════════
+ WaRP pipeline  ts=20260802_161153
+   safety model : wvnvwn/llama2-7b-chat-lr5e-5-ssft-cb
+   safety data  : /home/edgeai_lab/Safety-WaRP-LLM/data/circuit_breakers_train.json
+   layer_type   : attn_q,attn_k,attn_v,ffn_up,ffn_down   target_layers: all   keep_ratio: 0.1
+   Phase3       : tasks=sst2 lr=1e-5 ep=1 batch=2x8 (eff 16)
+   GPU          : agnews=0  sst2=1      free: 262GB
+════════════════════════════════════════════════════════════════
+Phase 1 skip — 지정된 basis 사용: checkpoints/phase1_20260802_150552/basis
+Phase 2 skip — 지정된 mask 사용: checkpoints/phase2_20260802_160818/checkpoints/masks
+[sst2] Phase3 start (GPU 1) 16:11:53
+[sst2] Phase3 done 16:22:26
+
+════════════════════ summary ════════════════════
+  basis: checkpoints/phase1_20260802_150552/basis
+  masks: checkpoints/phase2_20260802_160818/checkpoints/masks
+  checkpoints/phase3_20260802_161244
+  checkpoints/phase3_20260802_161010
+완료.

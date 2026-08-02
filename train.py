@@ -138,7 +138,7 @@ def parse_args():
     parser.add_argument('--masks_dir', type=str, default=None,
                         help='Phase 2의 masks 디렉토리 경로 (Phase 3에서 사용)')
     parser.add_argument('--phase3_dataset', type=str, default='gsm8k',
-                        choices=['gsm8k', 'safety', 'metamath', 'math', 'mmlu', 'swebench', 'agnews', 'medqa', 'mbpp', 'arc'],
+                        choices=['gsm8k', 'safety', 'metamath', 'math', 'mmlu', 'swebench', 'agnews', 'sst2', 'medqa', 'mbpp', 'arc'],
                         help='Phase 3 finetuning용 데이터셋 - gsm8k(Utility), safety(안전성 강화), metamath(고급 수학), math(Hendrycks MATH), mmlu(MMLU MCQ), swebench(소프트웨어 엔지니어링), agnews(뉴스 분류), medqa(의료 USMLE MCQ), mbpp(파이썬 프로그래밍 문제), arc(ARC-Challenge MCQ)')
     parser.add_argument('--gsm8k_samples', type=int, default=1000,
                         help='GSM8K 샘플 수 (Phase 3 - GSM8K 선택시만 사용)')
@@ -177,6 +177,10 @@ def parse_args():
                         help='AG News split 이름 (default: train)')
     parser.add_argument('--agnews_samples', type=int, default=8000,
                         help='AG News 샘플 수 (0=전체)')
+    parser.add_argument('--sst2_dataset_path', type=str, default=None,
+                        help='SST-2 로컬 태스크 JSON 경로 (미지정 시 data/sst2_train_8k_seed42.json)')
+    parser.add_argument('--sst2_samples', type=int, default=0,
+                        help='SST-2 샘플 수 (0=전체)')
     parser.add_argument('--swebench_dataset_path', type=str, default=None,
                         help='SWE-bench 데이터셋 경로 (Phase 3 - SWE-bench 선택시 필수)')
     parser.add_argument('--swebench_split', type=str, default='train',

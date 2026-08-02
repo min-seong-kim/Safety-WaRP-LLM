@@ -438,6 +438,8 @@ class Phase3IncrementalLearner:
             self._load_swebench()
         elif phase3_dataset == 'agnews':
             self._load_agnews()
+        elif phase3_dataset == 'sst2':
+            self._load_local_task('sst2')
         elif phase3_dataset == 'medqa':
             self._load_medqa()
         elif phase3_dataset == 'mbpp':
@@ -450,6 +452,53 @@ class Phase3IncrementalLearner:
         # safeInstr: safety data mixing
         if safety_mix_ratio > 0.0 and phase3_dataset != 'safety':
             self._mix_safety_data(safety_mix_ratio)
+
+    def _load_local_task(self, task_name: str):
+        """로컬 태스크 JSON([{"question":..., "response":...}]) 로드.
+
+        LoRA 계열 러너(finetune_gsm8k_lora.py / finetune_gsm8k_lisa.py)가 쓰는
+        data/local_task_dataset.py 와 **같은 로더**를 재사용한다. 프롬프트/정답 문자열이
+        방법 간에 한 글자도 달라지지 않아야 WaRP vs SafeLoRA/LISA/AsFT 비교가 성립한다.
+
+        경로는 --{task}_dataset_path 로 주고, 없으면 data/ 의 표준 파일명을 쓴다.
+        """
+        from pathlib import Path
+        from datasets import Dataset as HFDataset
+        from data.local_task_dataset import load_task_pairs, KNOWN_TASKS
+
+        dataset_path = getattr(self.args, f'{task_name}_dataset_path', None)
+        if not dataset_path:
+            default_rel = KNOWN_TASKS.get(task_name)
+            if not default_rel:
+                raise ValueError(f"--{task_name}_dataset_path 가 필요합니다 (기본 경로 미등록)")
+            dataset_path = str(Path(__file__).resolve().parent.parent / default_rel)
+
+        max_samples = getattr(self.args, f'{task_name}_samples', 0) or 0
+        max_length = getattr(self.args, 'max_length', 1024)
+
+        self.logger.info(f"Loading {task_name} dataset from {dataset_path}...")
+        pairs = load_task_pairs(dataset_path, max_samples)
+
+        tokenized_data = []
+        for idx, (prompt, answer) in enumerate(pairs):
+            if idx == 0:
+                self.logger.info(f"\n[{task_name} Sample #0]")
+                self.logger.info(f"  Prompt (first 100 chars): {prompt[:100]}...")
+                self.logger.info(f"  Answer: {answer}")
+            tokenized_data.append(
+                self._tokenize_question_answer_example(prompt, answer, max_length=max_length)
+            )
+
+        if not tokenized_data:
+            raise ValueError(f"{task_name} dataset produced no valid training examples")
+
+        self.dataset = HFDataset.from_dict({
+            "input_ids": [d["input_ids"] for d in tokenized_data],
+            "attention_mask": [d["attention_mask"] for d in tokenized_data],
+            "labels": [d["labels"] for d in tokenized_data],
+        })
+        del tokenized_data
+        self.logger.info(f"✓ {task_name} dataset created ({len(self.dataset)} samples)")
 
     def _load_agnews(self):
         """

@@ -31,6 +31,12 @@ Everything flows through four numbered phases. The main entry point is `train.py
 **Invariant: `--layer_type` and `--target_layers` MUST be identical across Phases 1, 2, and 3.** The basis, the
 masks, and the training all index the same layers; a mismatch silently produces wrong results.
 
+**Phase 2 needs `--perlayer` unless you mean otherwise.** The flag picks a *different implementation*
+(`train.py:459`): with it, `phase2_importance_per_layer` applies `keep_ratio` **within each layer** and runs
+at ~5 it/s; without it, `phase2_importance_whole` applies one global threshold across the model and runs at
+~0.1 it/s — a 50× slowdown (≈9 min vs ≈3.5 h on Llama-2-7B) *and* a different mask. Every existing sweep and
+every uploaded WaRP model is per-layer, so omitting the flag silently produces an incomparable model.
+
 `run_phase{1,2,3}` in `train.py` each `import` a *variant* class chosen by CLI flags (e.g. `--original_space_mask`,
 `--no_rotation`, `--two_mask`, `--non_freeze`, LoRA flags). The many `models/phase2_importance_*.py` /
 `models/phase3_extra_learning_*.py` files are these variants — `_per_layer`, `_whole`, `_original_space`,
@@ -158,6 +164,76 @@ r=16/α=32/batch16/3ep. Upload with the paired `scripts/upload_*.sh`.
 
 **See `wsr_lora_status.md`** for what has actually been trained/uploaded, current results, and the
 environment-migration checklist. `wsr_lora_comparison.md` is the older pre-implementation spec.
+
+WaRP **Phase 3 also accepts `sst2`/`agnews`** through the same loader (`_load_local_task` in
+`models/phase3_extra_learning.py`, `--phase3_dataset sst2 --sst2_dataset_path ...`), so a WaRP model and a
+baseline trained by `finetune_task_full_params.py` see byte-identical prompt strings.
+
+## Classification baselines & defense line (SST-2 / AG News, full-param)
+
+Comparison arms for the WaRP Phase 3 classification models, all from the **same start model**
+`kmseong/llama2_7b-chat-Safety-FT-lr5e-5` and the same operating point: **full-parameter SFT, epoch 1,
+effective batch 16 (2×8), max_len 1024, seed 42, bf16, cosine + warmup 0.1, weight_decay 0** — deliberately
+the same optimizer settings as WaRP Phase 3 *and* the same prompt strings (`data/local_task_dataset.py`), so
+the only variable across arms is the method. Built at lr 1e-5, then baseline re-run at lr 5e-5 (higher lr =
+stronger downstream fit = more safety loss; the lr 1e-5 baseline barely lost safety).
+
+| arm | how it is produced | knob |
+|---|---|---|
+| baseline | plain full-param SFT | lr |
+| SafeInstr | same SFT + `circuit_breakers` mixed into the train set | `--safety_mix_ratio` (used 0.1) |
+| SafeDelta | post-hoc on the **baseline** output | `--scale` s (used 0.4) |
+| RESTA | post-hoc merge on the **baseline** output | γ (used 0.5) |
+| SafeLoRA | LoRA r16/α32 + post-hoc `lora_B ← C·B` | threshold (used 0.5) |
+
+SafeDelta and RESTA take the *baseline* (not SafeInstr) as input — both are "fix a model that was tuned
+without defense" methods.
+
+- `finetune_task_full_params.py` — full-param SFT on any local task JSON, plus `--safety_mix_ratio`
+  (= SafeInstr). It **imports** `tokenize_prompt_response` / collator / model loading / `maybe_mix_safety`
+  from `agnews_eval/finetune_agnews_full_params.py` rather than copying them, so tokenization cannot drift
+  from the AG News harness. Refuses to start if an instruct model's tokenizer has no `chat_template`.
+- `scripts/run_cls_baselines.sh` — `STAGE=A` (train) / `B` (post-hoc) / `AB`; `MODES="baseline safeinstr"`
+  selects which trainings run; one task per GPU; resumable (skips on `summary.json` / `config.json`).
+- `scripts/resta_add_safety.py` — RESTA merge **without mergekit** (`pip install -e resta/merge` drags in
+  its own transformers pin and would break the `hb` env). Streams shard-by-shard, accumulates in fp32.
+  `W_resta = W_ft + γ·(W_align − W_base)`; weights sum to 1.0, so mergekit's `linear`
+  (`normalize=True`) is identical. Verified bitwise against the formula.
+- `scripts/upload_cls_baselines.sh` — derives repo names from directory names (never hand-typed) and
+  validates `chat_template` both before and after upload. `MODES` / `DRY_RUN` supported.
+- SafeLoRA reuses `scripts/run_safelora_thr_sweep_qa.sh` with `MODEL`/`LR`/`EPOCHS`/`THRS`/`OUTPUT_ROOT`
+  env overrides — it already handles `sst2`/`agnews`.
+
+Uploaded (namespace `kmseong`, `{task}` ∈ {sst2, agnews}):
+`llama2_7b-chat-{task}-fullft-lr{1e-5,5e-5}-ep1`,
+`llama2_7b-chat-{task}-safeinstr0.1-lr1e-5-ep1-cb`,
+`llama2_7b-chat-{task}-safedelta-lr1e-5-ep1-cb-s0.4`,
+`llama2_7b-chat-{task}-resta-lr1e-5-ep1-gamma0.5`,
+`llama2_7b-chat-{task}-safelora-r16-a32-lr3e-5-ep1-cb-thr0.5`,
+plus the WaRP arm `llama2_7b-chat-{task}-warp-kr0.1-lr1e-5-ep1-cb`.
+**The defense arms are all built on the lr 1e-5 baseline**; if the lr 5e-5 baseline becomes the reference,
+SafeDelta/RESTA/SafeInstr must be regenerated from it or the arms no longer pair up.
+
+### Traps this line walked into (all fixed; do not re-introduce)
+
+- **`chat_template.jinja` is a separate file.** transformers 4.4x/5.x writes the chat template next to
+  `tokenizer_config.json`, and an upload path that pushes only the model + tokenizer objects can silently
+  drop it — the hub copy then loads with `chat_template=None` and evaluation renders a different prompt than
+  training did. This actually happened to both uploaded WaRP classification models (weights were fine; the
+  file was re-uploaded). **Always verify `chat_template` on the hub after upload**, not just locally.
+- **`agnews_eval/finetune_agnews_full_params.py:46` set `CUDA_VISIBLE_DEVICES="1"` at import time** — the
+  third file in this repo with that bug. Commented out; `finetune_task_full_params.py` raises if importing
+  it ever changes the variable again.
+- **RESTA merge key mismatch:** `meta-llama/Llama-2-7b-chat-hf` is an old checkpoint carrying
+  `model.layers.N.self_attn.rotary_emb.inv_freq` buffers that newer saves do not have. They are a rotary
+  frequency cache derived from config, not parameters — the merge whitelists that suffix and aborts on any
+  other unexpected key.
+- **SafeDelta's `s` is not comparable across fine-tuning types.** At s=0.4 a LoRA-merged delta keeps 98–99%
+  of the fine-tuned deltas (essentially no defense), while a full-param delta keeps only ~46% (per-layer
+  21–86%). Full FT perturbs every parameter, so the same safety-loss budget binds far harder. Do not carry
+  an `s` value across the LoRA line and this line and assume equal strength.
+- **lr 3e-5 LoRA for 1 epoch is enough here**, contrary to the intuition from the 3e-4 LoRA runs: SST-2 /
+  AG News answers are a single token, so loss reaches 0.03–0.06 by the end of one epoch.
 
 ## Rebuttal experiment: WSR-Tune vs ActSVD mask-structure ablation
 

@@ -1,0 +1,21 @@
+2026-08-02 17:27:27 - finetune_agnews_full_params - INFO - ======================================================================
+2026-08-02 17:27:27 - finetune_agnews_full_params - INFO - Full-parameter SFT: task=sst2  mode=SafeInstr
+2026-08-02 17:27:27 - finetune_agnews_full_params - INFO - ======================================================================
+2026-08-02 17:27:27 - finetune_agnews_full_params - INFO - Log file  : ./logs/safety_neuron_agnews/finetune_agnews_20260802_172727.log
+2026-08-02 17:27:27 - finetune_agnews_full_params - INFO - Model     : kmseong/llama2_7b-chat-Safety-FT-lr5e-5
+2026-08-02 17:27:27 - finetune_agnews_full_params - INFO - Task data : /home/edgeai_lab/Safety-WaRP-LLM/data/sst2_train_8k_seed42.json
+2026-08-02 17:27:27 - finetune_agnews_full_params - INFO - GPU       : CUDA_VISIBLE_DEVICES=1
+2026-08-02 17:27:27 - finetune_agnews_full_params - INFO - Formatting: chat template
+2026-08-02 17:27:27 - finetune_agnews_full_params - INFO - Loading tokenizer
+2026-08-02 17:27:27 - finetune_agnews_full_params - INFO - Tokenizer loaded from local files
+2026-08-02 17:27:27 - finetune_agnews_full_params - INFO - Loading model
+2026-08-02 17:27:30 - finetune_agnews_full_params - INFO - Model loaded from local files
+2026-08-02 17:27:30 - finetune_agnews_full_params - INFO - Model params: total=6.74B, trainable=6.74B (100.00%)
+2026-08-02 17:27:31 - finetune_agnews_full_params - INFO - Task samples tokenized: 8000
+2026-08-02 17:27:31 - finetune_agnews_full_params - INFO - Safety data mixed: 800 samples (ratio=0.1)
+2026-08-02 17:27:31 - finetune_agnews_full_params - INFO - Total training samples: 8800 (AG News 8000 + Safety 800)
+2026-08-02 17:27:31 - finetune_agnews_full_params - INFO - Starting training (8800 samples, effective batch 16)
+2026-08-02 17:31:28 - finetune_agnews_full_params - INFO - Saving model
+2026-08-02 17:31:37 - finetune_agnews_full_params - INFO - chat_template saved: True
+2026-08-02 17:31:37 - finetune_agnews_full_params - INFO - summary.json written: loss=0.12525702861222354 runtime=236.801s
+2026-08-02 17:31:37 - finetune_agnews_full_params - INFO - Done

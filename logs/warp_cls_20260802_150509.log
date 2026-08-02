@@ -1,0 +1,24 @@
+════════════════════════════════════════════════════════════════
+ WaRP pipeline  ts=20260802_150509
+   safety model : wvnvwn/llama2-7b-chat-lr5e-5-ssft-cb
+   safety data  : /home/edgeai_lab/Safety-WaRP-LLM/data/circuit_breakers_train.json
+   layer_type   : attn_q,attn_k,attn_v,ffn_up,ffn_down   target_layers: all   keep_ratio: 0.1
+   Phase3       : tasks=agnews sst2 lr=1e-5 ep=1 batch=2x8 (eff 16)
+   GPU          : agnews=0  sst2=1      free: 324GB
+════════════════════════════════════════════════════════════════
+──────────── Phase 1 (basis) start 15:05:09 ────────────
+Traceback (most recent call last):
+  File "/home/edgeai_lab/Safety-WaRP-LLM/train.py", line 675, in <module>
+    main()
+  File "/home/edgeai_lab/Safety-WaRP-LLM/train.py", line 613, in main
+    os.makedirs(args.log_dir, exist_ok=True)
+  File "/home/edgeai_lab/miniconda3/envs/hb/lib/python3.10/os.py", line 215, in makedirs
+    makedirs(head, exist_ok=exist_ok)
+  File "/home/edgeai_lab/miniconda3/envs/hb/lib/python3.10/os.py", line 215, in makedirs
+    makedirs(head, exist_ok=exist_ok)
+  File "/home/edgeai_lab/miniconda3/envs/hb/lib/python3.10/os.py", line 215, in makedirs
+    makedirs(head, exist_ok=exist_ok)
+  File "/home/edgeai_lab/miniconda3/envs/hb/lib/python3.10/os.py", line 225, in makedirs
+    mkdir(name, mode)
+PermissionError: [Errno 13] Permission denied: '/lustre'
+Phase1 FAILED

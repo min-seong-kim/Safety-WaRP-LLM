@@ -1,0 +1,5 @@
+════════ upload plan (2) ════════
+  ✓ agnews_fullft_lr5e-5_ep1                                               -> kmseong/llama2_7b-chat-agnews-fullft-lr5e-5-ep1
+  ✓ sst2_fullft_lr5e-5_ep1                                                 -> kmseong/llama2_7b-chat-sst2-fullft-lr5e-5-ep1
+
+DRY_RUN=1 — 업로드하지 않음
