@@ -1,0 +1,14 @@
+════════════════════════════════════════════════════════════════
+ CLS baselines  ts=20260803_020747
+   W_align   : kmseong/llama2_7b-chat-Safety-FT-lr5e-5
+   base(RESTA model3): meta-llama/Llama-2-7b-chat-hf
+   tasks     : agnews sst2      stage: B      modes: baseline safeinstr
+   full-param SFT: lr=3e-6 ep=3 batch=2x8 (eff 16)
+   SafeInstr : ratio=0.1   SafeDelta: s=0.4   RESTA: γ=0.5
+   GPU       : agnews=0  sst2=1       free: 257GB
+   output    : /home/edgeai_lab/Safety-WaRP-LLM/outputs/cls_baselines
+════════════════════════════════════════════════════════════════
+
+──────────── Stage B: SafeDelta(s=0.4) + RESTA(γ=0.5) ────────────
+[agnews/safedelta] start (GPU 0, s=0.4) 02:07:47
+[sst2/safedelta] start (GPU 1, s=0.4) 02:07:47

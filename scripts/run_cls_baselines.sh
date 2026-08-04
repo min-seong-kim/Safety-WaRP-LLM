@@ -181,7 +181,11 @@ if [[ "$STAGE" == *B* ]]; then
   echo "──────────── Stage B: SafeDelta(s=$SAFEDELTA_SCALE) + RESTA(γ=$RESTA_GAMMA) ────────────"
   pids=(); names=()
   for task in $TASKS; do
-    ( run_safedelta "$task" "$(task_gpu "$task")" && run_resta "$task" ) &
+    # ⚠️ RESTA 는 SafeDelta 와 무관하다(둘 다 baseline FT 산출물만 입력으로 쓴다).
+    #    예전처럼 && 로 묶으면 SafeDelta 가 죽을 때 RESTA 까지 통째로 건너뛴다.
+    ( rc=0; run_safedelta "$task" "$(task_gpu "$task")" || rc=1
+      run_resta "$task" || rc=1
+      exit $rc ) &
     pids+=("$!"); names+=("$task")
   done
   for i in "${!pids[@]}"; do wait "${pids[$i]}" || failed+=("${names[$i]}/stageB"); done

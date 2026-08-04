@@ -1,0 +1,28 @@
+════════════════════════════════════════════════════════════════
+ CLS baselines  ts=20260803_015348
+   W_align   : kmseong/llama2_7b-chat-Safety-FT-lr5e-5
+   base(RESTA model3): meta-llama/Llama-2-7b-chat-hf
+   tasks     : agnews sst2      stage: A      modes: baseline
+   full-param SFT: lr=3e-6 ep=3 batch=2x8 (eff 16)
+   SafeInstr : ratio=0.1   SafeDelta: s=0.4   RESTA: γ=0.5
+   GPU       : agnews=0  sst2=1       free: 282GB
+   output    : /home/edgeai_lab/Safety-WaRP-LLM/outputs/cls_baselines
+════════════════════════════════════════════════════════════════
+
+──────────── Stage A: full-param SFT (baseline + SafeInstr) ────────────
+[agnews/baseline] start (GPU 0, free 282GB) 01:53:48
+[sst2/baseline] start (GPU 1, free 282GB) 01:53:48
+[sst2/baseline] done 02:04:14
+[agnews/baseline] done 02:05:04
+
+════════════════════ summary ════════════════════
+  ✓ /home/edgeai_lab/Safety-WaRP-LLM/outputs/cls_baselines/agnews_fullft_lr3e-6_ep3
+  ✗ /home/edgeai_lab/Safety-WaRP-LLM/outputs/cls_baselines/agnews_safeinstr0.1_lr3e-6_ep3 (없음)
+  ✗ /home/edgeai_lab/Safety-WaRP-LLM/outputs/cls_baselines/agnews_fullft_lr3e-6_ep3-SafeDelta-s0.4 (없음)
+  ✗ /home/edgeai_lab/Safety-WaRP-LLM/outputs/cls_baselines/agnews_resta_gamma0.5_lr3e-6_ep3 (없음)
+  ✓ /home/edgeai_lab/Safety-WaRP-LLM/outputs/cls_baselines/sst2_fullft_lr3e-6_ep3
+  ✗ /home/edgeai_lab/Safety-WaRP-LLM/outputs/cls_baselines/sst2_safeinstr0.1_lr3e-6_ep3 (없음)
+  ✗ /home/edgeai_lab/Safety-WaRP-LLM/outputs/cls_baselines/sst2_fullft_lr3e-6_ep3-SafeDelta-s0.4 (없음)
+  ✗ /home/edgeai_lab/Safety-WaRP-LLM/outputs/cls_baselines/sst2_resta_gamma0.5_lr3e-6_ep3 (없음)
+  free: 257GB
+완료. 업로드는 scripts/upload_cls_baselines.sh 로 수행할 것.
