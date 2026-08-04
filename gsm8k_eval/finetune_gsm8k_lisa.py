@@ -71,7 +71,7 @@ except ImportError:
 
 # 참고 스크립트와 동일하게 GPU 를 고정한다. 셸에서 CUDA_VISIBLE_DEVICES 를 이미
 # 지정했다면 그것을 존중한다.
-# os.environ.setdefault("CUDA_VISIBLE_DEVICES", "2,3")
+os.environ.setdefault("CUDA_VISIBLE_DEVICES", "0")
 
 
 # ---------------------------------------------------------------------------

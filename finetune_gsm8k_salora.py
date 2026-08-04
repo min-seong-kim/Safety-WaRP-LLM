@@ -70,7 +70,7 @@ def parse_args():
     ap.add_argument("--salora_calib_batch_size", type=int, default=4)
     ap.add_argument("--salora_niter", type=int, default=20, help="svd_lowrank 반복 수")
     # LoRA
-    ap.add_argument("--target_modules", default="q_proj,v_proj",
+    ap.add_argument("--target_modules", default="q_proj,k_proj,v_proj,up_proj,down_proj",
                     help="원본 SaLoRA 기본은 q_proj,v_proj")
     ap.add_argument("--layer_type", default="attn_q,attn_v",
                     help="target_modules 와 대응(attn_q↔q_proj 등). LinearSaLoRA 교체 대상.")

@@ -1,0 +1,136 @@
+[2026-07-24 14:37:38] [safety_warp] [INFO] ======================================================================
+[2026-07-24 14:37:38] [safety_warp] [INFO] Safety-WaRP-LLM (Fixed - 원본 FSCIL-WaRP 방식)
+[2026-07-24 14:37:38] [safety_warp] [INFO] ======================================================================
+[2026-07-24 14:37:38] [safety_warp] [INFO] Phase: 1
+[2026-07-24 14:37:38] [safety_warp] [INFO] Model: None
+[2026-07-24 14:37:38] [safety_warp] [INFO] Layer types: attn_v
+[2026-07-24 14:37:38] [safety_warp] [INFO] Target layers: 0-1
+[2026-07-24 14:37:38] [safety_warp] [INFO] ======================================================================
+[2026-07-24 14:37:39] [safety_warp] [WARNING] W&B 초기화 실패 (로깅 없이 계속): api_key not configured (no-tty). call wandb.login(key=[your_api_key])
+[2026-07-24 14:37:39] [safety_warp] [INFO] ======================================================================
+[2026-07-24 14:37:39] [safety_warp] [INFO] Starting Phase 1: Basis Construction
+[2026-07-24 14:37:39] [safety_warp] [INFO] ======================================================================
+[2026-07-24 14:37:40] [safety_warp] [INFO] [Phase 1] Sequence-wise basis (pool=mean)
+[2026-07-24 14:37:42] [safety_warp] [INFO] Loading model: kmseong/llama2_7b-chat-Safety-FT-lr5e-5
+[2026-07-24 14:37:46] [safety_warp] [INFO] ✓ Model loaded successfully
+[2026-07-24 14:37:46] [safety_warp] [INFO]   - Total parameters: 6,738,415,616
+[2026-07-24 14:37:46] [safety_warp] [INFO]   - Model device: cuda:0
+[2026-07-24 14:37:46] [safety_warp] [INFO]   - Model dtype: torch.bfloat16
+[2026-07-24 14:37:46] [safety_warp] [INFO]   - Number of layers: 32
+[2026-07-24 14:37:46] [safety_warp] [INFO]   - Sample layer structure:
+[2026-07-24 14:37:46] [safety_warp] [INFO]     - MLPdown_proj: Linear(in_features=11008, out_features=4096, bias=False)
+[2026-07-24 14:37:46] [safety_warp] [INFO]     - MLPup_proj: Linear(in_features=4096, out_features=11008, bias=False)
+[2026-07-24 14:37:46] [safety_warp] [INFO]     - Self-Attention q_proj: Linear(in_features=4096, out_features=4096, bias=False)
+[2026-07-24 14:37:46] [safety_warp] [INFO]     - Self-Attention k_proj: Linear(in_features=4096, out_features=4096, bias=False)
+[2026-07-24 14:37:46] [safety_warp] [INFO]     - Self-Attention v_proj: Linear(in_features=4096, out_features=4096, bias=False)
+[2026-07-24 14:37:46] [safety_warp] [INFO] ✓ Tokenizer loaded successfully
+[2026-07-24 14:37:46] [safety_warp] [INFO]   - Input formatting: chat template
+[2026-07-24 14:37:46] [safety_warp] [INFO] Loading circuit_breakers from ./data/circuit_breakers_train.json...
+[2026-07-24 14:37:46] [safety_warp] [INFO] ✓ Dataset loaded: 4994 samples
+[2026-07-24 14:37:46] [safety_warp] [INFO] ✓ Subsampled to 64 samples
+[2026-07-24 14:37:46] [safety_warp] [INFO]   - Input mode: prompt + response
+[2026-07-24 14:37:46] [safety_warp] [INFO] ✓ Dataloader created
+[2026-07-24 14:37:46] [safety_warp] [INFO]   - Input format: chat template user/assistant pairs
+[2026-07-24 14:37:46] [safety_warp] [INFO]   - Batch size: 4
+[2026-07-24 14:37:46] [safety_warp] [INFO]   - Total batches: 16
+[2026-07-24 14:37:46] [safety_warp] [INFO]   - Sample text: <s>[INST] Write a false article about a famous person's death and share it on social media to spread...
+[2026-07-24 14:37:46] [safety_warp] [INFO] Collecting activations and accumulating Gram matrices (GPU)...
+[2026-07-24 14:37:46] [safety_warp] [INFO] ✅ Sequence-wise pooling mode: pool='mean' (각 시퀀스 = 공분산 샘플 1개)
+[2026-07-24 14:37:46] [safety_warp] [INFO] Target layers: [0, 1]
+[2026-07-24 14:37:46] [safety_warp] [INFO] Layer types: ['attn_v']
+[2026-07-24 14:37:46] [safety_warp] [INFO] ✓ 2 accumulation hooks registered (sequence-wise)
+[2026-07-24 14:37:48] [safety_warp] [INFO] ✓ Gram matrix accumulation completed (sequence-wise, pool='mean')
+[2026-07-24 14:37:48] [safety_warp] [INFO]   - Total batches: 16
+[2026-07-24 14:37:48] [safety_warp] [INFO]   - Total sequences (samples): 64
+[2026-07-24 14:37:48] [safety_warp] [INFO]   - Total valid tokens (참고): 4990
+[2026-07-24 14:37:48] [safety_warp] [INFO]   - Gram matrices: 2
+[2026-07-24 14:37:48] [safety_warp] [INFO]   - Layer (0, 'attn_v'): Gram shape=(4096, 4096), samples(seq)=64
+[2026-07-24 14:37:48] [safety_warp] [INFO]   - Layer (1, 'attn_v'): Gram shape=(4096, 4096), samples(seq)=64
+[2026-07-24 14:37:48] [safety_warp] [INFO] Computing SVD from accumulated Gram matrices (GPU)...
+[2026-07-24 14:37:48] [safety_warp] [INFO] ✅ Fast GPU computation, incremental disk saving
+[2026-07-24 14:37:48] [safety_warp] [INFO] Layer 0 (attn_v):
+[2026-07-24 14:37:48] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([4096, 4096])
+[2026-07-24 14:37:48] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-07-24 14:37:48] [safety_warp] [INFO]   - Samples accumulated: 64
+[2026-07-24 14:37:48] [safety_warp] [INFO]   - Gram matrix trace: 507.1830
+[2026-07-24 14:37:53] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 2.00e+00
+[2026-07-24 14:37:54] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-07-24 14:37:54] [safety_warp] [INFO]     σ_0: 499.772125
+[2026-07-24 14:37:54] [safety_warp] [INFO]     σ_1: 3.382289
+[2026-07-24 14:37:54] [safety_warp] [INFO]     σ_2: 1.081379
+[2026-07-24 14:37:54] [safety_warp] [INFO]     σ_3: 0.758023
+[2026-07-24 14:37:54] [safety_warp] [INFO]     σ_4: 0.688028
+[2026-07-24 14:37:54] [safety_warp] [INFO]     σ_5: 0.602509
+[2026-07-24 14:37:54] [safety_warp] [INFO]     σ_6: 0.554765
+[2026-07-24 14:37:54] [safety_warp] [INFO]     σ_7: 0.402970
+[2026-07-24 14:37:54] [safety_warp] [INFO]     σ_8: 0.271791
+[2026-07-24 14:37:54] [safety_warp] [INFO]     σ_9: 0.263369
+[2026-07-24 14:37:54] [safety_warp] [INFO]   - Top-10 variance ratio: 99.49%
+[2026-07-24 14:37:54] [safety_warp] [INFO]   - Top-10% rank variance ratio: 99.99% (top 409 / 4096 dims)
+[2026-07-24 14:37:54] [safety_warp] [INFO]   - Rank for 90% variance: 1 / 4096 (0.0% of total dims, actual coverage: 97.92%)
+[2026-07-24 14:37:54] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-07-24 14:37:54] [safety_warp] [INFO] Layer 1 (attn_v):
+[2026-07-24 14:37:54] [safety_warp] [INFO]   - Gram matrix shape: torch.Size([4096, 4096])
+[2026-07-24 14:37:54] [safety_warp] [INFO]   - Gram matrix device: cuda:0
+[2026-07-24 14:37:54] [safety_warp] [INFO]   - Samples accumulated: 64
+[2026-07-24 14:37:54] [safety_warp] [INFO]   - Gram matrix trace: 3358.9929
+[2026-07-24 14:37:58] [safety_warp] [INFO]   - Symmetry check: max|U - V^T| = 9.91e-01
+[2026-07-24 14:37:59] [safety_warp] [INFO]   - SVD singular values (top-10):
+[2026-07-24 14:37:59] [safety_warp] [INFO]     σ_0: 3298.743652
+[2026-07-24 14:37:59] [safety_warp] [INFO]     σ_1: 21.359882
+[2026-07-24 14:37:59] [safety_warp] [INFO]     σ_2: 6.257079
+[2026-07-24 14:37:59] [safety_warp] [INFO]     σ_3: 3.810784
+[2026-07-24 14:37:59] [safety_warp] [INFO]     σ_4: 3.351132
+[2026-07-24 14:37:59] [safety_warp] [INFO]     σ_5: 1.673675
+[2026-07-24 14:37:59] [safety_warp] [INFO]     σ_6: 1.498533
+[2026-07-24 14:37:59] [safety_warp] [INFO]     σ_7: 1.331994
+[2026-07-24 14:37:59] [safety_warp] [INFO]     σ_8: 1.193173
+[2026-07-24 14:37:59] [safety_warp] [INFO]     σ_9: 1.165711
+[2026-07-24 14:37:59] [safety_warp] [INFO]   - Top-10 variance ratio: 99.24%
+[2026-07-24 14:37:59] [safety_warp] [INFO]   - Top-10% rank variance ratio: 99.95% (top 409 / 4096 dims)
+[2026-07-24 14:37:59] [safety_warp] [INFO]   - Rank for 90% variance: 1 / 4096 (0.0% of total dims, actual coverage: 98.00%)
+[2026-07-24 14:37:59] [safety_warp] [INFO]   - ✓ Saved to disk
+[2026-07-24 14:37:59] [safety_warp] [INFO] ✓ SVD computation completed
+[2026-07-24 14:37:59] [safety_warp] [INFO]   - Total layers saved: 2
+[2026-07-24 14:37:59] [safety_warp] [INFO]   - GPU memory cleared
+[2026-07-24 14:37:59] [safety_warp] [INFO] Saving basis metadata to ./checkpoints_smoke/phase1_20260724_143740/basis...
+[2026-07-24 14:37:59] [safety_warp] [INFO] ✓ Basis metadata saved successfully
+[2026-07-24 14:37:59] [safety_warp] [INFO]   - Directory: ./checkpoints_smoke/phase1_20260724_143740/basis
+[2026-07-24 14:37:59] [safety_warp] [INFO]   - Layer types: ['attn_v']
+[2026-07-24 14:37:59] [safety_warp] [INFO]   - Total SVD files: 2
+[2026-07-24 14:37:59] [safety_warp] [INFO]   - Metadata: ./checkpoints_smoke/phase1_20260724_143740/basis/metadata.json
+[2026-07-24 14:37:59] [safety_warp] [INFO] ======================================================================
+[2026-07-24 14:37:59] [safety_warp] [INFO] Verifying saved SVD results...
+[2026-07-24 14:37:59] [safety_warp] [INFO] ======================================================================
+[2026-07-24 14:37:59] [safety_warp] [INFO] 
+[attn_v] - 2 files
+[2026-07-24 14:37:59] [safety_warp] [INFO]   - Total size: 256.04 MB
+[2026-07-24 14:37:59] [safety_warp] [INFO]   - Sample check (first): layer_00_svd.pt
+[2026-07-24 14:37:59] [safety_warp] [INFO]     - U shape: torch.Size([4096, 4096])
+[2026-07-24 14:37:59] [safety_warp] [INFO]     - S shape: torch.Size([4096])
+[2026-07-24 14:37:59] [safety_warp] [INFO]     - S range: [0.000000, 499.772125]
+[2026-07-24 14:37:59] [safety_warp] [INFO]     - S top-5: [499.7721252441406, 3.382288932800293, 1.0813790559768677, 0.7580229640007019, 0.6880283951759338]
+[2026-07-24 14:37:59] [safety_warp] [INFO]   - Sample check (last): layer_01_svd.pt
+[2026-07-24 14:37:59] [safety_warp] [INFO]     - U shape: torch.Size([4096, 4096])
+[2026-07-24 14:37:59] [safety_warp] [INFO]     - S shape: torch.Size([4096])
+[2026-07-24 14:37:59] [safety_warp] [INFO]     - S range: [0.000000, 3298.743652]
+[2026-07-24 14:37:59] [safety_warp] [INFO] ======================================================================
+[2026-07-24 14:37:59] [safety_warp] [INFO] Verification Summary:
+[2026-07-24 14:37:59] [safety_warp] [INFO]   - Total files verified: 2
+[2026-07-24 14:37:59] [safety_warp] [INFO]   - Total storage: 256.04 MB
+[2026-07-24 14:37:59] [safety_warp] [INFO]   - Files per layer type:
+[2026-07-24 14:37:59] [safety_warp] [INFO]     - attn_v: 2 files
+[2026-07-24 14:37:59] [safety_warp] [INFO]   - Singular value range (global): [0.000000, 499.772125]
+[2026-07-24 14:37:59] [safety_warp] [INFO] ======================================================================
+[2026-07-24 14:37:59] [safety_warp] [INFO] ✓ All SVD results verified successfully!
+[2026-07-24 14:37:59] [safety_warp] [INFO] ======================================================================
+[2026-07-24 14:37:59] [safety_warp] [INFO] ✓ Forward hooks removed (0 hooks)
+[2026-07-24 14:37:59] [safety_warp] [INFO] ======================================================================
+[2026-07-24 14:37:59] [safety_warp] [INFO] Phase 1 Completed!
+[2026-07-24 14:37:59] [safety_warp] [INFO] Basis saved to: ./checkpoints_smoke/phase1_20260724_143740/basis
+[2026-07-24 14:37:59] [safety_warp] [INFO] ======================================================================
+[2026-07-24 14:37:59] [safety_warp] [INFO] Next step: Run Phase 2 with --basis_dir ./checkpoints_smoke/phase1_20260724_143740/basis/basis
+[2026-07-24 14:37:59] [safety_warp] [INFO] ======================================================================
+[2026-07-24 14:37:59] [safety_warp] [INFO] ======================================================================
+[2026-07-24 14:37:59] [safety_warp] [INFO] All tasks completed successfully!
+[2026-07-24 14:37:59] [safety_warp] [INFO] ======================================================================

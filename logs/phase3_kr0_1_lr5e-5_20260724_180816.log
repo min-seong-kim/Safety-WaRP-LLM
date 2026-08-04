@@ -1,0 +1,642 @@
+[2026-07-24 18:53:39] [safety_warp] [INFO] ======================================================================
+[2026-07-24 18:53:39] [safety_warp] [INFO] Safety-WaRP-LLM (Fixed - 원본 FSCIL-WaRP 방식)
+[2026-07-24 18:53:39] [safety_warp] [INFO] ======================================================================
+[2026-07-24 18:53:39] [safety_warp] [INFO] Phase: 3
+[2026-07-24 18:53:39] [safety_warp] [INFO] Model: None
+[2026-07-24 18:53:39] [safety_warp] [INFO] Layer types: attn_q,attn_k,attn_v,ffn_down,ffn_up
+[2026-07-24 18:53:39] [safety_warp] [INFO] Target layers: all
+[2026-07-24 18:53:39] [safety_warp] [INFO] ======================================================================
+[2026-07-24 18:53:39] [safety_warp] [WARNING] W&B 초기화 실패 (로깅 없이 계속): api_key not configured (no-tty). call wandb.login(key=[your_api_key])
+[2026-07-24 18:53:39] [safety_warp] [INFO] ======================================================================
+[2026-07-24 18:53:39] [safety_warp] [INFO] Starting Phase 3: Incremental Learning (Fixed)
+[2026-07-24 18:53:39] [safety_warp] [INFO] Mode: non_freeze_warp
+[2026-07-24 18:53:39] [safety_warp] [INFO] ======================================================================
+[2026-07-24 18:53:42] [safety_warp] [INFO] Loading basis from ./checkpoints/phase1_20260724_180818/basis...
+[2026-07-24 18:54:11] [safety_warp] [INFO] ✓ Basis loaded: 160 combinations
+[2026-07-24 18:54:11] [safety_warp] [INFO] Loading masks from ./checkpoints/phase2_20260724_185140/checkpoints/masks...
+[2026-07-24 18:54:11] [safety_warp] [INFO] ✓ Mask metadata loaded:
+[2026-07-24 18:54:11] [safety_warp] [INFO]   - Keep ratio: 0.1
+[2026-07-24 18:55:08] [safety_warp] [INFO] ✓ Masks loaded: 160 combinations
+[2026-07-24 18:55:08] [safety_warp] [INFO] Loading Phase 0 model from kmseong/llama2_7b-chat-Safety-FT-lr5e-5...
+`torch_dtype` is deprecated! Use `dtype` instead!
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards:  33%|███▎      | 1/3 [00:00<00:01,  1.31it/s]Loading checkpoint shards:  67%|██████▋   | 2/3 [00:01<00:00,  1.32it/s]Loading checkpoint shards: 100%|██████████| 3/3 [00:02<00:00,  1.46it/s]Loading checkpoint shards: 100%|██████████| 3/3 [00:02<00:00,  1.41it/s]
+[2026-07-24 18:55:11] [safety_warp] [INFO] ✓ Model loaded
+[2026-07-24 18:55:11] [safety_warp] [INFO] Converting to WaRP modules...
+[2026-07-24 18:55:12] [safety_warp] [INFO] ✓ Tokenizer loaded
+[2026-07-24 18:55:12] [safety_warp] [INFO]   - Input formatting: chat template
+[2026-07-24 18:55:12] [safety_warp] [INFO] ======================================================================
+[2026-07-24 18:55:12] [safety_warp] [INFO] Setting up WaRP modules with basis and masks
+[2026-07-24 18:55:12] [safety_warp] [INFO] ======================================================================
+[2026-07-24 18:55:12] [safety_warp] [INFO] Layer 0 (attn_q):
+[2026-07-24 18:55:12] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:12] [safety_warp] [INFO]   ✓ mask: Frozen 1679243/16777216 (10.0%)
+[2026-07-24 18:55:12] [safety_warp] [INFO] Layer 0 (attn_k):
+[2026-07-24 18:55:12] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:12] [safety_warp] [INFO]   ✓ mask: Frozen 1696727/16777216 (10.1%)
+[2026-07-24 18:55:12] [safety_warp] [INFO] Layer 0 (attn_v):
+[2026-07-24 18:55:12] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:12] [safety_warp] [INFO]   ✓ mask: Frozen 1678860/16777216 (10.0%)
+[2026-07-24 18:55:12] [safety_warp] [INFO] Layer 0 (ffn_down):
+[2026-07-24 18:55:12] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-07-24 18:55:12] [safety_warp] [INFO]   ✓ mask: Frozen 4533723/45088768 (10.1%)
+[2026-07-24 18:55:12] [safety_warp] [INFO] Layer 0 (ffn_up):
+[2026-07-24 18:55:12] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-07-24 18:55:12] [safety_warp] [INFO]   ✓ mask: Frozen 4518844/45088768 (10.0%)
+[2026-07-24 18:55:13] [safety_warp] [INFO] Layer 1 (attn_q):
+[2026-07-24 18:55:13] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:13] [safety_warp] [INFO]   ✓ mask: Frozen 1678189/16777216 (10.0%)
+[2026-07-24 18:55:13] [safety_warp] [INFO] Layer 1 (attn_k):
+[2026-07-24 18:55:13] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:13] [safety_warp] [INFO]   ✓ mask: Frozen 1684681/16777216 (10.0%)
+[2026-07-24 18:55:13] [safety_warp] [INFO] Layer 1 (attn_v):
+[2026-07-24 18:55:13] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:13] [safety_warp] [INFO]   ✓ mask: Frozen 1678857/16777216 (10.0%)
+[2026-07-24 18:55:13] [safety_warp] [INFO] Layer 1 (ffn_down):
+[2026-07-24 18:55:13] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-07-24 18:55:13] [safety_warp] [INFO]   ✓ mask: Frozen 4541992/45088768 (10.1%)
+[2026-07-24 18:55:13] [safety_warp] [INFO] Layer 1 (ffn_up):
+[2026-07-24 18:55:13] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-07-24 18:55:13] [safety_warp] [INFO]   ✓ mask: Frozen 4522035/45088768 (10.0%)
+[2026-07-24 18:55:13] [safety_warp] [INFO] Layer 2 (attn_q):
+[2026-07-24 18:55:13] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:13] [safety_warp] [INFO]   ✓ mask: Frozen 1688405/16777216 (10.1%)
+[2026-07-24 18:55:13] [safety_warp] [INFO] Layer 2 (attn_k):
+[2026-07-24 18:55:13] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:13] [safety_warp] [INFO]   ✓ mask: Frozen 1685842/16777216 (10.0%)
+[2026-07-24 18:55:13] [safety_warp] [INFO] Layer 2 (attn_v):
+[2026-07-24 18:55:13] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:13] [safety_warp] [INFO]   ✓ mask: Frozen 1696579/16777216 (10.1%)
+[2026-07-24 18:55:14] [safety_warp] [INFO] Layer 2 (ffn_down):
+[2026-07-24 18:55:14] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-07-24 18:55:14] [safety_warp] [INFO]   ✓ mask: Frozen 4596922/45088768 (10.2%)
+[2026-07-24 18:55:14] [safety_warp] [INFO] Layer 2 (ffn_up):
+[2026-07-24 18:55:14] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-07-24 18:55:14] [safety_warp] [INFO]   ✓ mask: Frozen 4538682/45088768 (10.1%)
+[2026-07-24 18:55:14] [safety_warp] [INFO] Layer 3 (attn_q):
+[2026-07-24 18:55:14] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:14] [safety_warp] [INFO]   ✓ mask: Frozen 1682098/16777216 (10.0%)
+[2026-07-24 18:55:14] [safety_warp] [INFO] Layer 3 (attn_k):
+[2026-07-24 18:55:14] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:14] [safety_warp] [INFO]   ✓ mask: Frozen 1691226/16777216 (10.1%)
+[2026-07-24 18:55:14] [safety_warp] [INFO] Layer 3 (attn_v):
+[2026-07-24 18:55:14] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:14] [safety_warp] [INFO]   ✓ mask: Frozen 1689627/16777216 (10.1%)
+[2026-07-24 18:55:14] [safety_warp] [INFO] Layer 3 (ffn_down):
+[2026-07-24 18:55:14] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-07-24 18:55:14] [safety_warp] [INFO]   ✓ mask: Frozen 4561539/45088768 (10.1%)
+[2026-07-24 18:55:14] [safety_warp] [INFO] Layer 3 (ffn_up):
+[2026-07-24 18:55:14] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-07-24 18:55:14] [safety_warp] [INFO]   ✓ mask: Frozen 4664531/45088768 (10.3%)
+[2026-07-24 18:55:14] [safety_warp] [INFO] Layer 4 (attn_q):
+[2026-07-24 18:55:14] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:14] [safety_warp] [INFO]   ✓ mask: Frozen 1698739/16777216 (10.1%)
+[2026-07-24 18:55:14] [safety_warp] [INFO] Layer 4 (attn_k):
+[2026-07-24 18:55:14] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:14] [safety_warp] [INFO]   ✓ mask: Frozen 1695293/16777216 (10.1%)
+[2026-07-24 18:55:14] [safety_warp] [INFO] Layer 4 (attn_v):
+[2026-07-24 18:55:14] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:14] [safety_warp] [INFO]   ✓ mask: Frozen 1677781/16777216 (10.0%)
+[2026-07-24 18:55:15] [safety_warp] [INFO] Layer 4 (ffn_down):
+[2026-07-24 18:55:15] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-07-24 18:55:15] [safety_warp] [INFO]   ✓ mask: Frozen 4531347/45088768 (10.0%)
+[2026-07-24 18:55:15] [safety_warp] [INFO] Layer 4 (ffn_up):
+[2026-07-24 18:55:15] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-07-24 18:55:15] [safety_warp] [INFO]   ✓ mask: Frozen 4603486/45088768 (10.2%)
+[2026-07-24 18:55:15] [safety_warp] [INFO] Layer 5 (attn_q):
+[2026-07-24 18:55:15] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:15] [safety_warp] [INFO]   ✓ mask: Frozen 1698988/16777216 (10.1%)
+[2026-07-24 18:55:15] [safety_warp] [INFO] Layer 5 (attn_k):
+[2026-07-24 18:55:15] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:15] [safety_warp] [INFO]   ✓ mask: Frozen 1682034/16777216 (10.0%)
+[2026-07-24 18:55:15] [safety_warp] [INFO] Layer 5 (attn_v):
+[2026-07-24 18:55:15] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:15] [safety_warp] [INFO]   ✓ mask: Frozen 1678730/16777216 (10.0%)
+[2026-07-24 18:55:15] [safety_warp] [INFO] Layer 5 (ffn_down):
+[2026-07-24 18:55:15] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-07-24 18:55:15] [safety_warp] [INFO]   ✓ mask: Frozen 4533305/45088768 (10.1%)
+[2026-07-24 18:55:16] [safety_warp] [INFO] Layer 5 (ffn_up):
+[2026-07-24 18:55:16] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-07-24 18:55:16] [safety_warp] [INFO]   ✓ mask: Frozen 4517042/45088768 (10.0%)
+[2026-07-24 18:55:16] [safety_warp] [INFO] Layer 6 (attn_q):
+[2026-07-24 18:55:16] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:16] [safety_warp] [INFO]   ✓ mask: Frozen 1696824/16777216 (10.1%)
+[2026-07-24 18:55:16] [safety_warp] [INFO] Layer 6 (attn_k):
+[2026-07-24 18:55:16] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:16] [safety_warp] [INFO]   ✓ mask: Frozen 1684473/16777216 (10.0%)
+[2026-07-24 18:55:16] [safety_warp] [INFO] Layer 6 (attn_v):
+[2026-07-24 18:55:16] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:16] [safety_warp] [INFO]   ✓ mask: Frozen 1679186/16777216 (10.0%)
+[2026-07-24 18:55:16] [safety_warp] [INFO] Layer 6 (ffn_down):
+[2026-07-24 18:55:16] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-07-24 18:55:16] [safety_warp] [INFO]   ✓ mask: Frozen 4553855/45088768 (10.1%)
+[2026-07-24 18:55:16] [safety_warp] [INFO] Layer 6 (ffn_up):
+[2026-07-24 18:55:16] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-07-24 18:55:16] [safety_warp] [INFO]   ✓ mask: Frozen 4572752/45088768 (10.1%)
+[2026-07-24 18:55:16] [safety_warp] [INFO] Layer 7 (attn_q):
+[2026-07-24 18:55:16] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:16] [safety_warp] [INFO]   ✓ mask: Frozen 1690866/16777216 (10.1%)
+[2026-07-24 18:55:16] [safety_warp] [INFO] Layer 7 (attn_k):
+[2026-07-24 18:55:16] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:16] [safety_warp] [INFO]   ✓ mask: Frozen 1680151/16777216 (10.0%)
+[2026-07-24 18:55:16] [safety_warp] [INFO] Layer 7 (attn_v):
+[2026-07-24 18:55:16] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:16] [safety_warp] [INFO]   ✓ mask: Frozen 1679170/16777216 (10.0%)
+[2026-07-24 18:55:17] [safety_warp] [INFO] Layer 7 (ffn_down):
+[2026-07-24 18:55:17] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-07-24 18:55:17] [safety_warp] [INFO]   ✓ mask: Frozen 4519531/45088768 (10.0%)
+[2026-07-24 18:55:17] [safety_warp] [INFO] Layer 7 (ffn_up):
+[2026-07-24 18:55:17] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-07-24 18:55:17] [safety_warp] [INFO]   ✓ mask: Frozen 4515024/45088768 (10.0%)
+[2026-07-24 18:55:17] [safety_warp] [INFO] Layer 8 (attn_q):
+[2026-07-24 18:55:17] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:17] [safety_warp] [INFO]   ✓ mask: Frozen 1685199/16777216 (10.0%)
+[2026-07-24 18:55:17] [safety_warp] [INFO] Layer 8 (attn_k):
+[2026-07-24 18:55:17] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:17] [safety_warp] [INFO]   ✓ mask: Frozen 1690872/16777216 (10.1%)
+[2026-07-24 18:55:17] [safety_warp] [INFO] Layer 8 (attn_v):
+[2026-07-24 18:55:17] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:17] [safety_warp] [INFO]   ✓ mask: Frozen 1689436/16777216 (10.1%)
+[2026-07-24 18:55:17] [safety_warp] [INFO] Layer 8 (ffn_down):
+[2026-07-24 18:55:17] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-07-24 18:55:17] [safety_warp] [INFO]   ✓ mask: Frozen 4509905/45088768 (10.0%)
+[2026-07-24 18:55:17] [safety_warp] [INFO] Layer 8 (ffn_up):
+[2026-07-24 18:55:17] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-07-24 18:55:17] [safety_warp] [INFO]   ✓ mask: Frozen 4550420/45088768 (10.1%)
+[2026-07-24 18:55:18] [safety_warp] [INFO] Layer 9 (attn_q):
+[2026-07-24 18:55:18] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:18] [safety_warp] [INFO]   ✓ mask: Frozen 1684342/16777216 (10.0%)
+[2026-07-24 18:55:18] [safety_warp] [INFO] Layer 9 (attn_k):
+[2026-07-24 18:55:18] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:18] [safety_warp] [INFO]   ✓ mask: Frozen 1689406/16777216 (10.1%)
+[2026-07-24 18:55:18] [safety_warp] [INFO] Layer 9 (attn_v):
+[2026-07-24 18:55:18] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:18] [safety_warp] [INFO]   ✓ mask: Frozen 1685517/16777216 (10.0%)
+[2026-07-24 18:55:18] [safety_warp] [INFO] Layer 9 (ffn_down):
+[2026-07-24 18:55:18] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-07-24 18:55:18] [safety_warp] [INFO]   ✓ mask: Frozen 4535759/45088768 (10.1%)
+[2026-07-24 18:55:18] [safety_warp] [INFO] Layer 9 (ffn_up):
+[2026-07-24 18:55:18] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-07-24 18:55:18] [safety_warp] [INFO]   ✓ mask: Frozen 4544031/45088768 (10.1%)
+[2026-07-24 18:55:18] [safety_warp] [INFO] Layer 10 (attn_q):
+[2026-07-24 18:55:18] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:18] [safety_warp] [INFO]   ✓ mask: Frozen 1679453/16777216 (10.0%)
+[2026-07-24 18:55:18] [safety_warp] [INFO] Layer 10 (attn_k):
+[2026-07-24 18:55:18] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:18] [safety_warp] [INFO]   ✓ mask: Frozen 1690633/16777216 (10.1%)
+[2026-07-24 18:55:18] [safety_warp] [INFO] Layer 10 (attn_v):
+[2026-07-24 18:55:18] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:18] [safety_warp] [INFO]   ✓ mask: Frozen 1687860/16777216 (10.1%)
+[2026-07-24 18:55:19] [safety_warp] [INFO] Layer 10 (ffn_down):
+[2026-07-24 18:55:19] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-07-24 18:55:19] [safety_warp] [INFO]   ✓ mask: Frozen 4555321/45088768 (10.1%)
+[2026-07-24 18:55:19] [safety_warp] [INFO] Layer 10 (ffn_up):
+[2026-07-24 18:55:19] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-07-24 18:55:19] [safety_warp] [INFO]   ✓ mask: Frozen 4531607/45088768 (10.1%)
+[2026-07-24 18:55:19] [safety_warp] [INFO] Layer 11 (attn_q):
+[2026-07-24 18:55:19] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:19] [safety_warp] [INFO]   ✓ mask: Frozen 1683099/16777216 (10.0%)
+[2026-07-24 18:55:19] [safety_warp] [INFO] Layer 11 (attn_k):
+[2026-07-24 18:55:19] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:19] [safety_warp] [INFO]   ✓ mask: Frozen 1685567/16777216 (10.0%)
+[2026-07-24 18:55:19] [safety_warp] [INFO] Layer 11 (attn_v):
+[2026-07-24 18:55:19] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:19] [safety_warp] [INFO]   ✓ mask: Frozen 1682331/16777216 (10.0%)
+[2026-07-24 18:55:20] [safety_warp] [INFO] Layer 11 (ffn_down):
+[2026-07-24 18:55:20] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-07-24 18:55:20] [safety_warp] [INFO]   ✓ mask: Frozen 4554760/45088768 (10.1%)
+[2026-07-24 18:55:20] [safety_warp] [INFO] Layer 11 (ffn_up):
+[2026-07-24 18:55:20] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-07-24 18:55:20] [safety_warp] [INFO]   ✓ mask: Frozen 4564688/45088768 (10.1%)
+[2026-07-24 18:55:20] [safety_warp] [INFO] Layer 12 (attn_q):
+[2026-07-24 18:55:20] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:20] [safety_warp] [INFO]   ✓ mask: Frozen 1686128/16777216 (10.1%)
+[2026-07-24 18:55:20] [safety_warp] [INFO] Layer 12 (attn_k):
+[2026-07-24 18:55:20] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:20] [safety_warp] [INFO]   ✓ mask: Frozen 1687229/16777216 (10.1%)
+[2026-07-24 18:55:20] [safety_warp] [INFO] Layer 12 (attn_v):
+[2026-07-24 18:55:20] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:20] [safety_warp] [INFO]   ✓ mask: Frozen 1680626/16777216 (10.0%)
+[2026-07-24 18:55:20] [safety_warp] [INFO] Layer 12 (ffn_down):
+[2026-07-24 18:55:20] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-07-24 18:55:20] [safety_warp] [INFO]   ✓ mask: Frozen 4519061/45088768 (10.0%)
+[2026-07-24 18:55:20] [safety_warp] [INFO] Layer 12 (ffn_up):
+[2026-07-24 18:55:20] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-07-24 18:55:20] [safety_warp] [INFO]   ✓ mask: Frozen 4524972/45088768 (10.0%)
+[2026-07-24 18:55:20] [safety_warp] [INFO] Layer 13 (attn_q):
+[2026-07-24 18:55:20] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:20] [safety_warp] [INFO]   ✓ mask: Frozen 1687064/16777216 (10.1%)
+[2026-07-24 18:55:20] [safety_warp] [INFO] Layer 13 (attn_k):
+[2026-07-24 18:55:20] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:20] [safety_warp] [INFO]   ✓ mask: Frozen 1679580/16777216 (10.0%)
+[2026-07-24 18:55:20] [safety_warp] [INFO] Layer 13 (attn_v):
+[2026-07-24 18:55:20] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:20] [safety_warp] [INFO]   ✓ mask: Frozen 1680214/16777216 (10.0%)
+[2026-07-24 18:55:21] [safety_warp] [INFO] Layer 13 (ffn_down):
+[2026-07-24 18:55:21] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-07-24 18:55:21] [safety_warp] [INFO]   ✓ mask: Frozen 4523625/45088768 (10.0%)
+[2026-07-24 18:55:21] [safety_warp] [INFO] Layer 13 (ffn_up):
+[2026-07-24 18:55:21] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-07-24 18:55:21] [safety_warp] [INFO]   ✓ mask: Frozen 4554060/45088768 (10.1%)
+[2026-07-24 18:55:21] [safety_warp] [INFO] Layer 14 (attn_q):
+[2026-07-24 18:55:21] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:21] [safety_warp] [INFO]   ✓ mask: Frozen 1700528/16777216 (10.1%)
+[2026-07-24 18:55:21] [safety_warp] [INFO] Layer 14 (attn_k):
+[2026-07-24 18:55:21] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:21] [safety_warp] [INFO]   ✓ mask: Frozen 1688484/16777216 (10.1%)
+[2026-07-24 18:55:21] [safety_warp] [INFO] Layer 14 (attn_v):
+[2026-07-24 18:55:21] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:21] [safety_warp] [INFO]   ✓ mask: Frozen 1679475/16777216 (10.0%)
+[2026-07-24 18:55:21] [safety_warp] [INFO] Layer 14 (ffn_down):
+[2026-07-24 18:55:21] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-07-24 18:55:21] [safety_warp] [INFO]   ✓ mask: Frozen 4531095/45088768 (10.0%)
+[2026-07-24 18:55:22] [safety_warp] [INFO] Layer 14 (ffn_up):
+[2026-07-24 18:55:22] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-07-24 18:55:22] [safety_warp] [INFO]   ✓ mask: Frozen 4549301/45088768 (10.1%)
+[2026-07-24 18:55:22] [safety_warp] [INFO] Layer 15 (attn_q):
+[2026-07-24 18:55:22] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:22] [safety_warp] [INFO]   ✓ mask: Frozen 1691944/16777216 (10.1%)
+[2026-07-24 18:55:22] [safety_warp] [INFO] Layer 15 (attn_k):
+[2026-07-24 18:55:22] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:22] [safety_warp] [INFO]   ✓ mask: Frozen 1695058/16777216 (10.1%)
+[2026-07-24 18:55:22] [safety_warp] [INFO] Layer 15 (attn_v):
+[2026-07-24 18:55:22] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:22] [safety_warp] [INFO]   ✓ mask: Frozen 1681506/16777216 (10.0%)
+[2026-07-24 18:55:22] [safety_warp] [INFO] Layer 15 (ffn_down):
+[2026-07-24 18:55:22] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-07-24 18:55:22] [safety_warp] [INFO]   ✓ mask: Frozen 4550040/45088768 (10.1%)
+[2026-07-24 18:55:22] [safety_warp] [INFO] Layer 15 (ffn_up):
+[2026-07-24 18:55:22] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-07-24 18:55:22] [safety_warp] [INFO]   ✓ mask: Frozen 4524476/45088768 (10.0%)
+[2026-07-24 18:55:22] [safety_warp] [INFO] Layer 16 (attn_q):
+[2026-07-24 18:55:22] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:22] [safety_warp] [INFO]   ✓ mask: Frozen 1678510/16777216 (10.0%)
+[2026-07-24 18:55:23] [safety_warp] [INFO] Layer 16 (attn_k):
+[2026-07-24 18:55:23] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:23] [safety_warp] [INFO]   ✓ mask: Frozen 1687789/16777216 (10.1%)
+[2026-07-24 18:55:23] [safety_warp] [INFO] Layer 16 (attn_v):
+[2026-07-24 18:55:23] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:23] [safety_warp] [INFO]   ✓ mask: Frozen 1678541/16777216 (10.0%)
+[2026-07-24 18:55:23] [safety_warp] [INFO] Layer 16 (ffn_down):
+[2026-07-24 18:55:23] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-07-24 18:55:23] [safety_warp] [INFO]   ✓ mask: Frozen 4512488/45088768 (10.0%)
+[2026-07-24 18:55:23] [safety_warp] [INFO] Layer 16 (ffn_up):
+[2026-07-24 18:55:23] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-07-24 18:55:23] [safety_warp] [INFO]   ✓ mask: Frozen 4555976/45088768 (10.1%)
+[2026-07-24 18:55:23] [safety_warp] [INFO] Layer 17 (attn_q):
+[2026-07-24 18:55:23] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:23] [safety_warp] [INFO]   ✓ mask: Frozen 1708364/16777216 (10.2%)
+[2026-07-24 18:55:23] [safety_warp] [INFO] Layer 17 (attn_k):
+[2026-07-24 18:55:23] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:23] [safety_warp] [INFO]   ✓ mask: Frozen 1683814/16777216 (10.0%)
+[2026-07-24 18:55:23] [safety_warp] [INFO] Layer 17 (attn_v):
+[2026-07-24 18:55:23] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:23] [safety_warp] [INFO]   ✓ mask: Frozen 1682932/16777216 (10.0%)
+[2026-07-24 18:55:24] [safety_warp] [INFO] Layer 17 (ffn_down):
+[2026-07-24 18:55:24] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-07-24 18:55:24] [safety_warp] [INFO]   ✓ mask: Frozen 4617632/45088768 (10.2%)
+[2026-07-24 18:55:24] [safety_warp] [INFO] Layer 17 (ffn_up):
+[2026-07-24 18:55:24] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-07-24 18:55:24] [safety_warp] [INFO]   ✓ mask: Frozen 4553311/45088768 (10.1%)
+[2026-07-24 18:55:24] [safety_warp] [INFO] Layer 18 (attn_q):
+[2026-07-24 18:55:24] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:24] [safety_warp] [INFO]   ✓ mask: Frozen 1705815/16777216 (10.2%)
+[2026-07-24 18:55:24] [safety_warp] [INFO] Layer 18 (attn_k):
+[2026-07-24 18:55:24] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:24] [safety_warp] [INFO]   ✓ mask: Frozen 1688635/16777216 (10.1%)
+[2026-07-24 18:55:24] [safety_warp] [INFO] Layer 18 (attn_v):
+[2026-07-24 18:55:24] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:24] [safety_warp] [INFO]   ✓ mask: Frozen 1682964/16777216 (10.0%)
+[2026-07-24 18:55:25] [safety_warp] [INFO] Layer 18 (ffn_down):
+[2026-07-24 18:55:25] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-07-24 18:55:25] [safety_warp] [INFO]   ✓ mask: Frozen 4574294/45088768 (10.1%)
+[2026-07-24 18:55:25] [safety_warp] [INFO] Layer 18 (ffn_up):
+[2026-07-24 18:55:25] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-07-24 18:55:25] [safety_warp] [INFO]   ✓ mask: Frozen 4514659/45088768 (10.0%)
+[2026-07-24 18:55:25] [safety_warp] [INFO] Layer 19 (attn_q):
+[2026-07-24 18:55:25] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:25] [safety_warp] [INFO]   ✓ mask: Frozen 1679491/16777216 (10.0%)
+[2026-07-24 18:55:25] [safety_warp] [INFO] Layer 19 (attn_k):
+[2026-07-24 18:55:25] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:25] [safety_warp] [INFO]   ✓ mask: Frozen 1685950/16777216 (10.0%)
+[2026-07-24 18:55:25] [safety_warp] [INFO] Layer 19 (attn_v):
+[2026-07-24 18:55:25] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:25] [safety_warp] [INFO]   ✓ mask: Frozen 1683828/16777216 (10.0%)
+[2026-07-24 18:55:25] [safety_warp] [INFO] Layer 19 (ffn_down):
+[2026-07-24 18:55:25] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-07-24 18:55:25] [safety_warp] [INFO]   ✓ mask: Frozen 4522253/45088768 (10.0%)
+[2026-07-24 18:55:25] [safety_warp] [INFO] Layer 19 (ffn_up):
+[2026-07-24 18:55:25] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-07-24 18:55:25] [safety_warp] [INFO]   ✓ mask: Frozen 4516614/45088768 (10.0%)
+[2026-07-24 18:55:25] [safety_warp] [INFO] Layer 20 (attn_q):
+[2026-07-24 18:55:25] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:25] [safety_warp] [INFO]   ✓ mask: Frozen 1686545/16777216 (10.1%)
+[2026-07-24 18:55:26] [safety_warp] [INFO] Layer 20 (attn_k):
+[2026-07-24 18:55:26] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:26] [safety_warp] [INFO]   ✓ mask: Frozen 1679902/16777216 (10.0%)
+[2026-07-24 18:55:26] [safety_warp] [INFO] Layer 20 (attn_v):
+[2026-07-24 18:55:26] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:26] [safety_warp] [INFO]   ✓ mask: Frozen 1693758/16777216 (10.1%)
+[2026-07-24 18:55:26] [safety_warp] [INFO] Layer 20 (ffn_down):
+[2026-07-24 18:55:26] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-07-24 18:55:26] [safety_warp] [INFO]   ✓ mask: Frozen 4522907/45088768 (10.0%)
+[2026-07-24 18:55:26] [safety_warp] [INFO] Layer 20 (ffn_up):
+[2026-07-24 18:55:26] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-07-24 18:55:26] [safety_warp] [INFO]   ✓ mask: Frozen 4510305/45088768 (10.0%)
+[2026-07-24 18:55:26] [safety_warp] [INFO] Layer 21 (attn_q):
+[2026-07-24 18:55:26] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:26] [safety_warp] [INFO]   ✓ mask: Frozen 1691437/16777216 (10.1%)
+[2026-07-24 18:55:26] [safety_warp] [INFO] Layer 21 (attn_k):
+[2026-07-24 18:55:26] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:26] [safety_warp] [INFO]   ✓ mask: Frozen 1684348/16777216 (10.0%)
+[2026-07-24 18:55:27] [safety_warp] [INFO] Layer 21 (attn_v):
+[2026-07-24 18:55:27] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:27] [safety_warp] [INFO]   ✓ mask: Frozen 1702024/16777216 (10.1%)
+[2026-07-24 18:55:27] [safety_warp] [INFO] Layer 21 (ffn_down):
+[2026-07-24 18:55:27] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-07-24 18:55:27] [safety_warp] [INFO]   ✓ mask: Frozen 4520491/45088768 (10.0%)
+[2026-07-24 18:55:27] [safety_warp] [INFO] Layer 21 (ffn_up):
+[2026-07-24 18:55:27] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-07-24 18:55:27] [safety_warp] [INFO]   ✓ mask: Frozen 4551529/45088768 (10.1%)
+[2026-07-24 18:55:27] [safety_warp] [INFO] Layer 22 (attn_q):
+[2026-07-24 18:55:27] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:27] [safety_warp] [INFO]   ✓ mask: Frozen 1680560/16777216 (10.0%)
+[2026-07-24 18:55:27] [safety_warp] [INFO] Layer 22 (attn_k):
+[2026-07-24 18:55:27] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:27] [safety_warp] [INFO]   ✓ mask: Frozen 1696412/16777216 (10.1%)
+[2026-07-24 18:55:27] [safety_warp] [INFO] Layer 22 (attn_v):
+[2026-07-24 18:55:27] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:27] [safety_warp] [INFO]   ✓ mask: Frozen 1695883/16777216 (10.1%)
+[2026-07-24 18:55:28] [safety_warp] [INFO] Layer 22 (ffn_down):
+[2026-07-24 18:55:28] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-07-24 18:55:28] [safety_warp] [INFO]   ✓ mask: Frozen 4537618/45088768 (10.1%)
+[2026-07-24 18:55:28] [safety_warp] [INFO] Layer 22 (ffn_up):
+[2026-07-24 18:55:28] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-07-24 18:55:28] [safety_warp] [INFO]   ✓ mask: Frozen 4592989/45088768 (10.2%)
+[2026-07-24 18:55:28] [safety_warp] [INFO] Layer 23 (attn_q):
+[2026-07-24 18:55:28] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:28] [safety_warp] [INFO]   ✓ mask: Frozen 1681803/16777216 (10.0%)
+[2026-07-24 18:55:28] [safety_warp] [INFO] Layer 23 (attn_k):
+[2026-07-24 18:55:28] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:28] [safety_warp] [INFO]   ✓ mask: Frozen 1682865/16777216 (10.0%)
+[2026-07-24 18:55:28] [safety_warp] [INFO] Layer 23 (attn_v):
+[2026-07-24 18:55:28] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:28] [safety_warp] [INFO]   ✓ mask: Frozen 1699085/16777216 (10.1%)
+[2026-07-24 18:55:29] [safety_warp] [INFO] Layer 23 (ffn_down):
+[2026-07-24 18:55:29] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-07-24 18:55:29] [safety_warp] [INFO]   ✓ mask: Frozen 4511193/45088768 (10.0%)
+[2026-07-24 18:55:29] [safety_warp] [INFO] Layer 23 (ffn_up):
+[2026-07-24 18:55:29] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-07-24 18:55:29] [safety_warp] [INFO]   ✓ mask: Frozen 4536758/45088768 (10.1%)
+[2026-07-24 18:55:29] [safety_warp] [INFO] Layer 24 (attn_q):
+[2026-07-24 18:55:29] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:29] [safety_warp] [INFO]   ✓ mask: Frozen 1686280/16777216 (10.1%)
+[2026-07-24 18:55:29] [safety_warp] [INFO] Layer 24 (attn_k):
+[2026-07-24 18:55:29] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:29] [safety_warp] [INFO]   ✓ mask: Frozen 1685447/16777216 (10.0%)
+[2026-07-24 18:55:29] [safety_warp] [INFO] Layer 24 (attn_v):
+[2026-07-24 18:55:29] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:29] [safety_warp] [INFO]   ✓ mask: Frozen 1702833/16777216 (10.1%)
+[2026-07-24 18:55:30] [safety_warp] [INFO] Layer 24 (ffn_down):
+[2026-07-24 18:55:30] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-07-24 18:55:30] [safety_warp] [INFO]   ✓ mask: Frozen 4536728/45088768 (10.1%)
+[2026-07-24 18:55:30] [safety_warp] [INFO] Layer 24 (ffn_up):
+[2026-07-24 18:55:30] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-07-24 18:55:30] [safety_warp] [INFO]   ✓ mask: Frozen 4562276/45088768 (10.1%)
+[2026-07-24 18:55:30] [safety_warp] [INFO] Layer 25 (attn_q):
+[2026-07-24 18:55:30] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:30] [safety_warp] [INFO]   ✓ mask: Frozen 1697803/16777216 (10.1%)
+[2026-07-24 18:55:30] [safety_warp] [INFO] Layer 25 (attn_k):
+[2026-07-24 18:55:30] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:30] [safety_warp] [INFO]   ✓ mask: Frozen 1678294/16777216 (10.0%)
+[2026-07-24 18:55:30] [safety_warp] [INFO] Layer 25 (attn_v):
+[2026-07-24 18:55:30] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:30] [safety_warp] [INFO]   ✓ mask: Frozen 1686057/16777216 (10.0%)
+[2026-07-24 18:55:31] [safety_warp] [INFO] Layer 25 (ffn_down):
+[2026-07-24 18:55:31] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-07-24 18:55:31] [safety_warp] [INFO]   ✓ mask: Frozen 4544548/45088768 (10.1%)
+[2026-07-24 18:55:31] [safety_warp] [INFO] Layer 25 (ffn_up):
+[2026-07-24 18:55:31] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-07-24 18:55:31] [safety_warp] [INFO]   ✓ mask: Frozen 4592173/45088768 (10.2%)
+[2026-07-24 18:55:31] [safety_warp] [INFO] Layer 26 (attn_q):
+[2026-07-24 18:55:31] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:31] [safety_warp] [INFO]   ✓ mask: Frozen 1688576/16777216 (10.1%)
+[2026-07-24 18:55:31] [safety_warp] [INFO] Layer 26 (attn_k):
+[2026-07-24 18:55:31] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:31] [safety_warp] [INFO]   ✓ mask: Frozen 1682190/16777216 (10.0%)
+[2026-07-24 18:55:31] [safety_warp] [INFO] Layer 26 (attn_v):
+[2026-07-24 18:55:31] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:31] [safety_warp] [INFO]   ✓ mask: Frozen 1682117/16777216 (10.0%)
+[2026-07-24 18:55:31] [safety_warp] [INFO] Layer 26 (ffn_down):
+[2026-07-24 18:55:31] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-07-24 18:55:31] [safety_warp] [INFO]   ✓ mask: Frozen 4567425/45088768 (10.1%)
+[2026-07-24 18:55:32] [safety_warp] [INFO] Layer 26 (ffn_up):
+[2026-07-24 18:55:32] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-07-24 18:55:32] [safety_warp] [INFO]   ✓ mask: Frozen 4610892/45088768 (10.2%)
+[2026-07-24 18:55:32] [safety_warp] [INFO] Layer 27 (attn_q):
+[2026-07-24 18:55:32] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:32] [safety_warp] [INFO]   ✓ mask: Frozen 1686018/16777216 (10.0%)
+[2026-07-24 18:55:32] [safety_warp] [INFO] Layer 27 (attn_k):
+[2026-07-24 18:55:32] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:32] [safety_warp] [INFO]   ✓ mask: Frozen 1687740/16777216 (10.1%)
+[2026-07-24 18:55:32] [safety_warp] [INFO] Layer 27 (attn_v):
+[2026-07-24 18:55:32] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:32] [safety_warp] [INFO]   ✓ mask: Frozen 1695274/16777216 (10.1%)
+[2026-07-24 18:55:32] [safety_warp] [INFO] Layer 27 (ffn_down):
+[2026-07-24 18:55:32] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-07-24 18:55:32] [safety_warp] [INFO]   ✓ mask: Frozen 4559828/45088768 (10.1%)
+[2026-07-24 18:55:32] [safety_warp] [INFO] Layer 27 (ffn_up):
+[2026-07-24 18:55:32] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-07-24 18:55:32] [safety_warp] [INFO]   ✓ mask: Frozen 4574756/45088768 (10.1%)
+[2026-07-24 18:55:32] [safety_warp] [INFO] Layer 28 (attn_q):
+[2026-07-24 18:55:32] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:32] [safety_warp] [INFO]   ✓ mask: Frozen 1684534/16777216 (10.0%)
+[2026-07-24 18:55:33] [safety_warp] [INFO] Layer 28 (attn_k):
+[2026-07-24 18:55:33] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:33] [safety_warp] [INFO]   ✓ mask: Frozen 1686201/16777216 (10.1%)
+[2026-07-24 18:55:33] [safety_warp] [INFO] Layer 28 (attn_v):
+[2026-07-24 18:55:33] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:33] [safety_warp] [INFO]   ✓ mask: Frozen 1686413/16777216 (10.1%)
+[2026-07-24 18:55:33] [safety_warp] [INFO] Layer 28 (ffn_down):
+[2026-07-24 18:55:33] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-07-24 18:55:33] [safety_warp] [INFO]   ✓ mask: Frozen 4529401/45088768 (10.0%)
+[2026-07-24 18:55:33] [safety_warp] [INFO] Layer 28 (ffn_up):
+[2026-07-24 18:55:33] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-07-24 18:55:33] [safety_warp] [INFO]   ✓ mask: Frozen 4532282/45088768 (10.1%)
+[2026-07-24 18:55:33] [safety_warp] [INFO] Layer 29 (attn_q):
+[2026-07-24 18:55:33] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:33] [safety_warp] [INFO]   ✓ mask: Frozen 1682988/16777216 (10.0%)
+[2026-07-24 18:55:33] [safety_warp] [INFO] Layer 29 (attn_k):
+[2026-07-24 18:55:33] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:33] [safety_warp] [INFO]   ✓ mask: Frozen 1686889/16777216 (10.1%)
+[2026-07-24 18:55:33] [safety_warp] [INFO] Layer 29 (attn_v):
+[2026-07-24 18:55:33] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:33] [safety_warp] [INFO]   ✓ mask: Frozen 1681369/16777216 (10.0%)
+[2026-07-24 18:55:34] [safety_warp] [INFO] Layer 29 (ffn_down):
+[2026-07-24 18:55:34] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-07-24 18:55:34] [safety_warp] [INFO]   ✓ mask: Frozen 4545162/45088768 (10.1%)
+[2026-07-24 18:55:34] [safety_warp] [INFO] Layer 29 (ffn_up):
+[2026-07-24 18:55:34] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-07-24 18:55:34] [safety_warp] [INFO]   ✓ mask: Frozen 4532362/45088768 (10.1%)
+[2026-07-24 18:55:34] [safety_warp] [INFO] Layer 30 (attn_q):
+[2026-07-24 18:55:34] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:34] [safety_warp] [INFO]   ✓ mask: Frozen 1679109/16777216 (10.0%)
+[2026-07-24 18:55:34] [safety_warp] [INFO] Layer 30 (attn_k):
+[2026-07-24 18:55:34] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:34] [safety_warp] [INFO]   ✓ mask: Frozen 1687290/16777216 (10.1%)
+[2026-07-24 18:55:34] [safety_warp] [INFO] Layer 30 (attn_v):
+[2026-07-24 18:55:34] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:34] [safety_warp] [INFO]   ✓ mask: Frozen 1694090/16777216 (10.1%)
+[2026-07-24 18:55:35] [safety_warp] [INFO] Layer 30 (ffn_down):
+[2026-07-24 18:55:35] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-07-24 18:55:35] [safety_warp] [INFO]   ✓ mask: Frozen 4560399/45088768 (10.1%)
+[2026-07-24 18:55:35] [safety_warp] [INFO] Layer 30 (ffn_up):
+[2026-07-24 18:55:35] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-07-24 18:55:35] [safety_warp] [INFO]   ✓ mask: Frozen 4592769/45088768 (10.2%)
+[2026-07-24 18:55:35] [safety_warp] [INFO] Layer 31 (attn_q):
+[2026-07-24 18:55:35] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:35] [safety_warp] [INFO]   ✓ mask: Frozen 1685822/16777216 (10.0%)
+[2026-07-24 18:55:35] [safety_warp] [INFO] Layer 31 (attn_k):
+[2026-07-24 18:55:35] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:35] [safety_warp] [INFO]   ✓ mask: Frozen 1679054/16777216 (10.0%)
+[2026-07-24 18:55:35] [safety_warp] [INFO] Layer 31 (attn_v):
+[2026-07-24 18:55:35] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-07-24 18:55:35] [safety_warp] [INFO]   ✓ mask: Frozen 1698870/16777216 (10.1%)
+[2026-07-24 18:55:36] [safety_warp] [INFO] Layer 31 (ffn_down):
+[2026-07-24 18:55:36] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-07-24 18:55:36] [safety_warp] [INFO]   ✓ mask: Frozen 4608466/45088768 (10.2%)
+[2026-07-24 18:55:36] [safety_warp] [INFO] Layer 31 (ffn_up):
+[2026-07-24 18:55:36] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-07-24 18:55:36] [safety_warp] [INFO]   ✓ mask: Frozen 4512411/45088768 (10.0%)
+[2026-07-24 18:55:36] [safety_warp] [INFO] ======================================================================
+[2026-07-24 18:55:36] [safety_warp] [INFO] ✓ Setup completed: 160 WaRP modules
+[2026-07-24 18:55:36] [safety_warp] [INFO] ======================================================================
+[2026-07-24 18:55:36] [safety_warp] [INFO] Forward에서 자동으로 마스킹 적용:
+[2026-07-24 18:55:36] [safety_warp] [INFO]   W = V @ (basis_coeff * mask).detach() + basis_coeff * (1-mask) @ U
+[2026-07-24 18:55:36] [safety_warp] [INFO]   mask=1: gradient 차단 (동결)
+[2026-07-24 18:55:36] [safety_warp] [INFO]   mask=0: gradient 흐름 (학습 가능)
+[2026-07-24 18:55:36] [safety_warp] [INFO] ======================================================================
+[2026-07-24 18:55:36] [safety_warp] [INFO] [WaRP-Monitor] verification probes registered
+[2026-07-24 18:55:36] [safety_warp] [INFO]   - modules: 160
+[2026-07-24 18:55:36] [safety_warp] [INFO]   - masked probes: 640
+[2026-07-24 18:55:36] [safety_warp] [INFO]   - trainable probes: 640
+[2026-07-24 18:55:36] [safety_warp] [INFO] Loading GSM8K dataset...
+[2026-07-24 18:55:37] [safety_warp] [INFO] ✓ Using all 7473 samples (gsm8k_samples=0 or not specified)
+[2026-07-24 18:55:40] [safety_warp] [INFO] ✓ Dataset created (7473 samples)
+[2026-07-24 18:55:40] [safety_warp] [INFO] ======================================================================
+[2026-07-24 18:55:40] [safety_warp] [INFO] Phase 3: Incremental Learning with GSM8K (Non-Freeze)
+[2026-07-24 18:55:40] [safety_warp] [INFO] ======================================================================
+[2026-07-24 18:55:40] [safety_warp] [INFO] Non-Freeze 모드: weight_decay=0.01 적용 (WaRPMaskRestoreCallback으로 mask=1 basis_coeff drift 완전 차단)
+[2026-07-24 18:55:40] [safety_warp] [INFO] Parameter freeze status (Non-Freeze mode):
+[2026-07-24 18:55:40] [safety_warp] [INFO]   - Total params: 6,738,415,616
+[2026-07-24 18:55:40] [safety_warp] [INFO]   - Trainable params: 6,738,415,616
+[2026-07-24 18:55:40] [safety_warp] [INFO]   - basis_coeff params: 4,496,293,888
+[2026-07-24 18:55:40] [safety_warp] [INFO]   - Frozen params (requires_grad=False): 0
+[2026-07-24 18:55:40] [safety_warp] [INFO]   - Trainable ratio: 100.00%
+[2026-07-24 18:55:40] [safety_warp] [INFO]   - WaRP masked frozen coeff elems: 453,017,259/4,496,293,888
+[2026-07-24 18:55:40] [safety_warp] [INFO]   - WaRP masked trainable coeff elems: 4,043,276,629 (89.92%)
+[2026-07-24 18:55:40] [safety_warp] [INFO] Training configuration:
+[2026-07-24 18:55:40] [safety_warp] [INFO]   - Epochs: 3
+[2026-07-24 18:55:40] [safety_warp] [INFO]   - Learning rate: 5e-05
+[2026-07-24 18:55:40] [safety_warp] [INFO]   - Weight decay (requested): 0.01
+[2026-07-24 18:55:40] [safety_warp] [INFO]   - Weight decay (effective): 0.01
+[2026-07-24 18:55:40] [safety_warp] [INFO]   - Warmup ratio: 0.1
+[2026-07-24 18:55:40] [safety_warp] [INFO]   - Batch size: 2
+[2026-07-24 18:55:40] [safety_warp] [INFO]   - Gradient accumulation steps: 8
+[2026-07-24 18:55:40] [safety_warp] [INFO]   - Effective batch size: 16
+[2026-07-24 18:55:40] [safety_warp] [INFO]   - Max gradient norm: 1.0
+[2026-07-24 18:55:40] [safety_warp] [INFO]   - Optimizer: adamw_torch
+[2026-07-24 18:55:40] [safety_warp] [INFO]   - LR scheduler: linear
+[2026-07-24 18:55:40] [safety_warp] [INFO]   - Input formatting: chat template
+[2026-07-24 18:55:40] [safety_warp] [INFO]   - Checkpoint directory: ./checkpoints/phase3_non_freeze_20260724_185540
+[2026-07-24 18:55:40] [safety_warp] [INFO] ======================================================================
+[2026-07-24 18:55:40] [safety_warp] [INFO] [Constrained SFT] precomputing reference logps (π_aligned = init reparameterized model == safety model)
+[2026-07-24 19:08:26] [safety_warp] [INFO] ✓ Reference logps precomputed for 7473 examples
+[2026-07-24 19:08:28] [safety_warp] [INFO] [WaRP-GradCheck] one-batch gradient sanity
+[2026-07-24 19:08:28] [safety_warp] [INFO]   - loss: 1.532246
+[2026-07-24 19:08:28] [safety_warp] [INFO]   - masked(=1) grad |mean|: 0.000000e+00, nonzero ratio: 0.00%
+[2026-07-24 19:08:28] [safety_warp] [INFO]   - trainable(=0) grad |mean|: 1.466322e-04, nonzero ratio: 100.00%
+[2026-07-24 19:08:28] [safety_warp] [INFO] [WaRPMaskRestoreCallback] registered 160 modules for post-step weight-decay restore
+/root/Safety-WaRP-LLM/models/phase3_extra_learning_non_freeze.py:107: FutureWarning: `tokenizer` is deprecated and will be removed in version 5.0.0 for `ConstrainedSFTTrainer.__init__`. Use `processing_class` instead.
+  super().__init__(*args, **kwargs)
+The model is already on multiple devices. Skipping the move to device specified in `args`.
+[2026-07-24 19:08:28] [safety_warp] [INFO] ✓ ConstrainedSFTTrainer initialized (WaRP masking + token-wise constrained loss)
+[2026-07-24 19:08:28] [safety_warp] [INFO]   β schedule: β1=0.3, β2..3=1, β_rest=0.1
+[2026-07-24 19:08:28] [safety_warp] [INFO] ✓ Trainer initialized
+[2026-07-24 19:08:28] [safety_warp] [INFO] Starting training (Non-Freeze mode)...
+[2026-07-24 19:08:28] [safety_warp] [INFO]   WaRP forward still applies masking:
+[2026-07-24 19:08:28] [safety_warp] [INFO]     W = V @ (basis_coeff * mask).detach() + basis_coeff * (1-mask) @ U
+[2026-07-24 19:08:28] [safety_warp] [INFO]     mask=1: gradient 차단 (frozen)
+[2026-07-24 19:08:28] [safety_warp] [INFO]     mask=0: gradient 흐름 (trainable)
+The tokenizer has new PAD/BOS/EOS tokens that differ from the model config and generation config. The model config and generation config were aligned accordingly, being updated with the tokenizer's values. Updated tokens: {'pad_token_id': 2}.
+  0%|          | 0/1404 [00:00<?, ?it/s]  0%|          | 1/1404 [00:04<1:48:30,  4.64s/it]  0%|          | 2/1404 [00:08<1:38:39,  4.22s/it]  0%|          | 3/1404 [00:12<1:34:48,  4.06s/it]  0%|          | 4/1404 [00:16<1:33:03,  3.99s/it]  0%|          | 5/1404 [00:20<1:32:55,  3.99s/it]  0%|          | 6/1404 [00:24<1:32:53,  3.99s/it]  0%|          | 7/1404 [00:28<1:32:57,  3.99s/it]  1%|          | 8/1404 [00:32<1:34:19,  4.05s/it]  1%|          | 9/1404 [00:36<1:33:27,  4.02s/it]  1%|          | 10/1404 [00:40<1:33:01,  4.00s/it]                                                   {'loss': 11.6765, 'grad_norm': 49.75, 'learning_rate': 3.1914893617021277e-06, 'epoch': 0.02}
+  1%|          | 10/1404 [00:40<1:33:01,  4.00s/it]  1%|          | 11/1404 [00:44<1:32:50,  4.00s/it]  1%|          | 12/1404 [00:48<1:31:44,  3.95s/it]  1%|          | 13/1404 [00:52<1:31:15,  3.94s/it]  1%|          | 14/1404 [00:56<1:30:50,  3.92s/it]  1%|          | 15/1404 [00:59<1:30:43,  3.92s/it]  1%|          | 16/1404 [01:03<1:30:43,  3.92s/it]  1%|          | 17/1404 [01:07<1:31:05,  3.94s/it]  1%|▏         | 18/1404 [01:11<1:31:12,  3.95s/it]  1%|▏         | 19/1404 [01:15<1:30:52,  3.94s/it]  1%|▏         | 20/1404 [01:19<1:30:56,  3.94s/it]                                                   {'loss': 9.9611, 'grad_norm': 31.125, 'learning_rate': 6.73758865248227e-06, 'epoch': 0.04}
+  1%|▏         | 20/1404 [01:19<1:30:56,  3.94s/it]  1%|▏         | 21/1404 [01:23<1:31:17,  3.96s/it]  2%|▏         | 22/1404 [01:27<1:31:27,  3.97s/it]  2%|▏         | 23/1404 [01:31<1:31:31,  3.98s/it]  2%|▏         | 24/1404 [01:35<1:31:02,  3.96s/it]  2%|▏         | 25/1404 [01:39<1:31:09,  3.97s/it]  2%|▏         | 26/1404 [01:43<1:30:17,  3.93s/it]  2%|▏         | 27/1404 [01:47<1:30:40,  3.95s/it]  2%|▏         | 28/1404 [01:51<1:30:24,  3.94s/it]  2%|▏         | 29/1404 [01:55<1:30:05,  3.93s/it]  2%|▏         | 30/1404 [01:59<1:29:52,  3.92s/it]                                                   {'loss': 5.423, 'grad_norm': 19.25, 'learning_rate': 1.0283687943262411e-05, 'epoch': 0.06}
+  2%|▏         | 30/1404 [01:59<1:29:52,  3.92s/it]  2%|▏         | 31/1404 [02:03<1:30:29,  3.95s/it]  2%|▏         | 32/1404 [02:07<1:30:33,  3.96s/it]  2%|▏         | 33/1404 [02:11<1:31:25,  4.00s/it]  2%|▏         | 34/1404 [02:15<1:31:04,  3.99s/it]  2%|▏         | 35/1404 [02:19<1:29:52,  3.94s/it]  3%|▎         | 36/1404 [02:22<1:29:43,  3.94s/it]  3%|▎         | 37/1404 [02:26<1:29:02,  3.91s/it]  3%|▎         | 38/1404 [02:30<1:28:52,  3.90s/it]  3%|▎         | 39/1404 [02:34<1:29:09,  3.92s/it]  3%|▎         | 40/1404 [02:38<1:28:44,  3.90s/it]                                                   {'loss': 3.8484, 'grad_norm': 16.0, 'learning_rate': 1.3829787234042554e-05, 'epoch': 0.09}
+  3%|▎         | 40/1404 [02:38<1:28:44,  3.90s/it]  3%|▎         | 41/1404 [02:42<1:28:39,  3.90s/it]  3%|▎         | 42/1404 [02:46<1:28:36,  3.90s/it]  3%|▎         | 43/1404 [02:50<1:29:18,  3.94s/it]  3%|▎         | 44/1404 [02:54<1:29:46,  3.96s/it]  3%|▎         | 45/1404 [02:58<1:29:37,  3.96s/it]  3%|▎         | 46/1404 [03:02<1:29:32,  3.96s/it]  3%|▎         | 47/1404 [03:06<1:29:09,  3.94s/it]  3%|▎         | 48/1404 [03:10<1:30:12,  3.99s/it]  3%|▎         | 49/1404 [03:14<1:29:32,  3.96s/it]  4%|▎         | 50/1404 [03:18<1:29:17,  3.96s/it]                                                   {'loss': 3.6375, 'grad_norm': 15.4375, 'learning_rate': 1.7375886524822697e-05, 'epoch': 0.11}
+  4%|▎         | 50/1404 [03:18<1:29:17,  3.96s/it]  4%|▎         | 51/1404 [03:22<1:28:55,  3.94s/it]  4%|▎         | 52/1404 [03:25<1:28:22,  3.92s/it]  4%|▍         | 53/1404 [03:29<1:27:41,  3.89s/it]  4%|▍         | 54/1404 [03:33<1:28:38,  3.94s/it]  4%|▍         | 55/1404 [03:37<1:29:45,  3.99s/it]  4%|▍         | 56/1404 [03:41<1:29:06,  3.97s/it]  4%|▍         | 57/1404 [03:45<1:29:58,  4.01s/it]  4%|▍         | 58/1404 [03:49<1:29:05,  3.97s/it]  4%|▍         | 59/1404 [03:53<1:29:34,  4.00s/it]  4%|▍         | 60/1404 [03:57<1:29:23,  3.99s/it]                                                   {'loss': 3.442, 'grad_norm': 12.25, 'learning_rate': 2.0921985815602837e-05, 'epoch': 0.13}
+  4%|▍         | 60/1404 [03:57<1:29:23,  3.99s/it]  4%|▍         | 61/1404 [04:01<1:29:35,  4.00s/it]  4%|▍         | 62/1404 [04:05<1:29:01,  3.98s/it]  4%|▍         | 63/1404 [04:09<1:28:42,  3.97s/it]  5%|▍         | 64/1404 [04:13<1:27:28,  3.92s/it]  5%|▍         | 65/1404 [04:17<1:27:28,  3.92s/it]  5%|▍         | 66/1404 [04:21<1:27:02,  3.90s/it]  5%|▍         | 67/1404 [04:25<1:27:17,  3.92s/it]  5%|▍         | 68/1404 [04:29<1:26:24,  3.88s/it]  5%|▍         | 69/1404 [04:32<1:26:32,  3.89s/it]  5%|▍         | 70/1404 [04:36<1:26:36,  3.90s/it]                                                   {'loss': 3.0503, 'grad_norm': 13.1875, 'learning_rate': 2.446808510638298e-05, 'epoch': 0.15}
+  5%|▍         | 70/1404 [04:36<1:26:36,  3.90s/it]  5%|▌         | 71/1404 [04:40<1:26:59,  3.92s/it]  5%|▌         | 72/1404 [04:44<1:27:21,  3.93s/it]  5%|▌         | 73/1404 [04:48<1:27:33,  3.95s/it]  5%|▌         | 74/1404 [04:52<1:27:06,  3.93s/it]  5%|▌         | 75/1404 [04:56<1:27:49,  3.97s/it]  5%|▌         | 76/1404 [05:00<1:28:27,  4.00s/it]  5%|▌         | 77/1404 [05:04<1:28:44,  4.01s/it]  6%|▌         | 78/1404 [05:08<1:27:42,  3.97s/it]  6%|▌         | 79/1404 [05:12<1:26:44,  3.93s/it]  6%|▌         | 80/1404 [05:16<1:27:07,  3.95s/it]                                                   {'loss': 3.1284, 'grad_norm': 14.0, 'learning_rate': 2.8014184397163124e-05, 'epoch': 0.17}
+  6%|▌         | 80/1404 [05:16<1:27:07,  3.95s/it]  6%|▌         | 81/1404 [05:20<1:27:33,  3.97s/it]  6%|▌         | 82/1404 [05:24<1:27:34,  3.97s/it]  6%|▌         | 83/1404 [05:28<1:27:09,  3.96s/it]  6%|▌         | 84/1404 [05:32<1:27:24,  3.97s/it]  6%|▌         | 85/1404 [05:36<1:27:39,  3.99s/it]  6%|▌         | 86/1404 [05:40<1:27:40,  3.99s/it]  6%|▌         | 87/1404 [05:44<1:27:04,  3.97s/it]  6%|▋         | 88/1404 [05:48<1:26:01,  3.92s/it]  6%|▋         | 89/1404 [05:52<1:26:57,  3.97s/it]  6%|▋         | 90/1404 [05:56<1:25:57,  3.93s/it]                                                   {'loss': 3.1703, 'grad_norm': 11.3125, 'learning_rate': 3.156028368794326e-05, 'epoch': 0.19}
+  6%|▋         | 90/1404 [05:56<1:25:57,  3.93s/it]  6%|▋         | 91/1404 [06:00<1:26:36,  3.96s/it]  7%|▋         | 92/1404 [06:03<1:25:49,  3.92s/it]  7%|▋         | 93/1404 [06:07<1:25:41,  3.92s/it]  7%|▋         | 94/1404 [06:11<1:25:40,  3.92s/it]  7%|▋         | 95/1404 [06:15<1:25:32,  3.92s/it]  7%|▋         | 96/1404 [06:19<1:25:25,  3.92s/it]  7%|▋         | 97/1404 [06:23<1:25:58,  3.95s/it]  7%|▋         | 98/1404 [06:27<1:25:08,  3.91s/it]  7%|▋         | 99/1404 [06:31<1:25:09,  3.92s/it]  7%|▋         | 100/1404 [06:35<1:25:25,  3.93s/it]                                                    {'loss': 2.9848, 'grad_norm': 11.625, 'learning_rate': 3.5106382978723407e-05, 'epoch': 0.21}
+  7%|▋         | 100/1404 [06:35<1:25:25,  3.93s/it]  7%|▋         | 101/1404 [06:39<1:24:33,  3.89s/it]  7%|▋         | 102/1404 [06:43<1:24:54,  3.91s/it]  7%|▋         | 103/1404 [06:47<1:24:56,  3.92s/it]  7%|▋         | 104/1404 [06:51<1:25:06,  3.93s/it]  7%|▋         | 105/1404 [06:55<1:25:23,  3.94s/it]  8%|▊         | 106/1404 [06:58<1:25:04,  3.93s/it]  8%|▊         | 107/1404 [07:02<1:25:13,  3.94s/it]  8%|▊         | 108/1404 [07:06<1:25:07,  3.94s/it]  8%|▊         | 109/1404 [07:10<1:24:40,  3.92s/it]  8%|▊         | 110/1404 [07:14<1:24:41,  3.93s/it]                                                    {'loss': 3.2474, 'grad_norm': 13.1875, 'learning_rate': 3.865248226950355e-05, 'epoch': 0.24}
+  8%|▊         | 110/1404 [07:14<1:24:41,  3.93s/it]  8%|▊         | 111/1404 [07:18<1:24:26,  3.92s/it]  8%|▊         | 112/1404 [07:22<1:24:08,  3.91s/it]  8%|▊         | 113/1404 [07:26<1:23:30,  3.88s/it]  8%|▊         | 114/1404 [07:30<1:24:30,  3.93s/it]  8%|▊         | 115/1404 [07:34<1:23:42,  3.90s/it]  8%|▊         | 116/1404 [07:38<1:24:23,  3.93s/it]  8%|▊         | 117/1404 [07:42<1:25:53,  4.00s/it]  8%|▊         | 118/1404 [07:46<1:25:22,  3.98s/it]  8%|▊         | 119/1404 [07:50<1:25:04,  3.97s/it]  9%|▊         | 120/1404 [07:54<1:24:51,  3.97s/it]                                                    {'loss': 3.1728, 'grad_norm': 12.1875, 'learning_rate': 4.219858156028369e-05, 'epoch': 0.26}
+  9%|▊         | 120/1404 [07:54<1:24:51,  3.97s/it]  9%|▊         | 121/1404 [07:58<1:24:28,  3.95s/it]  9%|▊         | 122/1404 [08:02<1:24:44,  3.97s/it]  9%|▉         | 123/1404 [08:06<1:26:52,  4.07s/it]  9%|▉         | 124/1404 [08:10<1:26:16,  4.04s/it]  9%|▉         | 125/1404 [08:14<1:25:13,  4.00s/it]  9%|▉         | 126/1404 [08:18<1:25:06,  4.00s/it]  9%|▉         | 127/1404 [08:22<1:24:52,  3.99s/it]  9%|▉         | 128/1404 [08:26<1:24:16,  3.96s/it]  9%|▉         | 129/1404 [08:30<1:25:31,  4.02s/it]  9%|▉         | 130/1404 [08:34<1:25:06,  4.01s/it]                                                    {'loss': 3.1641, 'grad_norm': 12.625, 'learning_rate': 4.574468085106383e-05, 'epoch': 0.28}
+  9%|▉         | 130/1404 [08:34<1:25:06,  4.01s/it]  9%|▉         | 131/1404 [08:38<1:24:52,  4.00s/it]  9%|▉         | 132/1404 [08:42<1:23:58,  3.96s/it]  9%|▉         | 133/1404 [08:46<1:23:55,  3.96s/it] 10%|▉         | 134/1404 [08:50<1:23:58,  3.97s/it] 10%|▉         | 135/1404 [08:54<1:24:29,  4.00s/it] 10%|▉         | 136/1404 [08:58<1:24:43,  4.01s/it] 10%|▉         | 137/1404 [09:02<1:24:13,  3.99s/it] 10%|▉         | 138/1404 [09:05<1:23:22,  3.95s/it] 10%|▉         | 139/1404 [09:09<1:23:20,  3.95s/it] 10%|▉         | 140/1404 [09:13<1:23:00,  3.94s/it]                                                    {'loss': 3.2443, 'grad_norm': 11.9375, 'learning_rate': 4.929078014184397e-05, 'epoch': 0.3}
+ 10%|▉         | 140/1404 [09:13<1:23:00,  3.94s/it] 10%|█         | 141/1404 [09:17<1:23:30,  3.97s/it] 10%|█         | 142/1404 [09:21<1:22:40,  3.93s/it] 10%|█         | 143/1404 [09:25<1:22:54,  3.94s/it] 10%|█         | 144/1404 [09:29<1:22:02,  3.91s/it] 10%|█         | 145/1404 [09:33<1:22:24,  3.93s/it] 10%|█         | 146/1404 [09:37<1:22:00,  3.91s/it] 10%|█         | 147/1404 [09:41<1:21:27,  3.89s/it] 11%|█         | 148/1404 [09:45<1:21:17,  3.88s/it] 11%|█         | 149/1404 [09:49<1:22:16,  3.93s/it] 11%|█         | 150/1404 [09:53<1:22:20,  3.94s/it]                                                    {'loss': 3.1254, 'grad_norm': 9.1875, 'learning_rate': 4.999505041598724e-05, 'epoch': 0.32}
+ 11%|█         | 150/1404 [09:53<1:22:20,  3.94s/it] 11%|█         | 151/1404 [09:57<1:22:45,  3.96s/it] 11%|█         | 152/1404 [10:00<1:22:27,  3.95s/it] 11%|█         | 153/1404 [10:04<1:22:03,  3.94s/it] 11%|█         | 154/1404 [10:08<1:21:20,  3.90s/it] 11%|█         | 155/1404 [10:12<1:21:24,  3.91s/it] 11%|█         | 156/1404 [10:16<1:21:17,  3.91s/it] 11%|█         | 157/1404 [10:20<1:21:36,  3.93s/it] 11%|█▏        | 158/1404 [10:24<1:22:00,  3.95s/it] 11%|█▏        | 159/1404 [10:28<1:22:13,  3.96s/it] 11%|█▏        | 160/1404 [10:32<1:22:43,  3.99s/it]                                                    {'loss': 3.1009, 'grad_norm': 11.5, 'learning_rate': 4.997494608984612e-05, 'epoch': 0.34}
+ 11%|█▏        | 160/1404 [10:32<1:22:43,  3.99s/it] 11%|█▏        | 161/1404 [10:36<1:21:52,  3.95s/it] 12%|█▏        | 162/1404 [10:40<1:22:36,  3.99s/it] 12%|█▏        | 163/1404 [10:44<1:22:06,  3.97s/it] 12%|█▏        | 164/1404 [10:48<1:21:47,  3.96s/it] 12%|█▏        | 165/1404 [10:52<1:22:06,  3.98s/it] 12%|█▏        | 166/1404 [10:56<1:22:06,  3.98s/it] 12%|█▏        | 167/1404 [11:00<1:21:54,  3.97s/it] 12%|█▏        | 168/1404 [11:04<1:22:07,  3.99s/it] 12%|█▏        | 169/1404 [11:08<1:21:49,  3.98s/it] 12%|█▏        | 170/1404 [11:12<1:21:26,  3.96s/it]                                                    {'loss': 3.0609, 'grad_norm': 11.0, 'learning_rate': 4.993939010128119e-05, 'epoch': 0.36}
+ 12%|█▏        | 170/1404 [11:12<1:21:26,  3.96s/it] 12%|█▏        | 171/1404 [11:16<1:21:10,  3.95s/it] 12%|█▏        | 172/1404 [11:20<1:20:52,  3.94s/it] 12%|█▏        | 173/1404 [11:24<1:20:54,  3.94s/it] 12%|█▏        | 174/1404 [11:27<1:20:26,  3.92s/it] 12%|█▏        | 175/1404 [11:31<1:20:24,  3.93s/it] 13%|█▎        | 176/1404 [11:35<1:19:56,  3.91s/it] 13%|█▎        | 177/1404 [11:39<1:19:45,  3.90s/it] 13%|█▎        | 178/1404 [11:43<1:19:35,  3.89s/it] 13%|█▎        | 179/1404 [11:47<1:19:43,  3.90s/it] 13%|█▎        | 180/1404 [11:51<1:19:20,  3.89s/it]                                                    {'loss': 3.1728, 'grad_norm': 10.9375, 'learning_rate': 4.9888404448303205e-05, 'epoch': 0.39}
+ 13%|█▎        | 180/1404 [11:51<1:19:20,  3.89s/it] 13%|█▎        | 181/1404 [11:55<1:19:35,  3.90s/it] 13%|█▎        | 182/1404 [11:59<1:19:21,  3.90s/it] 13%|█▎        | 183/1404 [12:02<1:19:28,  3.91s/it] 13%|█▎        | 184/1404 [12:06<1:19:30,  3.91s/it] 13%|█▎        | 185/1404 [12:10<1:19:44,  3.92s/it] 13%|█▎        | 186/1404 [12:14<1:19:31,  3.92s/it] 13%|█▎        | 187/1404 [12:18<1:19:19,  3.91s/it] 13%|█▎        | 188/1404 [12:22<1:20:12,  3.96s/it] 13%|█▎        | 189/1404 [12:26<1:20:01,  3.95s/it] 14%|█▎        | 190/1404 [12:30<1:19:35,  3.93s/it]                                                    {'loss': 2.9618, 'grad_norm': 9.5625, 'learning_rate': 4.982202067504824e-05, 'epoch': 0.41}
+ 14%|█▎        | 190/1404 [12:30<1:19:35,  3.93s/it] 14%|█▎        | 191/1404 [12:34<1:19:35,  3.94s/it] 14%|█▎        | 192/1404 [12:38<1:20:12,  3.97s/it] 14%|█▎        | 193/1404 [12:42<1:20:04,  3.97s/it] 14%|█▍        | 194/1404 [12:46<1:20:14,  3.98s/it] 14%|█▍        | 195/1404 [12:50<1:19:29,  3.95s/it] 14%|█▍        | 196/1404 [12:54<1:19:39,  3.96s/it] 14%|█▍        | 197/1404 [12:58<1:19:04,  3.93s/it] 14%|█▍        | 198/1404 [13:02<1:19:20,  3.95s/it] 14%|█▍        | 199/1404 [13:06<1:18:51,  3.93s/it] 14%|█▍        | 200/1404 [13:10<1:19:16,  3.95s/it]                                                    {'loss': 3.0794, 'grad_norm': 9.4375, 'learning_rate': 4.9740279852261815e-05, 'epoch': 0.43}
+ 14%|█▍        | 200/1404 [13:10<1:19:16,  3.95s/it] 14%|█▍        | 201/1404 [13:14<1:19:25,  3.96s/it] 14%|█▍        | 202/1404 [13:17<1:18:51,  3.94s/it] 14%|█▍        | 203/1404 [13:21<1:19:12,  3.96s/it] 15%|█▍        | 204/1404 [13:25<1:18:28,  3.92s/it] 15%|█▍        | 205/1404 [13:29<1:18:24,  3.92s/it] 15%|█▍        | 206/1404 [13:33<1:19:13,  3.97s/it] 15%|█▍        | 207/1404 [13:37<1:18:44,  3.95s/it] 15%|█▍        | 208/1404 [13:41<1:19:03,  3.97s/it] 15%|█▍        | 209/1404 [13:45<1:18:59,  3.97s/it] 15%|█▍        | 210/1404 [13:49<1:18:56,  3.97s/it]                                                    {'loss': 3.0467, 'grad_norm': 10.125, 'learning_rate': 4.9643232551888905e-05, 'epoch': 0.45}
+ 15%|█▍        | 210/1404 [13:49<1:18:56,  3.97s/it] 15%|█▌        | 211/1404 [13:53<1:19:01,  3.97s/it] 15%|█▌        | 212/1404 [13:57<1:19:07,  3.98s/it] 15%|█▌        | 213/1404 [14:01<1:18:58,  3.98s/it] 15%|█▌        | 214/1404 [14:05<1:17:57,  3.93s/it] 15%|█▌        | 215/1404 [14:09<1:18:11,  3.95s/it] 15%|█▌        | 216/1404 [14:13<1:17:32,  3.92s/it] 15%|█▌        | 217/1404 [14:17<1:17:21,  3.91s/it] 16%|█▌        | 218/1404 [14:21<1:17:45,  3.93s/it] 16%|█▌        | 219/1404 [14:24<1:17:11,  3.91s/it] 16%|█▌        | 220/1404 [14:28<1:16:55,  3.90s/it]                                                    {'loss': 3.0664, 'grad_norm': 10.1875, 'learning_rate': 4.953093881578584e-05, 'epoch': 0.47}
+ 16%|█▌        | 220/1404 [14:28<1:16:55,  3.90s/it] 16%|█▌        | 221/1404 [14:32<1:16:16,  3.87s/it] 16%|█▌        | 222/1404 [14:36<1:16:28,  3.88s/it] 16%|█▌        | 223/1404 [14:40<1:17:41,  3.95s/it] 16%|█▌        | 224/1404 [14:44<1:17:40,  3.95s/it] 16%|█▌        | 225/1404 [14:48<1:17:48,  3.96s/it] 16%|█▌        | 226/1404 [14:52<1:17:54,  3.97s/it] 16%|█▌        | 227/1404 [14:56<1:17:30,  3.95s/it] 16%|█▌        | 228/1404 [15:00<1:17:38,  3.96s/it] 16%|█▋        | 229/1404 [15:04<1:17:25,  3.95s/it] 16%|█▋        | 230/1404 [15:08<1:17:30,  3.96s/it]                                                    {'loss': 3.0522, 'grad_norm': 9.5, 'learning_rate': 4.940346811857315e-05, 'epoch': 0.49}
+ 16%|█▋        | 230/1404 [15:08<1:17:30,  3.96s/it] 16%|█▋        | 231/1404 [15:12<1:18:11,  4.00s/it] 17%|█▋        | 232/1404 [15:16<1:18:08,  4.00s/it] 17%|█▋        | 233/1404 [15:20<1:18:13,  4.01s/it] 17%|█▋        | 234/1404 [15:24<1:18:05,  4.00s/it] 17%|█▋        | 235/1404 [15:28<1:17:35,  3.98s/it] 17%|█▋        | 236/1404 [15:32<1:17:02,  3.96s/it] 17%|█▋        | 237/1404 [15:36<1:16:40,  3.94s/it] 17%|█▋        | 238/1404 [15:40<1:16:45,  3.95s/it] 17%|█▋        | 239/1404 [15:44<1:16:57,  3.96s/it] 17%|█▋        | 240/1404 [15:48<1:16:44,  3.96s/it]                                                    {'loss': 2.8819, 'grad_norm': 9.9375, 'learning_rate': 4.926089932465259e-05, 'epoch': 0.51}
+ 17%|█▋        | 240/1404 [15:48<1:16:44,  3.96s/it] 17%|█▋        | 241/1404 [15:52<1:16:20,  3.94s/it] 17%|█▋        | 242/1404 [15:56<1:16:58,  3.97s/it] 17%|█▋        | 243/1404 [16:00<1:16:47,  3.97s/it] 17%|█▋        | 244/1404 [16:04<1:17:05,  3.99s/it] 17%|█▋        | 245/1404 [16:08<1:17:43,  4.02s/it] 18%|█▊        | 246/1404 [16:12<1:17:03,  3.99s/it] 18%|█▊        | 247/1404 [16:16<1:16:31,  3.97s/it] 18%|█▊        | 248/1404 [16:19<1:16:10,  3.95s/it] 18%|█▊        | 249/1404 [16:23<1:15:58,  3.95s/it] 18%|█▊        | 250/1404 [16:27<1:15:52,  3.94s/it]                                                    {'loss': 3.1228, 'grad_norm': 9.75, 'learning_rate': 4.9103320639414787e-05, 'epoch': 0.54}
+ 18%|█▊        | 250/1404 [16:27<1:15:52,  3.94s/it] 18%|█▊        | 251/1404 [16:31<1:15:38,  3.94s/it] 18%|█▊        | 252/1404 [16:35<1:15:22,  3.93s/it] 18%|█▊        | 253/1404 [16:39<1:15:42,  3.95s/it] 18%|█▊        | 254/1404 [16:43<1:15:30,  3.94s/it] 18%|█▊        | 255/1404 [16:47<1:15:39,  3.95s/it] 18%|█▊        | 256/1404 [16:51<1:15:53,  3.97s/it] 18%|█▊        | 257/1404 [16:55<1:16:30,  4.00s/it] 18%|█▊        | 258/1404 [16:59<1:15:59,  3.98s/it] 18%|█▊        | 259/1404 [17:03<1:16:00,  3.98s/it] 19%|█▊        | 260/1404 [17:07<1:15:06,  3.94s/it]                                                    {'loss': 2.8435, 'grad_norm': 10.625, 'learning_rate': 4.893082955466777e-05, 'epoch': 0.56}
+ 19%|█▊        | 260/1404 [17:07<1:15:06,  3.94s/it] 19%|█▊        | 261/1404 [17:11<1:14:11,  3.89s/it] 19%|█▊        | 262/1404 [17:15<1:14:52,  3.93s/it] 19%|█▊        | 263/1404 [17:19<1:14:59,  3.94s/it] 19%|█▉        | 264/1404 [17:23<1:15:16,  3.96s/it] 19%|█▉        | 265/1404 [17:27<1:15:14,  3.96s/it] 19%|█▉        | 266/1404 [17:31<1:14:35,  3.93s/it] 19%|█▉        | 267/1404 [17:34<1:14:17,  3.92s/it] 19%|█▉        | 268/1404 [17:38<1:14:31,  3.94s/it] 19%|█▉        | 269/1404 [17:42<1:14:03,  3.91s/it] 19%|█▉        | 270/1404 [17:46<1:14:11,  3.93s/it]                                                    {'loss': 2.958, 'grad_norm': 11.25, 'learning_rate': 4.8743532788320065e-05, 'epoch': 0.58}
+ 19%|█▉        | 270/1404 [17:46<1:14:11,  3.93s/it] 19%|█▉        | 271/1404 [17:50<1:14:14,  3.93s/it] 19%|█▉        | 272/1404 [17:54<1:14:35,  3.95s/it] 19%|█▉        | 273/1404 [17:58<1:13:47,  3.91s/it] 20%|█▉        | 274/1404 [18:02<1:13:19,  3.89s/it] 20%|█▉        | 275/1404 [18:06<1:13:28,  3.91s/it] 20%|█▉        | 276/1404 [18:10<1:13:34,  3.91s/it] 20%|█▉        | 277/1404 [18:14<1:13:12,  3.90s/it] 20%|█▉        | 278/1404 [18:17<1:12:39,  3.87s/it] 20%|█▉        | 279/1404 [18:21<1:12:46,  3.88s/it] 20%|█▉        | 280/1404 [18:25<1:13:31,  3.92s/it]                                                    {'loss': 2.8695, 'grad_norm': 7.96875, 'learning_rate': 4.8541546218355826e-05, 'epoch': 0.6}
+ 20%|█▉        | 280/1404 [18:25<1:13:31,  3.92s/it] 20%|██        | 281/1404 [18:29<1:15:04,  4.01s/it] 20%|██        | 282/1404 [18:33<1:14:59,  4.01s/it] 20%|██        | 283/1404 [18:37<1:14:38,  3.99s/it] 20%|██        | 284/1404 [18:41<1:14:16,  3.98s/it] 20%|██        | 285/1404 [18:45<1:14:04,  3.97s/it] 20%|██        | 286/1404 [18:49<1:13:35,  3.95s/it] 20%|██        | 287/1404 [18:53<1:13:25,  3.94s/it] 21%|██        | 288/1404 [18:57<1:12:42,  3.91s/it] 21%|██        | 289/1404 [19:01<1:12:41,  3.91s/it] 21%|██        | 290/1404 [19:05<1:12:44,  3.92s/it]                                                    {'loss': 2.8618, 'grad_norm': 8.375, 'learning_rate': 4.832499481114261e-05, 'epoch': 0.62}
+ 21%|██        | 290/1404 [19:05<1:12:44,  3.92s/it] 21%|██        | 291/1404 [19:09<1:12:49,  3.93s/it] 21%|██        | 292/1404 [19:13<1:13:09,  3.95s/it] 21%|██        | 293/1404 [19:17<1:13:56,  3.99s/it] 21%|██        | 294/1404 [19:21<1:13:55,  4.00s/it] 21%|██        | 295/1404 [19:25<1:14:03,  4.01s/it] 21%|██        | 296/1404 [19:29<1:14:05,  4.01s/it] 21%|██        | 297/1404 [19:33<1:12:42,  3.94s/it] 21%|██        | 298/1404 [19:37<1:11:59,  3.91s/it] 21%|██▏       | 299/1404 [19:40<1:11:54,  3.90s/it] 21%|██▏       | 300/1404 [19:44<1:12:22,  3.93s/it]                                                    {'loss': 2.9006, 'grad_norm': 9.1875, 'learning_rate': 4.809401254411643e-05, 'epoch': 0.64}
+ 21%|██▏       | 300/1404 [19:44<1:12:22,  3.93s/it] 21%|██▏       | 301/1404 [19:48<1:12:32,  3.95s/it] 22%|██▏       | 302/1404 [19:52<1:12:42,  3.96s/it] 22%|██▏       | 303/1404 [19:56<1:12:28,  3.95s/it] 22%|██▏       | 304/1404 [20:00<1:11:52,  3.92s/it] 22%|██▏       | 305/1404 [20:04<1:11:21,  3.90s/it] 22%|██▏       | 306/1404 [20:08<1:11:07,  3.89s/it] 22%|██▏       | 307/1404 [20:12<1:11:41,  3.92s/it] 22%|██▏       | 308/1404 [20:16<1:12:03,  3.94s/it] 22%|██▏       | 309/1404 [20:20<1:11:35,  3.92s/it] 22%|██▏       | 310/1404 [20:24<1:11:37,  3.93s/it]                                                    {'loss': 2.9951, 'grad_norm': 9.25, 'learning_rate': 4.7848742322891714e-05, 'epoch': 0.66}
+ 22%|██▏       | 310/1404 [20:24<1:11:37,  3.93s/it] 22%|██▏       | 311/1404 [20:28<1:11:50,  3.94s/it] 22%|██▏       | 312/1404 [20:32<1:11:53,  3.95s/it] 22%|██▏       | 313/1404 [20:36<1:11:38,  3.94s/it] 22%|██▏       | 314/1404 [20:39<1:11:11,  3.92s/it] 22%|██▏       | 315/1404 [20:43<1:11:19,  3.93s/it] 23%|██▎       | 316/1404 [20:47<1:11:48,  3.96s/it] 23%|██▎       | 317/1404 [20:51<1:11:15,  3.93s/it] 23%|██▎       | 318/1404 [20:55<1:11:16,  3.94s/it] 23%|██▎       | 319/1404 [20:59<1:11:16,  3.94s/it] 23%|██▎       | 320/1404 [21:03<1:10:41,  3.91s/it]                                                    {'loss': 3.0005, 'grad_norm': 11.4375, 'learning_rate': 4.75893358928475e-05, 'epoch': 0.69}
+ 23%|██▎       | 320/1404 [21:03<1:10:41,  3.91s/it] 23%|██▎       | 321/1404 [21:07<1:11:05,  3.94s/it] 23%|██▎       | 322/1404 [21:11<1:11:15,  3.95s/it] 23%|██▎       | 323/1404 [21:15<1:10:16,  3.90s/it] 23%|██▎       | 324/1404 [21:19<1:10:21,  3.91s/it] 23%|██▎       | 325/1404 [21:23<1:10:36,  3.93s/it] 23%|██▎       | 326/1404 [21:27<1:10:38,  3.93s/it] 23%|██▎       | 327/1404 [21:31<1:11:03,  3.96s/it] 23%|██▎       | 328/1404 [21:35<1:10:58,  3.96s/it] 23%|██▎       | 329/1404 [21:38<1:10:22,  3.93s/it] 24%|██▎       | 330/1404 [21:42<1:10:07,  3.92s/it]                                                    {'loss': 2.7264, 'grad_norm': 10.125, 'learning_rate': 4.731595374524462e-05, 'epoch': 0.71}
+ 24%|██▎       | 330/1404 [21:42<1:10:07,  3.92s/it] 24%|██▎       | 331/1404 [21:46<1:09:42,  3.90s/it] 24%|██▎       | 332/1404 [21:50<1:10:45,  3.96s/it] 24%|██▎       | 333/1404 [21:54<1:10:57,  3.98s/it] 24%|██▍       | 334/1404 [21:58<1:10:46,  3.97s/it] 24%|██▍       | 335/1404 [22:02<1:10:52,  3.98s/it] 24%|██▍       | 336/1404 [22:06<1:10:45,  3.98s/it] 24%|██▍       | 337/1404 [22:10<1:10:48,  3.98s/it] 24%|██▍       | 338/1404 [22:14<1:10:38,  3.98s/it] 24%|██▍       | 339/1404 [22:18<1:09:56,  3.94s/it] 24%|██▍       | 340/1404 [22:22<1:09:59,  3.95s/it]                                                    {'loss': 2.9431, 'grad_norm': 8.9375, 'learning_rate': 4.7028765017931976e-05, 'epoch': 0.73}
+ 24%|██▍       | 340/1404 [22:22<1:09:59,  3.95s/it] 24%|██▍       | 341/1404 [22:26<1:09:47,  3.94s/it] 24%|██▍       | 342/1404 [22:30<1:10:02,  3.96s/it] 24%|██▍       | 343/1404 [22:34<1:09:12,  3.91s/it] 25%|██▍       | 344/1404 [22:38<1:09:01,  3.91s/it] 25%|██▍       | 345/1404 [22:42<1:08:57,  3.91s/it] 25%|██▍       | 346/1404 [22:45<1:08:35,  3.89s/it] 25%|██▍       | 347/1404 [22:49<1:08:38,  3.90s/it] 25%|██▍       | 348/1404 [22:53<1:08:57,  3.92s/it] 25%|██▍       | 349/1404 [22:57<1:08:40,  3.91s/it] 25%|██▍       | 350/1404 [23:01<1:08:17,  3.89s/it]                                                    {'loss': 2.8195, 'grad_norm': 8.1875, 'learning_rate': 4.672794739070315e-05, 'epoch': 0.75}
+ 25%|██▍       | 350/1404 [23:01<1:08:17,  3.89s/it] 25%|██▌       | 351/1404 [23:05<1:08:48,  3.92s/it] 25%|██▌       | 352/1404 [23:09<1:09:08,  3.94s/it] 25%|██▌       | 353/1404 [23:13<1:08:45,  3.93s/it] 25%|██▌       | 354/1404 [23:17<1:08:32,  3.92s/it] 25%|██▌       | 355/1404 [23:21<1:08:12,  3.90s/it] 25%|██▌       | 356/1404 [23:25<1:08:15,  3.91s/it] 25%|██▌       | 357/1404 [23:29<1:09:01,  3.96s/it] 25%|██▌       | 358/1404 [23:33<1:09:05,  3.96s/it] 26%|██▌       | 359/1404 [23:37<1:08:48,  3.95s/it] 26%|██▌       | 360/1404 [23:40<1:08:14,  3.92s/it]                                                    {'loss': 2.6983, 'grad_norm': 9.375, 'learning_rate': 4.6413686975368374e-05, 'epoch': 0.77}
+ 26%|██▌       | 360/1404 [23:40<1:08:14,  3.92s/it] 26%|██▌       | 361/1404 [23:44<1:08:00,  3.91s/it] 26%|██▌       | 362/1404 [23:48<1:08:00,  3.92s/it][2026-07-24 19:32:18] [safety_warp] [ERROR] Training failed: CUDA out of memory. Tried to allocate 136.00 MiB. GPU 0 has a total capacity of 94.97 GiB of which 120.12 MiB is free. Including non-PyTorch memory, this process has 94.85 GiB memory in use. Of the allocated memory 93.15 GiB is allocated by PyTorch, and 1.03 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+Traceback (most recent call last):
+  File "/root/Safety-WaRP-LLM/models/phase3_extra_learning_non_freeze.py", line 415, in train
+    trainer.train()
+  File "/venv/hb/lib/python3.10/site-packages/transformers/trainer.py", line 2325, in train
+    return inner_training_loop(
+  File "/venv/hb/lib/python3.10/site-packages/transformers/trainer.py", line 2674, in _inner_training_loop
+    tr_loss_step = self.training_step(model, inputs, num_items_in_batch)
+  File "/venv/hb/lib/python3.10/site-packages/transformers/trainer.py", line 4020, in training_step
+    loss = self.compute_loss(model, inputs, num_items_in_batch=num_items_in_batch)
+  File "/root/Safety-WaRP-LLM/models/phase3_extra_learning_non_freeze.py", line 132, in compute_loss
+    policy_list = _per_token_answer_logps(outputs.logits, inputs["labels"].to(outputs.logits.device))
+  File "/root/Safety-WaRP-LLM/models/phase3_extra_learning_non_freeze.py", line 73, in _per_token_answer_logps
+    logps = torch.gather(logits.float().log_softmax(-1), dim=2, index=safe.unsqueeze(2)).squeeze(2)
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 136.00 MiB. GPU 0 has a total capacity of 94.97 GiB of which 120.12 MiB is free. Including non-PyTorch memory, this process has 94.85 GiB memory in use. Of the allocated memory 93.15 GiB is allocated by PyTorch, and 1.03 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+Traceback (most recent call last):
+  File "/root/Safety-WaRP-LLM/train.py", line 532, in <module>
+    main()
+  File "/root/Safety-WaRP-LLM/train.py", line 515, in main
+    run_phase3(args, logger)
+  File "/root/Safety-WaRP-LLM/train.py", line 461, in run_phase3
+    final_model_path = learner.train()
+  File "/root/Safety-WaRP-LLM/models/phase3_extra_learning_non_freeze.py", line 415, in train
+    trainer.train()
+  File "/venv/hb/lib/python3.10/site-packages/transformers/trainer.py", line 2325, in train
+    return inner_training_loop(
+  File "/venv/hb/lib/python3.10/site-packages/transformers/trainer.py", line 2674, in _inner_training_loop
+    tr_loss_step = self.training_step(model, inputs, num_items_in_batch)
+  File "/venv/hb/lib/python3.10/site-packages/transformers/trainer.py", line 4020, in training_step
+    loss = self.compute_loss(model, inputs, num_items_in_batch=num_items_in_batch)
+  File "/root/Safety-WaRP-LLM/models/phase3_extra_learning_non_freeze.py", line 132, in compute_loss
+    policy_list = _per_token_answer_logps(outputs.logits, inputs["labels"].to(outputs.logits.device))
+  File "/root/Safety-WaRP-LLM/models/phase3_extra_learning_non_freeze.py", line 73, in _per_token_answer_logps
+    logps = torch.gather(logits.float().log_softmax(-1), dim=2, index=safe.unsqueeze(2)).squeeze(2)
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 136.00 MiB. GPU 0 has a total capacity of 94.97 GiB of which 120.12 MiB is free. Including non-PyTorch memory, this process has 94.85 GiB memory in use. Of the allocated memory 93.15 GiB is allocated by PyTorch, and 1.03 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+ 26%|██▌       | 362/1404 [23:49<1:08:35,  3.95s/it]

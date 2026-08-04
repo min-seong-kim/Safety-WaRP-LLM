@@ -50,7 +50,8 @@ PHASE1_BASIS_DIR_OVERRIDE="./checkpoints/phase1_20260727_155833/basis"
 # Dataset 선택 (동일하게 사용)
 PHASE2_DATASET="circuit_breakers"
 PHASE2_SAMPLES=4994
-KEEP_RATIO_LIST=("0.1")  
+KEEP_RATIO_LIST=("0.1")
+PHASE2_KR03_MASKS_OVERRIDE="./checkpoints/phase2_20260726_093516/checkpoints/masks"
 
 # Two-Mask 설정 (비활성화하려면 TWO_MASK="" 로 설정)
 # preserve_mask AND NOT adapt_mask → adapt에 중요한 파라미터는 Phase 3에서 학습 가능
@@ -103,8 +104,9 @@ elif [ "$PHASE3_DATASET" = "mmlu" ]; then
 fi
 
 # 공통 설정
-BATCH_SIZE=2
-GRAD_ACCUM_STEPS=8
+PHASE2_BATCH_SIZE=2
+PHASE3_BATCH_SIZE=1
+GRAD_ACCUM_STEPS=16
 DTYPE="bfloat16"
 DEVICE="auto"
 EPOCHS=3
@@ -217,7 +219,8 @@ echo "  Phase 2 Dataset: $PHASE2_DATASET (samples=$PHASE2_SAMPLES)"
 echo "  Phase 3 Dataset: $PHASE3_DATASET (samples=$PHASE3_SAMPLES)"
 echo "  SafeInstr Ratio: $SAFEINSTR_RATIO"
 echo "  Keep Ratios: ${KEEP_RATIO_LIST[*]}"
-echo "  Batch Size: $BATCH_SIZE"
+echo "  Phase 2 Batch Size: $PHASE2_BATCH_SIZE"
+echo "  Phase 3 Batch Size: $PHASE3_BATCH_SIZE"
 echo "  Device: $DEVICE"
 echo "  Output Dir: $BASE_OUTPUT_DIR"
 echo ""
@@ -266,7 +269,7 @@ else
         --phase0_model_dir "$PHASE0_MODEL" \
         --safety_dataset "$PHASE1_DATASET" \
         $PHASE1_DATASET_ARG \
-        --batch_size $BATCH_SIZE \
+        --batch_size $PHASE2_BATCH_SIZE \
         --layer_type "$LAYER_TYPE" \
         --target_layers $TARGET_LAYERS \
         --output_dir $BASE_OUTPUT_DIR \
@@ -369,7 +372,7 @@ for KEEP_RATIO in "${KEEP_RATIO_LIST[@]}"; do
         --circuit_breakers_path ./data/circuit_breakers_train.json \
         $PHASE2_DATASET_ARG \
         --keep_ratio $KEEP_RATIO \
-        --batch_size $BATCH_SIZE \
+        --batch_size $PHASE2_BATCH_SIZE \
         --max_length 1024 \
         --layer_type "$LAYER_TYPE" \
         --target_layers $TARGET_LAYERS \
@@ -388,6 +391,7 @@ for KEEP_RATIO in "${KEEP_RATIO_LIST[@]}"; do
 
     PHASE2_OUTPUT_DIR=$(find $BASE_OUTPUT_DIR -maxdepth 1 -name "phase2_*" -type d -printf '%T@ %p\n' | sort -rn | head -1 | cut -d' ' -f2-)
     PHASE2_MASKS_DIR="$PHASE2_OUTPUT_DIR/checkpoints/masks"
+    fi
 
     if [ ! -d "$PHASE2_MASKS_DIR" ]; then
         echo "ERROR: Phase 2 (kr=$KEEP_RATIO) masks not found: $PHASE2_MASKS_DIR"
@@ -435,7 +439,7 @@ for KEEP_RATIO in "${KEEP_RATIO_LIST[@]}"; do
                 --output_dir "$PHASE3_OUTPUT_DIR" \
                 --learning_rate "$LEARNING_RATE" \
                 --epochs "$EPOCHS" \
-                --batch_size "$BATCH_SIZE" \
+                --batch_size "$PHASE3_BATCH_SIZE" \
                 --grad_accum "$GRAD_ACCUM_STEPS" \
                 --max_length 1024 \
                 --safety_mix_ratio "$SAFEINSTR_RATIO" \
@@ -456,7 +460,7 @@ for KEEP_RATIO in "${KEEP_RATIO_LIST[@]}"; do
                 $PHASE3_DATASET_ARG \
                 --epochs $EPOCHS \
                 --utility_lr $LEARNING_RATE \
-                --batch_size $BATCH_SIZE \
+                --batch_size $PHASE3_BATCH_SIZE \
                 --gradient_accumulation_steps $GRAD_ACCUM_STEPS \
                 --layer_type "$LAYER_TYPE" \
                 --target_layers $TARGET_LAYERS \
@@ -466,10 +470,6 @@ for KEEP_RATIO in "${KEEP_RATIO_LIST[@]}"; do
                 --dtype $DTYPE \
                 --seed 42 \
                 --non_freeze \
-                --constrained_sft \
-                --csft_bias_factor 10 --csft_bias_length 3 --csft_first_token_bias_factor 3 \
-                --profile_json "$PHASE3_PROFILE_JSON" \
-                $WANDB_ARG --wandb_run_name "p3_${PHASE3_DATASET}_kr${KR_SAFE}_lr${LR_SAFE}_${TIMESTAMP}" \
                 $SAFEINSTR_ARG \
                 2>&1 | tee $LOG_DIR/phase3_kr${KR_SAFE}_lr${LR_SAFE}_${TIMESTAMP}.log
 

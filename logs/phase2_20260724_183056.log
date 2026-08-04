@@ -1,0 +1,381 @@
+[2026-07-24 18:30:56] [safety_warp] [INFO] ======================================================================
+[2026-07-24 18:30:56] [safety_warp] [INFO] Safety-WaRP-LLM (Fixed - 원본 FSCIL-WaRP 방식)
+[2026-07-24 18:30:56] [safety_warp] [INFO] ======================================================================
+[2026-07-24 18:30:56] [safety_warp] [INFO] Phase: 2
+[2026-07-24 18:30:56] [safety_warp] [INFO] Model: None
+[2026-07-24 18:30:56] [safety_warp] [INFO] Layer types: attn_q,attn_k,attn_v,ffn_down,ffn_up
+[2026-07-24 18:30:56] [safety_warp] [INFO] Target layers: all
+[2026-07-24 18:30:56] [safety_warp] [INFO] ======================================================================
+[2026-07-24 18:30:56] [safety_warp] [WARNING] W&B 초기화 실패 (로깅 없이 계속): api_key not configured (no-tty). call wandb.login(key=[your_api_key])
+[2026-07-24 18:30:56] [safety_warp] [INFO] ======================================================================
+[2026-07-24 18:30:56] [safety_warp] [INFO] Starting Phase 2: Importance Scoring (Fixed)
+[2026-07-24 18:30:56] [safety_warp] [INFO] ======================================================================
+[2026-07-24 18:30:57] [safety_warp] [INFO] Loading basis from ./checkpoints/phase1_20260724_180818/basis...
+[2026-07-24 18:30:57] [safety_warp] [INFO] ✓ Metadata loaded:
+[2026-07-24 18:30:57] [safety_warp] [INFO]   - Layer types: ['attn_k', 'attn_q', 'attn_v', 'ffn_down', 'ffn_up']
+[2026-07-24 18:31:28] [safety_warp] [INFO] ✓ Basis loaded: 160 (layer, type) combinations
+[2026-07-24 18:31:30] [safety_warp] [INFO] Loading Phase 0 trained model from kmseong/llama2_7b-chat-Safety-FT-lr5e-5...
+[2026-07-24 18:31:33] [safety_warp] [INFO] ✓ Phase 0 model loaded
+[2026-07-24 18:31:33] [safety_warp] [INFO] ✓ Tokenizer loaded
+[2026-07-24 18:31:33] [safety_warp] [INFO]   - Input formatting: chat template
+[2026-07-24 18:31:33] [safety_warp] [INFO] Converting to WaRP modules...
+[2026-07-24 18:31:33] [safety_warp] [INFO] ✓ Conversion completed
+[2026-07-24 18:31:33] [safety_warp] [INFO] Reparameterizing weights to basis space...
+[2026-07-24 18:31:33] [safety_warp] [INFO] ======================================================================
+[2026-07-24 18:31:56] [safety_warp] [INFO] ======================================================================
+[2026-07-24 18:31:56] [safety_warp] [INFO] ✓ Reparameterization completed: 160 modules
+[2026-07-24 18:31:56] [safety_warp] [INFO] Loading circuit_breakers data from ./data/circuit_breakers_train.json...
+[2026-07-24 18:31:56] [safety_warp] [INFO] ✓ Loaded 4994 samples
+[2026-07-24 18:31:56] [safety_warp] [INFO] ✓ Dataloader created (2497 batches)
+[2026-07-24 18:31:56] [safety_warp] [INFO]   - Input format: chat template user/assistant pairs
+[2026-07-24 18:31:56] [safety_warp] [INFO] ======================================================================
+[2026-07-24 18:31:56] [safety_warp] [INFO] Phase 2: Importance Scoring (Per-layer keep_ratio)
+[2026-07-24 18:31:56] [safety_warp] [INFO] ======================================================================
+[2026-07-24 18:31:56] [safety_warp] [INFO] ✅ model.eval() 모드 - 파라미터 업데이트 없음
+[2026-07-24 18:31:56] [safety_warp] [INFO] ✅ Gradient만 계산하여 importance 측정
+[2026-07-24 18:31:56] [safety_warp] [INFO] ======================================================================
+[2026-07-24 18:31:56] [safety_warp] [INFO] ✓ Model set to eval mode (파라미터 변경 없음)
+[2026-07-24 18:31:56] [safety_warp] [INFO] ✓ Found 160 WaRP modules
+[2026-07-24 18:31:56] [safety_warp] [INFO] ✓ Trainable params in Phase 2: 4,496,293,888/6,738,415,616 (66.73%)
+[2026-07-24 18:50:21] [safety_warp] [INFO] ======================================================================
+[2026-07-24 18:50:21] [safety_warp] [INFO] ✓ Importance computation completed
+[2026-07-24 18:50:21] [safety_warp] [INFO]   - Total samples: 4994
+[2026-07-24 18:50:21] [safety_warp] [INFO]   - Total tokens: 239979
+[2026-07-24 18:50:21] [safety_warp] [INFO]   ⚠️  파라미터는 변경되지 않음 (optimizer.step 없음)
+[2026-07-24 18:50:21] [safety_warp] [INFO] ======================================================================
+[2026-07-24 18:50:34] [safety_warp] [INFO] ======================================================================
+[2026-07-24 18:50:34] [safety_warp] [INFO] Generating masks per-layer (keep_ratio=0.1)
+[2026-07-24 18:50:34] [safety_warp] [INFO] ======================================================================
+[2026-07-24 18:50:34] [safety_warp] [INFO] Layer 0 (attn_q):
+[2026-07-24 18:50:34] [safety_warp] [INFO]   - Frozen: 1679243.0/16777216 (10.01%)
+[2026-07-24 18:50:34] [safety_warp] [INFO] Layer 0 (attn_k):
+[2026-07-24 18:50:34] [safety_warp] [INFO]   - Frozen: 1696727.0/16777216 (10.11%)
+[2026-07-24 18:50:35] [safety_warp] [INFO] Layer 0 (attn_v):
+[2026-07-24 18:50:35] [safety_warp] [INFO]   - Frozen: 1678860.0/16777216 (10.01%)
+[2026-07-24 18:50:35] [safety_warp] [INFO] Layer 0 (ffn_down):
+[2026-07-24 18:50:35] [safety_warp] [INFO]   - Frozen: 4533723.0/45088768 (10.06%)
+[2026-07-24 18:50:36] [safety_warp] [INFO] Layer 0 (ffn_up):
+[2026-07-24 18:50:36] [safety_warp] [INFO]   - Frozen: 4518844.0/45088768 (10.02%)
+[2026-07-24 18:50:36] [safety_warp] [INFO] Layer 1 (attn_q):
+[2026-07-24 18:50:36] [safety_warp] [INFO]   - Frozen: 1678189.0/16777216 (10.00%)
+[2026-07-24 18:50:36] [safety_warp] [INFO] Layer 1 (attn_k):
+[2026-07-24 18:50:36] [safety_warp] [INFO]   - Frozen: 1684681.0/16777216 (10.04%)
+[2026-07-24 18:50:37] [safety_warp] [INFO] Layer 1 (attn_v):
+[2026-07-24 18:50:37] [safety_warp] [INFO]   - Frozen: 1678857.0/16777216 (10.01%)
+[2026-07-24 18:50:37] [safety_warp] [INFO] Layer 1 (ffn_down):
+[2026-07-24 18:50:37] [safety_warp] [INFO]   - Frozen: 4541992.0/45088768 (10.07%)
+[2026-07-24 18:50:38] [safety_warp] [INFO] Layer 1 (ffn_up):
+[2026-07-24 18:50:38] [safety_warp] [INFO]   - Frozen: 4522035.0/45088768 (10.03%)
+[2026-07-24 18:50:38] [safety_warp] [INFO] Layer 2 (attn_q):
+[2026-07-24 18:50:38] [safety_warp] [INFO]   - Frozen: 1688405.0/16777216 (10.06%)
+[2026-07-24 18:50:38] [safety_warp] [INFO] Layer 2 (attn_k):
+[2026-07-24 18:50:38] [safety_warp] [INFO]   - Frozen: 1685842.0/16777216 (10.05%)
+[2026-07-24 18:50:39] [safety_warp] [INFO] Layer 2 (attn_v):
+[2026-07-24 18:50:39] [safety_warp] [INFO]   - Frozen: 1696579.0/16777216 (10.11%)
+[2026-07-24 18:50:39] [safety_warp] [INFO] Layer 2 (ffn_down):
+[2026-07-24 18:50:39] [safety_warp] [INFO]   - Frozen: 4596922.0/45088768 (10.20%)
+[2026-07-24 18:50:40] [safety_warp] [INFO] Layer 2 (ffn_up):
+[2026-07-24 18:50:40] [safety_warp] [INFO]   - Frozen: 4538682.0/45088768 (10.07%)
+[2026-07-24 18:50:40] [safety_warp] [INFO] Layer 3 (attn_q):
+[2026-07-24 18:50:40] [safety_warp] [INFO]   - Frozen: 1682098.0/16777216 (10.03%)
+[2026-07-24 18:50:40] [safety_warp] [INFO] Layer 3 (attn_k):
+[2026-07-24 18:50:40] [safety_warp] [INFO]   - Frozen: 1691226.0/16777216 (10.08%)
+[2026-07-24 18:50:41] [safety_warp] [INFO] Layer 3 (attn_v):
+[2026-07-24 18:50:41] [safety_warp] [INFO]   - Frozen: 1689627.0/16777216 (10.07%)
+[2026-07-24 18:50:41] [safety_warp] [INFO] Layer 3 (ffn_down):
+[2026-07-24 18:50:41] [safety_warp] [INFO]   - Frozen: 4561539.0/45088768 (10.12%)
+[2026-07-24 18:50:42] [safety_warp] [INFO] Layer 3 (ffn_up):
+[2026-07-24 18:50:42] [safety_warp] [INFO]   - Frozen: 4664531.0/45088768 (10.35%)
+[2026-07-24 18:50:42] [safety_warp] [INFO] Layer 4 (attn_q):
+[2026-07-24 18:50:42] [safety_warp] [INFO]   - Frozen: 1698739.0/16777216 (10.13%)
+[2026-07-24 18:50:42] [safety_warp] [INFO] Layer 4 (attn_k):
+[2026-07-24 18:50:42] [safety_warp] [INFO]   - Frozen: 1695293.0/16777216 (10.10%)
+[2026-07-24 18:50:42] [safety_warp] [INFO] Layer 4 (attn_v):
+[2026-07-24 18:50:42] [safety_warp] [INFO]   - Frozen: 1677781.0/16777216 (10.00%)
+[2026-07-24 18:50:43] [safety_warp] [INFO] Layer 4 (ffn_down):
+[2026-07-24 18:50:43] [safety_warp] [INFO]   - Frozen: 4531347.0/45088768 (10.05%)
+[2026-07-24 18:50:44] [safety_warp] [INFO] Layer 4 (ffn_up):
+[2026-07-24 18:50:44] [safety_warp] [INFO]   - Frozen: 4603486.0/45088768 (10.21%)
+[2026-07-24 18:50:44] [safety_warp] [INFO] Layer 5 (attn_q):
+[2026-07-24 18:50:44] [safety_warp] [INFO]   - Frozen: 1698988.0/16777216 (10.13%)
+[2026-07-24 18:50:44] [safety_warp] [INFO] Layer 5 (attn_k):
+[2026-07-24 18:50:44] [safety_warp] [INFO]   - Frozen: 1682034.0/16777216 (10.03%)
+[2026-07-24 18:50:44] [safety_warp] [INFO] Layer 5 (attn_v):
+[2026-07-24 18:50:44] [safety_warp] [INFO]   - Frozen: 1678730.0/16777216 (10.01%)
+[2026-07-24 18:50:45] [safety_warp] [INFO] Layer 5 (ffn_down):
+[2026-07-24 18:50:45] [safety_warp] [INFO]   - Frozen: 4533305.0/45088768 (10.05%)
+[2026-07-24 18:50:45] [safety_warp] [INFO] Layer 5 (ffn_up):
+[2026-07-24 18:50:45] [safety_warp] [INFO]   - Frozen: 4517042.0/45088768 (10.02%)
+[2026-07-24 18:50:46] [safety_warp] [INFO] Layer 6 (attn_q):
+[2026-07-24 18:50:46] [safety_warp] [INFO]   - Frozen: 1696824.0/16777216 (10.11%)
+[2026-07-24 18:50:46] [safety_warp] [INFO] Layer 6 (attn_k):
+[2026-07-24 18:50:46] [safety_warp] [INFO]   - Frozen: 1684473.0/16777216 (10.04%)
+[2026-07-24 18:50:46] [safety_warp] [INFO] Layer 6 (attn_v):
+[2026-07-24 18:50:46] [safety_warp] [INFO]   - Frozen: 1679186.0/16777216 (10.01%)
+[2026-07-24 18:50:47] [safety_warp] [INFO] Layer 6 (ffn_down):
+[2026-07-24 18:50:47] [safety_warp] [INFO]   - Frozen: 4553855.0/45088768 (10.10%)
+[2026-07-24 18:50:47] [safety_warp] [INFO] Layer 6 (ffn_up):
+[2026-07-24 18:50:47] [safety_warp] [INFO]   - Frozen: 4572752.0/45088768 (10.14%)
+[2026-07-24 18:50:47] [safety_warp] [INFO] Layer 7 (attn_q):
+[2026-07-24 18:50:47] [safety_warp] [INFO]   - Frozen: 1690866.0/16777216 (10.08%)
+[2026-07-24 18:50:48] [safety_warp] [INFO] Layer 7 (attn_k):
+[2026-07-24 18:50:48] [safety_warp] [INFO]   - Frozen: 1680151.0/16777216 (10.01%)
+[2026-07-24 18:50:48] [safety_warp] [INFO] Layer 7 (attn_v):
+[2026-07-24 18:50:48] [safety_warp] [INFO]   - Frozen: 1679170.0/16777216 (10.01%)
+[2026-07-24 18:50:49] [safety_warp] [INFO] Layer 7 (ffn_down):
+[2026-07-24 18:50:49] [safety_warp] [INFO]   - Frozen: 4519531.0/45088768 (10.02%)
+[2026-07-24 18:50:49] [safety_warp] [INFO] Layer 7 (ffn_up):
+[2026-07-24 18:50:49] [safety_warp] [INFO]   - Frozen: 4515024.0/45088768 (10.01%)
+[2026-07-24 18:50:50] [safety_warp] [INFO] Layer 8 (attn_q):
+[2026-07-24 18:50:50] [safety_warp] [INFO]   - Frozen: 1685199.0/16777216 (10.04%)
+[2026-07-24 18:50:50] [safety_warp] [INFO] Layer 8 (attn_k):
+[2026-07-24 18:50:50] [safety_warp] [INFO]   - Frozen: 1690872.0/16777216 (10.08%)
+[2026-07-24 18:50:50] [safety_warp] [INFO] Layer 8 (attn_v):
+[2026-07-24 18:50:50] [safety_warp] [INFO]   - Frozen: 1689436.0/16777216 (10.07%)
+[2026-07-24 18:50:51] [safety_warp] [INFO] Layer 8 (ffn_down):
+[2026-07-24 18:50:51] [safety_warp] [INFO]   - Frozen: 4509905.0/45088768 (10.00%)
+[2026-07-24 18:50:51] [safety_warp] [INFO] Layer 8 (ffn_up):
+[2026-07-24 18:50:51] [safety_warp] [INFO]   - Frozen: 4550420.0/45088768 (10.09%)
+[2026-07-24 18:50:51] [safety_warp] [INFO] Layer 9 (attn_q):
+[2026-07-24 18:50:51] [safety_warp] [INFO]   - Frozen: 1684342.0/16777216 (10.04%)
+[2026-07-24 18:50:52] [safety_warp] [INFO] Layer 9 (attn_k):
+[2026-07-24 18:50:52] [safety_warp] [INFO]   - Frozen: 1689406.0/16777216 (10.07%)
+[2026-07-24 18:50:52] [safety_warp] [INFO] Layer 9 (attn_v):
+[2026-07-24 18:50:52] [safety_warp] [INFO]   - Frozen: 1685517.0/16777216 (10.05%)
+[2026-07-24 18:50:52] [safety_warp] [INFO] Layer 9 (ffn_down):
+[2026-07-24 18:50:52] [safety_warp] [INFO]   - Frozen: 4535759.0/45088768 (10.06%)
+[2026-07-24 18:50:53] [safety_warp] [INFO] Layer 9 (ffn_up):
+[2026-07-24 18:50:53] [safety_warp] [INFO]   - Frozen: 4544031.0/45088768 (10.08%)
+[2026-07-24 18:50:53] [safety_warp] [INFO] Layer 10 (attn_q):
+[2026-07-24 18:50:53] [safety_warp] [INFO]   - Frozen: 1679453.0/16777216 (10.01%)
+[2026-07-24 18:50:53] [safety_warp] [INFO] Layer 10 (attn_k):
+[2026-07-24 18:50:53] [safety_warp] [INFO]   - Frozen: 1690633.0/16777216 (10.08%)
+[2026-07-24 18:50:54] [safety_warp] [INFO] Layer 10 (attn_v):
+[2026-07-24 18:50:54] [safety_warp] [INFO]   - Frozen: 1687860.0/16777216 (10.06%)
+[2026-07-24 18:50:54] [safety_warp] [INFO] Layer 10 (ffn_down):
+[2026-07-24 18:50:54] [safety_warp] [INFO]   - Frozen: 4555321.0/45088768 (10.10%)
+[2026-07-24 18:50:55] [safety_warp] [INFO] Layer 10 (ffn_up):
+[2026-07-24 18:50:55] [safety_warp] [INFO]   - Frozen: 4531607.0/45088768 (10.05%)
+[2026-07-24 18:50:55] [safety_warp] [INFO] Layer 11 (attn_q):
+[2026-07-24 18:50:55] [safety_warp] [INFO]   - Frozen: 1683099.0/16777216 (10.03%)
+[2026-07-24 18:50:55] [safety_warp] [INFO] Layer 11 (attn_k):
+[2026-07-24 18:50:55] [safety_warp] [INFO]   - Frozen: 1685567.0/16777216 (10.05%)
+[2026-07-24 18:50:56] [safety_warp] [INFO] Layer 11 (attn_v):
+[2026-07-24 18:50:56] [safety_warp] [INFO]   - Frozen: 1682331.0/16777216 (10.03%)
+[2026-07-24 18:50:56] [safety_warp] [INFO] Layer 11 (ffn_down):
+[2026-07-24 18:50:56] [safety_warp] [INFO]   - Frozen: 4554760.0/45088768 (10.10%)
+[2026-07-24 18:50:57] [safety_warp] [INFO] Layer 11 (ffn_up):
+[2026-07-24 18:50:57] [safety_warp] [INFO]   - Frozen: 4564688.0/45088768 (10.12%)
+[2026-07-24 18:50:57] [safety_warp] [INFO] Layer 12 (attn_q):
+[2026-07-24 18:50:57] [safety_warp] [INFO]   - Frozen: 1686128.0/16777216 (10.05%)
+[2026-07-24 18:50:57] [safety_warp] [INFO] Layer 12 (attn_k):
+[2026-07-24 18:50:57] [safety_warp] [INFO]   - Frozen: 1687229.0/16777216 (10.06%)
+[2026-07-24 18:50:57] [safety_warp] [INFO] Layer 12 (attn_v):
+[2026-07-24 18:50:57] [safety_warp] [INFO]   - Frozen: 1680626.0/16777216 (10.02%)
+[2026-07-24 18:50:58] [safety_warp] [INFO] Layer 12 (ffn_down):
+[2026-07-24 18:50:58] [safety_warp] [INFO]   - Frozen: 4519061.0/45088768 (10.02%)
+[2026-07-24 18:50:58] [safety_warp] [INFO] Layer 12 (ffn_up):
+[2026-07-24 18:50:58] [safety_warp] [INFO]   - Frozen: 4524972.0/45088768 (10.04%)
+[2026-07-24 18:50:59] [safety_warp] [INFO] Layer 13 (attn_q):
+[2026-07-24 18:50:59] [safety_warp] [INFO]   - Frozen: 1687064.0/16777216 (10.06%)
+[2026-07-24 18:50:59] [safety_warp] [INFO] Layer 13 (attn_k):
+[2026-07-24 18:50:59] [safety_warp] [INFO]   - Frozen: 1679580.0/16777216 (10.01%)
+[2026-07-24 18:50:59] [safety_warp] [INFO] Layer 13 (attn_v):
+[2026-07-24 18:50:59] [safety_warp] [INFO]   - Frozen: 1680214.0/16777216 (10.01%)
+[2026-07-24 18:51:00] [safety_warp] [INFO] Layer 13 (ffn_down):
+[2026-07-24 18:51:00] [safety_warp] [INFO]   - Frozen: 4523625.0/45088768 (10.03%)
+[2026-07-24 18:51:01] [safety_warp] [INFO] Layer 13 (ffn_up):
+[2026-07-24 18:51:01] [safety_warp] [INFO]   - Frozen: 4554060.0/45088768 (10.10%)
+[2026-07-24 18:51:01] [safety_warp] [INFO] Layer 14 (attn_q):
+[2026-07-24 18:51:01] [safety_warp] [INFO]   - Frozen: 1700528.0/16777216 (10.14%)
+[2026-07-24 18:51:01] [safety_warp] [INFO] Layer 14 (attn_k):
+[2026-07-24 18:51:01] [safety_warp] [INFO]   - Frozen: 1688484.0/16777216 (10.06%)
+[2026-07-24 18:51:02] [safety_warp] [INFO] Layer 14 (attn_v):
+[2026-07-24 18:51:02] [safety_warp] [INFO]   - Frozen: 1679475.0/16777216 (10.01%)
+[2026-07-24 18:51:02] [safety_warp] [INFO] Layer 14 (ffn_down):
+[2026-07-24 18:51:02] [safety_warp] [INFO]   - Frozen: 4531095.0/45088768 (10.05%)
+[2026-07-24 18:51:03] [safety_warp] [INFO] Layer 14 (ffn_up):
+[2026-07-24 18:51:03] [safety_warp] [INFO]   - Frozen: 4549301.0/45088768 (10.09%)
+[2026-07-24 18:51:03] [safety_warp] [INFO] Layer 15 (attn_q):
+[2026-07-24 18:51:03] [safety_warp] [INFO]   - Frozen: 1691944.0/16777216 (10.08%)
+[2026-07-24 18:51:04] [safety_warp] [INFO] Layer 15 (attn_k):
+[2026-07-24 18:51:04] [safety_warp] [INFO]   - Frozen: 1695058.0/16777216 (10.10%)
+[2026-07-24 18:51:04] [safety_warp] [INFO] Layer 15 (attn_v):
+[2026-07-24 18:51:04] [safety_warp] [INFO]   - Frozen: 1681506.0/16777216 (10.02%)
+[2026-07-24 18:51:04] [safety_warp] [INFO] Layer 15 (ffn_down):
+[2026-07-24 18:51:04] [safety_warp] [INFO]   - Frozen: 4550040.0/45088768 (10.09%)
+[2026-07-24 18:51:05] [safety_warp] [INFO] Layer 15 (ffn_up):
+[2026-07-24 18:51:05] [safety_warp] [INFO]   - Frozen: 4524476.0/45088768 (10.03%)
+[2026-07-24 18:51:05] [safety_warp] [INFO] Layer 16 (attn_q):
+[2026-07-24 18:51:05] [safety_warp] [INFO]   - Frozen: 1678510.0/16777216 (10.00%)
+[2026-07-24 18:51:06] [safety_warp] [INFO] Layer 16 (attn_k):
+[2026-07-24 18:51:06] [safety_warp] [INFO]   - Frozen: 1687789.0/16777216 (10.06%)
+[2026-07-24 18:51:06] [safety_warp] [INFO] Layer 16 (attn_v):
+[2026-07-24 18:51:06] [safety_warp] [INFO]   - Frozen: 1678541.0/16777216 (10.00%)
+[2026-07-24 18:51:07] [safety_warp] [INFO] Layer 16 (ffn_down):
+[2026-07-24 18:51:07] [safety_warp] [INFO]   - Frozen: 4512488.0/45088768 (10.01%)
+[2026-07-24 18:51:07] [safety_warp] [INFO] Layer 16 (ffn_up):
+[2026-07-24 18:51:07] [safety_warp] [INFO]   - Frozen: 4555976.0/45088768 (10.10%)
+[2026-07-24 18:51:07] [safety_warp] [INFO] Layer 17 (attn_q):
+[2026-07-24 18:51:07] [safety_warp] [INFO]   - Frozen: 1708364.0/16777216 (10.18%)
+[2026-07-24 18:51:08] [safety_warp] [INFO] Layer 17 (attn_k):
+[2026-07-24 18:51:08] [safety_warp] [INFO]   - Frozen: 1683814.0/16777216 (10.04%)
+[2026-07-24 18:51:08] [safety_warp] [INFO] Layer 17 (attn_v):
+[2026-07-24 18:51:08] [safety_warp] [INFO]   - Frozen: 1682932.0/16777216 (10.03%)
+[2026-07-24 18:51:09] [safety_warp] [INFO] Layer 17 (ffn_down):
+[2026-07-24 18:51:09] [safety_warp] [INFO]   - Frozen: 4617632.0/45088768 (10.24%)
+[2026-07-24 18:51:09] [safety_warp] [INFO] Layer 17 (ffn_up):
+[2026-07-24 18:51:09] [safety_warp] [INFO]   - Frozen: 4553311.0/45088768 (10.10%)
+[2026-07-24 18:51:09] [safety_warp] [INFO] Layer 18 (attn_q):
+[2026-07-24 18:51:09] [safety_warp] [INFO]   - Frozen: 1705815.0/16777216 (10.17%)
+[2026-07-24 18:51:10] [safety_warp] [INFO] Layer 18 (attn_k):
+[2026-07-24 18:51:10] [safety_warp] [INFO]   - Frozen: 1688635.0/16777216 (10.07%)
+[2026-07-24 18:51:10] [safety_warp] [INFO] Layer 18 (attn_v):
+[2026-07-24 18:51:10] [safety_warp] [INFO]   - Frozen: 1682964.0/16777216 (10.03%)
+[2026-07-24 18:51:11] [safety_warp] [INFO] Layer 18 (ffn_down):
+[2026-07-24 18:51:11] [safety_warp] [INFO]   - Frozen: 4574294.0/45088768 (10.15%)
+[2026-07-24 18:51:11] [safety_warp] [INFO] Layer 18 (ffn_up):
+[2026-07-24 18:51:11] [safety_warp] [INFO]   - Frozen: 4514659.0/45088768 (10.01%)
+[2026-07-24 18:51:12] [safety_warp] [INFO] Layer 19 (attn_q):
+[2026-07-24 18:51:12] [safety_warp] [INFO]   - Frozen: 1679491.0/16777216 (10.01%)
+[2026-07-24 18:51:12] [safety_warp] [INFO] Layer 19 (attn_k):
+[2026-07-24 18:51:12] [safety_warp] [INFO]   - Frozen: 1685950.0/16777216 (10.05%)
+[2026-07-24 18:51:12] [safety_warp] [INFO] Layer 19 (attn_v):
+[2026-07-24 18:51:12] [safety_warp] [INFO]   - Frozen: 1683828.0/16777216 (10.04%)
+[2026-07-24 18:51:13] [safety_warp] [INFO] Layer 19 (ffn_down):
+[2026-07-24 18:51:13] [safety_warp] [INFO]   - Frozen: 4522253.0/45088768 (10.03%)
+[2026-07-24 18:51:14] [safety_warp] [INFO] Layer 19 (ffn_up):
+[2026-07-24 18:51:14] [safety_warp] [INFO]   - Frozen: 4516614.0/45088768 (10.02%)
+[2026-07-24 18:51:14] [safety_warp] [INFO] Layer 20 (attn_q):
+[2026-07-24 18:51:14] [safety_warp] [INFO]   - Frozen: 1686545.0/16777216 (10.05%)
+[2026-07-24 18:51:14] [safety_warp] [INFO] Layer 20 (attn_k):
+[2026-07-24 18:51:14] [safety_warp] [INFO]   - Frozen: 1679902.0/16777216 (10.01%)
+[2026-07-24 18:51:14] [safety_warp] [INFO] Layer 20 (attn_v):
+[2026-07-24 18:51:14] [safety_warp] [INFO]   - Frozen: 1693758.0/16777216 (10.10%)
+[2026-07-24 18:51:15] [safety_warp] [INFO] Layer 20 (ffn_down):
+[2026-07-24 18:51:15] [safety_warp] [INFO]   - Frozen: 4522907.0/45088768 (10.03%)
+[2026-07-24 18:51:16] [safety_warp] [INFO] Layer 20 (ffn_up):
+[2026-07-24 18:51:16] [safety_warp] [INFO]   - Frozen: 4510305.0/45088768 (10.00%)
+[2026-07-24 18:51:16] [safety_warp] [INFO] Layer 21 (attn_q):
+[2026-07-24 18:51:16] [safety_warp] [INFO]   - Frozen: 1691437.0/16777216 (10.08%)
+[2026-07-24 18:51:16] [safety_warp] [INFO] Layer 21 (attn_k):
+[2026-07-24 18:51:16] [safety_warp] [INFO]   - Frozen: 1684348.0/16777216 (10.04%)
+[2026-07-24 18:51:17] [safety_warp] [INFO] Layer 21 (attn_v):
+[2026-07-24 18:51:17] [safety_warp] [INFO]   - Frozen: 1702024.0/16777216 (10.14%)
+[2026-07-24 18:51:18] [safety_warp] [INFO] Layer 21 (ffn_down):
+[2026-07-24 18:51:18] [safety_warp] [INFO]   - Frozen: 4520491.0/45088768 (10.03%)
+[2026-07-24 18:51:18] [safety_warp] [INFO] Layer 21 (ffn_up):
+[2026-07-24 18:51:18] [safety_warp] [INFO]   - Frozen: 4551529.0/45088768 (10.09%)
+[2026-07-24 18:51:18] [safety_warp] [INFO] Layer 22 (attn_q):
+[2026-07-24 18:51:18] [safety_warp] [INFO]   - Frozen: 1680560.0/16777216 (10.02%)
+[2026-07-24 18:51:19] [safety_warp] [INFO] Layer 22 (attn_k):
+[2026-07-24 18:51:19] [safety_warp] [INFO]   - Frozen: 1696412.0/16777216 (10.11%)
+[2026-07-24 18:51:19] [safety_warp] [INFO] Layer 22 (attn_v):
+[2026-07-24 18:51:19] [safety_warp] [INFO]   - Frozen: 1695883.0/16777216 (10.11%)
+[2026-07-24 18:51:19] [safety_warp] [INFO] Layer 22 (ffn_down):
+[2026-07-24 18:51:19] [safety_warp] [INFO]   - Frozen: 4537618.0/45088768 (10.06%)
+[2026-07-24 18:51:20] [safety_warp] [INFO] Layer 22 (ffn_up):
+[2026-07-24 18:51:20] [safety_warp] [INFO]   - Frozen: 4592989.0/45088768 (10.19%)
+[2026-07-24 18:51:20] [safety_warp] [INFO] Layer 23 (attn_q):
+[2026-07-24 18:51:20] [safety_warp] [INFO]   - Frozen: 1681803.0/16777216 (10.02%)
+[2026-07-24 18:51:21] [safety_warp] [INFO] Layer 23 (attn_k):
+[2026-07-24 18:51:21] [safety_warp] [INFO]   - Frozen: 1682865.0/16777216 (10.03%)
+[2026-07-24 18:51:21] [safety_warp] [INFO] Layer 23 (attn_v):
+[2026-07-24 18:51:21] [safety_warp] [INFO]   - Frozen: 1699085.0/16777216 (10.13%)
+[2026-07-24 18:51:22] [safety_warp] [INFO] Layer 23 (ffn_down):
+[2026-07-24 18:51:22] [safety_warp] [INFO]   - Frozen: 4511193.0/45088768 (10.01%)
+[2026-07-24 18:51:22] [safety_warp] [INFO] Layer 23 (ffn_up):
+[2026-07-24 18:51:22] [safety_warp] [INFO]   - Frozen: 4536758.0/45088768 (10.06%)
+[2026-07-24 18:51:23] [safety_warp] [INFO] Layer 24 (attn_q):
+[2026-07-24 18:51:23] [safety_warp] [INFO]   - Frozen: 1686280.0/16777216 (10.05%)
+[2026-07-24 18:51:23] [safety_warp] [INFO] Layer 24 (attn_k):
+[2026-07-24 18:51:23] [safety_warp] [INFO]   - Frozen: 1685447.0/16777216 (10.05%)
+[2026-07-24 18:51:23] [safety_warp] [INFO] Layer 24 (attn_v):
+[2026-07-24 18:51:23] [safety_warp] [INFO]   - Frozen: 1702833.0/16777216 (10.15%)
+[2026-07-24 18:51:24] [safety_warp] [INFO] Layer 24 (ffn_down):
+[2026-07-24 18:51:24] [safety_warp] [INFO]   - Frozen: 4536728.0/45088768 (10.06%)
+[2026-07-24 18:51:24] [safety_warp] [INFO] Layer 24 (ffn_up):
+[2026-07-24 18:51:24] [safety_warp] [INFO]   - Frozen: 4562276.0/45088768 (10.12%)
+[2026-07-24 18:51:24] [safety_warp] [INFO] Layer 25 (attn_q):
+[2026-07-24 18:51:24] [safety_warp] [INFO]   - Frozen: 1697803.0/16777216 (10.12%)
+[2026-07-24 18:51:25] [safety_warp] [INFO] Layer 25 (attn_k):
+[2026-07-24 18:51:25] [safety_warp] [INFO]   - Frozen: 1678294.0/16777216 (10.00%)
+[2026-07-24 18:51:25] [safety_warp] [INFO] Layer 25 (attn_v):
+[2026-07-24 18:51:25] [safety_warp] [INFO]   - Frozen: 1686057.0/16777216 (10.05%)
+[2026-07-24 18:51:26] [safety_warp] [INFO] Layer 25 (ffn_down):
+[2026-07-24 18:51:26] [safety_warp] [INFO]   - Frozen: 4544548.0/45088768 (10.08%)
+[2026-07-24 18:51:27] [safety_warp] [INFO] Layer 25 (ffn_up):
+[2026-07-24 18:51:27] [safety_warp] [INFO]   - Frozen: 4592173.0/45088768 (10.18%)
+[2026-07-24 18:51:27] [safety_warp] [INFO] Layer 26 (attn_q):
+[2026-07-24 18:51:27] [safety_warp] [INFO]   - Frozen: 1688576.0/16777216 (10.06%)
+[2026-07-24 18:51:27] [safety_warp] [INFO] Layer 26 (attn_k):
+[2026-07-24 18:51:27] [safety_warp] [INFO]   - Frozen: 1682190.0/16777216 (10.03%)
+[2026-07-24 18:51:27] [safety_warp] [INFO] Layer 26 (attn_v):
+[2026-07-24 18:51:27] [safety_warp] [INFO]   - Frozen: 1682117.0/16777216 (10.03%)
+[2026-07-24 18:51:28] [safety_warp] [INFO] Layer 26 (ffn_down):
+[2026-07-24 18:51:28] [safety_warp] [INFO]   - Frozen: 4567425.0/45088768 (10.13%)
+[2026-07-24 18:51:29] [safety_warp] [INFO] Layer 26 (ffn_up):
+[2026-07-24 18:51:29] [safety_warp] [INFO]   - Frozen: 4610892.0/45088768 (10.23%)
+[2026-07-24 18:51:29] [safety_warp] [INFO] Layer 27 (attn_q):
+[2026-07-24 18:51:29] [safety_warp] [INFO]   - Frozen: 1686018.0/16777216 (10.05%)
+[2026-07-24 18:51:29] [safety_warp] [INFO] Layer 27 (attn_k):
+[2026-07-24 18:51:29] [safety_warp] [INFO]   - Frozen: 1687740.0/16777216 (10.06%)
+[2026-07-24 18:51:29] [safety_warp] [INFO] Layer 27 (attn_v):
+[2026-07-24 18:51:29] [safety_warp] [INFO]   - Frozen: 1695274.0/16777216 (10.10%)
+[2026-07-24 18:51:30] [safety_warp] [INFO] Layer 27 (ffn_down):
+[2026-07-24 18:51:30] [safety_warp] [INFO]   - Frozen: 4559828.0/45088768 (10.11%)
+[2026-07-24 18:51:31] [safety_warp] [INFO] Layer 27 (ffn_up):
+[2026-07-24 18:51:31] [safety_warp] [INFO]   - Frozen: 4574756.0/45088768 (10.15%)
+[2026-07-24 18:51:31] [safety_warp] [INFO] Layer 28 (attn_q):
+[2026-07-24 18:51:31] [safety_warp] [INFO]   - Frozen: 1684534.0/16777216 (10.04%)
+[2026-07-24 18:51:31] [safety_warp] [INFO] Layer 28 (attn_k):
+[2026-07-24 18:51:31] [safety_warp] [INFO]   - Frozen: 1686201.0/16777216 (10.05%)
+[2026-07-24 18:51:31] [safety_warp] [INFO] Layer 28 (attn_v):
+[2026-07-24 18:51:31] [safety_warp] [INFO]   - Frozen: 1686413.0/16777216 (10.05%)
+[2026-07-24 18:51:32] [safety_warp] [INFO] Layer 28 (ffn_down):
+[2026-07-24 18:51:32] [safety_warp] [INFO]   - Frozen: 4529401.0/45088768 (10.05%)
+[2026-07-24 18:51:33] [safety_warp] [INFO] Layer 28 (ffn_up):
+[2026-07-24 18:51:33] [safety_warp] [INFO]   - Frozen: 4532282.0/45088768 (10.05%)
+[2026-07-24 18:51:33] [safety_warp] [INFO] Layer 29 (attn_q):
+[2026-07-24 18:51:33] [safety_warp] [INFO]   - Frozen: 1682988.0/16777216 (10.03%)
+[2026-07-24 18:51:33] [safety_warp] [INFO] Layer 29 (attn_k):
+[2026-07-24 18:51:33] [safety_warp] [INFO]   - Frozen: 1686889.0/16777216 (10.05%)
+[2026-07-24 18:51:34] [safety_warp] [INFO] Layer 29 (attn_v):
+[2026-07-24 18:51:34] [safety_warp] [INFO]   - Frozen: 1681369.0/16777216 (10.02%)
+[2026-07-24 18:51:34] [safety_warp] [INFO] Layer 29 (ffn_down):
+[2026-07-24 18:51:34] [safety_warp] [INFO]   - Frozen: 4545162.0/45088768 (10.08%)
+[2026-07-24 18:51:35] [safety_warp] [INFO] Layer 29 (ffn_up):
+[2026-07-24 18:51:35] [safety_warp] [INFO]   - Frozen: 4532362.0/45088768 (10.05%)
+[2026-07-24 18:51:35] [safety_warp] [INFO] Layer 30 (attn_q):
+[2026-07-24 18:51:35] [safety_warp] [INFO]   - Frozen: 1679109.0/16777216 (10.01%)
+[2026-07-24 18:51:35] [safety_warp] [INFO] Layer 30 (attn_k):
+[2026-07-24 18:51:35] [safety_warp] [INFO]   - Frozen: 1687290.0/16777216 (10.06%)
+[2026-07-24 18:51:35] [safety_warp] [INFO] Layer 30 (attn_v):
+[2026-07-24 18:51:35] [safety_warp] [INFO]   - Frozen: 1694090.0/16777216 (10.10%)
+[2026-07-24 18:51:36] [safety_warp] [INFO] Layer 30 (ffn_down):
+[2026-07-24 18:51:36] [safety_warp] [INFO]   - Frozen: 4560399.0/45088768 (10.11%)
+[2026-07-24 18:51:37] [safety_warp] [INFO] Layer 30 (ffn_up):
+[2026-07-24 18:51:37] [safety_warp] [INFO]   - Frozen: 4592769.0/45088768 (10.19%)
+[2026-07-24 18:51:37] [safety_warp] [INFO] Layer 31 (attn_q):
+[2026-07-24 18:51:37] [safety_warp] [INFO]   - Frozen: 1685822.0/16777216 (10.05%)
+[2026-07-24 18:51:37] [safety_warp] [INFO] Layer 31 (attn_k):
+[2026-07-24 18:51:37] [safety_warp] [INFO]   - Frozen: 1679054.0/16777216 (10.01%)
+[2026-07-24 18:51:37] [safety_warp] [INFO] Layer 31 (attn_v):
+[2026-07-24 18:51:37] [safety_warp] [INFO]   - Frozen: 1698870.0/16777216 (10.13%)
+[2026-07-24 18:51:38] [safety_warp] [INFO] Layer 31 (ffn_down):
+[2026-07-24 18:51:38] [safety_warp] [INFO]   - Frozen: 4608466.0/45088768 (10.22%)
+[2026-07-24 18:51:39] [safety_warp] [INFO] Layer 31 (ffn_up):
+[2026-07-24 18:51:39] [safety_warp] [INFO]   - Frozen: 4512411.0/45088768 (10.01%)
+[2026-07-24 18:51:39] [safety_warp] [INFO] ======================================================================
+[2026-07-24 18:51:39] [safety_warp] [INFO] ✓ Masks generated for 160 modules
+[2026-07-24 18:53:33] [safety_warp] [INFO] ✓ Masks saved to: ./checkpoints/phase2_20260724_185140/checkpoints/masks
+[2026-07-24 18:53:33] [safety_warp] [INFO] ✓ Metadata saved to: ./checkpoints/phase2_20260724_185140/checkpoints/masks/metadata.json
+[2026-07-24 18:53:33] [safety_warp] [INFO] ======================================================================
+[2026-07-24 18:53:33] [safety_warp] [INFO] Phase 2 Completed!
+[2026-07-24 18:53:33] [safety_warp] [INFO] Masks saved to: ./checkpoints/phase2_20260724_185140/checkpoints/masks
+[2026-07-24 18:53:33] [safety_warp] [INFO] ======================================================================
+[2026-07-24 18:53:33] [safety_warp] [INFO] Next step: Run Phase 3 with --masks_dir ./checkpoints/phase2_20260724_185140/checkpoints/masks
+[2026-07-24 18:53:33] [safety_warp] [INFO] ======================================================================
+[2026-07-24 18:53:33] [safety_warp] [INFO] ======================================================================
+[2026-07-24 18:53:33] [safety_warp] [INFO] All tasks completed successfully!
+[2026-07-24 18:53:33] [safety_warp] [INFO] ======================================================================

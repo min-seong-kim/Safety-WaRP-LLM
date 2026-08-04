@@ -117,6 +117,13 @@ def parse_args():
                         help='Phase 2에서 layer별 keep_ratio 적용')
     parser.add_argument('--no_rotation', action='store_true',
                         help='Phase 2/3에서 Phase 1 basis 없이 no-rotation(identity basis) 실험 수행')
+    # Phase 1 activation 수집 granularity
+    parser.add_argument('--basis_granularity', type=str, default='token',
+                        choices=['token', 'sequence'],
+                        help='Phase 1 활성화 수집 단위: token(기본, 모든 토큰 위치) 또는 sequence(시퀀스별 pooling)')
+    parser.add_argument('--seq_pool', type=str, default='mean',
+                        choices=['mean', 'last', 'sum'],
+                        help='--basis_granularity sequence 일 때 시퀀스 pooling 방식 (mean/last/sum)')
     parser.add_argument('--original_space_mask', action='store_true',
                         help='Phase 2/3에서 basis/WaRP 없이 original weight space importance mask 사용')
 
@@ -379,6 +386,7 @@ def run_phase1(args, logger, profiler=None):
         logger.error("Phase 1 requires --phase0_model_dir (trained model from Phase 0)")
         raise ValueError("Missing --phase0_model_dir")
     
+<<<<<<< HEAD
     if getattr(args, 'basis_side', None) or getattr(args, 'basis_token_scope', 'all') != 'all':
         # [ablation] 입력측/출력측(ActSVD) 기저 빌더
         from models.actsvd_basis import ActSVDBasisBuilder
@@ -389,6 +397,18 @@ def run_phase1(args, logger, profiler=None):
         from models.phase1_basis import Phase1BasisBuilder
         builder = Phase1BasisBuilder(args, logger)
 
+=======
+    granularity = getattr(args, 'basis_granularity', 'token')
+    if granularity == 'sequence':
+        from models.phase1_basis_sequence import Phase1BasisBuilderSequence as Phase1BasisBuilder
+        logger.info(f"[Phase 1] Sequence-wise basis (pool={getattr(args, 'seq_pool', 'mean')})")
+    else:
+        from models.phase1_basis import Phase1BasisBuilder
+        logger.info("[Phase 1] Token-wise basis (default)")
+
+    builder = Phase1BasisBuilder(args, logger)
+    
+>>>>>>> cde938ce (rebuttal finish)
     # Phase 0 모델 로드
     args.model_name = args.phase0_model_dir
     with profiler.stage('load_model'):

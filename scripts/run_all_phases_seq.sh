@@ -5,11 +5,16 @@
 # 
 # run_phase1_basis.sh, run_phase2_importance.sh, run_phase3_learning.sh를 통합
 # 한 번에 모든 phase를 순차적으로 실행
-source /home/yonsei_jong/miniconda3/etc/profile.d/conda.sh
-conda activate hb
+# 이 머신엔 conda 없음 → venv python 사용 (PYTHON_BIN 로 오버라이드 가능)
+PY=${PYTHON_BIN:-/venv/hb/bin/python}
 set -e  # Exit on error
 set -o pipefail  # Ensure failures are not hidden by tee pipelines
-export CUDA_VISIBLE_DEVICES=5
+export CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0}
+
+# ==== Phase 1 basis granularity (이 스크립트의 핵심 차이) ====
+#   sequence: 시퀀스별 pooling basis (mean/last/sum), token: 원본 token-wise
+BASIS_GRANULARITY=${BASIS_GRANULARITY:-sequence}
+SEQ_POOL=${SEQ_POOL:-mean}
 
 echo "========================================================================"
 echo "Safety-WaRP-LLM: Complete Training Pipeline (Integrated)"
@@ -21,7 +26,7 @@ echo ""
 # ========================================================================
 
 # Phase 0 모델
-PHASE0_MODEL="kmseong/llama3_2_3b-instruct-SSFT-lr5e-5"  
+PHASE0_MODEL="kmseong/llama2_7b-chat-Safety-FT-lr5e-5"  
 
 
 # Phase 1: Basis Construction
@@ -50,10 +55,10 @@ KEEP_RATIO_LIST=("0.1")
 # Phase 3: Incremental Learning
 # ==============================
 # Dataset 선택 (Utility 또는 Safety)
-PHASE3_DATASET="math" # Options: safety, gsm8k, metamath, math, agnews, medqa
+PHASE3_DATASET="gsm8k" # Options: safety, gsm8k, metamath, math, agnews, medqa, mmlu
 
 # SafeInstr: safety data mixing (0.0 = 비활성화, 0.1 = 학습 데이터의 10%)
-SAFEINSTR_RATIO=0.1
+SAFEINSTR_RATIO=0.0
 CIRCUIT_BREAKERS_PATH="./data/circuit_breakers_train.json"
 
 # Phase3=MATH 설정
@@ -65,8 +70,15 @@ AGNEWS_DATASET_PATH="/home/yonsei_jong/Safety-WaRP-LLM/data/agnews_train_8000.js
 AGNEWS_SAMPLES=8000      # 0=전체
 
 # Phase3=MEDQA 설정
-MEDQA_DATASET_PATH="/NHNHOME/WORKSPACE/26msit001_A/edge_ai_lab/minseong/Safety-WaRP-LLM/data/medqa_train_10178.jsonl"   # --medqa_dataset_path 필수 (medqa 선택 시)
-MEDQA_SAMPLES=0      # 0=전체
+MEDQA_DATASET_PATH="/home/yonsei_jong/Safety-WaRP-LLM/data/medqa_train_10178.jsonl"   # --medqa_dataset_path 필수 (medqa 선택 시)
+MEDQA_SAMPLES=10000      # 0=전체
+
+# Phase3=MMLU 설정
+MMLU_SUBJECT="all"                # all 또는 단일 subject
+MMLU_SPLIT="auxiliary_train"      # auxiliary_train | train | validation | test | dev
+MMLU_EVAL_SPLIT="validation"
+MMLU_SAMPLES=10000                 # 0=전체
+MMLU_EVAL_SAMPLES=0                # 0=eval 생략
 
 if [ "$PHASE3_DATASET" = "safety" ]; then
     PHASE3_SAMPLES=4994
@@ -80,16 +92,18 @@ elif [ "$PHASE3_DATASET" = "agnews" ]; then
     PHASE3_SAMPLES=$AGNEWS_SAMPLES
 elif [ "$PHASE3_DATASET" = "medqa" ]; then
     PHASE3_SAMPLES=$MEDQA_SAMPLES
+elif [ "$PHASE3_DATASET" = "mmlu" ]; then
+    PHASE3_SAMPLES=$MMLU_SAMPLES
 fi
 
 # 공통 설정
-BATCH_SIZE=4
-GRAD_ACCUM_STEPS=4
+BATCH_SIZE=2
+GRAD_ACCUM_STEPS=8
 DTYPE="bfloat16"
-DEVICE="cuda"
+DEVICE="auto"
 EPOCHS=3
 # LR_LIST=("1e-5" "3e-5" "5e-5")
-LR_LIST=("3e-5")  
+LR_LIST=("5e-5")  
 TARGET_LAYERS="all"
 LAYER_TYPE="attn_q,attn_k,attn_v,ffn_down,ffn_up"
 BASE_OUTPUT_DIR="./checkpoints"
@@ -103,16 +117,18 @@ echo "Configuration:"
 echo "  Phase 0 Model: $PHASE0_MODEL"
 echo "  Phase 1 Dataset: $PHASE1_DATASET (samples=$PHASE1_SAMPLES)"
 echo "  Phase 2 Dataset: $PHASE2_DATASET (samples=$PHASE2_SAMPLES)"
-echo "  Phase 3 Dataset: $PHASE3_DATASET (samples=$PHASE3_SAMPLES)"  echo "  SafeInstr Ratio: $SAFEINSTR_RATIO"echo "  Keep Ratios: ${KEEP_RATIO_LIST[*]}"
+echo "  Phase 3 Dataset: $PHASE3_DATASET (samples=$PHASE3_SAMPLES)"
+echo "  SafeInstr Ratio: $SAFEINSTR_RATIO"
+echo "  Keep Ratios: ${KEEP_RATIO_LIST[*]}"
 echo "  Batch Size: $BATCH_SIZE"
 echo "  Device: $DEVICE"
 echo "  Output Dir: $BASE_OUTPUT_DIR"
 echo ""
 
 # Phase 3 Dataset validation
-if [[ ! "$PHASE3_DATASET" =~ ^(safety|gsm8k|metamath|math|agnews|medqa)$ ]]; then
+if [[ ! "$PHASE3_DATASET" =~ ^(safety|gsm8k|metamath|math|agnews|medqa|mmlu)$ ]]; then
     echo "❌ ERROR: Unknown Phase 3 dataset: $PHASE3_DATASET"
-    echo "Choose from: safety, gsm8k, metamath, math, agnews, medqa"
+    echo "Choose from: safety, gsm8k, metamath, math, agnews, medqa, mmlu"
     exit 1
 fi
 
@@ -145,11 +161,13 @@ else
         exit 1
     fi
 
-    python train.py \
+    "$PY" train.py \
         --phase 1 \
         --phase0_model_dir "$PHASE0_MODEL" \
         --safety_dataset "$PHASE1_DATASET" \
         $PHASE1_DATASET_ARG \
+        --basis_granularity $BASIS_GRANULARITY \
+        --seq_pool $SEQ_POOL \
         --batch_size $BATCH_SIZE \
         --layer_type "$LAYER_TYPE" \
         --target_layers $TARGET_LAYERS \
@@ -218,6 +236,8 @@ elif [ "$PHASE3_DATASET" = "medqa" ]; then
         exit 1
     fi
     PHASE3_DATASET_ARG="--phase3_dataset medqa --medqa_dataset_path $MEDQA_DATASET_PATH --medqa_samples $PHASE3_SAMPLES"
+elif [ "$PHASE3_DATASET" = "mmlu" ]; then
+    PHASE3_DATASET_ARG=""
 else
     echo "ERROR: Unknown Phase 3 dataset: $PHASE3_DATASET"
     exit 1
@@ -237,7 +257,7 @@ for KEEP_RATIO in "${KEEP_RATIO_LIST[@]}"; do
     echo "========================================================================"
     echo ""
 
-    python train.py \
+    "$PY" train.py \
         --phase 2 \
         --phase0_model_dir "$PHASE0_MODEL" \
         --basis_dir "$PHASE1_BASIS_DIR" \
@@ -291,30 +311,51 @@ for KEEP_RATIO in "${KEEP_RATIO_LIST[@]}"; do
             SAFEINSTR_ARG=""
         fi
 
-        python train.py \
-            --phase 3 \
-            --phase0_model_dir "$PHASE0_MODEL" \
-            --basis_dir "$PHASE1_BASIS_DIR" \
-            --masks_dir "$PHASE2_MASKS_DIR" \
-            $PHASE3_DATASET_ARG \
-            --epochs $EPOCHS \
-            --utility_lr $LEARNING_RATE \
-            --batch_size $BATCH_SIZE \
-            --gradient_accumulation_steps $GRAD_ACCUM_STEPS \
-            --layer_type "$LAYER_TYPE" \
-            --target_layers $TARGET_LAYERS \
-            --output_dir $BASE_OUTPUT_DIR \
-            --log_dir $LOG_DIR \
-            --device $DEVICE \
-            --dtype $DTYPE \
-            --seed 42 \
-            --non_freeze \
-            # --constrained_sft \
-            # --csft_bias_factor 10 --csft_bias_length 3 --csft_first_token_bias_factor 3 \
-            $SAFEINSTR_ARG \
-            2>&1 | tee $LOG_DIR/phase3_kr${KR_SAFE}_lr${LR_SAFE}_${TIMESTAMP}.log
+        if [ "$PHASE3_DATASET" = "mmlu" ]; then
+            PHASE3_OUTPUT_DIR="$BASE_OUTPUT_DIR/phase3_mmlu_kr${KR_SAFE}_lr${LR_SAFE}_${TIMESTAMP}"
+            "$PY" mmlu_eval/finetune_mmlu_full_params.py \
+                --model_path "$PHASE0_MODEL" \
+                --mmlu_subject "$MMLU_SUBJECT" \
+                --mmlu_split "$MMLU_SPLIT" \
+                --mmlu_eval_split "$MMLU_EVAL_SPLIT" \
+                --num_train_samples "$PHASE3_SAMPLES" \
+                --num_eval_samples "$MMLU_EVAL_SAMPLES" \
+                --output_dir "$PHASE3_OUTPUT_DIR" \
+                --learning_rate "$LEARNING_RATE" \
+                --epochs "$EPOCHS" \
+                --batch_size "$BATCH_SIZE" \
+                --grad_accum "$GRAD_ACCUM_STEPS" \
+                --max_length 1024 \
+                --safety_mix_ratio "$SAFEINSTR_RATIO" \
+                --safety_data_path "$CIRCUIT_BREAKERS_PATH" \
+                2>&1 | tee $LOG_DIR/phase3_kr${KR_SAFE}_lr${LR_SAFE}_${TIMESTAMP}.log
+        else
+            "$PY" train.py \
+                --phase 3 \
+                --phase0_model_dir "$PHASE0_MODEL" \
+                --basis_dir "$PHASE1_BASIS_DIR" \
+                --masks_dir "$PHASE2_MASKS_DIR" \
+                $PHASE3_DATASET_ARG \
+                --epochs $EPOCHS \
+                --utility_lr $LEARNING_RATE \
+                --batch_size ${PHASE3_BATCH_SIZE:-1} \
+                --gradient_accumulation_steps ${PHASE3_GRAD_ACCUM:-16} \
+                --gradient_checkpointing \
+                --layer_type "$LAYER_TYPE" \
+                --target_layers $TARGET_LAYERS \
+                --output_dir $BASE_OUTPUT_DIR \
+                --log_dir $LOG_DIR \
+                --device $DEVICE \
+                --dtype $DTYPE \
+                --seed 42 \
+                --non_freeze \
+                --constrained_sft \
+                --csft_bias_factor 10 --csft_bias_length 3 --csft_first_token_bias_factor 3 \
+                $SAFEINSTR_ARG \
+                2>&1 | tee $LOG_DIR/phase3_kr${KR_SAFE}_lr${LR_SAFE}_${TIMESTAMP}.log
 
-        PHASE3_OUTPUT_DIR=$(find $BASE_OUTPUT_DIR -maxdepth 1 -name "phase3_*" -type d -printf '%T@ %p\n' | sort -rn | head -1 | cut -d' ' -f2-)
+            PHASE3_OUTPUT_DIR=$(find $BASE_OUTPUT_DIR -maxdepth 1 -name "phase3_*" -type d -printf '%T@ %p\n' | sort -rn | head -1 | cut -d' ' -f2-)
+        fi
 
         if [ ! -d "$PHASE3_OUTPUT_DIR" ]; then
             echo "WARNING: Phase 3 (kr=$KEEP_RATIO, LR=$LEARNING_RATE) output not found"
@@ -396,6 +437,11 @@ elif [ "$PHASE3_DATASET" = "medqa" ]; then
     echo "  - basis_coeff only training with WaRP masking"
     echo "  - Medical QA MCQ (MedQA) learning"
     echo "  - Dataset path: $MEDQA_DATASET_PATH, Samples: $MEDQA_SAMPLES"
+elif [ "$PHASE3_DATASET" = "mmlu" ]; then
+    echo "🎯 Downstream Utility Training Mode (MMLU):"
+    echo "  - Using mmlu_eval/finetune_mmlu_full_params.py"
+    echo "  - Subject: $MMLU_SUBJECT, Split: $MMLU_SPLIT"
+    echo "  - Samples: $MMLU_SAMPLES, Eval samples: $MMLU_EVAL_SAMPLES"
 fi
 
 echo ""
