@@ -28,6 +28,7 @@ import json
 import os
 import shutil
 import sys
+from fnmatch import fnmatch
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -40,7 +41,10 @@ IGNORE_PATTERNS = [
     "run.log", ".done", ".uploaded", "MODEL_DIR", "UPLOAD.json",
     "*.log", "trainer/*", "checkpoint-*/*", "runs/*",
     "optimizer.pt", "scheduler.pt", "rng_state*.pth", "trainer_state.json",
-    "phase3_profile.json", "phase1_profile.json",
+    "phase3_profile.json", "phase1_profile.json", "phase2_profile.json",
+    # WaRP Phase 3 은 final_model/ 을 셀 디렉토리로 끌어올린 뒤 phase3_* 껍데기를 남긴다.
+    # 그 안의 metadata.json 은 phase3_metadata.json 으로 따로 복사해 두므로 중복이다.
+    "phase1_*/*", "phase2_*/*", "phase3_*/*",
 ]
 # prune 시 지울 대상 (가중치). 작은 메타데이터(json/jinja/tokenizer)는 남겨 둔다.
 WEIGHT_SUFFIXES = {".safetensors", ".bin", ".pth", ".pt", ".h5", ".msgpack"}
@@ -73,19 +77,27 @@ def model_dir_of(cell: Path) -> Path:
     raise FileNotFoundError(f"모델 디렉토리를 찾지 못했다: {cell}")
 
 
+def _ignored(rel: str, name: str) -> bool:
+    """upload_folder 의 ignore_patterns 와 **같은 규칙**으로 판정한다.
+
+    이 둘이 어긋나면 '올리지 않기로 한 파일'을 '허브에 없다'고 실패 처리하게 된다
+    (phase3_profile.json 에서 실제로 발생했다).
+    """
+    return any(fnmatch(rel, pat) or fnmatch(name, pat) for pat in IGNORE_PATTERNS)
+
+
 def local_files(model_dir: Path):
-    """업로드 대상 파일 → 상대경로: 크기."""
-    skip_names = {"run.log", ".done", ".uploaded", "MODEL_DIR", "UPLOAD.json"}
+    """업로드 대상 파일 → 상대경로: 크기. IGNORE_PATTERNS 는 제외한다."""
     out = {}
     for p in model_dir.rglob("*"):
         if not p.is_file():
             continue
-        rel = p.relative_to(model_dir)
-        if rel.parts[0] in PRUNE_DIRS or rel.parts[0].startswith("checkpoint-"):
+        rel = str(p.relative_to(model_dir))
+        if rel.split(os.sep)[0] in PRUNE_DIRS or rel.startswith("checkpoint-"):
             continue
-        if p.name in skip_names or p.suffix == ".log":
+        if _ignored(rel, p.name):
             continue
-        out[str(rel)] = p.stat().st_size
+        out[rel] = p.stat().st_size
     return out
 
 
