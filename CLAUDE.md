@@ -290,6 +290,108 @@ Report/budget cross-check: `python actsvd/wsr_actsvd_ablation_report.py --root o
   bf16 basis round-trip that the published WSR-Tune also has. B-vs-C-vs-D is clean; A-vs-rest has this
   small extra term. Flagged automatically in the report.
 
+## Revision experiment matrix (`scripts/revision/`)
+
+Extends the paper's Table 2 / Table 4 / Figure 4 with the seven methods it never ran
+(`lora asft lisa seal safelora salora wsr_lora`) plus a BeaverTails safety axis — **116 new
+training cells**. Full docs: **`scripts/revision/README.md`**; every repo it will create is
+listed in **`scripts/revision/REPO_LIST.md`**.
+
+```bash
+PLAN_ONLY=1 bash scripts/revision/run_all.sh    # size/progress only
+DRY_RUN=1   bash scripts/revision/run_all.sh    # print commands
+bash scripts/revision/run_all.sh                # run (resumable)
+```
+
+- Axes: safety `cb`/`bt`; models `llama2_7b llama2_13b llama32_3b llama31_8b qwen25_7b
+  gemma2_9b`; methods `fullft safeinstr resta safedelta wsr_tune` + `lora asft lisa seal
+  safelora salora wsr_lora` (SN-Tune/RSN-Tune deliberately excluded).
+- **Scope is 116 cells, not the full 2×6×tasks×12 grid.** `BT_MODELS=llama2_7b` (BeaverTails
+  runs only on Llama-2-7B, but on all four tasks with all twelve methods), and
+  `SKIP_PUBLISHED=1` reuses the paper's own numbers. `already_published()` in `common.sh`
+  encodes exactly what is reused and why.
+- **Reuse rule is deliberately strict: only Table 2/4/10's five full-parameter arms**
+  (`fullft safeinstr resta safedelta wsr_tune`) on the CB axis. Those came from
+  `run_all_phases_integrated.sh` with `PHASE0_MODEL=kmseong/llama2_7b-chat-Safety-FT-lr5e-5`,
+  lr 5e-5, 3 epochs, effective batch 16 — verified to match this line's settings.
+  The rebuttal's PEFT numbers are **not** reused, for three checked reasons:
+  (a) the MedQA/ARC PEFT runs started from `wvnvwn/llama2-7b-chat-lr5e-5-ssft-cb`, whose
+  safetensors sha256 differ from `kmseong/llama2_7b-chat-Safety-FT-lr5e-5` (total bytes differ
+  by 8, so possibly the same weights re-sharded — unverified, so not assumed);
+  (b) SafeLoRA was swept at thr 0.15/0.25/0.35, never 0.3, which is this line's value;
+  (c) the AGNEWS table came from the classification-baseline operating point
+  (epoch 1, lr 1e-5, wd 0) — this line uses epoch 3, lr 5e-5, wd 0.01.
+  Because of (a), **keep `LLAMA2_7B_ALIGNED_CB` at `kmseong/...Safety-FT-lr5e-5`**: switching it
+  to the `wvnvwn` copy would misalign the new arms against the very rows being reused.
+- Known residual gap: the paper's MedQA runs used 10 000 samples (`MEDQA_SAMPLES=10000`),
+  new cells use all 10 178 (+1.7%). Affects only the five reused MedQA reference rows.
+- Stages `00`(data) → `01`(BT SSFT) → `02`(basis+mask) → `10`(FullFT/SafeInstr) →
+  `11`(RESTA/SafeDelta, consumes `10`) → `12`(WSR-Tune) → `20`(LoRA×6) → `21`(SEAL).
+  Every cell writes a `.done` sentinel, so re-running resumes. At the current scope stage `01`
+  is a no-op (the Llama-2-7B BeaverTails start model `wvnvwn/llama2-7b-chat-lr5e-5-ssft-bv`
+  already exists), and stage `02` builds a Phase 2 mask only where a `wsr_tune` cell is actually
+  wanted — WSR-LoRA needs the basis alone.
+- `scripts/revision/REPO_LIST.md` lists every repo that will be created, grouped by model, with
+  each cell marked new vs reused. Regenerate with `gen_repo_list.sh` after any hyperparameter
+  change, since the hyperparameter is part of the repo name.
+- `scripts/revision/common.sh` is the **single source of truth** for the registry and every
+  hyperparameter. Output convention: `outputs/revision/<safety>/<model>/<task>/<method>/`,
+  with a `MODEL_DIR` file naming the actual model directory (runners disagree on whether the
+  model lands in `<out>` or `<out>/merged_model`).
+
+**Three invariants this line depends on:**
+1. **Every arm reads the same task JSON.** Six different tokenization implementations exist
+   across the runners; `scripts/revision/verify_prompt_parity.py` feeds identical rows through
+   all six and asserts identical `(input_ids, labels)`. Verified: 6 models × 5 tasks × 6 paths.
+   GSM8K is dumped to `data/gsm8k_train_task_7473.json` for this reason.
+   **AG News is the 8k seed42 subset, not the full 120k** — matches all existing AGNEWS results.
+2. **One safety axis.** Methods needing safety data use the dataset their *start model* was
+   safety-tuned on; the `$safety` loop variable drives both `aligned_for()` and `safety_json()`.
+3. **WSR-LoRA = `wsr-lora/wsr_lora.py --reparam`** (PiSSA init + `Ã=AU`), the variant described
+   in the rebuttal — *not* `finetune_gsm8k_lora.py --method wsr_lora` (old element-wise
+   product-mask). It requires the Phase 1 basis from stage `02`.
+
+**Disk / HF upload.** 216 cells kept locally = **3.4 TB**; this box has ~155 GB. The default
+operating mode is `PUSH_TO_HUB=1`: each finished cell is uploaded, **verified**, then its local
+weights are deleted (`scripts/revision/upload_and_prune.py`). Verification requires all four of —
+files present, sizes match, `AutoConfig` loads from the hub, and **`AutoTokenizer(...).chat_template`
+is non-None on the hub** (the `chat_template.jinja` trap, hit twice before). Nothing is deleted
+unless all four pass. `fullft` is RESTA/SafeDelta's input, so it is uploaded immediately but pruned
+only after those consumers finish. Repo names come from `hf_repo_id()` — never hand-typed:
+`kmseong/{model}-{CB|BT}_SSFT-{method}_{task}[_{hparam}]_lr{lr}`. The full list of all 221 repos
+that will be created lives in `scripts/revision/REPO_LIST.md`, generated by
+`scripts/revision/gen_repo_list.sh` — regenerate it after changing any hyperparameter, since
+the hyperparameter is part of the repo name.
+Two other consumers are auto-pruned: Phase1 basis + Phase2 mask (248 GB total, freed per
+(safety, model) once the WSR arms finish) and the HF cache (freed per model). `ORDER=model`
+(default) puts the model in the outer loop so both prunes actually fire. `llama2_13b` peaks at
+~161 GB — run it alone and split `METHODS` in two.
+
+**Basis storage is now 1/4 the size.** `--basis_save_dtype bfloat16` (default, and now actually
+honored by `models/phase1_basis.py`, which previously ignored it) plus the new `--basis_omit_ut`.
+Safe because Phase 2, Phase 3, and WSR-LoRA all do `U.to(dtype=W.dtype)` (bf16) right after
+loading, and **no consumer in this repo ever reads the `UT` key** (symmetric Gram ⇒ `UT == U.t()`).
+Only `apply_safety_basis_rotation.py` does float32 math on the basis — pass
+`--basis_save_dtype float32` when building a basis for it.
+
+**Bugs fixed while building this (do not re-introduce):**
+- `is_instruct_model` disagreed across `agnews_eval` / `gsm8k_eval` / `seal` (`"instruct"|"chat"`)
+  and `models/phase3_extra_learning` (also `'it'`). **`gemma-2-9b-it` was therefore trained with
+  a chat template by WSR-Tune and a plain prompt by every other arm.** All five now share one
+  token-boundary rule; keep them in sync.
+- BT SSFT output dirs must keep the base model's identity in the **name**
+  (`ssft_bt/<BaseName>-ssft-bt-lr<lr>`) — the runners decide chat-template usage from the model
+  reference *string*, so a tagless path silently falls back to plain prompts.
+- `--phase3_task_data_path` / `--phase3_task_samples` added to `train.py` + Phase 3: routes any
+  task through `_load_local_task`. Without it Phase 3's `_load_agnews` cannot read the
+  `{"question","response"}` schema and **shuffles** when subsampling.
+- Phase 1 now writes `'decomp': 'svd'` into `basis/metadata.json`; `wsr-lora/wsr_lora.py`
+  required that key and no code here ever wrote it, so `--reparam` always failed.
+- `models/phase0_SSFT.py` batch/grad-accum are now env-overridable (`SSFT_BATCH_SIZE`,
+  `SSFT_GRAD_ACCUM`); hardcoded 4×4 OOMs on 13B/9B. Keep the product at 16.
+- `/home/edgeai_lab/SafeDelta/llama2/run_safedelta.py` had `CUDA_VISIBLE_DEVICES="2,3"` at
+  import time; patched to `setdefault`. SafeDelta is an **external** repo dependency.
+
 ## Evaluation
 
 Downstream task eval/fine-tune harnesses live in per-task directories, each a standalone script (not wired into

@@ -74,8 +74,15 @@ def parse_args():
                              '논문 Table 2/5 재현용 기본값), response=응답 토큰만(spec §2).')
     parser.add_argument('--basis_save_dtype', type=str, default='bfloat16',
                         choices=['float32', 'bfloat16'],
-                        help='[ablation] 기저 저장 dtype. Phase 2/3이 어차피 모델 dtype으로 '
-                             '캐스팅하므로 bf16 저장이 기본 (spec §6: 디스크/메모리 절감).')
+                        help='기저 저장 dtype. Phase 2/3 은 로드 직후 모델 dtype(bf16)으로 '
+                             '캐스팅하므로 bf16 저장이 실제 사용값을 바꾸지 않으면서 디스크를 '
+                             '절반으로 줄인다. actsvd ablation 빌더와 models/phase1_basis.py '
+                             '둘 다 이 값을 존중한다. (기본 bfloat16)')
+    parser.add_argument('--basis_omit_ut', action='store_true',
+                        help="Phase 1 basis 파일에서 'UT' 텐서를 저장하지 않는다. 이 저장소의 "
+                             "어떤 소비자도 'UT' 키를 읽지 않으며(대칭 Gram 이라 UT == U.t()), "
+                             '생략하면 basis 디스크가 다시 절반이 된다. 216셀 매트릭스처럼 '
+                             'basis 를 여러 (모델×안전데이터) 조합으로 만들 때 켜라.')
     parser.add_argument('--gram_dtype', type=str, default='float32',
                         choices=['float32', 'bfloat16'],
                         help='[ablation] 활성화 Gram 누적 dtype. 기본 float32(정확), '
@@ -147,6 +154,13 @@ def parse_args():
     parser.add_argument('--phase3_dataset', type=str, default='gsm8k',
                         choices=['gsm8k', 'safety', 'metamath', 'math', 'mmlu', 'swebench', 'agnews', 'sst2', 'medqa', 'mbpp', 'arc'],
                         help='Phase 3 finetuning용 데이터셋 - gsm8k(Utility), safety(안전성 강화), metamath(고급 수학), math(Hendrycks MATH), mmlu(MMLU MCQ), swebench(소프트웨어 엔지니어링), agnews(뉴스 분류), medqa(의료 USMLE MCQ), mbpp(파이썬 프로그래밍 문제), arc(ARC-Challenge MCQ)')
+    parser.add_argument('--phase3_task_data_path', type=str, default=None,
+                        help='Phase 3 downstream 데이터를 로컬 태스크 JSON([{"question","response"}])'
+                             '에서 직접 읽는다. 주면 --phase3_dataset 종류와 무관하게 '
+                             'data/local_task_dataset.py 공용 로더를 쓰므로, LoRA 계열 baseline / '
+                             'finetune_task_full_params.py 와 학습 텍스트가 바이트 단위로 동일해진다.')
+    parser.add_argument('--phase3_task_samples', type=int, default=0,
+                        help='--phase3_task_data_path 사용 시 샘플 수 (0=전체)')
     parser.add_argument('--gsm8k_samples', type=int, default=1000,
                         help='GSM8K 샘플 수 (Phase 3 - GSM8K 선택시만 사용)')
     parser.add_argument('--metamath_samples', type=int, default=0,

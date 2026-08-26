@@ -52,8 +52,10 @@ MODEL_NAME = "meta-llama/Llama-2-7B-chat"  # Base 모델 (Phase 0) - WaRP 제거
 
 LEARNING_RATE = 1e-4
 NUM_EPOCHS = 3
-BATCH_SIZE = 4
-GRAD_ACCUM_STEPS = 4
+# 13B / gemma-9B full-param SSFT 는 micro-batch 4 가 OOM 이라 환경변수로 뺀다.
+# ⚠️ BATCH_SIZE * GRAD_ACCUM_STEPS = 16 (effective batch) 을 반드시 유지할 것.
+BATCH_SIZE = int(os.environ.get("SSFT_BATCH_SIZE", "4"))
+GRAD_ACCUM_STEPS = int(os.environ.get("SSFT_GRAD_ACCUM", "4"))
 MAX_SEQ_LENGTH = 1024
 MAX_SAMPLES = 4994
 

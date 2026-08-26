@@ -167,8 +167,15 @@ def setup_logging(output_dir: str):
 
 
 def is_instruct_model(model_ref: str) -> bool:
-    model_ref = str(model_ref).lower()
-    return "instruct" in model_ref or "chat" in model_ref
+    ref = str(model_ref).lower()
+    if "instruct" in ref or "chat" in ref:
+        return True
+    # 'gemma-2-9b-it' 처럼 -it 가 독립 토큰으로 붙는 경우도 instruct 모델이다.
+    # 단순 `"it" in ref` 는 경로 문자열의 아무 곳이나 걸리므로 토큰 경계를 본다.
+    # ⚠️ 이 규칙은 models/phase3_extra_learning._is_instruct_model 과 **동일**해야 한다.
+    #    갈라지면 같은 모델을 arm 마다 다른 프롬프트 포맷으로 학습하게 된다.
+    import re as _re
+    return _re.search(r"(?:^|[^a-z0-9])it(?:[^a-z0-9]|$)", ref) is not None
 
 
 def render_chat_fallback(prompt: str, response: Optional[str], model_ref: str) -> Tuple[str, str]:

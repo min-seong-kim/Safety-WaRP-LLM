@@ -68,8 +68,15 @@ class Phase3IncrementalLearner:
         }
 
     def _is_instruct_model(self) -> bool:
-        model_ref = self.phase0_model_dir.lower()
-        return any(tag in model_ref for tag in ('instruct', 'chat', 'it'))
+        # ⚠️ 이 규칙은 agnews_eval / gsm8k_eval / seal 의 is_instruct_model 과 **동일**해야 한다.
+        #    갈라지면 같은 모델을 arm 마다 다른 프롬프트 포맷으로 학습하게 된다.
+        #    (예전 구현은 `'it' in ref` 라 'gemma-2-9b-it' 는 맞췄지만 경로에 우연히 'it'
+        #     이 들어간 체크포인트도 instruct 로 오판했다. 토큰 경계를 본다.)
+        import re as _re
+        ref = str(self.phase0_model_dir).lower()
+        if "instruct" in ref or "chat" in ref:
+            return True
+        return _re.search(r"(?:^|[^a-z0-9])it(?:[^a-z0-9]|$)", ref) is not None
 
     def _build_question_answer_prompt(self, question: str) -> str:
         return f"Question: {question.strip()}\nAnswer:"
@@ -424,7 +431,17 @@ class Phase3IncrementalLearner:
         phase3_dataset = getattr(self.args, 'phase3_dataset', 'gsm8k')
         safety_mix_ratio = getattr(self.args, 'safety_mix_ratio', 0.0)
 
-        if phase3_dataset == 'gsm8k':
+        # 명시적 로컬 태스크 JSON 이 주어지면, phase3_dataset 이 무엇이든 공용 로더를 쓴다.
+        # baseline 러너(data/local_task_dataset.py 를 쓰는 LoRA 계열 / finetune_task_full_params.py)
+        # 와 **한 글자도 다르지 않은** 학습 텍스트를 보장하기 위한 경로다.
+        explicit_task_json = getattr(self.args, 'phase3_task_data_path', None)
+        if explicit_task_json:
+            self._load_local_task(
+                phase3_dataset,
+                dataset_path=explicit_task_json,
+                max_samples=getattr(self.args, 'phase3_task_samples', 0) or 0,
+            )
+        elif phase3_dataset == 'gsm8k':
             self._load_gsm8k()
         elif phase3_dataset == 'safety':
             self._load_safety_dataset()
@@ -453,7 +470,8 @@ class Phase3IncrementalLearner:
         if safety_mix_ratio > 0.0 and phase3_dataset != 'safety':
             self._mix_safety_data(safety_mix_ratio)
 
-    def _load_local_task(self, task_name: str):
+    def _load_local_task(self, task_name: str, dataset_path: str = None,
+                         max_samples: int = None):
         """로컬 태스크 JSON([{"question":..., "response":...}]) 로드.
 
         LoRA 계열 러너(finetune_gsm8k_lora.py / finetune_gsm8k_lisa.py)가 쓰는
@@ -466,14 +484,16 @@ class Phase3IncrementalLearner:
         from datasets import Dataset as HFDataset
         from data.local_task_dataset import load_task_pairs, KNOWN_TASKS
 
-        dataset_path = getattr(self.args, f'{task_name}_dataset_path', None)
+        if not dataset_path:
+            dataset_path = getattr(self.args, f'{task_name}_dataset_path', None)
         if not dataset_path:
             default_rel = KNOWN_TASKS.get(task_name)
             if not default_rel:
                 raise ValueError(f"--{task_name}_dataset_path 가 필요합니다 (기본 경로 미등록)")
             dataset_path = str(Path(__file__).resolve().parent.parent / default_rel)
 
-        max_samples = getattr(self.args, f'{task_name}_samples', 0) or 0
+        if max_samples is None:
+            max_samples = getattr(self.args, f'{task_name}_samples', 0) or 0
         max_length = getattr(self.args, 'max_length', 1024)
 
         self.logger.info(f"Loading {task_name} dataset from {dataset_path}...")

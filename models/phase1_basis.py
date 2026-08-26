@@ -796,11 +796,29 @@ class Phase1BasisBuilder:
         # SVD 결과 저장
         save_path = os.path.join(layer_type_dir, f'layer_{layer_idx:02d}_svd.pt')
         
-        torch.save({
-            'U': svd_result['U'].cpu() if torch.is_tensor(svd_result['U']) else svd_result['U'],
-            'S': svd_result['S'].cpu() if torch.is_tensor(svd_result['S']) else svd_result['S'],
-            'UT': svd_result.get('UT', None),  # UT 저장 (있는 경우)
-        }, save_path)
+        # 저장 dtype: --basis_save_dtype (기본 float32 = 기존 동작).
+        #   Phase 2/3 은 로드 직후 U.to(dtype=W.dtype) 로 모델 dtype(bf16)으로 내리므로
+        #   bfloat16 저장은 실제 사용값을 바꾸지 않으면서 디스크를 절반으로 줄인다.
+        # UT: --basis_omit_ut 로 생략 가능. 이 저장소의 어떤 소비자도 'UT' 키를 읽지 않는다
+        #   (phase2/phase3/wsr-lora/apply_safety_basis_rotation 전부 'U' 만 읽는다).
+        #   대칭 Gram 이라 UT == U.t() 이므로 정보 손실도 없다. 기본은 기존대로 저장.
+        save_dtype_name = getattr(self.args, 'basis_save_dtype', 'float32')
+        save_dtype = {'float32': torch.float32, 'bfloat16': torch.bfloat16}.get(
+            save_dtype_name, torch.float32)
+
+        def _prep(t):
+            if not torch.is_tensor(t):
+                return t
+            t = t.cpu()
+            return t.to(save_dtype) if t.is_floating_point() else t
+
+        payload = {
+            'U': _prep(svd_result['U']),
+            'S': _prep(svd_result['S']),
+        }
+        if not getattr(self.args, 'basis_omit_ut', False):
+            payload['UT'] = _prep(svd_result.get('UT', None))
+        torch.save(payload, save_path)
         
         file_size_mb = os.path.getsize(save_path) / (1024 * 1024)
         self.logger.debug(f"    - Saved: {save_path} ({file_size_mb:.2f} MB)")
@@ -851,6 +869,9 @@ class Phase1BasisBuilder:
                 'only_prompt': bool(getattr(self.args, 'only_prompt', False)),
                 'input_fields': ('prompt only' if getattr(self.args, 'only_prompt', False)
                                  else 'prompt + llama3_output (refusal)'),
+                # 'decomp' 는 basis 소비자(wsr-lora/wsr_lora.py validate_shared_basis)가
+                # 요구하는 필드다. Phase 1 은 Φ Φᵀ 에 torch.linalg.svd 를 쓰므로 항상 'svd'.
+                'decomp': 'svd',
                 'layer_types': sorted(list(layer_types_saved)),
                 'target_layers': self.args.target_layers,
                 'num_layers_saved': total_files,

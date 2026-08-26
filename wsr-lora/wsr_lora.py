@@ -166,8 +166,12 @@ def validate_shared_basis(basis_dir, module_names, expected_samples):
     if not metadata_path.is_file():
         raise FileNotFoundError(f"missing shared-basis metadata: {metadata_path}")
     metadata = json.loads(metadata_path.read_text())
-    if metadata.get("decomp") != "svd":
-        raise ValueError(f"shared basis must use svd, got {metadata.get('decomp')!r}")
+    # 'decomp' 는 이 레포 Phase 1 이 뒤늦게 추가한 필드다. 그 전에 만들어진 basis 에는
+    # 키 자체가 없다 — Phase 1 은 언제나 SVD 를 쓰므로 '없음' 은 허용하고,
+    # 'svd' 가 아닌 **다른 값**이 적혀 있을 때만 거부한다.
+    _decomp = metadata.get("decomp")
+    if _decomp is not None and _decomp != "svd":
+        raise ValueError(f"shared basis must use svd, got {_decomp!r}")
     if int(metadata.get("total_samples", -1)) != int(expected_samples):
         raise ValueError(
             f"shared basis used {metadata.get('total_samples')} samples; "
