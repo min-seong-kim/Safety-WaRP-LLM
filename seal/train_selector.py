@@ -84,6 +84,10 @@ def parse_args():
     p.add_argument("--dataset_name", type=str, default="openai/gsm8k")
     p.add_argument("--dataset_subset", type=str, default="main")
     p.add_argument("--train_split", type=str, default="train")
+    p.add_argument("--task_data_path", type=str, default=None,
+                   help="로컬 task JSON. 주면 gsm8k 대신 이 downstream 을 쓴다 "
+                        "(selector 인덱스는 이 파일의 행 순서 기준이 되므로 "
+                        "Stage 1 과 Stage 2 가 반드시 같은 파일이어야 한다).")
     p.add_argument("--num_ft_samples", type=int, default=0,
                    help="downstream(gsm8k) 샘플 수. 0=전체. selector 길이가 이 값이 된다.")
     p.add_argument("--max_length", type=int, default=1024)
@@ -160,9 +164,10 @@ def main():
         dataset_name=args.dataset_name, dataset_subset=args.dataset_subset,
         split=args.train_split, num_samples=args.num_ft_samples,
         subset_indices=None, with_index=True, cache_dir=args.cache_dir,
+        task_data_path=args.task_data_path,
     )
     selector_size = len(ft_ds)
-    print(f"[selector] safe={len(safe_ds)}  downstream(gsm8k)={selector_size}")
+    print(f"[selector] safe={len(safe_ds)}  downstream={selector_size}")
 
     collator = DataCollatorForCausalLMWithPadding(tokenizer)
     safe_loader = DataLoader(safe_ds, batch_size=args.batch_size, shuffle=True,

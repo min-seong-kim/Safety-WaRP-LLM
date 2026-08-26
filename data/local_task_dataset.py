@@ -24,6 +24,9 @@ KNOWN_TASKS = {
     # arc_eval / medqa_eval 하네스에서 그대로 가져오므로 평가와 포맷이 일치한다.
     "arc": "data/arc_challenge_train_task_1119.json",
     "medqa": "data/medqa_train_task_10178.json",
+    # MATH (scripts/prepare_math_task_data.py 산출물). 전처리는 data/math_task_format.py 를
+    # WaRP Phase 3 와 공유하므로 두 arm 의 학습 텍스트가 동일하다.
+    "math": "data/math_train_task_7500.json",
 }
 
 

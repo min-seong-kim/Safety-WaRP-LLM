@@ -391,7 +391,6 @@ for KEEP_RATIO in "${KEEP_RATIO_LIST[@]}"; do
 
     PHASE2_OUTPUT_DIR=$(find $BASE_OUTPUT_DIR -maxdepth 1 -name "phase2_*" -type d -printf '%T@ %p\n' | sort -rn | head -1 | cut -d' ' -f2-)
     PHASE2_MASKS_DIR="$PHASE2_OUTPUT_DIR/checkpoints/masks"
-    fi
 
     if [ ! -d "$PHASE2_MASKS_DIR" ]; then
         echo "ERROR: Phase 2 (kr=$KEEP_RATIO) masks not found: $PHASE2_MASKS_DIR"

@@ -386,29 +386,22 @@ def run_phase1(args, logger, profiler=None):
         logger.error("Phase 1 requires --phase0_model_dir (trained model from Phase 0)")
         raise ValueError("Missing --phase0_model_dir")
     
-<<<<<<< HEAD
     if getattr(args, 'basis_side', None) or getattr(args, 'basis_token_scope', 'all') != 'all':
         # [ablation] 입력측/출력측(ActSVD) 기저 빌더
-        from models.actsvd_basis import ActSVDBasisBuilder
+        from actsvd.actsvd_basis import ActSVDBasisBuilder
         if not getattr(args, 'basis_side', None):
             args.basis_side = 'input'
         builder = ActSVDBasisBuilder(args, logger)
     else:
-        from models.phase1_basis import Phase1BasisBuilder
+        granularity = getattr(args, 'basis_granularity', 'token')
+        if granularity == 'sequence':
+            from models.phase1_basis_sequence import Phase1BasisBuilderSequence as Phase1BasisBuilder
+            logger.info(f"[Phase 1] Sequence-wise basis (pool={getattr(args, 'seq_pool', 'mean')})")
+        else:
+            from models.phase1_basis import Phase1BasisBuilder
+            logger.info("[Phase 1] Token-wise basis (default)")
         builder = Phase1BasisBuilder(args, logger)
 
-=======
-    granularity = getattr(args, 'basis_granularity', 'token')
-    if granularity == 'sequence':
-        from models.phase1_basis_sequence import Phase1BasisBuilderSequence as Phase1BasisBuilder
-        logger.info(f"[Phase 1] Sequence-wise basis (pool={getattr(args, 'seq_pool', 'mean')})")
-    else:
-        from models.phase1_basis import Phase1BasisBuilder
-        logger.info("[Phase 1] Token-wise basis (default)")
-
-    builder = Phase1BasisBuilder(args, logger)
-    
->>>>>>> cde938ce (rebuttal finish)
     # Phase 0 모델 로드
     args.model_name = args.phase0_model_dir
     with profiler.stage('load_model'):
@@ -459,7 +452,7 @@ def run_phase2(args, logger, profiler=None):
 
     ablation_arm = getattr(args, 'ablation_arm', None)
     if ablation_arm:
-        from models.wsr_ablation_masks import arm_spec as _arm_spec
+        from actsvd.wsr_ablation_masks import arm_spec as _arm_spec
         if _arm_spec(ablation_arm)['basis_side'] is not None and args.basis_dir is None:
             logger.error(f"Phase 2 arm {ablation_arm} requires --basis_dir")
             raise ValueError("Missing --basis_dir")
@@ -468,7 +461,7 @@ def run_phase2(args, logger, profiler=None):
         raise ValueError("Missing --basis_dir")
 
     if ablation_arm:
-        from models.phase2_importance_ablation import Phase2AblationImportanceScorer
+        from actsvd.phase2_importance_ablation import Phase2AblationImportanceScorer
         scorer = Phase2AblationImportanceScorer(args, logger, args.basis_dir, args.phase0_model_dir)
     elif args.original_space_mask:
         from models.phase2_importance_original_space import Phase2ImportanceOriginalSpace
@@ -555,7 +548,7 @@ def run_phase3(args, logger, profiler=None):
     
     ablation_arm = getattr(args, 'ablation_arm', None)
     if ablation_arm:
-        from models.wsr_ablation_masks import arm_spec as _arm_spec
+        from actsvd.wsr_ablation_masks import arm_spec as _arm_spec
         if _arm_spec(ablation_arm)['basis_side'] is not None and args.basis_dir is None:
             logger.error(f"Phase 3 arm {ablation_arm} requires --basis_dir")
             raise ValueError("Missing --basis_dir")
@@ -568,7 +561,7 @@ def run_phase3(args, logger, profiler=None):
         raise ValueError("Missing --masks_dir")
 
     if ablation_arm:
-        from models.phase3_ablation import Phase3AblationLearner as Phase3Learner
+        from actsvd.phase3_ablation import Phase3AblationLearner as Phase3Learner
     elif args.original_space_mask:
         if args.use_lora:
             from models.phase3_extra_learning_lora import Phase3LoRAMaskedLearner as Phase3Learner

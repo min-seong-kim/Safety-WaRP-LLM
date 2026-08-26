@@ -107,8 +107,8 @@ if [[ -n "$EXISTING_NEURON_FILE" && ! -f "$EXISTING_NEURON_FILE" ]]; then
     echo "[ERROR] EXISTING_NEURON_FILE not found: ${EXISTING_NEURON_FILE}" >&2
     exit 1
 fi
-if [[ ! -f "${WARP_DIR}/run_warp_sn_pipeline.py" ]]; then
-    echo "[ERROR] run_warp_sn_pipeline.py not found in ${WARP_DIR}" >&2
+if [[ ! -f "${WARP_DIR}/sn_tune/run_warp_sn_pipeline.py" ]]; then
+    echo "[ERROR] sn_tune/run_warp_sn_pipeline.py not found in ${WARP_DIR}" >&2
     exit 1
 fi
 
@@ -138,7 +138,7 @@ export TOKENIZERS_PARALLELISM=false
 export TRANSFORMERS_NO_ADVISORY_WARNINGS=1
 
 CMD=(
-    "$PYTHON_BIN" "run_warp_sn_pipeline.py"
+    "$PYTHON_BIN" "sn_tune/run_warp_sn_pipeline.py"
     --model_name "$BASE_MODEL_NAME"
     --basis_dir "$BASIS_DIR"
     --dataset_file "$SAFETY_DATASET"

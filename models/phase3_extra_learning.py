@@ -1522,106 +1522,15 @@ class Phase3IncrementalLearner:
         try:
             self.logger.info("Loading Hendrycks MATH dataset...")
 
-            subject_to_config = {
-                "Algebra": "algebra",
-                "Counting & Probability": "counting_and_probability",
-                "Geometry": "geometry",
-                "Intermediate Algebra": "intermediate_algebra",
-                "Number Theory": "number_theory",
-                "Prealgebra": "prealgebra",
-                "Precalculus": "precalculus",
-            }
-            valid_levels = {f"Level {i}" for i in range(1, 6)}
-
-            multi_space_re = re.compile(r"\n{3,}")
-
-            def _normalize_csv_arg(raw_value: str) -> str:
-                value = str(raw_value).strip()
-                # Handle values passed as '"all"' or "'all'"
-                if len(value) >= 2 and ((value[0] == '"' and value[-1] == '"') or (value[0] == "'" and value[-1] == "'")):
-                    value = value[1:-1].strip()
-                return value
-
-            def _last_boxed_only_string(text: str):
-                idx = text.rfind("\\boxed")
-                if "\\boxed " in text:
-                    return "\\boxed " + text.split("\\boxed ")[-1].split("$")[0]
-                if idx < 0:
-                    idx = text.rfind("\\fbox")
-                    if idx < 0:
-                        return None
-
-                i = idx
-                right_brace_idx = None
-                num_left_braces_open = 0
-                while i < len(text):
-                    if text[i] == "{":
-                        num_left_braces_open += 1
-                    if text[i] == "}":
-                        num_left_braces_open -= 1
-                        if num_left_braces_open == 0:
-                            right_brace_idx = i
-                            break
-                    i += 1
-
-                if right_brace_idx is None:
-                    return None
-                return text[idx:right_brace_idx + 1]
-
-            def _remove_boxed(s: str) -> str:
-                if s is None:
-                    raise ValueError("remove_boxed received None")
-                if "\\boxed " in s:
-                    left = "\\boxed "
-                    if s.startswith(left):
-                        return s[len(left):]
-                left = "\\boxed{" 
-                if s.startswith(left) and s.endswith("}"):
-                    return s[len(left):-1]
-                left = "\\fbox{" 
-                if s.startswith(left) and s.endswith("}"):
-                    return s[len(left):-1]
-                return s
-
-            def _extract_final_answer_from_solution(solution: str) -> str:
-                boxed = _last_boxed_only_string(solution)
-                if boxed is None:
-                    raise ValueError(f"Could not find final boxed answer in solution: {solution[:300]!r}")
-                return _remove_boxed(boxed).strip()
-
-            def _clean_solution_for_reasoning(solution: str, final_answer: str) -> str:
-                text = solution.strip()
-                boxed = _last_boxed_only_string(text)
-                if boxed is not None:
-                    text = text.replace(boxed, final_answer)
-
-                text = text.replace("$", "")
-                text = text.replace("\\[", "")
-                text = text.replace("\\]", "")
-                text = text.replace("\\(", "")
-                text = text.replace("\\)", "")
-                text = text.replace("\\boxed", "")
-                text = text.replace("\\fbox", "")
-                text = multi_space_re.sub("\n\n", text)
-                return text.strip()
-
-            def _build_target(solution: str, rng: random.Random, train_on_mixed_formats: bool) -> str:
-                final_answer = _extract_final_answer_from_solution(solution)
-                rationale = _clean_solution_for_reasoning(solution, final_answer)
-
-                long_target = f"{rationale}\nFinal Answer: ${final_answer}$"
-                short_target = f"Final Answer: ${final_answer}$"
-                minimal_target = f"${final_answer}$"
-
-                if not train_on_mixed_formats:
-                    return long_target
-
-                draw = rng.random()
-                if draw < 0.70:
-                    return long_target
-                if draw < 0.90:
-                    return short_target
-                return minimal_target
+            # MATH 전처리는 data/math_task_format.py 를 단일 소스로 쓴다.
+            # baseline 러너용 scripts/prepare_math_task_data.py 도 같은 모듈을 import 하므로
+            # WaRP arm 과 baseline arm 의 학습 텍스트가 어긋날 수 없다.
+            from data.math_task_format import (
+                SUBJECT_TO_CONFIG as subject_to_config,
+                VALID_LEVELS as valid_levels,
+                normalize_csv_arg as _normalize_csv_arg,
+                build_target as _build_target,
+            )
 
             # Subject filtering
             subjects_arg = _normalize_csv_arg(getattr(self.args, 'math_subjects', 'all'))

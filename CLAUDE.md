@@ -111,6 +111,14 @@ Pipeline: Convert layers to `LinearSNWaRP` (`C = W @ U`) → detect top-k safety
 `|∂L/∂C|` → tune only those coordinates → restore to `nn.Linear` (`W_final = C @ U.T`, exact because `U` is
 orthonormal). Components: `module.py`, `detect.py`, `run.py`.
 
+The older WaRP-SN variant lives in the same package: `warp_sn_detection.py` / `warp_sn_tune.py`
+(both import `models.warp_modules`), driven by `run_warp_sn_pipeline.py`
+(`scripts/run_warp_sn.sh`) and `finetune_downstream_freeze_warp_sn.py`
+(`scripts/run_downstream_freeze_warp_sn.sh`). Both entry points put the repo root on `sys.path`
+themselves, so `python sn_tune/run_warp_sn_pipeline.py …` works from the repo root. The per-task
+SN fine-tuners stay with their eval harnesses (`mbpp_eval/finetune_mbpp_freeze_sn.py`,
+`mmlu_eval/finetune_mmlu_freeze_sn.py`).
+
 ## LoRA line: WSR-LoRA and friends (`finetune_gsm8k_lora.py`)
 
 A **separate experiment line** from the numbered phases, answering "does the WSR idea carry over to LoRA?".
@@ -239,7 +247,7 @@ SafeDelta/RESTA/SafeInstr must be regenerated from it or the arms no longer pair
 
 Answers the reviewer question "how is this different from ActSVD (Wei et al. 2024)?" by running
 ActSVD-style **rank freezing** and WSR-Tune's **entry freezing** inside the *same* Phase 1/2/3
-pipeline, changing only the coordinate basis and the mask granularity. Spec: `wsr_actsvd_ablation_spec.md`.
+pipeline, changing only the coordinate basis and the mask granularity. Spec: `actsvd/wsr_actsvd_ablation_spec.md`.
 
 **The distinction that must not be blurred:** ActSVD SVDs the *output* `W X_in` and takes **left**
 singular vectors `U_out ∈ R^{m×m}` (output space, applied by left-multiply `Ŵ = U_out U_outᵀ W`);
@@ -262,12 +270,16 @@ the premise that the only variable across arms is basis/mask structure.
 
 Driver: `bash scripts/run_wsr_actsvd_ablation.sh` (resumable; `STOP_AFTER_MASKS=1` halts before
 training). Smoke test on a tiny random LLaMA: `bash scripts/_smoke_wsr_actsvd.sh` (~5 min).
-Report/budget cross-check: `python wsr_actsvd_ablation_report.py --root outputs/wsr_actsvd_ablation`.
+Report/budget cross-check: `python actsvd/wsr_actsvd_ablation_report.py --root outputs/wsr_actsvd_ablation`.
 
-- New code: `models/actsvd_basis.py` (both basis sides, `--basis_side {input,output}`),
-  `models/wsr_ablation_masks.py` (arm specs, entry/row/column masks, budget accounting),
-  `models/wsr_ablation_reparam.py` (Phase 2/3 공용 좌표계 세팅), `models/phase2_importance_ablation.py`,
-  `models/phase3_ablation.py`, `tests/test_wsr_actsvd_ablation.py`.
+- Code lives in its own package **`actsvd/`**: `actsvd_basis.py` (both basis sides,
+  `--basis_side {input,output}`), `wsr_ablation_masks.py` (arm specs, entry/row/column masks,
+  budget accounting), `wsr_ablation_reparam.py` (Phase 2/3 공용 좌표계 세팅),
+  `phase2_importance_ablation.py`, `phase3_ablation.py`, `test_wsr_actsvd_ablation.py`,
+  `wsr_actsvd_ablation_report.py`, `wsr_actsvd_ablation_spec.md`. `train.py` lazy-imports them
+  behind `--ablation_arm` / `--basis_side`; they import `models.{phase1_basis,
+  phase2_importance_per_layer, phase3_extra_learning, warp_modules}` so the repo root must be on
+  `sys.path` (running from the repo root, as every script does, is enough).
 - `LinearWaRP` now treats an **empty** `UT_forward`/`UT_backward` as an identity basis, which is what
   makes arm A (both empty) and arm B (only `UT_backward`) expressible. Existing paths are unchanged.
 - **Budget matching is the fairness gate**: every arm freezes the same number of scalars

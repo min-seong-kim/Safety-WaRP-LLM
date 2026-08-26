@@ -155,7 +155,7 @@ class DataCollatorForCausalLMWithPadding:
 # ─────────────────────────────────────────────────────────────────────────────
 # Dataset 빌더
 # ─────────────────────────────────────────────────────────────────────────────
-def build_gsm8k_dataset(
+def build_downstream_dataset(
     tokenizer,
     max_length: int,
     model_ref: str,
@@ -167,6 +167,7 @@ def build_gsm8k_dataset(
     with_index: bool = False,
     cache_dir: Optional[str] = None,
     num_proc: int = 4,
+    task_data_path: Optional[str] = None,
 ) -> TokenizedDataset:
     """
     gsm8k → TokenizedDataset.
@@ -176,7 +177,16 @@ def build_gsm8k_dataset(
       → selector 학습(Stage 1)에서는 전체 데이터에 with_index=True를 쓰고,
          SFT(Stage 2)에서는 subset_indices로 선택된 부분집합만 학습한다.
     """
-    ds = load_dataset(dataset_name, dataset_subset, split=split, cache_dir=cache_dir)
+    if task_data_path:
+        # 로컬 task JSON([{question,response},...]) — gsm8k 이외의 downstream.
+        # 다른 baseline 러너들과 같은 로더를 써서 프롬프트 문자열이 동일하다.
+        from data.local_task_dataset import load_task_pairs
+        from datasets import Dataset as _HFDataset
+        pairs = load_task_pairs(task_data_path, 0)
+        ds = _HFDataset.from_list(
+            [{"question": q, "answer": a} for q, a in pairs])
+    else:
+        ds = load_dataset(dataset_name, dataset_subset, split=split, cache_dir=cache_dir)
     if num_samples and num_samples > 0:
         ds = ds.select(range(min(num_samples, len(ds))))
 
@@ -231,3 +241,7 @@ def build_circuit_breakers_dataset(
         examples.append(ex)
 
     return TokenizedDataset(examples, with_index=with_index)
+
+
+# 하위 호환: 이 함수는 원래 gsm8k 전용이었다.
+build_gsm8k_dataset = build_downstream_dataset

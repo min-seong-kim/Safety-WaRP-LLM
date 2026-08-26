@@ -137,7 +137,7 @@ echo "=================================================================="
 cd "$WARP_DIR"
 
 CMD=(
-    "$PYTHON_BIN" "finetune_downstream_freeze_warp_sn.py"
+    "$PYTHON_BIN" "sn_tune/finetune_downstream_freeze_warp_sn.py"
     --model_name_or_path  "$MODEL_PATH"
     --basis_dir           "$BASIS_DIR"
     --neuron_file         "$NEURON_FILE"

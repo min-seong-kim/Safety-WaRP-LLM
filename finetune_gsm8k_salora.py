@@ -82,6 +82,11 @@ def parse_args():
     ap.add_argument("--dataset_name", default="openai/gsm8k")
     ap.add_argument("--dataset_subset", default="main")
     ap.add_argument("--gsm8k_samples", type=int, default=0, help="0=전체")
+    ap.add_argument("--task_data_path", default=None,
+                    help="로컬 task JSON([{question,response},...]). 주면 gsm8k 대신 이걸 학습한다. "
+                         "utility 부분공간 calibration 도 같은 데이터에서 뽑는다 "
+                         "(data/local_task_dataset.py, 다른 러너들과 동일한 인터페이스).")
+    ap.add_argument("--task_samples", type=int, default=0, help="0=전체 (task_data_path 용)")
     ap.add_argument("--learning_rate", type=float, default=1e-4)
     ap.add_argument("--epochs", type=int, default=3)
     ap.add_argument("--batch_size", type=int, default=2)
@@ -106,7 +111,11 @@ def _make_batches(features, collator, batch_size):
     return [collator(features[i:i + batch_size]) for i in range(0, len(features), batch_size)]
 
 
-def build_gsm8k_pairs(args, n=0):
+def build_utility_pairs(args, n=0):
+    """utility(=downstream) calibration 쌍. task_data_path 가 있으면 그쪽이 우선."""
+    if args.task_data_path:
+        from data.local_task_dataset import load_task_pairs
+        return load_task_pairs(args.task_data_path, n)
     ds = load_dataset(args.dataset_name, args.dataset_subset, split="train")
     if n > 0:
         ds = _select_first_n(ds, n)
@@ -120,7 +129,14 @@ def build_safety_pairs(args, n):
     return [(data[i]["prompt"], data[i][args.safety_response_field]) for i in range(n)]
 
 
-def build_gsm8k_train(tokenizer, args):
+def build_train_dataset(tokenizer, args):
+    """downstream 학습셋. task_data_path 가 있으면 로컬 JSON, 없으면 gsm8k."""
+    if args.task_data_path:
+        from data.local_task_dataset import build_task_dataset, infer_task_name
+        return build_task_dataset(
+            args.task_data_path, tokenizer, args.max_length, args.model_name,
+            tokenize_sft_example, max_samples=args.task_samples,
+            desc=f"tokenizing {infer_task_name(args.task_data_path)}")
     ds = load_dataset(args.dataset_name, args.dataset_subset, split="train")
     if args.gsm8k_samples > 0:
         ds = _select_first_n(ds, args.gsm8k_samples)
@@ -178,7 +194,7 @@ def main():
     collator = DataCollatorForCausalLMWithPadding(tokenizer=tok)
     safety_feats = _tokenize_pairs(build_safety_pairs(args, args.salora_calib_samples),
                                    tok, args.max_length, args.model_name)
-    util_feats = _tokenize_pairs(build_gsm8k_pairs(args, args.salora_calib_samples),
+    util_feats = _tokenize_pairs(build_utility_pairs(args, args.salora_calib_samples),
                                  tok, args.max_length, args.model_name)
     safety_batches = _make_batches(safety_feats, collator, args.salora_calib_batch_size)
     util_batches = _make_batches(util_feats, collator, args.salora_calib_batch_size)
@@ -201,7 +217,7 @@ def main():
 
     # ── 4) GSM8K SFT (A,B 만 학습) ──
     model.train()
-    train_ds = build_gsm8k_train(tok, args)
+    train_ds = build_train_dataset(tok, args)
     targs = TrainingArguments(
         output_dir=os.path.join(args.output_dir, "trainer"),
         num_train_epochs=args.epochs,
@@ -247,7 +263,11 @@ def main():
     except Exception as e:
         logger.warning(f"sanity gen failed: {e}")
 
-    summary = {"method": "salora", "model_name": args.model_name, "lr": args.learning_rate,
+    from data.local_task_dataset import infer_task_name as _infer_task
+    _task = _infer_task(args.task_data_path) if args.task_data_path else "gsm8k"
+    summary = {"method": "salora", "task": _task,
+               "task_data_path": args.task_data_path,
+               "model_name": args.model_name, "lr": args.learning_rate,
                "lora_r": args.lora_r, "lora_alpha": args.lora_alpha,
                "rank_safe": args.salora_rank_safe, "rank_util": args.salora_rank_util,
                "calib_samples": args.salora_calib_samples, "target_modules": args.target_modules,
