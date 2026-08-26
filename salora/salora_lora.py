@@ -47,6 +47,9 @@ def main():
     ap.add_argument("--train_samples", type=int, default=0)
     ap.add_argument("--dtype", default="bfloat16")
     ap.add_argument("--seed", type=int, default=42)
+    # [Safety-WaRP-LLM] 원본은 warmup_ratio 를 0.1 로 박아 뒀다. 다른 LoRA arm 과
+    # 예산(0.03)을 맞추려면 바꿀 수 있어야 해서 플래그로 뺀다. 기본값은 원본 그대로.
+    ap.add_argument("--warmup_ratio", type=float, default=0.1)
     args = ap.parse_args()
 
     torch.manual_seed(args.seed)
@@ -126,7 +129,7 @@ def main():
         output_dir=args.output_dir, num_train_epochs=args.epochs,
         per_device_train_batch_size=args.batch_size,
         gradient_accumulation_steps=args.grad_accum,
-        learning_rate=args.lr, lr_scheduler_type="cosine", warmup_ratio=0.1,
+        learning_rate=args.lr, lr_scheduler_type="cosine", warmup_ratio=args.warmup_ratio,
         weight_decay=0.0, logging_steps=10, save_strategy="no",
         bf16=(args.dtype == "bfloat16"), seed=args.seed, report_to=[],
         remove_unused_columns=False,

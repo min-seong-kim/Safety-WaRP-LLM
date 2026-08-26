@@ -121,11 +121,16 @@ LISA_RHO="${LISA_RHO:-1.0}"                 # 사용자 지정
 LISA_ALIGNMENT_STEP="${LISA_ALIGNMENT_STEP:-100}"
 LISA_FINETUNE_STEP="${LISA_FINETUNE_STEP:-900}"
 SAFELORA_THRESHOLD="${SAFELORA_THRESHOLD:-0.3}"   # 사용자 지정 thr=0.3
-SALORA_RANK_SAFE="${SALORA_RANK_SAFE:-32}"
-SALORA_RANK_UTIL="${SALORA_RANK_UTIL:-32}"
-SALORA_CALIB_SAMPLES="${SALORA_CALIB_SAMPLES:-128}"
-SALORA_CALIB_BS="${SALORA_CALIB_BS:-2}"
-SALORA_NITER="${SALORA_NITER:-20}"
+# SaLoRA 는 salora/salora_lora.py + salora/salora_impl.py (Li et al., ICLR'25 포팅) 를 쓴다.
+#   r_s : safety 부분공간 차원 — C_S = I − U_C U_Cᵀ (U_C = top-r_s left SV of W X_harmful)
+#   r_t : task 부분공간 차원   — init_mode=task 일 때 B_S 를 이 부분공간으로 투영
+#   둘 다 원본 포팅의 기본값 32 를 그대로 쓴다.
+SALORA_R_S="${SALORA_R_S:-32}"
+SALORA_R_T="${SALORA_R_T:-32}"
+SALORA_INIT_MODE="${SALORA_INIT_MODE:-task}"        # full SaLoRA
+SALORA_N_HARMFUL="${SALORA_N_HARMFUL:-256}"         # C_S 용 harmful 샘플 수
+SALORA_N_TASK="${SALORA_N_TASK:-256}"               # task 부분공간용 downstream 샘플 수
+SALORA_MAX_TOKENS="${SALORA_MAX_TOKENS:-4096}"
 SEAL_TOPP="${SEAL_TOPP:-0.8}"
 SEAL_SEL_EPOCHS="${SEAL_SEL_EPOCHS:-2}"
 
@@ -423,7 +428,7 @@ hf_hparam_tag() {
     lisa)      echo "rho${LISA_RHO}" ;;
     seal)      echo "topp${SEAL_TOPP}" ;;
     safelora)  echo "thr${SAFELORA_THRESHOLD}" ;;
-    salora)    echo "rs${SALORA_RANK_SAFE}ru${SALORA_RANK_UTIL}" ;;
+    salora)    echo "rs${SALORA_R_S}rt${SALORA_R_T}" ;;
     *)         echo "" ;;   # fullft / lora
   esac
 }

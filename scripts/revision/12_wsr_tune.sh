@@ -53,6 +53,17 @@ for safety in $SAFETY_SETS; do
     [[ -s "$BASIS_PTR" ]] && BASIS_DIR="$(cat "$BASIS_PTR")"
     [[ -s "$MASKS_PTR" ]] && MASKS_DIR="$(cat "$MASKS_PTR")"
 
+    # 이 조합에 돌릴 wsr_tune 셀이 하나도 없으면(=논문에 이미 있는 셀) basis/mask 도
+    # 만들어지지 않는 게 정상이다. 아래 존재 검사를 그대로 태우면 가짜 실패가 기록된다.
+    want_any=0
+    for task in $(tasks_for_model "$mkey" "$safety"); do
+      want_cell "$safety" "$mkey" "$task" wsr_tune && want_any=1
+    done
+    if (( want_any == 0 )); then
+      log "[skip] wsr_tune $safety/$mkey — 돌릴 셀이 없다 (논문 Table 2/4/10 에 이미 있음)"
+      continue
+    fi
+
     if [[ "$DRY_RUN" != "1" ]] && { [[ ! -d "$BASIS_DIR" ]] || [[ ! -d "$MASKS_DIR" ]]; }; then
       warn "[$safety/$mkey] basis/mask 가 없다 → 02_warp_basis_mask.sh 먼저. 건너뜀."
       warn "   basis=$BASIS_DIR  mask=$MASKS_DIR"

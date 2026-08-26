@@ -54,7 +54,7 @@ echo ""
 echo "  AsFT λ          : $ASFT_LAMBDA_REG"
 echo "  SafeLoRA thr    : $SAFELORA_THRESHOLD  (load dtype=$SAFELORA_LOAD_DTYPE)"
 echo "  LISA            : ρ=$LISA_RHO align_step=$LISA_ALIGNMENT_STEP ft_step=$LISA_FINETUNE_STEP"
-echo "  SaLoRA          : rank_safe=$SALORA_RANK_SAFE rank_util=$SALORA_RANK_UTIL calib=$SALORA_CALIB_SAMPLES"
+echo "  SaLoRA          : salora/salora_lora.py · r_s=$SALORA_R_S r_t=$SALORA_R_T init=$SALORA_INIT_MODE n_harmful=$SALORA_N_HARMFUL n_task=$SALORA_N_TASK"
 echo "  WSR-LoRA ρ      : $KEEP_RATIO  (Phase1 basis 필요)"
 
 for safety in $SAFETY_SETS; do
@@ -171,22 +171,27 @@ for safety in $SAFETY_SETS; do
       # ═══════════════ SaLoRA ═══════════════
       if want_cell "$safety" "$mkey" "$task" salora; then
         odir="$(out_dir "$safety" "$mkey" "$task" salora)"
-        run_cell "$odir" "salora  $TAG" -- \
-          "$PY" finetune_gsm8k_salora.py \
+        # 구현체: salora/salora_lora.py + salora/salora_impl.py (사용자 지정 기준 구현).
+        #   · --gsm8k_json 은 이름과 달리 임의의 {"question","response"} JSON 을 받는다
+        #     (pw.GSM8KDataset — WSR-LoRA 와 같은 로더라 프롬프트가 다른 arm 과 동일하다).
+        #   · 두 파일이 서로를 상대경로로 import 하므로 PYTHONPATH 에 salora/ 와 wsr-lora/ 가 필요하다.
+        #   · 이 러너에는 gradient_checkpointing 옵션이 없다(원본 그대로). B200 에서는 문제없다.
+        #   · weight_decay 는 러너 안에서 0.0 으로 고정돼 있다 (= LORA_WEIGHT_DECAY 와 동일).
+        run_cell "$odir" "salora(r_s=$SALORA_R_S,r_t=$SALORA_R_T)  $TAG" -- \
+          env PYTHONPATH="$REPO_DIR/salora:$REPO_DIR/wsr-lora:$REPO_DIR${PYTHONPATH:+:$PYTHONPATH}" \
+          "$PY" salora/salora_lora.py \
             --model_name "$ALIGNED" --output_dir "$odir" \
-            --task_data_path "$TASK_DATA" --task_samples "$TASK_SAMPLES" \
-            --safety_data_path "$SAFE_DATA" \
-            --layer_type "$LAYER_TYPES" --target_modules "$TARGET_MODULES_CSV" \
-            --target_layers "$TARGET_LAYERS" \
-            --salora_rank_safe "$SALORA_RANK_SAFE" --salora_rank_util "$SALORA_RANK_UTIL" \
-            --salora_calib_samples "$SALORA_CALIB_SAMPLES" \
-            --salora_calib_batch_size "$SALORA_CALIB_BS" --salora_niter "$SALORA_NITER" \
-            --lora_r "$LORA_R" --lora_alpha "$LORA_ALPHA" --lora_dropout "$LORA_DROPOUT" \
-            --learning_rate "$LR" --epochs "$EPOCHS" \
-            --batch_size "$MB_LORA" --gradient_accumulation_steps "$accum" \
-            --max_length "$MAX_LENGTH" \
-            --warmup_ratio "$LORA_WARMUP_RATIO" --weight_decay "$LORA_WEIGHT_DECAY" \
-            --seed "$SEED" --dtype "$DTYPE" --gradient_checkpointing
+            --safety_data "$SAFE_DATA" --response_field llama3_output \
+            --gsm8k_json "$TASK_DATA" --train_samples "$TASK_SAMPLES" \
+            --target_modules "$TARGET_MODULES_CSV" \
+            --rank "$LORA_R" --lora_alpha "$LORA_ALPHA" --lora_dropout "$LORA_DROPOUT" \
+            --r_s "$SALORA_R_S" --r_t "$SALORA_R_T" --init_mode "$SALORA_INIT_MODE" \
+            --n_harmful "$SALORA_N_HARMFUL" --n_task "$SALORA_N_TASK" \
+            --salora_max_tokens "$SALORA_MAX_TOKENS" \
+            --lr "$LR" --epochs "$EPOCHS" \
+            --batch_size "$MB_LORA" --grad_accum "$accum" \
+            --max_length "$MAX_LENGTH" --warmup_ratio "$LORA_WARMUP_RATIO" \
+            --dtype "$DTYPE" --seed "$SEED"
         post_cell "$odir" "$safety" "$mkey" "$task" salora
       fi
 

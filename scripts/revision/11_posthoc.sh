@@ -55,6 +55,18 @@ for safety in $SAFETY_SETS; do
     for task in $(tasks_for_model "$mkey" "$safety"); do
       FT_DIR="$(out_dir "$safety" "$mkey" "$task" fullft)"
 
+      # 이 셀에서 실제로 돌릴 post-hoc 기법이 있는지 먼저 본다.
+      # (resta/safedelta 가 둘 다 논문에 이미 있으면 fullft 도 만들지 않는 게 정상이라,
+      #  아래 존재 검사를 그대로 태우면 가짜 실패가 기록된다 — stage 12 와 같은 함정.)
+      want_any=0
+      for c in resta safedelta; do
+        want_cell "$safety" "$mkey" "$task" "$c" && want_any=1
+      done
+      if (( want_any == 0 )); then
+        log "[skip] post-hoc $safety/$mkey/$task — 돌릴 셀이 없다 (논문 Table 2/4/10 에 이미 있음)"
+        continue
+      fi
+
       # 두 기법 모두 fullft 산출물이 있어야 한다.
       if [[ "$DRY_RUN" != "1" ]] && { ! is_done "$FT_DIR" || [[ ! -f "$FT_DIR/config.json" ]]; }; then
         warn "[$safety/$mkey/$task] fullft 산출물이 없다 ($FT_DIR) → 10_fullft_safeinstr.sh 먼저. 건너뜀."
