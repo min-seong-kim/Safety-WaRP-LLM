@@ -594,6 +594,55 @@ deadline_passed() {
   (( $(date +%s) >= REVISION_DEADLINE_EPOCH ))
 }
 
+# ── 디스크 안전장치 ───────────────────────────────────────────────────────
+#  밤새 무인으로 도는 동안 가장 현실적인 사고는 디스크 고갈이다.
+#  업로드가 실패하면 그 셀의 가중치가 삭제되지 않고 쌓이는데, 그게 몇 개 겹치면
+#  이후 모든 셀이 저장 단계에서 죽는다. 그래서 새 셀을 시작하기 전에
+#    (1) 이미 허브에 올라갔는데 로컬에 남아 있는 셀을 회수하고,
+#    (2) 그래도 모자라면 그 셀을 **시작하지 않고** 건너뛴다(재실행하면 이어서 간다).
+MIN_FREE_GB="${MIN_FREE_GB:-45}"
+
+avail_gb() { df -BG --output=avail "$OUT_ROOT" 2>/dev/null | tail -1 | tr -dc '0-9'; }
+
+# 업로드 검증까지 끝났는데 아직 가중치가 남아 있는 셀을 지운다.
+#  · .uploaded 가 있다 = 허브에 올라가고 4종 검증을 통과했다는 뜻이라 안전하다.
+#  · fullft 은 RESTA/SafeDelta 가 아직이면 prune_allowed 가 막는다.
+reclaim_disk() {
+  [[ "$DRY_RUN" == "1" ]] && return 0
+  local cell repo n=0
+  while IFS= read -r up; do
+    cell="$(dirname "$up")"
+    # <out>/<safety>/<model>/<task>/<method>
+    local method task mkey safety
+    method="$(basename "$cell")"; task="$(basename "$(dirname "$cell")")"
+    mkey="$(basename "$(dirname "$(dirname "$cell")")")"
+    safety="$(basename "$(dirname "$(dirname "$(dirname "$cell")")")")"
+    # 가중치가 남아 있나?
+    find "$cell" \( -name '*.safetensors' -o -name '*.bin' \) -print -quit 2>/dev/null | grep -q . || continue
+    prune_allowed "$safety" "$mkey" "$task" "$method" || continue
+    repo="$(cat "$up")"
+    log "[reclaim] $safety/$mkey/$task/$method — 이미 업로드됨, 로컬 가중치 회수"
+    "$PY" scripts/revision/upload_and_prune.py --cell_dir "$cell" --repo_id "$repo" \
+          --verify_only --prune 2>&1 | sed 's/^/    /'
+    n=$((n+1))
+  done < <(find "$OUT_ROOT" -name .uploaded 2>/dev/null)
+  (( n > 0 )) && log "[reclaim] ${n}개 셀 정리 · 여유 $(avail_gb)GB"
+  return 0
+}
+
+# 새 셀을 시작해도 되는가. 부족하면 회수 후 재확인.
+disk_ok() {
+  [[ "$DRY_RUN" == "1" ]] && return 0
+  local a; a="$(avail_gb)"; a="${a:-0}"
+  (( a >= MIN_FREE_GB )) && return 0
+  warn "[disk] 여유 ${a}GB < ${MIN_FREE_GB}GB — 업로드 끝난 셀부터 회수한다"
+  reclaim_disk
+  a="$(avail_gb)"; a="${a:-0}"
+  (( a >= MIN_FREE_GB )) && { log "[disk] 회수 후 ${a}GB — 계속 진행"; return 0; }
+  warn "[disk] 회수 후에도 ${a}GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)"
+  return 1
+}
+
 # 한 셀을 실행하고 성공 시 .done 을 남긴다.
 #   run_cell <out_dir> <label> -- <command...>
 run_cell() {
@@ -603,6 +652,10 @@ run_cell() {
   if is_done "$odir"; then log "[skip] $label  (이미 완료: $odir)"; return 0; fi
   if deadline_passed; then
     log "[deadline] $label — 마감 시각을 넘겨 시작하지 않는다"
+    return 0
+  fi
+  if ! disk_ok; then
+    FAILED_CELLS+=("$label (disk)")
     return 0
   fi
   hdr "$label"
