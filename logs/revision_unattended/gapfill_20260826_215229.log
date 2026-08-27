@@ -1,3 +1,1988 @@
 ════ gap-fill 대기 시작  ts=20260826_215229 ════
   기다리는 PID : 178810
   로그         : /home/edgeai_lab/Safety-WaRP-LLM/logs/revision_unattended/gapfill_20260826_215229.log
+  본 러너(PID 178810) 종료 확인 — 2026-08-28 07:08:33
+
+════ 빠진 셀 확인 ════
+  학습 셀: 114개 중 60개 완료, 54개 남음
+  디스크: 업로드-후-삭제 모드 · / 여유 18GB   (셀 누적 857GB 는 허브로 나간다)
+
+════ gap-fill 실행 (완료된 셀은 자동으로 건너뛴다) ════
+── PASS cb
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/edgeai_lab/Safety-WaRP-LLM
+   python    : /home/edgeai_lab/miniforge3/envs/hb/bin/python
+   safety    : cb
+   models    : llama2_7b llama2_13b llama32_3b llama31_8b qwen25_7b gemma2_9b
+   methods   : fullft safeinstr resta safedelta wsr_tune lora asft lisa seal safelora salora wsr_lora
+   tasks     : <모델별 자동>
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=1, basis 삭제=1)
+════════════════════════════════════════════════════════════════
+
+════════════════ 셀 목록 / 진행률 ════════════════
+  학습 셀: 66개 중 59개 완료, 7개 남음
+
+  디스크: 업로드-후-삭제 모드 · / 여유 18GB   (셀 누적 152GB 는 허브로 나간다)
+          model        HF캐시    basis   셀×2 동시최대
+          llama2_7b         45G      16G      30G       91G  ← 빠듯
+          llama2_13b        78G      31G      52G      161G  ← 빠듯
+          llama32_3b        21G       8G      14G       43G  ← 빠듯
+          llama31_8b        45G      21G      30G       96G  ← 빠듯
+          qwen25_7b         45G      26G      30G      101G  ← 빠듯
+          gemma2_9b         57G      26G      38G      121G  ← 빠듯
+[revision][WARN ] 다음 모델은 현재 여유로는 빠듯하다: llama2_7b llama2_13b llama32_3b llama31_8b qwen25_7b gemma2_9b
+[revision][WARN ]   · 그 모델만 단독으로 돌리고(MODELS=<key>), 다른 모델 캐시를 먼저 비워라.
+[revision][WARN ]   · 또는 METHODS 를 둘로 쪼개 돌려라 (예: 먼저 full-param 5종, 다음 LoRA 7종).
+
+  선행 산출물:
+    cb  llama2_7b    aligned=reuse(hub)  basis=MISSING  mask=MISSING
+    cb  llama2_13b   aligned=reuse(hub)  basis=ok       mask=불필요
+    cb  llama32_3b   aligned=reuse(hub)  basis=MISSING  mask=불필요
+    cb  llama31_8b   aligned=reuse(hub)  basis=ok       mask=불필요
+    cb  qwen25_7b    aligned=reuse(hub)  basis=MISSING  mask=불필요
+    cb  gemma2_9b    aligned=reuse(hub)  basis=MISSING  mask=불필요
+
+  ── STAGE 00  00_prepare.sh     (08-28 07:09:33)
+════════════════════════════════════════════════════════════════
+ Stage 00 — 데이터 준비 / 환경 점검     ts=20260828_070933
+════════════════════════════════════════════════════════════════
+
+──────────────────────────────────────────────────────────────
+  1. 환경 점검   (08-28 07:09:33)
+──────────────────────────────────────────────────────────────
+  python       3.10.19  (/home/edgeai_lab/miniforge3/envs/hb/bin/python)
+  torch        2.10.0+cu128  cuda_build=12.8  avail=True
+  gpu          NVIDIA B200  178.4 GiB  sm_100  (n=1)
+  transformers 4.57.3   peft 0.18.1   accelerate 1.12.0   datasets 4.4.1
+  fire         0.7.1   (SafeDelta 에 필요)
+
+  CUDA_VISIBLE_DEVICES = '<unset>'  (스케줄러가 넣어준 값을 그대로 쓴다)
+  hf user      kmseong
+
+──────────────────────────────────────────────────────────────
+  1-b. gated base 모델 접근   (08-28 07:09:38)
+──────────────────────────────────────────────────────────────
+  ✓ meta-llama/Llama-2-7b-chat-hf
+  ✓ meta-llama/Llama-2-13b-chat-hf
+  ✓ meta-llama/Llama-3.2-3B-Instruct
+  ✓ meta-llama/Llama-3.1-8B-Instruct
+  ✓ Qwen/Qwen2.5-7B-Instruct
+  ✗ google/gemma-2-9b-it  (OSError)
+
+  [WARN] 위 base 모델을 받을 수 없다. 해당 모델의 AsFT / SafeLoRA / RESTA 셀이 실패한다.
+         해당 페이지에서 라이선스를 수락하라: https://huggingface.co/google/gemma-2-9b-it
+  SafeDelta    /home/edgeai_lab/SafeDelta  (OK)
+
+──────────────────────────────────────────────────────────────
+  2. 안전 데이터   (08-28 07:09:42)
+──────────────────────────────────────────────────────────────
+  [cb]  4994 rows   /home/edgeai_lab/Safety-WaRP-LLM/data/circuit_breakers_train.json
+  [bt]  4994 rows   /home/edgeai_lab/Safety-WaRP-LLM/data/beavertails_cb_train.json
+
+──────────────────────────────────────────────────────────────
+  3. 태스크 데이터 생성/점검   (08-28 07:09:42)
+──────────────────────────────────────────────────────────────
+  [gsm8k]  이미 존재 — skip
+  [math]   이미 존재 — skip
+  [arc]    이미 존재 — skip
+  [medqa]  이미 존재 — skip
+  [agnews] 이미 존재 — skip
+
+──────────────────────────────────────────────────────────────
+  4. 태스크 데이터 요약   (08-28 07:09:42)
+──────────────────────────────────────────────────────────────
+  task        rows   q(chars)  r(chars)  file
+  gsm8k       7473        235       287  data/gsm8k_train_task_7473.json
+  math        7500        210       547  data/math_train_task_7500.json
+  arc         1119        488        20  data/arc_challenge_train_task_1119.json
+  medqa      10178       1052        30  data/medqa_train_task_10178.json
+  agnews      8000        360         7  data/agnews_train_8k_seed42.json
+
+  5개 태스크 JSON 모두 준비됨.
+
+다음 단계:
+  bash scripts/revision/01_ssft_bt.sh          # BeaverTails 안전정렬 출발모델
+  bash scripts/revision/02_warp_basis_mask.sh  # Phase1 basis + Phase2 mask
+  또는  bash scripts/revision/run_all.sh       # 전체
+[revision] [stage 00] 완료
+[revision] [stage 01] SAFETY_SETS 에 bt 가 없음 — 건너뜀
+
+████████████████████████████████████████████████████████████████
+  ▶ cb / llama2_7b     (08-28 07:09:42)
+     디스크 여유: 18G
+████████████████████████████████████████████████████████████████
+
+  ── STAGE 02  02_warp_basis_mask.sh  MODELS=llama2_7b SAFETY_SETS=cb   (08-28 07:09:42)
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/edgeai_lab/Safety-WaRP-LLM
+   python    : /home/edgeai_lab/miniforge3/envs/hb/bin/python
+   safety    : cb
+   models    : llama2_7b
+   methods   : fullft safeinstr resta safedelta wsr_tune lora asft lisa seal safelora salora wsr_lora
+   tasks     : <모델별 자동>
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=1, basis 삭제=1)
+════════════════════════════════════════════════════════════════
+
+  layer_type    : attn_q,attn_k,attn_v,ffn_up,ffn_down
+  target_layers : all
+  keep_ratio ρ  : 0.1
+  basis 저장    : dtype=bfloat16  omit_UT=1  (fp32+UT 대비 1/4)
+  출력          : /home/edgeai_lab/Safety-WaRP-LLM/checkpoints/revision/warp/<safety>/<model>/
+[revision][WARN ] [disk] 여유 18GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 18GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+[revision][WARN ] [disk] basis 를 만들 공간이 없다 — cb/llama2_7b 건너뜀
+
+════════════════ Stage 02 요약 ════════════════
+  cb  llama2_7b    basis=MISSING  mask=MISSING 
+
+실패한 셀 없음.
+[revision] [stage 02] 완료
+
+  ── STAGE 10  10_fullft_safeinstr.sh  MODELS=llama2_7b SAFETY_SETS=cb   (08-28 07:09:43)
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/edgeai_lab/Safety-WaRP-LLM
+   python    : /home/edgeai_lab/miniforge3/envs/hb/bin/python
+   safety    : cb
+   models    : llama2_7b
+   methods   : fullft safeinstr resta safedelta wsr_tune lora asft lisa seal safelora salora wsr_lora
+   tasks     : <모델별 자동>
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=1, basis 삭제=1)
+════════════════════════════════════════════════════════════════
+[revision] [skip] fullft  cb/llama2_7b/agnews  lr=5e-5 batch=4x4  (이미 완료: /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/agnews/fullft)
+    [upload] cell   : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/agnews/fullft
+    [upload] repo   : kmseong/llama2_7b-chat-CB_SSFT-fullft_agnews_lr5e-5
+    [upload] model  : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/agnews/fullft
+    [upload] 가중치 파일이 없다 — 이미 prune 됐거나 저장이 실패한 셀이다. 중단.
+[revision] [skip] safeinstr(0.1)  cb/llama2_7b/agnews  lr=5e-5  (이미 완료: /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/agnews/safeinstr)
+    [upload] cell   : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/agnews/safeinstr
+    [upload] repo   : kmseong/llama2_7b-chat-CB_SSFT-safeinstr_agnews_mix0.1_lr5e-5
+    [upload] model  : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/agnews/safeinstr
+    [upload] 가중치 파일이 없다 — 이미 prune 됐거나 저장이 실패한 셀이다. 중단.
+
+실패한 셀 없음.
+[revision] [stage 10] 완료
+
+  ── STAGE 12  12_wsr_tune.sh  MODELS=llama2_7b SAFETY_SETS=cb   (08-28 07:09:43)
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/edgeai_lab/Safety-WaRP-LLM
+   python    : /home/edgeai_lab/miniforge3/envs/hb/bin/python
+   safety    : cb
+   models    : llama2_7b
+   methods   : fullft safeinstr resta safedelta wsr_tune lora asft lisa seal safelora salora wsr_lora
+   tasks     : <모델별 자동>
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=1, basis 삭제=1)
+════════════════════════════════════════════════════════════════
+
+  keep_ratio ρ  : 0.1
+  layer_type    : attn_q,attn_k,attn_v,ffn_up,ffn_down   target_layers: all
+[revision][WARN ] [cb/llama2_7b] basis/mask 가 없다 → 02_warp_basis_mask.sh 먼저. 건너뜀.
+[revision][WARN ]    basis=/home/edgeai_lab/Safety-WaRP-LLM/checkpoints/revision/warp/cb/llama2_7b/phase1_20260826_222611/basis  mask=/home/edgeai_lab/Safety-WaRP-LLM/checkpoints/revision/warp/cb/llama2_7b/phase2_20260826_224642/checkpoints/masks
+
+════════════════ 실패한 셀 (1) ════════════════
+  - wsr_tune/cb/llama2_7b (no basis/mask)
+[revision][WARN ] [stage 12] 실패한 셀이 있다 (위 로그 확인)
+
+  ── STAGE 20  20_lora_family.sh  MODELS=llama2_7b SAFETY_SETS=cb   (08-28 07:09:43)
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/edgeai_lab/Safety-WaRP-LLM
+   python    : /home/edgeai_lab/miniforge3/envs/hb/bin/python
+   safety    : cb
+   models    : llama2_7b
+   methods   : fullft safeinstr resta safedelta wsr_tune lora asft lisa seal safelora salora wsr_lora
+   tasks     : <모델별 자동>
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=1, basis 삭제=1)
+════════════════════════════════════════════════════════════════
+
+  AsFT λ          : 1.0
+  SafeLoRA thr    : 0.3  (load dtype=float32)
+  LISA            : ρ=1.0 align_step=100 ft_step=900
+  SaLoRA          : salora/salora_lora.py · r_s=32 r_t=32 init=task n_harmful=256 n_task=256
+  WSR-LoRA ρ      : 0.1  (Phase1 basis 필요)
+[revision] [skip] lora  cb/llama2_7b/gsm8k lr=3e-4 batch=4x4  (이미 완료: /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/gsm8k/lora)
+    [upload] cell   : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/gsm8k/lora
+    [upload] repo   : kmseong/llama2_7b-chat-CB_SSFT-lora_gsm8k_lr3e-4
+    [upload] model  : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/gsm8k/lora/merged_model
+    [upload] 가중치 파일이 없다 — 이미 prune 됐거나 저장이 실패한 셀이다. 중단.
+[revision] [skip] asft(λ=1.0)  cb/llama2_7b/gsm8k lr=3e-4 batch=4x4  (이미 완료: /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/gsm8k/asft)
+    [upload] cell   : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/gsm8k/asft
+    [upload] repo   : kmseong/llama2_7b-chat-CB_SSFT-asft_gsm8k_lambda1.0_lr3e-4
+    [upload] model  : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/gsm8k/asft/merged_model
+    [upload] 가중치 파일이 없다 — 이미 prune 됐거나 저장이 실패한 셀이다. 중단.
+[revision] [skip] safelora(thr=0.3)  cb/llama2_7b/gsm8k lr=3e-4 batch=4x4  (이미 완료: /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/gsm8k/safelora)
+    [upload] cell   : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/gsm8k/safelora
+    [upload] repo   : kmseong/llama2_7b-chat-CB_SSFT-safelora_gsm8k_thr0.3_lr3e-4
+    [upload] model  : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/gsm8k/safelora/merged_model
+    [upload] 가중치 파일이 없다 — 이미 prune 됐거나 저장이 실패한 셀이다. 중단.
+[revision] [skip] lisa(ρ=1.0)  cb/llama2_7b/gsm8k lr=3e-4 batch=4x4  (이미 완료: /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/gsm8k/lisa)
+    [upload] cell   : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/gsm8k/lisa
+    [upload] repo   : kmseong/llama2_7b-chat-CB_SSFT-lisa_gsm8k_rho1.0_lr3e-4
+    [upload] model  : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/gsm8k/lisa
+    [upload] 가중치 파일이 없다 — 이미 prune 됐거나 저장이 실패한 셀이다. 중단.
+[revision] [skip] salora(r_s=32,r_t=32)  cb/llama2_7b/gsm8k lr=3e-4 batch=4x4  (이미 완료: /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/gsm8k/salora)
+    [upload] cell   : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/gsm8k/salora
+    [upload] repo   : kmseong/llama2_7b-chat-CB_SSFT-salora_gsm8k_rs32rt32_lr3e-4
+    [upload] model  : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/gsm8k/salora
+    [upload] 가중치 파일이 없다 — 이미 prune 됐거나 저장이 실패한 셀이다. 중단.
+[revision][WARN ] [cb/llama2_7b/gsm8k] WSR-LoRA 에 필요한 Phase 1 basis 가 없다 → 02_warp_basis_mask.sh 먼저. 건너뜀.
+[revision] [skip] lora  cb/llama2_7b/medqa lr=3e-4 batch=4x4  (이미 완료: /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/medqa/lora)
+    [upload] cell   : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/medqa/lora
+    [upload] repo   : kmseong/llama2_7b-chat-CB_SSFT-lora_medqa_lr3e-4
+    [upload] model  : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/medqa/lora/merged_model
+    [upload] 가중치 파일이 없다 — 이미 prune 됐거나 저장이 실패한 셀이다. 중단.
+[revision] [skip] asft(λ=1.0)  cb/llama2_7b/medqa lr=3e-4 batch=4x4  (이미 완료: /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/medqa/asft)
+    [upload] cell   : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/medqa/asft
+    [upload] repo   : kmseong/llama2_7b-chat-CB_SSFT-asft_medqa_lambda1.0_lr3e-4
+    [upload] model  : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/medqa/asft/merged_model
+    [upload] 가중치 파일이 없다 — 이미 prune 됐거나 저장이 실패한 셀이다. 중단.
+[revision] [skip] safelora(thr=0.3)  cb/llama2_7b/medqa lr=3e-4 batch=4x4  (이미 완료: /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/medqa/safelora)
+    [upload] cell   : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/medqa/safelora
+    [upload] repo   : kmseong/llama2_7b-chat-CB_SSFT-safelora_medqa_thr0.3_lr3e-4
+    [upload] model  : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/medqa/safelora/merged_model
+    [upload] 가중치 파일이 없다 — 이미 prune 됐거나 저장이 실패한 셀이다. 중단.
+[revision] [skip] lisa(ρ=1.0)  cb/llama2_7b/medqa lr=3e-4 batch=4x4  (이미 완료: /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/medqa/lisa)
+    [upload] cell   : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/medqa/lisa
+    [upload] repo   : kmseong/llama2_7b-chat-CB_SSFT-lisa_medqa_rho1.0_lr3e-4
+    [upload] model  : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/medqa/lisa
+    [upload] 가중치 파일이 없다 — 이미 prune 됐거나 저장이 실패한 셀이다. 중단.
+[revision] [skip] salora(r_s=32,r_t=32)  cb/llama2_7b/medqa lr=3e-4 batch=4x4  (이미 완료: /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/medqa/salora)
+    [upload] cell   : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/medqa/salora
+    [upload] repo   : kmseong/llama2_7b-chat-CB_SSFT-salora_medqa_rs32rt32_lr3e-4
+    [upload] model  : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/medqa/salora
+    [upload] 가중치 파일이 없다 — 이미 prune 됐거나 저장이 실패한 셀이다. 중단.
+[revision][WARN ] [cb/llama2_7b/medqa] WSR-LoRA 에 필요한 Phase 1 basis 가 없다 → 02_warp_basis_mask.sh 먼저. 건너뜀.
+[revision] [skip] lora  cb/llama2_7b/arc lr=3e-4 batch=4x4  (이미 완료: /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/arc/lora)
+    [upload] cell   : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/arc/lora
+    [upload] repo   : kmseong/llama2_7b-chat-CB_SSFT-lora_arc_lr3e-4
+    [upload] model  : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/arc/lora/merged_model
+    [upload] 가중치 파일이 없다 — 이미 prune 됐거나 저장이 실패한 셀이다. 중단.
+[revision] [skip] asft(λ=1.0)  cb/llama2_7b/arc lr=3e-4 batch=4x4  (이미 완료: /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/arc/asft)
+    [upload] cell   : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/arc/asft
+    [upload] repo   : kmseong/llama2_7b-chat-CB_SSFT-asft_arc_lambda1.0_lr3e-4
+    [upload] model  : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/arc/asft/merged_model
+    [upload] 가중치 파일이 없다 — 이미 prune 됐거나 저장이 실패한 셀이다. 중단.
+[revision] [skip] safelora(thr=0.3)  cb/llama2_7b/arc lr=3e-4 batch=4x4  (이미 완료: /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/arc/safelora)
+    [upload] cell   : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/arc/safelora
+    [upload] repo   : kmseong/llama2_7b-chat-CB_SSFT-safelora_arc_thr0.3_lr3e-4
+    [upload] model  : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/arc/safelora/merged_model
+    [upload] 가중치 파일이 없다 — 이미 prune 됐거나 저장이 실패한 셀이다. 중단.
+[revision] [skip] lisa(ρ=1.0)  cb/llama2_7b/arc lr=3e-4 batch=4x4  (이미 완료: /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/arc/lisa)
+    [upload] cell   : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/arc/lisa
+    [upload] repo   : kmseong/llama2_7b-chat-CB_SSFT-lisa_arc_rho1.0_lr3e-4
+    [upload] model  : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/arc/lisa
+    [upload] 가중치 파일이 없다 — 이미 prune 됐거나 저장이 실패한 셀이다. 중단.
+[revision] [skip] salora(r_s=32,r_t=32)  cb/llama2_7b/arc lr=3e-4 batch=4x4  (이미 완료: /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/arc/salora)
+    [upload] cell   : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/arc/salora
+    [upload] repo   : kmseong/llama2_7b-chat-CB_SSFT-salora_arc_rs32rt32_lr3e-4
+    [upload] model  : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/arc/salora
+    [upload] 가중치 파일이 없다 — 이미 prune 됐거나 저장이 실패한 셀이다. 중단.
+[revision][WARN ] [cb/llama2_7b/arc] WSR-LoRA 에 필요한 Phase 1 basis 가 없다 → 02_warp_basis_mask.sh 먼저. 건너뜀.
+[revision] [skip] lora  cb/llama2_7b/agnews lr=7e-5 batch=4x4  (이미 완료: /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/agnews/lora)
+    [upload] cell   : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/agnews/lora
+    [upload] repo   : kmseong/llama2_7b-chat-CB_SSFT-lora_agnews_lr7e-5
+    [upload] model  : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/agnews/lora/merged_model
+    [upload] 가중치 파일이 없다 — 이미 prune 됐거나 저장이 실패한 셀이다. 중단.
+[revision] [skip] asft(λ=1.0)  cb/llama2_7b/agnews lr=7e-5 batch=4x4  (이미 완료: /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/agnews/asft)
+    [upload] cell   : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/agnews/asft
+    [upload] repo   : kmseong/llama2_7b-chat-CB_SSFT-asft_agnews_lambda1.0_lr7e-5
+    [upload] model  : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/agnews/asft/merged_model
+    [upload] 가중치 파일이 없다 — 이미 prune 됐거나 저장이 실패한 셀이다. 중단.
+[revision] [skip] safelora(thr=0.3)  cb/llama2_7b/agnews lr=7e-5 batch=4x4  (이미 완료: /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/agnews/safelora)
+    [upload] cell   : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/agnews/safelora
+    [upload] repo   : kmseong/llama2_7b-chat-CB_SSFT-safelora_agnews_thr0.3_lr7e-5
+    [upload] model  : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/agnews/safelora/merged_model
+    [upload] 가중치 파일이 없다 — 이미 prune 됐거나 저장이 실패한 셀이다. 중단.
+[revision] [skip] lisa(ρ=1.0)  cb/llama2_7b/agnews lr=7e-5 batch=4x4  (이미 완료: /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/agnews/lisa)
+    [upload] cell   : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/agnews/lisa
+    [upload] repo   : kmseong/llama2_7b-chat-CB_SSFT-lisa_agnews_rho1.0_lr7e-5
+    [upload] model  : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/agnews/lisa
+    [upload] 가중치 파일이 없다 — 이미 prune 됐거나 저장이 실패한 셀이다. 중단.
+[revision] [skip] salora(r_s=32,r_t=32)  cb/llama2_7b/agnews lr=7e-5 batch=4x4  (이미 완료: /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/agnews/salora)
+    [upload] cell   : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/agnews/salora
+    [upload] repo   : kmseong/llama2_7b-chat-CB_SSFT-salora_agnews_rs32rt32_lr7e-5
+    [upload] model  : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/agnews/salora
+    [upload] 가중치 파일이 없다 — 이미 prune 됐거나 저장이 실패한 셀이다. 중단.
+[revision][WARN ] [cb/llama2_7b/agnews] WSR-LoRA 에 필요한 Phase 1 basis 가 없다 → 02_warp_basis_mask.sh 먼저. 건너뜀.
+[revision] [prune] basis/mask 삭제: cb/llama2_7b (~0GB 회수)
+
+════════════════ 실패한 셀 (4) ════════════════
+  - wsr_lora/cb/llama2_7b/gsm8k (no basis)
+  - wsr_lora/cb/llama2_7b/medqa (no basis)
+  - wsr_lora/cb/llama2_7b/arc (no basis)
+  - wsr_lora/cb/llama2_7b/agnews (no basis)
+[revision][WARN ] [stage 20] 실패한 셀이 있다 (위 로그 확인)
+
+  ── STAGE 21  21_seal.sh  MODELS=llama2_7b SAFETY_SETS=cb   (08-28 07:09:43)
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/edgeai_lab/Safety-WaRP-LLM
+   python    : /home/edgeai_lab/miniforge3/envs/hb/bin/python
+   safety    : cb
+   models    : llama2_7b
+   methods   : fullft safeinstr resta safedelta wsr_tune lora asft lisa seal safelora salora wsr_lora
+   tasks     : <모델별 자동>
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=1, basis 삭제=1)
+════════════════════════════════════════════════════════════════
+
+  SEAL top-p     : 0.8 (top80)
+  selector epochs: 2
+  S2 (full-param): lr=5e-5 wd=0.01 warmup=0.1 epochs=3
+  selector ckpt  : /home/edgeai_lab/Safety-WaRP-LLM/seal/ckpt/revision
+[revision] [skip] seal  cb/llama2_7b/gsm8k  (이미 완료)
+[revision] [skip] seal  cb/llama2_7b/medqa  (이미 완료)
+[revision] [skip] seal  cb/llama2_7b/arc  (이미 완료)
+[revision] [skip] seal  cb/llama2_7b/agnews  (이미 완료)
+
+실패한 셀 없음.
+[revision] [stage 21] 완료
+
+  ── STAGE 11  11_posthoc.sh  MODELS=llama2_7b SAFETY_SETS=cb   (08-28 07:09:43)
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/edgeai_lab/Safety-WaRP-LLM
+   python    : /home/edgeai_lab/miniforge3/envs/hb/bin/python
+   safety    : cb
+   models    : llama2_7b
+   methods   : fullft safeinstr resta safedelta wsr_tune lora asft lisa seal safelora salora wsr_lora
+   tasks     : <모델별 자동>
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=1, basis 삭제=1)
+════════════════════════════════════════════════════════════════
+
+  RESTA γ      : 0.3
+  SafeDelta s  : 0.1  (nsamples=512 seq_len=512)
+  SafeDelta dir: /home/edgeai_lab/SafeDelta
+[revision] [skip] post-hoc cb/llama2_7b/gsm8k — 돌릴 셀이 없다 (논문 Table 2/4/10 에 이미 있음)
+[revision] [skip] post-hoc cb/llama2_7b/medqa — 돌릴 셀이 없다 (논문 Table 2/4/10 에 이미 있음)
+[revision] [skip] post-hoc cb/llama2_7b/arc — 돌릴 셀이 없다 (논문 Table 2/4/10 에 이미 있음)
+[revision] [skip] resta(γ=0.3)  cb/llama2_7b/agnews  (이미 완료: /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/agnews/resta)
+    [upload] cell   : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/agnews/resta
+    [upload] repo   : kmseong/llama2_7b-chat-CB_SSFT-resta_agnews_gamma0.3_lr5e-5
+    [upload] model  : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/agnews/resta
+    [upload] 가중치 파일이 없다 — 이미 prune 됐거나 저장이 실패한 셀이다. 중단.
+[revision] [skip] safedelta  cb/llama2_7b/agnews  (이미 완료)
+
+실패한 셀 없음.
+[revision] [stage 11] 완료
+    [upload] cell   : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/agnews/fullft
+    [upload] repo   : kmseong/llama2_7b-chat-CB_SSFT-fullft_agnews_lr5e-5
+    [upload] model  : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/agnews/fullft
+    [upload] 가중치 파일이 없다 — 이미 prune 됐거나 저장이 실패한 셀이다. 중단.
+
+████████████████████████████████████████████████████████████████
+  ▶ cb / llama2_13b     (08-28 07:09:43)
+     디스크 여유: 18G
+████████████████████████████████████████████████████████████████
+
+  ── STAGE 02  02_warp_basis_mask.sh  MODELS=llama2_13b SAFETY_SETS=cb   (08-28 07:09:43)
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/edgeai_lab/Safety-WaRP-LLM
+   python    : /home/edgeai_lab/miniforge3/envs/hb/bin/python
+   safety    : cb
+   models    : llama2_13b
+   methods   : fullft safeinstr resta safedelta wsr_tune lora asft lisa seal safelora salora wsr_lora
+   tasks     : <모델별 자동>
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=1, basis 삭제=1)
+════════════════════════════════════════════════════════════════
+
+  layer_type    : attn_q,attn_k,attn_v,ffn_up,ffn_down
+  target_layers : all
+  keep_ratio ρ  : 0.1
+  basis 저장    : dtype=bfloat16  omit_UT=1  (fp32+UT 대비 1/4)
+  출력          : /home/edgeai_lab/Safety-WaRP-LLM/checkpoints/revision/warp/<safety>/<model>/
+[revision] [skip] phase1 cb/llama2_13b — 이미 완료 (/home/edgeai_lab/Safety-WaRP-LLM/checkpoints/revision/warp/cb/llama2_13b/phase1_20260828_010930/basis)
+[revision] [skip] phase2 cb/llama2_13b — 돌릴 wsr_tune 셀이 없다 (WSR-LoRA 는 basis 만 쓴다)
+
+════════════════ Stage 02 요약 ════════════════
+  cb  llama2_13b   basis=ok       mask=MISSING 
+
+실패한 셀 없음.
+[revision] [stage 02] 완료
+
+  ── STAGE 10  10_fullft_safeinstr.sh  MODELS=llama2_13b SAFETY_SETS=cb   (08-28 07:09:43)
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/edgeai_lab/Safety-WaRP-LLM
+   python    : /home/edgeai_lab/miniforge3/envs/hb/bin/python
+   safety    : cb
+   models    : llama2_13b
+   methods   : fullft safeinstr resta safedelta wsr_tune lora asft lisa seal safelora salora wsr_lora
+   tasks     : <모델별 자동>
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=1, basis 삭제=1)
+════════════════════════════════════════════════════════════════
+
+실패한 셀 없음.
+[revision] [stage 10] 완료
+
+  ── STAGE 12  12_wsr_tune.sh  MODELS=llama2_13b SAFETY_SETS=cb   (08-28 07:09:43)
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/edgeai_lab/Safety-WaRP-LLM
+   python    : /home/edgeai_lab/miniforge3/envs/hb/bin/python
+   safety    : cb
+   models    : llama2_13b
+   methods   : fullft safeinstr resta safedelta wsr_tune lora asft lisa seal safelora salora wsr_lora
+   tasks     : <모델별 자동>
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=1, basis 삭제=1)
+════════════════════════════════════════════════════════════════
+
+  keep_ratio ρ  : 0.1
+  layer_type    : attn_q,attn_k,attn_v,ffn_up,ffn_down   target_layers: all
+[revision] [skip] wsr_tune cb/llama2_13b — 돌릴 셀이 없다 (논문 Table 2/4/10 에 이미 있음)
+
+실패한 셀 없음.
+[revision] [stage 12] 완료
+
+  ── STAGE 20  20_lora_family.sh  MODELS=llama2_13b SAFETY_SETS=cb   (08-28 07:09:43)
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/edgeai_lab/Safety-WaRP-LLM
+   python    : /home/edgeai_lab/miniforge3/envs/hb/bin/python
+   safety    : cb
+   models    : llama2_13b
+   methods   : fullft safeinstr resta safedelta wsr_tune lora asft lisa seal safelora salora wsr_lora
+   tasks     : <모델별 자동>
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=1, basis 삭제=1)
+════════════════════════════════════════════════════════════════
+
+  AsFT λ          : 1.0
+  SafeLoRA thr    : 0.3  (load dtype=float32)
+  LISA            : ρ=1.0 align_step=100 ft_step=900
+  SaLoRA          : salora/salora_lora.py · r_s=32 r_t=32 init=task n_harmful=256 n_task=256
+  WSR-LoRA ρ      : 0.1  (Phase1 basis 필요)
+[revision] [skip] lora  cb/llama2_13b/gsm8k lr=3e-4 batch=2x8  (이미 완료: /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_13b/gsm8k/lora)
+
+──────────────────────────────────────────────────────────────
+  HF 업로드  cb/llama2_13b/gsm8k/lora  →  kmseong/llama2_13b-chat-CB_SSFT-lora_gsm8k_lr3e-4   (08-28 07:09:43)
+──────────────────────────────────────────────────────────────
+    [upload] cell   : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_13b/gsm8k/lora
+    [upload] repo   : kmseong/llama2_13b-chat-CB_SSFT-lora_gsm8k_lr3e-4
+    [upload] model  : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_13b/gsm8k/lora/merged_model
+    [upload] files  : 14개 / 24.25 GiB (가중치 6개)
+    [upload] chat_template 기대: 있어야 함
+    [upload] hf user: kmseong
+    [upload] 업로드 중 ...
+    Traceback (most recent call last):
+      File "/home/edgeai_lab/miniforge3/envs/hb/lib/python3.10/site-packages/huggingface_hub/utils/_http.py", line 402, in hf_raise_for_status
+        response.raise_for_status()
+      File "/home/edgeai_lab/miniforge3/envs/hb/lib/python3.10/site-packages/requests/models.py", line 1026, in raise_for_status
+        raise HTTPError(http_error_msg, response=self)
+    requests.exceptions.HTTPError: 403 Client Error: Forbidden for url: https://huggingface.co/kmseong/llama2_13b-chat-CB_SSFT-lora_gsm8k_lr3e-4.git/info/lfs/objects/batch
+    
+    The above exception was the direct cause of the following exception:
+    
+    Traceback (most recent call last):
+      File "/home/edgeai_lab/Safety-WaRP-LLM/scripts/revision/upload_and_prune.py", line 278, in <module>
+        sys.exit(main())
+      File "/home/edgeai_lab/Safety-WaRP-LLM/scripts/revision/upload_and_prune.py", line 231, in main
+        api.upload_folder(
+      File "/home/edgeai_lab/miniforge3/envs/hb/lib/python3.10/site-packages/huggingface_hub/utils/_validators.py", line 114, in _inner_fn
+        return fn(*args, **kwargs)
+      File "/home/edgeai_lab/miniforge3/envs/hb/lib/python3.10/site-packages/huggingface_hub/hf_api.py", line 1687, in _inner
+        return fn(self, *args, **kwargs)
+      File "/home/edgeai_lab/miniforge3/envs/hb/lib/python3.10/site-packages/huggingface_hub/hf_api.py", line 4930, in upload_folder
+        commit_info = self.create_commit(
+      File "/home/edgeai_lab/miniforge3/envs/hb/lib/python3.10/site-packages/huggingface_hub/utils/_validators.py", line 114, in _inner_fn
+        return fn(*args, **kwargs)
+      File "/home/edgeai_lab/miniforge3/envs/hb/lib/python3.10/site-packages/huggingface_hub/hf_api.py", line 1687, in _inner
+        return fn(self, *args, **kwargs)
+      File "/home/edgeai_lab/miniforge3/envs/hb/lib/python3.10/site-packages/huggingface_hub/hf_api.py", line 4229, in create_commit
+        self.preupload_lfs_files(
+      File "/home/edgeai_lab/miniforge3/envs/hb/lib/python3.10/site-packages/huggingface_hub/hf_api.py", line 4494, in preupload_lfs_files
+        _upload_files(**upload_kwargs, num_threads=num_threads, create_pr=create_pr)  # type: ignore [arg-type]
+      File "/home/edgeai_lab/miniforge3/envs/hb/lib/python3.10/site-packages/huggingface_hub/utils/_validators.py", line 114, in _inner_fn
+        return fn(*args, **kwargs)
+      File "/home/edgeai_lab/miniforge3/envs/hb/lib/python3.10/site-packages/huggingface_hub/_commit_api.py", line 389, in _upload_files
+        actions_chunk, errors_chunk, chosen_transfer = post_lfs_batch_info(
+      File "/home/edgeai_lab/miniforge3/envs/hb/lib/python3.10/site-packages/huggingface_hub/utils/_validators.py", line 114, in _inner_fn
+        return fn(*args, **kwargs)
+      File "/home/edgeai_lab/miniforge3/envs/hb/lib/python3.10/site-packages/huggingface_hub/lfs.py", line 172, in post_lfs_batch_info
+        hf_raise_for_status(resp)
+      File "/home/edgeai_lab/miniforge3/envs/hb/lib/python3.10/site-packages/huggingface_hub/utils/_http.py", line 466, in hf_raise_for_status
+        raise _format(HfHubHTTPError, message, response) from e
+    huggingface_hub.errors.HfHubHTTPError: (Request ID: Root=1-6a90b5b8-6883bb531c02b47f2922b9a1;aeee0f9a-e159-4d1c-9560-55ed474af6e2)
+    
+    403 Forbidden: You have exceeded your public storage space. Subscribe at /subscribe/pro to get more included storage. Alternatively if you are working on an impactful public project, contact us at website@huggingface.co so we can verify your account and unlock more storage for your use-case..
+    Cannot access content at: https://huggingface.co/kmseong/llama2_13b-chat-CB_SSFT-lora_gsm8k_lr3e-4.git/info/lfs/objects/batch.
+    Make sure your token has the correct permissions.
+[revision][WARN ] 업로드/검증 실패: kmseong/llama2_13b-chat-CB_SSFT-lora_gsm8k_lr3e-4  (로컬은 보존됨)
+[revision] [skip] asft(λ=1.0)  cb/llama2_13b/gsm8k lr=3e-4 batch=2x8  (이미 완료: /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_13b/gsm8k/asft)
+
+──────────────────────────────────────────────────────────────
+  HF 업로드  cb/llama2_13b/gsm8k/asft  →  kmseong/llama2_13b-chat-CB_SSFT-asft_gsm8k_lambda1.0_lr3e-4   (08-28 07:10:01)
+──────────────────────────────────────────────────────────────
+    [upload] cell   : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_13b/gsm8k/asft
+    [upload] repo   : kmseong/llama2_13b-chat-CB_SSFT-asft_gsm8k_lambda1.0_lr3e-4
+    [upload] model  : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_13b/gsm8k/asft/merged_model
+    [upload] files  : 14개 / 24.25 GiB (가중치 6개)
+    [upload] chat_template 기대: 있어야 함
+    [upload] hf user: kmseong
+    [upload] 업로드 중 ...
+    Traceback (most recent call last):
+      File "/home/edgeai_lab/miniforge3/envs/hb/lib/python3.10/site-packages/huggingface_hub/utils/_http.py", line 402, in hf_raise_for_status
+        response.raise_for_status()
+      File "/home/edgeai_lab/miniforge3/envs/hb/lib/python3.10/site-packages/requests/models.py", line 1026, in raise_for_status
+        raise HTTPError(http_error_msg, response=self)
+    requests.exceptions.HTTPError: 403 Client Error: Forbidden for url: https://huggingface.co/kmseong/llama2_13b-chat-CB_SSFT-asft_gsm8k_lambda1.0_lr3e-4.git/info/lfs/objects/batch
+    
+    The above exception was the direct cause of the following exception:
+    
+    Traceback (most recent call last):
+      File "/home/edgeai_lab/Safety-WaRP-LLM/scripts/revision/upload_and_prune.py", line 278, in <module>
+        sys.exit(main())
+      File "/home/edgeai_lab/Safety-WaRP-LLM/scripts/revision/upload_and_prune.py", line 231, in main
+        api.upload_folder(
+      File "/home/edgeai_lab/miniforge3/envs/hb/lib/python3.10/site-packages/huggingface_hub/utils/_validators.py", line 114, in _inner_fn
+        return fn(*args, **kwargs)
+      File "/home/edgeai_lab/miniforge3/envs/hb/lib/python3.10/site-packages/huggingface_hub/hf_api.py", line 1687, in _inner
+        return fn(self, *args, **kwargs)
+      File "/home/edgeai_lab/miniforge3/envs/hb/lib/python3.10/site-packages/huggingface_hub/hf_api.py", line 4930, in upload_folder
+        commit_info = self.create_commit(
+      File "/home/edgeai_lab/miniforge3/envs/hb/lib/python3.10/site-packages/huggingface_hub/utils/_validators.py", line 114, in _inner_fn
+        return fn(*args, **kwargs)
+      File "/home/edgeai_lab/miniforge3/envs/hb/lib/python3.10/site-packages/huggingface_hub/hf_api.py", line 1687, in _inner
+        return fn(self, *args, **kwargs)
+      File "/home/edgeai_lab/miniforge3/envs/hb/lib/python3.10/site-packages/huggingface_hub/hf_api.py", line 4229, in create_commit
+        self.preupload_lfs_files(
+      File "/home/edgeai_lab/miniforge3/envs/hb/lib/python3.10/site-packages/huggingface_hub/hf_api.py", line 4494, in preupload_lfs_files
+        _upload_files(**upload_kwargs, num_threads=num_threads, create_pr=create_pr)  # type: ignore [arg-type]
+      File "/home/edgeai_lab/miniforge3/envs/hb/lib/python3.10/site-packages/huggingface_hub/utils/_validators.py", line 114, in _inner_fn
+        return fn(*args, **kwargs)
+      File "/home/edgeai_lab/miniforge3/envs/hb/lib/python3.10/site-packages/huggingface_hub/_commit_api.py", line 389, in _upload_files
+        actions_chunk, errors_chunk, chosen_transfer = post_lfs_batch_info(
+      File "/home/edgeai_lab/miniforge3/envs/hb/lib/python3.10/site-packages/huggingface_hub/utils/_validators.py", line 114, in _inner_fn
+        return fn(*args, **kwargs)
+      File "/home/edgeai_lab/miniforge3/envs/hb/lib/python3.10/site-packages/huggingface_hub/lfs.py", line 172, in post_lfs_batch_info
+        hf_raise_for_status(resp)
+      File "/home/edgeai_lab/miniforge3/envs/hb/lib/python3.10/site-packages/huggingface_hub/utils/_http.py", line 466, in hf_raise_for_status
+        raise _format(HfHubHTTPError, message, response) from e
+    huggingface_hub.errors.HfHubHTTPError: (Request ID: Root=1-6a90b5ca-259c05a243fa511533fb455a;b5568aef-c6e1-4909-8c6e-d5c235429db1)
+    
+    403 Forbidden: You have exceeded your public storage space. Subscribe at /subscribe/pro to get more included storage. Alternatively if you are working on an impactful public project, contact us at website@huggingface.co so we can verify your account and unlock more storage for your use-case..
+    Cannot access content at: https://huggingface.co/kmseong/llama2_13b-chat-CB_SSFT-asft_gsm8k_lambda1.0_lr3e-4.git/info/lfs/objects/batch.
+    Make sure your token has the correct permissions.
+[revision][WARN ] 업로드/검증 실패: kmseong/llama2_13b-chat-CB_SSFT-asft_gsm8k_lambda1.0_lr3e-4  (로컬은 보존됨)
+[revision][WARN ] [disk] 여유 18GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 18GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+[revision][WARN ] [disk] 여유 18GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 18GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+[revision][WARN ] [disk] 여유 18GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 18GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+[revision][WARN ] [disk] 여유 18GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 18GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+
+════════════════ 실패한 셀 (6) ════════════════
+  - upload/cb/llama2_13b/gsm8k/lora
+  - upload/cb/llama2_13b/gsm8k/asft
+  - safelora(thr=0.3)  cb/llama2_13b/gsm8k lr=3e-4 batch=2x8 (disk)
+  - lisa(ρ=1.0)  cb/llama2_13b/gsm8k lr=3e-4 batch=2x8 (disk)
+  - salora(r_s=32,r_t=32)  cb/llama2_13b/gsm8k lr=3e-4 batch=2x8 (disk)
+  - wsr_lora(ρ=0.1)  cb/llama2_13b/gsm8k lr=3e-4 batch=2x8 (disk)
+[revision][WARN ] [stage 20] 실패한 셀이 있다 (위 로그 확인)
+
+  ── STAGE 21  21_seal.sh  MODELS=llama2_13b SAFETY_SETS=cb   (08-28 07:10:21)
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/edgeai_lab/Safety-WaRP-LLM
+   python    : /home/edgeai_lab/miniforge3/envs/hb/bin/python
+   safety    : cb
+   models    : llama2_13b
+   methods   : fullft safeinstr resta safedelta wsr_tune lora asft lisa seal safelora salora wsr_lora
+   tasks     : <모델별 자동>
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=1, basis 삭제=1)
+════════════════════════════════════════════════════════════════
+
+  SEAL top-p     : 0.8 (top80)
+  selector epochs: 2
+  S2 (full-param): lr=5e-5 wd=0.01 warmup=0.1 epochs=3
+  selector ckpt  : /home/edgeai_lab/Safety-WaRP-LLM/seal/ckpt/revision
+[revision] [skip] seal-S1 selector  cb/llama2_13b/gsm8k  (이미 존재: /home/edgeai_lab/Safety-WaRP-LLM/seal/ckpt/revision/cb/llama2_13b/gsm8k_selector_softmax.pt)
+[revision] [skip] seal-S1.5 select  cb/llama2_13b/gsm8k  (이미 존재)
+[revision][WARN ] [disk] 여유 18GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 18GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+
+════════════════ 실패한 셀 (1) ════════════════
+  - seal-S2 SFT  cb/llama2_13b/gsm8k  lr=5e-5 batch=1x16 (disk)
+[revision][WARN ] [stage 21] 실패한 셀이 있다 (위 로그 확인)
+
+  ── STAGE 11  11_posthoc.sh  MODELS=llama2_13b SAFETY_SETS=cb   (08-28 07:10:21)
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/edgeai_lab/Safety-WaRP-LLM
+   python    : /home/edgeai_lab/miniforge3/envs/hb/bin/python
+   safety    : cb
+   models    : llama2_13b
+   methods   : fullft safeinstr resta safedelta wsr_tune lora asft lisa seal safelora salora wsr_lora
+   tasks     : <모델별 자동>
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=1, basis 삭제=1)
+════════════════════════════════════════════════════════════════
+
+  RESTA γ      : 0.3
+  SafeDelta s  : 0.1  (nsamples=512 seq_len=512)
+  SafeDelta dir: /home/edgeai_lab/SafeDelta
+[revision] [skip] post-hoc cb/llama2_13b/gsm8k — 돌릴 셀이 없다 (논문 Table 2/4/10 에 이미 있음)
+
+실패한 셀 없음.
+[revision] [stage 11] 완료
+
+████████████████████████████████████████████████████████████████
+  ▶ cb / llama32_3b     (08-28 07:10:21)
+     디스크 여유: 18G
+████████████████████████████████████████████████████████████████
+
+  ── STAGE 02  02_warp_basis_mask.sh  MODELS=llama32_3b SAFETY_SETS=cb   (08-28 07:10:21)
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/edgeai_lab/Safety-WaRP-LLM
+   python    : /home/edgeai_lab/miniforge3/envs/hb/bin/python
+   safety    : cb
+   models    : llama32_3b
+   methods   : fullft safeinstr resta safedelta wsr_tune lora asft lisa seal safelora salora wsr_lora
+   tasks     : <모델별 자동>
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=1, basis 삭제=1)
+════════════════════════════════════════════════════════════════
+
+  layer_type    : attn_q,attn_k,attn_v,ffn_up,ffn_down
+  target_layers : all
+  keep_ratio ρ  : 0.1
+  basis 저장    : dtype=bfloat16  omit_UT=1  (fp32+UT 대비 1/4)
+  출력          : /home/edgeai_lab/Safety-WaRP-LLM/checkpoints/revision/warp/<safety>/<model>/
+[revision][WARN ] [disk] 여유 18GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 18GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+[revision][WARN ] [disk] basis 를 만들 공간이 없다 — cb/llama32_3b 건너뜀
+
+════════════════ Stage 02 요약 ════════════════
+  cb  llama32_3b   basis=MISSING  mask=MISSING 
+
+실패한 셀 없음.
+[revision] [stage 02] 완료
+
+  ── STAGE 10  10_fullft_safeinstr.sh  MODELS=llama32_3b SAFETY_SETS=cb   (08-28 07:10:21)
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/edgeai_lab/Safety-WaRP-LLM
+   python    : /home/edgeai_lab/miniforge3/envs/hb/bin/python
+   safety    : cb
+   models    : llama32_3b
+   methods   : fullft safeinstr resta safedelta wsr_tune lora asft lisa seal safelora salora wsr_lora
+   tasks     : <모델별 자동>
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=1, basis 삭제=1)
+════════════════════════════════════════════════════════════════
+
+실패한 셀 없음.
+[revision] [stage 10] 완료
+
+  ── STAGE 12  12_wsr_tune.sh  MODELS=llama32_3b SAFETY_SETS=cb   (08-28 07:10:22)
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/edgeai_lab/Safety-WaRP-LLM
+   python    : /home/edgeai_lab/miniforge3/envs/hb/bin/python
+   safety    : cb
+   models    : llama32_3b
+   methods   : fullft safeinstr resta safedelta wsr_tune lora asft lisa seal safelora salora wsr_lora
+   tasks     : <모델별 자동>
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=1, basis 삭제=1)
+════════════════════════════════════════════════════════════════
+
+  keep_ratio ρ  : 0.1
+  layer_type    : attn_q,attn_k,attn_v,ffn_up,ffn_down   target_layers: all
+[revision] [skip] wsr_tune cb/llama32_3b — 돌릴 셀이 없다 (논문 Table 2/4/10 에 이미 있음)
+
+실패한 셀 없음.
+[revision] [stage 12] 완료
+
+  ── STAGE 20  20_lora_family.sh  MODELS=llama32_3b SAFETY_SETS=cb   (08-28 07:10:22)
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/edgeai_lab/Safety-WaRP-LLM
+   python    : /home/edgeai_lab/miniforge3/envs/hb/bin/python
+   safety    : cb
+   models    : llama32_3b
+   methods   : fullft safeinstr resta safedelta wsr_tune lora asft lisa seal safelora salora wsr_lora
+   tasks     : <모델별 자동>
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=1, basis 삭제=1)
+════════════════════════════════════════════════════════════════
+
+  AsFT λ          : 1.0
+  SafeLoRA thr    : 0.3  (load dtype=float32)
+  LISA            : ρ=1.0 align_step=100 ft_step=900
+  SaLoRA          : salora/salora_lora.py · r_s=32 r_t=32 init=task n_harmful=256 n_task=256
+  WSR-LoRA ρ      : 0.1  (Phase1 basis 필요)
+[revision] [skip] lora  cb/llama32_3b/math lr=3e-4 batch=8x2  (이미 완료: /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama32_3b/math/lora)
+    [upload] cell   : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama32_3b/math/lora
+    [upload] repo   : kmseong/llama3_2_3b-instruct-CB_SSFT-lora_math_lr3e-4
+    [upload] model  : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama32_3b/math/lora/merged_model
+    [upload] 가중치 파일이 없다 — 이미 prune 됐거나 저장이 실패한 셀이다. 중단.
+[revision] [skip] asft(λ=1.0)  cb/llama32_3b/math lr=3e-4 batch=8x2  (이미 완료: /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama32_3b/math/asft)
+    [upload] cell   : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama32_3b/math/asft
+    [upload] repo   : kmseong/llama3_2_3b-instruct-CB_SSFT-asft_math_lambda1.0_lr3e-4
+    [upload] model  : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama32_3b/math/asft/merged_model
+    [upload] 가중치 파일이 없다 — 이미 prune 됐거나 저장이 실패한 셀이다. 중단.
+[revision] [skip] safelora(thr=0.3)  cb/llama32_3b/math lr=3e-4 batch=8x2  (이미 완료: /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama32_3b/math/safelora)
+    [upload] cell   : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama32_3b/math/safelora
+    [upload] repo   : kmseong/llama3_2_3b-instruct-CB_SSFT-safelora_math_thr0.3_lr3e-4
+    [upload] model  : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama32_3b/math/safelora/merged_model
+    [upload] 가중치 파일이 없다 — 이미 prune 됐거나 저장이 실패한 셀이다. 중단.
+[revision] [skip] lisa(ρ=1.0)  cb/llama32_3b/math lr=3e-4 batch=8x2  (이미 완료: /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama32_3b/math/lisa)
+    [upload] cell   : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama32_3b/math/lisa
+    [upload] repo   : kmseong/llama3_2_3b-instruct-CB_SSFT-lisa_math_rho1.0_lr3e-4
+    [upload] model  : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama32_3b/math/lisa
+    [upload] 가중치 파일이 없다 — 이미 prune 됐거나 저장이 실패한 셀이다. 중단.
+[revision][WARN ] [disk] 여유 18GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 18GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+[revision][WARN ] [cb/llama32_3b/math] WSR-LoRA 에 필요한 Phase 1 basis 가 없다 → 02_warp_basis_mask.sh 먼저. 건너뜀.
+[revision] [prune] basis/mask 삭제: cb/llama32_3b (~0GB 회수)
+
+════════════════ 실패한 셀 (2) ════════════════
+  - salora(r_s=32,r_t=32)  cb/llama32_3b/math lr=3e-4 batch=8x2 (disk)
+  - wsr_lora/cb/llama32_3b/math (no basis)
+[revision][WARN ] [stage 20] 실패한 셀이 있다 (위 로그 확인)
+
+  ── STAGE 21  21_seal.sh  MODELS=llama32_3b SAFETY_SETS=cb   (08-28 07:10:22)
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/edgeai_lab/Safety-WaRP-LLM
+   python    : /home/edgeai_lab/miniforge3/envs/hb/bin/python
+   safety    : cb
+   models    : llama32_3b
+   methods   : fullft safeinstr resta safedelta wsr_tune lora asft lisa seal safelora salora wsr_lora
+   tasks     : <모델별 자동>
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=1, basis 삭제=1)
+════════════════════════════════════════════════════════════════
+
+  SEAL top-p     : 0.8 (top80)
+  selector epochs: 2
+  S2 (full-param): lr=5e-5 wd=0.01 warmup=0.1 epochs=3
+  selector ckpt  : /home/edgeai_lab/Safety-WaRP-LLM/seal/ckpt/revision
+[revision] [skip] seal  cb/llama32_3b/math  (이미 완료)
+
+실패한 셀 없음.
+[revision] [stage 21] 완료
+
+  ── STAGE 11  11_posthoc.sh  MODELS=llama32_3b SAFETY_SETS=cb   (08-28 07:10:22)
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/edgeai_lab/Safety-WaRP-LLM
+   python    : /home/edgeai_lab/miniforge3/envs/hb/bin/python
+   safety    : cb
+   models    : llama32_3b
+   methods   : fullft safeinstr resta safedelta wsr_tune lora asft lisa seal safelora salora wsr_lora
+   tasks     : <모델별 자동>
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=1, basis 삭제=1)
+════════════════════════════════════════════════════════════════
+
+  RESTA γ      : 0.3
+  SafeDelta s  : 0.1  (nsamples=512 seq_len=512)
+  SafeDelta dir: /home/edgeai_lab/SafeDelta
+[revision] [skip] post-hoc cb/llama32_3b/math — 돌릴 셀이 없다 (논문 Table 2/4/10 에 이미 있음)
+
+실패한 셀 없음.
+[revision] [stage 11] 완료
+
+████████████████████████████████████████████████████████████████
+  ▶ cb / llama31_8b     (08-28 07:10:22)
+     디스크 여유: 18G
+████████████████████████████████████████████████████████████████
+
+  ── STAGE 02  02_warp_basis_mask.sh  MODELS=llama31_8b SAFETY_SETS=cb   (08-28 07:10:22)
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/edgeai_lab/Safety-WaRP-LLM
+   python    : /home/edgeai_lab/miniforge3/envs/hb/bin/python
+   safety    : cb
+   models    : llama31_8b
+   methods   : fullft safeinstr resta safedelta wsr_tune lora asft lisa seal safelora salora wsr_lora
+   tasks     : <모델별 자동>
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=1, basis 삭제=1)
+════════════════════════════════════════════════════════════════
+
+  layer_type    : attn_q,attn_k,attn_v,ffn_up,ffn_down
+  target_layers : all
+  keep_ratio ρ  : 0.1
+  basis 저장    : dtype=bfloat16  omit_UT=1  (fp32+UT 대비 1/4)
+  출력          : /home/edgeai_lab/Safety-WaRP-LLM/checkpoints/revision/warp/<safety>/<model>/
+[revision] [skip] phase1 cb/llama31_8b — 이미 완료 (/home/edgeai_lab/Safety-WaRP-LLM/checkpoints/revision/warp/cb/llama31_8b/phase1_20260827_205033/basis)
+[revision] [skip] phase2 cb/llama31_8b — 돌릴 wsr_tune 셀이 없다 (WSR-LoRA 는 basis 만 쓴다)
+
+════════════════ Stage 02 요약 ════════════════
+  cb  llama31_8b   basis=ok       mask=MISSING 
+
+실패한 셀 없음.
+[revision] [stage 02] 완료
+
+  ── STAGE 10  10_fullft_safeinstr.sh  MODELS=llama31_8b SAFETY_SETS=cb   (08-28 07:10:22)
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/edgeai_lab/Safety-WaRP-LLM
+   python    : /home/edgeai_lab/miniforge3/envs/hb/bin/python
+   safety    : cb
+   models    : llama31_8b
+   methods   : fullft safeinstr resta safedelta wsr_tune lora asft lisa seal safelora salora wsr_lora
+   tasks     : <모델별 자동>
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=1, basis 삭제=1)
+════════════════════════════════════════════════════════════════
+
+실패한 셀 없음.
+[revision] [stage 10] 완료
+
+  ── STAGE 12  12_wsr_tune.sh  MODELS=llama31_8b SAFETY_SETS=cb   (08-28 07:10:22)
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/edgeai_lab/Safety-WaRP-LLM
+   python    : /home/edgeai_lab/miniforge3/envs/hb/bin/python
+   safety    : cb
+   models    : llama31_8b
+   methods   : fullft safeinstr resta safedelta wsr_tune lora asft lisa seal safelora salora wsr_lora
+   tasks     : <모델별 자동>
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=1, basis 삭제=1)
+════════════════════════════════════════════════════════════════
+
+  keep_ratio ρ  : 0.1
+  layer_type    : attn_q,attn_k,attn_v,ffn_up,ffn_down   target_layers: all
+[revision] [skip] wsr_tune cb/llama31_8b — 돌릴 셀이 없다 (논문 Table 2/4/10 에 이미 있음)
+
+실패한 셀 없음.
+[revision] [stage 12] 완료
+
+  ── STAGE 20  20_lora_family.sh  MODELS=llama31_8b SAFETY_SETS=cb   (08-28 07:10:22)
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/edgeai_lab/Safety-WaRP-LLM
+   python    : /home/edgeai_lab/miniforge3/envs/hb/bin/python
+   safety    : cb
+   models    : llama31_8b
+   methods   : fullft safeinstr resta safedelta wsr_tune lora asft lisa seal safelora salora wsr_lora
+   tasks     : <모델별 자동>
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=1, basis 삭제=1)
+════════════════════════════════════════════════════════════════
+
+  AsFT λ          : 1.0
+  SafeLoRA thr    : 0.3  (load dtype=float32)
+  LISA            : ρ=1.0 align_step=100 ft_step=900
+  SaLoRA          : salora/salora_lora.py · r_s=32 r_t=32 init=task n_harmful=256 n_task=256
+  WSR-LoRA ρ      : 0.1  (Phase1 basis 필요)
+[revision] [skip] lora  cb/llama31_8b/math lr=3e-4 batch=4x4  (이미 완료: /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama31_8b/math/lora)
+    [upload] cell   : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama31_8b/math/lora
+    [upload] repo   : kmseong/llama3_1_8b-instruct-CB_SSFT-lora_math_lr3e-4
+    [upload] model  : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama31_8b/math/lora/merged_model
+    [upload] 가중치 파일이 없다 — 이미 prune 됐거나 저장이 실패한 셀이다. 중단.
+[revision] [skip] asft(λ=1.0)  cb/llama31_8b/math lr=3e-4 batch=4x4  (이미 완료: /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama31_8b/math/asft)
+    [upload] cell   : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama31_8b/math/asft
+    [upload] repo   : kmseong/llama3_1_8b-instruct-CB_SSFT-asft_math_lambda1.0_lr3e-4
+    [upload] model  : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama31_8b/math/asft/merged_model
+    [upload] 가중치 파일이 없다 — 이미 prune 됐거나 저장이 실패한 셀이다. 중단.
+[revision] [skip] safelora(thr=0.3)  cb/llama31_8b/math lr=3e-4 batch=4x4  (이미 완료: /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama31_8b/math/safelora)
+    [upload] cell   : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama31_8b/math/safelora
+    [upload] repo   : kmseong/llama3_1_8b-instruct-CB_SSFT-safelora_math_thr0.3_lr3e-4
+    [upload] model  : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama31_8b/math/safelora/merged_model
+    [upload] 가중치 파일이 없다 — 이미 prune 됐거나 저장이 실패한 셀이다. 중단.
+[revision] [skip] lisa(ρ=1.0)  cb/llama31_8b/math lr=3e-4 batch=4x4  (이미 완료: /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama31_8b/math/lisa)
+    [upload] cell   : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama31_8b/math/lisa
+    [upload] repo   : kmseong/llama3_1_8b-instruct-CB_SSFT-lisa_math_rho1.0_lr3e-4
+    [upload] model  : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama31_8b/math/lisa
+    [upload] 가중치 파일이 없다 — 이미 prune 됐거나 저장이 실패한 셀이다. 중단.
+[revision] [skip] salora(r_s=32,r_t=32)  cb/llama31_8b/math lr=3e-4 batch=4x4  (이미 완료: /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama31_8b/math/salora)
+    [upload] cell   : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama31_8b/math/salora
+    [upload] repo   : kmseong/llama3_1_8b-instruct-CB_SSFT-salora_math_rs32rt32_lr3e-4
+    [upload] model  : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama31_8b/math/salora
+    [upload] 가중치 파일이 없다 — 이미 prune 됐거나 저장이 실패한 셀이다. 중단.
+[revision] [skip] wsr_lora(ρ=0.1)  cb/llama31_8b/math lr=3e-4 batch=4x4  (이미 완료: /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama31_8b/math/wsr_lora)
+
+──────────────────────────────────────────────────────────────
+  HF 업로드  cb/llama31_8b/math/wsr_lora  →  kmseong/llama3_1_8b-instruct-CB_SSFT-wsr-lora_math_rho0.1_lr3e-4   (08-28 07:10:22)
+──────────────────────────────────────────────────────────────
+    [upload] cell   : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama31_8b/math/wsr_lora
+    [upload] repo   : kmseong/llama3_1_8b-instruct-CB_SSFT-wsr-lora_math_rho0.1_lr3e-4
+    [upload] model  : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama31_8b/math/wsr_lora
+    [upload] files  : 12개 / 14.97 GiB (가중치 4개)
+    The tokenizer you are loading from '/home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama31_8b/math/wsr_lora' with an incorrect regex pattern: https://huggingface.co/mistralai/Mistral-Small-3.1-24B-Instruct-2503/discussions/84#69121093e8b480e709447d5e. This will lead to incorrect tokenization. You should set the `fix_mistral_regex=True` flag when loading this tokenizer to fix this issue.
+    [upload] chat_template 기대: 있어야 함
+    [upload] hf user: kmseong
+    [upload] 업로드 중 ...
+    Traceback (most recent call last):
+      File "/home/edgeai_lab/miniforge3/envs/hb/lib/python3.10/site-packages/huggingface_hub/utils/_http.py", line 402, in hf_raise_for_status
+        response.raise_for_status()
+      File "/home/edgeai_lab/miniforge3/envs/hb/lib/python3.10/site-packages/requests/models.py", line 1026, in raise_for_status
+        raise HTTPError(http_error_msg, response=self)
+    requests.exceptions.HTTPError: 403 Client Error: Forbidden for url: https://huggingface.co/kmseong/llama3_1_8b-instruct-CB_SSFT-wsr-lora_math_rho0.1_lr3e-4.git/info/lfs/objects/batch
+    
+    The above exception was the direct cause of the following exception:
+    
+    Traceback (most recent call last):
+      File "/home/edgeai_lab/Safety-WaRP-LLM/scripts/revision/upload_and_prune.py", line 278, in <module>
+        sys.exit(main())
+      File "/home/edgeai_lab/Safety-WaRP-LLM/scripts/revision/upload_and_prune.py", line 231, in main
+        api.upload_folder(
+      File "/home/edgeai_lab/miniforge3/envs/hb/lib/python3.10/site-packages/huggingface_hub/utils/_validators.py", line 114, in _inner_fn
+        return fn(*args, **kwargs)
+      File "/home/edgeai_lab/miniforge3/envs/hb/lib/python3.10/site-packages/huggingface_hub/hf_api.py", line 1687, in _inner
+        return fn(self, *args, **kwargs)
+      File "/home/edgeai_lab/miniforge3/envs/hb/lib/python3.10/site-packages/huggingface_hub/hf_api.py", line 4930, in upload_folder
+        commit_info = self.create_commit(
+      File "/home/edgeai_lab/miniforge3/envs/hb/lib/python3.10/site-packages/huggingface_hub/utils/_validators.py", line 114, in _inner_fn
+        return fn(*args, **kwargs)
+      File "/home/edgeai_lab/miniforge3/envs/hb/lib/python3.10/site-packages/huggingface_hub/hf_api.py", line 1687, in _inner
+        return fn(self, *args, **kwargs)
+      File "/home/edgeai_lab/miniforge3/envs/hb/lib/python3.10/site-packages/huggingface_hub/hf_api.py", line 4229, in create_commit
+        self.preupload_lfs_files(
+      File "/home/edgeai_lab/miniforge3/envs/hb/lib/python3.10/site-packages/huggingface_hub/hf_api.py", line 4494, in preupload_lfs_files
+        _upload_files(**upload_kwargs, num_threads=num_threads, create_pr=create_pr)  # type: ignore [arg-type]
+      File "/home/edgeai_lab/miniforge3/envs/hb/lib/python3.10/site-packages/huggingface_hub/utils/_validators.py", line 114, in _inner_fn
+        return fn(*args, **kwargs)
+      File "/home/edgeai_lab/miniforge3/envs/hb/lib/python3.10/site-packages/huggingface_hub/_commit_api.py", line 389, in _upload_files
+        actions_chunk, errors_chunk, chosen_transfer = post_lfs_batch_info(
+      File "/home/edgeai_lab/miniforge3/envs/hb/lib/python3.10/site-packages/huggingface_hub/utils/_validators.py", line 114, in _inner_fn
+        return fn(*args, **kwargs)
+      File "/home/edgeai_lab/miniforge3/envs/hb/lib/python3.10/site-packages/huggingface_hub/lfs.py", line 172, in post_lfs_batch_info
+        hf_raise_for_status(resp)
+      File "/home/edgeai_lab/miniforge3/envs/hb/lib/python3.10/site-packages/huggingface_hub/utils/_http.py", line 466, in hf_raise_for_status
+        raise _format(HfHubHTTPError, message, response) from e
+    huggingface_hub.errors.HfHubHTTPError: (Request ID: Root=1-6a90b5da-7363495730b77f1952110ed5;696ab104-dce4-4de5-96bf-601a7596e0ad)
+    
+    403 Forbidden: You have exceeded your public storage space. Subscribe at /subscribe/pro to get more included storage. Alternatively if you are working on an impactful public project, contact us at website@huggingface.co so we can verify your account and unlock more storage for your use-case..
+    Cannot access content at: https://huggingface.co/kmseong/llama3_1_8b-instruct-CB_SSFT-wsr-lora_math_rho0.1_lr3e-4.git/info/lfs/objects/batch.
+    Make sure your token has the correct permissions.
+[revision][WARN ] 업로드/검증 실패: kmseong/llama3_1_8b-instruct-CB_SSFT-wsr-lora_math_rho0.1_lr3e-4  (로컬은 보존됨)
+[revision] [prune] basis/mask 삭제: cb/llama31_8b (~16GB 회수)
+
+════════════════ 실패한 셀 (1) ════════════════
+  - upload/cb/llama31_8b/math/wsr_lora
+[revision][WARN ] [stage 20] 실패한 셀이 있다 (위 로그 확인)
+
+  ── STAGE 21  21_seal.sh  MODELS=llama31_8b SAFETY_SETS=cb   (08-28 07:10:35)
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/edgeai_lab/Safety-WaRP-LLM
+   python    : /home/edgeai_lab/miniforge3/envs/hb/bin/python
+   safety    : cb
+   models    : llama31_8b
+   methods   : fullft safeinstr resta safedelta wsr_tune lora asft lisa seal safelora salora wsr_lora
+   tasks     : <모델별 자동>
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=1, basis 삭제=1)
+════════════════════════════════════════════════════════════════
+
+  SEAL top-p     : 0.8 (top80)
+  selector epochs: 2
+  S2 (full-param): lr=5e-5 wd=0.01 warmup=0.1 epochs=3
+  selector ckpt  : /home/edgeai_lab/Safety-WaRP-LLM/seal/ckpt/revision
+[revision] [skip] seal  cb/llama31_8b/math  (이미 완료)
+
+실패한 셀 없음.
+[revision] [stage 21] 완료
+
+  ── STAGE 11  11_posthoc.sh  MODELS=llama31_8b SAFETY_SETS=cb   (08-28 07:10:35)
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/edgeai_lab/Safety-WaRP-LLM
+   python    : /home/edgeai_lab/miniforge3/envs/hb/bin/python
+   safety    : cb
+   models    : llama31_8b
+   methods   : fullft safeinstr resta safedelta wsr_tune lora asft lisa seal safelora salora wsr_lora
+   tasks     : <모델별 자동>
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=1, basis 삭제=1)
+════════════════════════════════════════════════════════════════
+
+  RESTA γ      : 0.3
+  SafeDelta s  : 0.1  (nsamples=512 seq_len=512)
+  SafeDelta dir: /home/edgeai_lab/SafeDelta
+[revision] [skip] post-hoc cb/llama31_8b/math — 돌릴 셀이 없다 (논문 Table 2/4/10 에 이미 있음)
+
+실패한 셀 없음.
+[revision] [stage 11] 완료
+
+████████████████████████████████████████████████████████████████
+  ▶ cb / qwen25_7b     (08-28 07:10:35)
+     디스크 여유: 35G
+████████████████████████████████████████████████████████████████
+
+  ── STAGE 02  02_warp_basis_mask.sh  MODELS=qwen25_7b SAFETY_SETS=cb   (08-28 07:10:35)
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/edgeai_lab/Safety-WaRP-LLM
+   python    : /home/edgeai_lab/miniforge3/envs/hb/bin/python
+   safety    : cb
+   models    : qwen25_7b
+   methods   : fullft safeinstr resta safedelta wsr_tune lora asft lisa seal safelora salora wsr_lora
+   tasks     : <모델별 자동>
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=1, basis 삭제=1)
+════════════════════════════════════════════════════════════════
+
+  layer_type    : attn_q,attn_k,attn_v,ffn_up,ffn_down
+  target_layers : all
+  keep_ratio ρ  : 0.1
+  basis 저장    : dtype=bfloat16  omit_UT=1  (fp32+UT 대비 1/4)
+  출력          : /home/edgeai_lab/Safety-WaRP-LLM/checkpoints/revision/warp/<safety>/<model>/
+[revision][WARN ] [disk] 여유 35GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 35GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+[revision][WARN ] [disk] basis 를 만들 공간이 없다 — cb/qwen25_7b 건너뜀
+
+════════════════ Stage 02 요약 ════════════════
+  cb  qwen25_7b    basis=MISSING  mask=MISSING 
+
+실패한 셀 없음.
+[revision] [stage 02] 완료
+
+  ── STAGE 10  10_fullft_safeinstr.sh  MODELS=qwen25_7b SAFETY_SETS=cb   (08-28 07:10:36)
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/edgeai_lab/Safety-WaRP-LLM
+   python    : /home/edgeai_lab/miniforge3/envs/hb/bin/python
+   safety    : cb
+   models    : qwen25_7b
+   methods   : fullft safeinstr resta safedelta wsr_tune lora asft lisa seal safelora salora wsr_lora
+   tasks     : <모델별 자동>
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=1, basis 삭제=1)
+════════════════════════════════════════════════════════════════
+
+실패한 셀 없음.
+[revision] [stage 10] 완료
+
+  ── STAGE 12  12_wsr_tune.sh  MODELS=qwen25_7b SAFETY_SETS=cb   (08-28 07:10:36)
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/edgeai_lab/Safety-WaRP-LLM
+   python    : /home/edgeai_lab/miniforge3/envs/hb/bin/python
+   safety    : cb
+   models    : qwen25_7b
+   methods   : fullft safeinstr resta safedelta wsr_tune lora asft lisa seal safelora salora wsr_lora
+   tasks     : <모델별 자동>
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=1, basis 삭제=1)
+════════════════════════════════════════════════════════════════
+
+  keep_ratio ρ  : 0.1
+  layer_type    : attn_q,attn_k,attn_v,ffn_up,ffn_down   target_layers: all
+[revision] [skip] wsr_tune cb/qwen25_7b — 돌릴 셀이 없다 (논문 Table 2/4/10 에 이미 있음)
+
+실패한 셀 없음.
+[revision] [stage 12] 완료
+
+  ── STAGE 20  20_lora_family.sh  MODELS=qwen25_7b SAFETY_SETS=cb   (08-28 07:10:36)
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/edgeai_lab/Safety-WaRP-LLM
+   python    : /home/edgeai_lab/miniforge3/envs/hb/bin/python
+   safety    : cb
+   models    : qwen25_7b
+   methods   : fullft safeinstr resta safedelta wsr_tune lora asft lisa seal safelora salora wsr_lora
+   tasks     : <모델별 자동>
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=1, basis 삭제=1)
+════════════════════════════════════════════════════════════════
+
+  AsFT λ          : 1.0
+  SafeLoRA thr    : 0.3  (load dtype=float32)
+  LISA            : ρ=1.0 align_step=100 ft_step=900
+  SaLoRA          : salora/salora_lora.py · r_s=32 r_t=32 init=task n_harmful=256 n_task=256
+  WSR-LoRA ρ      : 0.1  (Phase1 basis 필요)
+[revision] [skip] lora  cb/qwen25_7b/gsm8k lr=3e-4 batch=4x4  (이미 완료: /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/qwen25_7b/gsm8k/lora)
+    [upload] cell   : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/qwen25_7b/gsm8k/lora
+    [upload] repo   : kmseong/qwen2_5_7b-instruct-CB_SSFT-lora_gsm8k_lr3e-4
+    [upload] model  : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/qwen25_7b/gsm8k/lora/merged_model
+    [upload] 가중치 파일이 없다 — 이미 prune 됐거나 저장이 실패한 셀이다. 중단.
+[revision][WARN ] [disk] 여유 35GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 35GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+[revision] [skip] safelora(thr=0.3)  cb/qwen25_7b/gsm8k lr=3e-4 batch=4x4  (이미 완료: /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/qwen25_7b/gsm8k/safelora)
+    [upload] cell   : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/qwen25_7b/gsm8k/safelora
+    [upload] repo   : kmseong/qwen2_5_7b-instruct-CB_SSFT-safelora_gsm8k_thr0.3_lr3e-4
+    [upload] model  : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/qwen25_7b/gsm8k/safelora/merged_model
+    [upload] 가중치 파일이 없다 — 이미 prune 됐거나 저장이 실패한 셀이다. 중단.
+[revision] [skip] lisa(ρ=1.0)  cb/qwen25_7b/gsm8k lr=3e-4 batch=4x4  (이미 완료: /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/qwen25_7b/gsm8k/lisa)
+    [upload] cell   : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/qwen25_7b/gsm8k/lisa
+    [upload] repo   : kmseong/qwen2_5_7b-instruct-CB_SSFT-lisa_gsm8k_rho1.0_lr3e-4
+    [upload] model  : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/qwen25_7b/gsm8k/lisa
+    [upload] 가중치 파일이 없다 — 이미 prune 됐거나 저장이 실패한 셀이다. 중단.
+[revision] [skip] salora(r_s=32,r_t=32)  cb/qwen25_7b/gsm8k lr=3e-4 batch=4x4  (이미 완료: /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/qwen25_7b/gsm8k/salora)
+    [upload] cell   : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/qwen25_7b/gsm8k/salora
+    [upload] repo   : kmseong/qwen2_5_7b-instruct-CB_SSFT-salora_gsm8k_rs32rt32_lr3e-4
+    [upload] model  : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/qwen25_7b/gsm8k/salora
+    [upload] 가중치 파일이 없다 — 이미 prune 됐거나 저장이 실패한 셀이다. 중단.
+[revision][WARN ] [cb/qwen25_7b/gsm8k] WSR-LoRA 에 필요한 Phase 1 basis 가 없다 → 02_warp_basis_mask.sh 먼저. 건너뜀.
+[revision] [prune] basis/mask 삭제: cb/qwen25_7b (~0GB 회수)
+
+════════════════ 실패한 셀 (2) ════════════════
+  - asft(λ=1.0)  cb/qwen25_7b/gsm8k lr=3e-4 batch=4x4 (disk)
+  - wsr_lora/cb/qwen25_7b/gsm8k (no basis)
+[revision][WARN ] [stage 20] 실패한 셀이 있다 (위 로그 확인)
+
+  ── STAGE 21  21_seal.sh  MODELS=qwen25_7b SAFETY_SETS=cb   (08-28 07:10:36)
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/edgeai_lab/Safety-WaRP-LLM
+   python    : /home/edgeai_lab/miniforge3/envs/hb/bin/python
+   safety    : cb
+   models    : qwen25_7b
+   methods   : fullft safeinstr resta safedelta wsr_tune lora asft lisa seal safelora salora wsr_lora
+   tasks     : <모델별 자동>
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=1, basis 삭제=1)
+════════════════════════════════════════════════════════════════
+
+  SEAL top-p     : 0.8 (top80)
+  selector epochs: 2
+  S2 (full-param): lr=5e-5 wd=0.01 warmup=0.1 epochs=3
+  selector ckpt  : /home/edgeai_lab/Safety-WaRP-LLM/seal/ckpt/revision
+[revision] [skip] seal  cb/qwen25_7b/gsm8k  (이미 완료)
+
+실패한 셀 없음.
+[revision] [stage 21] 완료
+
+  ── STAGE 11  11_posthoc.sh  MODELS=qwen25_7b SAFETY_SETS=cb   (08-28 07:10:36)
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/edgeai_lab/Safety-WaRP-LLM
+   python    : /home/edgeai_lab/miniforge3/envs/hb/bin/python
+   safety    : cb
+   models    : qwen25_7b
+   methods   : fullft safeinstr resta safedelta wsr_tune lora asft lisa seal safelora salora wsr_lora
+   tasks     : <모델별 자동>
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=1, basis 삭제=1)
+════════════════════════════════════════════════════════════════
+
+  RESTA γ      : 0.3
+  SafeDelta s  : 0.1  (nsamples=512 seq_len=512)
+  SafeDelta dir: /home/edgeai_lab/SafeDelta
+[revision] [skip] post-hoc cb/qwen25_7b/gsm8k — 돌릴 셀이 없다 (논문 Table 2/4/10 에 이미 있음)
+
+실패한 셀 없음.
+[revision] [stage 11] 완료
+
+████████████████████████████████████████████████████████████████
+  ▶ cb / gemma2_9b     (08-28 07:10:37)
+     디스크 여유: 35G
+████████████████████████████████████████████████████████████████
+
+  ── STAGE 02  02_warp_basis_mask.sh  MODELS=gemma2_9b SAFETY_SETS=cb   (08-28 07:10:37)
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/edgeai_lab/Safety-WaRP-LLM
+   python    : /home/edgeai_lab/miniforge3/envs/hb/bin/python
+   safety    : cb
+   models    : gemma2_9b
+   methods   : fullft safeinstr resta safedelta wsr_tune lora asft lisa seal safelora salora wsr_lora
+   tasks     : <모델별 자동>
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=1, basis 삭제=1)
+════════════════════════════════════════════════════════════════
+
+  layer_type    : attn_q,attn_k,attn_v,ffn_up,ffn_down
+  target_layers : all
+  keep_ratio ρ  : 0.1
+  basis 저장    : dtype=bfloat16  omit_UT=1  (fp32+UT 대비 1/4)
+  출력          : /home/edgeai_lab/Safety-WaRP-LLM/checkpoints/revision/warp/<safety>/<model>/
+[revision][WARN ] [disk] 여유 35GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 35GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+[revision][WARN ] [disk] basis 를 만들 공간이 없다 — cb/gemma2_9b 건너뜀
+
+════════════════ Stage 02 요약 ════════════════
+  cb  gemma2_9b    basis=MISSING  mask=MISSING 
+
+실패한 셀 없음.
+[revision] [stage 02] 완료
+
+  ── STAGE 10  10_fullft_safeinstr.sh  MODELS=gemma2_9b SAFETY_SETS=cb   (08-28 07:10:37)
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/edgeai_lab/Safety-WaRP-LLM
+   python    : /home/edgeai_lab/miniforge3/envs/hb/bin/python
+   safety    : cb
+   models    : gemma2_9b
+   methods   : fullft safeinstr resta safedelta wsr_tune lora asft lisa seal safelora salora wsr_lora
+   tasks     : <모델별 자동>
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=1, basis 삭제=1)
+════════════════════════════════════════════════════════════════
+
+실패한 셀 없음.
+[revision] [stage 10] 완료
+
+  ── STAGE 12  12_wsr_tune.sh  MODELS=gemma2_9b SAFETY_SETS=cb   (08-28 07:10:37)
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/edgeai_lab/Safety-WaRP-LLM
+   python    : /home/edgeai_lab/miniforge3/envs/hb/bin/python
+   safety    : cb
+   models    : gemma2_9b
+   methods   : fullft safeinstr resta safedelta wsr_tune lora asft lisa seal safelora salora wsr_lora
+   tasks     : <모델별 자동>
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=1, basis 삭제=1)
+════════════════════════════════════════════════════════════════
+
+  keep_ratio ρ  : 0.1
+  layer_type    : attn_q,attn_k,attn_v,ffn_up,ffn_down   target_layers: all
+[revision] [skip] wsr_tune cb/gemma2_9b — 돌릴 셀이 없다 (논문 Table 2/4/10 에 이미 있음)
+
+실패한 셀 없음.
+[revision] [stage 12] 완료
+
+  ── STAGE 20  20_lora_family.sh  MODELS=gemma2_9b SAFETY_SETS=cb   (08-28 07:10:37)
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/edgeai_lab/Safety-WaRP-LLM
+   python    : /home/edgeai_lab/miniforge3/envs/hb/bin/python
+   safety    : cb
+   models    : gemma2_9b
+   methods   : fullft safeinstr resta safedelta wsr_tune lora asft lisa seal safelora salora wsr_lora
+   tasks     : <모델별 자동>
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=1, basis 삭제=1)
+════════════════════════════════════════════════════════════════
+
+  AsFT λ          : 1.0
+  SafeLoRA thr    : 0.3  (load dtype=float32)
+  LISA            : ρ=1.0 align_step=100 ft_step=900
+  SaLoRA          : salora/salora_lora.py · r_s=32 r_t=32 init=task n_harmful=256 n_task=256
+  WSR-LoRA ρ      : 0.1  (Phase1 basis 필요)
+[revision] [skip] lora  cb/gemma2_9b/gsm8k lr=3e-4 batch=2x8  (이미 완료: /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/gemma2_9b/gsm8k/lora)
+    [upload] cell   : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/gemma2_9b/gsm8k/lora
+    [upload] repo   : kmseong/gemma2_9b-it-CB_SSFT-lora_gsm8k_lr3e-4
+    [upload] model  : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/gemma2_9b/gsm8k/lora/merged_model
+    [upload] 가중치 파일이 없다 — 이미 prune 됐거나 저장이 실패한 셀이다. 중단.
+[revision] [skip] lisa(ρ=1.0)  cb/gemma2_9b/gsm8k lr=3e-4 batch=2x8  (이미 완료: /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/gemma2_9b/gsm8k/lisa)
+    [upload] cell   : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/gemma2_9b/gsm8k/lisa
+    [upload] repo   : kmseong/gemma2_9b-it-CB_SSFT-lisa_gsm8k_rho1.0_lr3e-4
+    [upload] model  : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/gemma2_9b/gsm8k/lisa
+    [upload] 가중치 파일이 없다 — 이미 prune 됐거나 저장이 실패한 셀이다. 중단.
+[revision] [skip] salora(r_s=32,r_t=32)  cb/gemma2_9b/gsm8k lr=3e-4 batch=2x8  (이미 완료: /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/gemma2_9b/gsm8k/salora)
+    [upload] cell   : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/gemma2_9b/gsm8k/salora
+    [upload] repo   : kmseong/gemma2_9b-it-CB_SSFT-salora_gsm8k_rs32rt32_lr3e-4
+    [upload] model  : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/gemma2_9b/gsm8k/salora
+    [upload] 가중치 파일이 없다 — 이미 prune 됐거나 저장이 실패한 셀이다. 중단.
+[revision][WARN ] [cb/gemma2_9b/gsm8k] WSR-LoRA 에 필요한 Phase 1 basis 가 없다 → 02_warp_basis_mask.sh 먼저. 건너뜀.
+[revision] [prune] basis/mask 삭제: cb/gemma2_9b (~0GB 회수)
+
+════════════════ 실패한 셀 (1) ════════════════
+  - wsr_lora/cb/gemma2_9b/gsm8k (no basis)
+[revision][WARN ] [stage 20] 실패한 셀이 있다 (위 로그 확인)
+
+  ── STAGE 21  21_seal.sh  MODELS=gemma2_9b SAFETY_SETS=cb   (08-28 07:10:37)
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/edgeai_lab/Safety-WaRP-LLM
+   python    : /home/edgeai_lab/miniforge3/envs/hb/bin/python
+   safety    : cb
+   models    : gemma2_9b
+   methods   : fullft safeinstr resta safedelta wsr_tune lora asft lisa seal safelora salora wsr_lora
+   tasks     : <모델별 자동>
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=1, basis 삭제=1)
+════════════════════════════════════════════════════════════════
+
+  SEAL top-p     : 0.8 (top80)
+  selector epochs: 2
+  S2 (full-param): lr=5e-5 wd=0.01 warmup=0.1 epochs=3
+  selector ckpt  : /home/edgeai_lab/Safety-WaRP-LLM/seal/ckpt/revision
+[revision] [skip] seal  cb/gemma2_9b/gsm8k  (이미 완료)
+
+실패한 셀 없음.
+[revision] [stage 21] 완료
+
+  ── STAGE 11  11_posthoc.sh  MODELS=gemma2_9b SAFETY_SETS=cb   (08-28 07:10:37)
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/edgeai_lab/Safety-WaRP-LLM
+   python    : /home/edgeai_lab/miniforge3/envs/hb/bin/python
+   safety    : cb
+   models    : gemma2_9b
+   methods   : fullft safeinstr resta safedelta wsr_tune lora asft lisa seal safelora salora wsr_lora
+   tasks     : <모델별 자동>
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=1, basis 삭제=1)
+════════════════════════════════════════════════════════════════
+
+  RESTA γ      : 0.3
+  SafeDelta s  : 0.1  (nsamples=512 seq_len=512)
+  SafeDelta dir: /home/edgeai_lab/SafeDelta
+[revision] [skip] post-hoc cb/gemma2_9b/gsm8k — 돌릴 셀이 없다 (논문 Table 2/4/10 에 이미 있음)
+
+실패한 셀 없음.
+[revision] [stage 11] 완료
+
+════════════════════════════════════════════════════════════════
+ 최종 요약    ts=20260828_070933
+════════════════════════════════════════════════════════════════
+  cb/llama2_7b/gsm8k : lora asft lisa seal safelora salora wsr_lora
+  cb/llama2_7b/medqa : lora asft lisa seal safelora salora wsr_lora
+  cb/llama2_7b/arc : lora asft lisa seal safelora salora wsr_lora
+  cb/llama2_7b/agnews : fullft safeinstr resta safedelta wsr_tune lora asft lisa seal safelora salora wsr_lora
+  cb/llama2_13b/gsm8k : lora asft -lisa -seal -safelora -salora -wsr_lora
+  cb/llama32_3b/math : lora asft lisa seal safelora -salora wsr_lora
+  cb/llama31_8b/math : lora asft lisa seal safelora salora wsr_lora
+  cb/qwen25_7b/gsm8k : lora -asft lisa seal safelora salora wsr_lora
+  cb/gemma2_9b/gsm8k : lora lisa seal salora wsr_lora
+
+  완료 59 / 66 셀   (앞에 '-' 가 붙은 것이 미완료)
+  산출물: /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/<safety>/<model>/<task>/<method>/   (모델 경로는 각 셀의 MODEL_DIR 파일)
+  로그  : /home/edgeai_lab/Safety-WaRP-LLM/logs/revision/
+
+  실패한 스테이지: 12:12_wsr_tune.sh (MODELS=llama2_7b SAFETY_SETS=cb) 20:20_lora_family.sh (MODELS=llama2_7b SAFETY_SETS=cb) 20:20_lora_family.sh (MODELS=llama2_13b SAFETY_SETS=cb) 21:21_seal.sh (MODELS=llama2_13b SAFETY_SETS=cb) 20:20_lora_family.sh (MODELS=llama32_3b SAFETY_SETS=cb) 20:20_lora_family.sh (MODELS=llama31_8b SAFETY_SETS=cb) 20:20_lora_family.sh (MODELS=qwen25_7b SAFETY_SETS=cb) 20:20_lora_family.sh (MODELS=gemma2_9b SAFETY_SETS=cb)
+  같은 명령을 그대로 다시 실행하면 완료된 셀은 건너뛰고 실패분만 재시도한다.
+── PASS bt
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/edgeai_lab/Safety-WaRP-LLM
+   python    : /home/edgeai_lab/miniforge3/envs/hb/bin/python
+   safety    : bt
+   models    : llama2_7b llama2_13b llama32_3b llama31_8b qwen25_7b gemma2_9b
+   methods   : fullft safeinstr resta safedelta wsr_tune lora asft lisa seal safelora salora wsr_lora
+   tasks     : <모델별 자동>
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=1, basis 삭제=1)
+════════════════════════════════════════════════════════════════
+
+════════════════ 셀 목록 / 진행률 ════════════════
+  학습 셀: 48개 중 1개 완료, 47개 남음
+
+  디스크: 업로드-후-삭제 모드 · / 여유 35GB   (셀 누적 705GB 는 허브로 나간다)
+          model        HF캐시    basis   셀×2 동시최대
+          llama2_7b         45G      16G      30G       91G  ← 빠듯
+          llama2_13b        78G      31G      52G      161G  ← 빠듯
+          llama32_3b        21G       8G      14G       43G  ← 빠듯
+          llama31_8b        45G      21G      30G       96G  ← 빠듯
+          qwen25_7b         45G      26G      30G      101G  ← 빠듯
+          gemma2_9b         57G      26G      38G      121G  ← 빠듯
+[revision][WARN ] 다음 모델은 현재 여유로는 빠듯하다: llama2_7b llama2_13b llama32_3b llama31_8b qwen25_7b gemma2_9b
+[revision][WARN ]   · 그 모델만 단독으로 돌리고(MODELS=<key>), 다른 모델 캐시를 먼저 비워라.
+[revision][WARN ]   · 또는 METHODS 를 둘로 쪼개 돌려라 (예: 먼저 full-param 5종, 다음 LoRA 7종).
+
+  선행 산출물:
+    bt  llama2_7b    aligned=reuse(hub)  basis=ok       mask=ok
+
+  ── STAGE 00  00_prepare.sh     (08-28 07:10:37)
+════════════════════════════════════════════════════════════════
+ Stage 00 — 데이터 준비 / 환경 점검     ts=20260828_071037
+════════════════════════════════════════════════════════════════
+
+──────────────────────────────────────────────────────────────
+  1. 환경 점검   (08-28 07:10:37)
+──────────────────────────────────────────────────────────────
+  python       3.10.19  (/home/edgeai_lab/miniforge3/envs/hb/bin/python)
+  torch        2.10.0+cu128  cuda_build=12.8  avail=True
+  gpu          NVIDIA B200  178.4 GiB  sm_100  (n=1)
+  transformers 4.57.3   peft 0.18.1   accelerate 1.12.0   datasets 4.4.1
+  fire         0.7.1   (SafeDelta 에 필요)
+
+  CUDA_VISIBLE_DEVICES = '<unset>'  (스케줄러가 넣어준 값을 그대로 쓴다)
+  hf user      kmseong
+
+──────────────────────────────────────────────────────────────
+  1-b. gated base 모델 접근   (08-28 07:10:42)
+──────────────────────────────────────────────────────────────
+  ✓ meta-llama/Llama-2-7b-chat-hf
+  ✓ meta-llama/Llama-2-13b-chat-hf
+  ✓ meta-llama/Llama-3.2-3B-Instruct
+  ✓ meta-llama/Llama-3.1-8B-Instruct
+  ✓ Qwen/Qwen2.5-7B-Instruct
+  ✗ google/gemma-2-9b-it  (OSError)
+
+  [WARN] 위 base 모델을 받을 수 없다. 해당 모델의 AsFT / SafeLoRA / RESTA 셀이 실패한다.
+         해당 페이지에서 라이선스를 수락하라: https://huggingface.co/google/gemma-2-9b-it
+  SafeDelta    /home/edgeai_lab/SafeDelta  (OK)
+
+──────────────────────────────────────────────────────────────
+  2. 안전 데이터   (08-28 07:10:45)
+──────────────────────────────────────────────────────────────
+  [cb]  4994 rows   /home/edgeai_lab/Safety-WaRP-LLM/data/circuit_breakers_train.json
+  [bt]  4994 rows   /home/edgeai_lab/Safety-WaRP-LLM/data/beavertails_cb_train.json
+
+──────────────────────────────────────────────────────────────
+  3. 태스크 데이터 생성/점검   (08-28 07:10:45)
+──────────────────────────────────────────────────────────────
+  [gsm8k]  이미 존재 — skip
+  [math]   이미 존재 — skip
+  [arc]    이미 존재 — skip
+  [medqa]  이미 존재 — skip
+  [agnews] 이미 존재 — skip
+
+──────────────────────────────────────────────────────────────
+  4. 태스크 데이터 요약   (08-28 07:10:45)
+──────────────────────────────────────────────────────────────
+  task        rows   q(chars)  r(chars)  file
+  gsm8k       7473        235       287  data/gsm8k_train_task_7473.json
+  math        7500        210       547  data/math_train_task_7500.json
+  arc         1119        488        20  data/arc_challenge_train_task_1119.json
+  medqa      10178       1052        30  data/medqa_train_task_10178.json
+  agnews      8000        360         7  data/agnews_train_8k_seed42.json
+
+  5개 태스크 JSON 모두 준비됨.
+
+다음 단계:
+  bash scripts/revision/01_ssft_bt.sh          # BeaverTails 안전정렬 출발모델
+  bash scripts/revision/02_warp_basis_mask.sh  # Phase1 basis + Phase2 mask
+  또는  bash scripts/revision/run_all.sh       # 전체
+[revision] [stage 00] 완료
+
+  ── STAGE 01  01_ssft_bt.sh     (08-28 07:10:45)
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/edgeai_lab/Safety-WaRP-LLM
+   python    : /home/edgeai_lab/miniforge3/envs/hb/bin/python
+   safety    : bt
+   models    : llama2_7b llama2_13b llama32_3b llama31_8b qwen25_7b gemma2_9b
+   methods   : fullft safeinstr resta safedelta wsr_tune lora asft lisa seal safelora salora wsr_lora
+   tasks     : <모델별 자동>
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=1, basis 삭제=1)
+════════════════════════════════════════════════════════════════
+
+  안전 데이터 : /home/edgeai_lab/Safety-WaRP-LLM/data/beavertails_cb_train.json (4994 샘플)
+  출력        : /home/edgeai_lab/Safety-WaRP-LLM/checkpoints/revision/ssft_bt/
+[revision] [skip] ssft_bt/llama2_7b — 기존 BT 안전정렬 모델 재사용: wvnvwn/llama2-7b-chat-lr5e-5-ssft-bv
+[revision] [skip] ssft_bt/llama2_13b — BT_MODELS 밖
+[revision] [skip] ssft_bt/llama32_3b — BT_MODELS 밖
+[revision] [skip] ssft_bt/llama31_8b — BT_MODELS 밖
+[revision] [skip] ssft_bt/qwen25_7b — BT_MODELS 밖
+[revision] [skip] ssft_bt/gemma2_9b — BT_MODELS 밖
+
+════════════════ Stage 01 요약 ════════════════
+  [reuse]   llama2_7b  → wvnvwn/llama2-7b-chat-lr5e-5-ssft-bv
+  [MISSING] llama2_13b  → /home/edgeai_lab/Safety-WaRP-LLM/checkpoints/revision/ssft_bt/Llama-2-13b-chat-hf-ssft-bt-lr5e-5
+  [MISSING] llama32_3b  → /home/edgeai_lab/Safety-WaRP-LLM/checkpoints/revision/ssft_bt/Llama-3.2-3B-Instruct-ssft-bt-lr5e-5
+  [MISSING] llama31_8b  → /home/edgeai_lab/Safety-WaRP-LLM/checkpoints/revision/ssft_bt/Llama-3.1-8B-Instruct-ssft-bt-lr5e-5
+  [MISSING] qwen25_7b  → /home/edgeai_lab/Safety-WaRP-LLM/checkpoints/revision/ssft_bt/Qwen2.5-7B-Instruct-ssft-bt-lr5e-5
+  [MISSING] gemma2_9b  → /home/edgeai_lab/Safety-WaRP-LLM/checkpoints/revision/ssft_bt/gemma-2-9b-it-ssft-bt-lr3e-5
+
+실패한 셀 없음.
+[revision] [stage 01] 완료
+
+████████████████████████████████████████████████████████████████
+  ▶ bt / llama2_7b     (08-28 07:10:45)
+     디스크 여유: 35G
+████████████████████████████████████████████████████████████████
+
+  ── STAGE 02  02_warp_basis_mask.sh  MODELS=llama2_7b SAFETY_SETS=bt   (08-28 07:10:45)
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/edgeai_lab/Safety-WaRP-LLM
+   python    : /home/edgeai_lab/miniforge3/envs/hb/bin/python
+   safety    : bt
+   models    : llama2_7b
+   methods   : fullft safeinstr resta safedelta wsr_tune lora asft lisa seal safelora salora wsr_lora
+   tasks     : <모델별 자동>
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=1, basis 삭제=1)
+════════════════════════════════════════════════════════════════
+
+  layer_type    : attn_q,attn_k,attn_v,ffn_up,ffn_down
+  target_layers : all
+  keep_ratio ρ  : 0.1
+  basis 저장    : dtype=bfloat16  omit_UT=1  (fp32+UT 대비 1/4)
+  출력          : /home/edgeai_lab/Safety-WaRP-LLM/checkpoints/revision/warp/<safety>/<model>/
+[revision] [skip] phase1 bt/llama2_7b — 이미 완료 (/home/edgeai_lab/Safety-WaRP-LLM/checkpoints/revision/warp/bt/llama2_7b/phase1_20260828_034626/basis)
+[revision] [skip] phase2 bt/llama2_7b — 이미 완료 (/home/edgeai_lab/Safety-WaRP-LLM/checkpoints/revision/warp/bt/llama2_7b/phase2_20260828_040926/checkpoints/masks)
+
+════════════════ Stage 02 요약 ════════════════
+  bt  llama2_7b    basis=ok       mask=ok      
+
+실패한 셀 없음.
+[revision] [stage 02] 완료
+
+  ── STAGE 10  10_fullft_safeinstr.sh  MODELS=llama2_7b SAFETY_SETS=bt   (08-28 07:10:45)
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/edgeai_lab/Safety-WaRP-LLM
+   python    : /home/edgeai_lab/miniforge3/envs/hb/bin/python
+   safety    : bt
+   models    : llama2_7b
+   methods   : fullft safeinstr resta safedelta wsr_tune lora asft lisa seal safelora salora wsr_lora
+   tasks     : <모델별 자동>
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=1, basis 삭제=1)
+════════════════════════════════════════════════════════════════
+[revision][WARN ] [disk] 여유 35GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 35GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+[revision][WARN ] [disk] 여유 35GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 35GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+[revision][WARN ] [disk] 여유 35GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 35GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+[revision][WARN ] [disk] 여유 35GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 35GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+[revision][WARN ] [disk] 여유 35GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 35GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+[revision][WARN ] [disk] 여유 35GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 35GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+[revision][WARN ] [disk] 여유 35GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 35GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+[revision][WARN ] [disk] 여유 35GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 35GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+
+════════════════ 실패한 셀 (8) ════════════════
+  - fullft  bt/llama2_7b/gsm8k  lr=5e-5 batch=4x4 (disk)
+  - safeinstr(0.1)  bt/llama2_7b/gsm8k  lr=5e-5 (disk)
+  - fullft  bt/llama2_7b/medqa  lr=5e-5 batch=4x4 (disk)
+  - safeinstr(0.1)  bt/llama2_7b/medqa  lr=5e-5 (disk)
+  - fullft  bt/llama2_7b/arc  lr=5e-5 batch=4x4 (disk)
+  - safeinstr(0.1)  bt/llama2_7b/arc  lr=5e-5 (disk)
+  - fullft  bt/llama2_7b/agnews  lr=5e-5 batch=4x4 (disk)
+  - safeinstr(0.1)  bt/llama2_7b/agnews  lr=5e-5 (disk)
+[revision][WARN ] [stage 10] 실패한 셀이 있다 (위 로그 확인)
+
+  ── STAGE 12  12_wsr_tune.sh  MODELS=llama2_7b SAFETY_SETS=bt   (08-28 07:10:49)
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/edgeai_lab/Safety-WaRP-LLM
+   python    : /home/edgeai_lab/miniforge3/envs/hb/bin/python
+   safety    : bt
+   models    : llama2_7b
+   methods   : fullft safeinstr resta safedelta wsr_tune lora asft lisa seal safelora salora wsr_lora
+   tasks     : <모델별 자동>
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=1, basis 삭제=1)
+════════════════════════════════════════════════════════════════
+
+  keep_ratio ρ  : 0.1
+  layer_type    : attn_q,attn_k,attn_v,ffn_up,ffn_down   target_layers: all
+[revision] [skip] wsr_tune  bt/llama2_7b/gsm8k  (이미 완료)
+[revision][WARN ] [disk] 여유 35GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 35GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+[revision][WARN ] [disk] 공간이 없어 시작하지 않는다
+[revision][WARN ] [disk] 여유 35GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 35GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+[revision][WARN ] [disk] 공간이 없어 시작하지 않는다
+[revision][WARN ] [disk] 여유 35GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 35GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+[revision][WARN ] [disk] 공간이 없어 시작하지 않는다
+
+실패한 셀 없음.
+[revision] [stage 12] 완료
+
+  ── STAGE 20  20_lora_family.sh  MODELS=llama2_7b SAFETY_SETS=bt   (08-28 07:10:50)
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/edgeai_lab/Safety-WaRP-LLM
+   python    : /home/edgeai_lab/miniforge3/envs/hb/bin/python
+   safety    : bt
+   models    : llama2_7b
+   methods   : fullft safeinstr resta safedelta wsr_tune lora asft lisa seal safelora salora wsr_lora
+   tasks     : <모델별 자동>
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=1, basis 삭제=1)
+════════════════════════════════════════════════════════════════
+
+  AsFT λ          : 1.0
+  SafeLoRA thr    : 0.3  (load dtype=float32)
+  LISA            : ρ=1.0 align_step=100 ft_step=900
+  SaLoRA          : salora/salora_lora.py · r_s=32 r_t=32 init=task n_harmful=256 n_task=256
+  WSR-LoRA ρ      : 0.1  (Phase1 basis 필요)
+[revision][WARN ] [disk] 여유 35GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 35GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+[revision][WARN ] [disk] 여유 35GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 35GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+[revision][WARN ] [disk] 여유 35GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 35GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+[revision][WARN ] [disk] 여유 35GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 35GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+[revision][WARN ] [disk] 여유 35GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 35GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+[revision][WARN ] [disk] 여유 35GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 35GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+[revision][WARN ] [disk] 여유 35GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 35GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+[revision][WARN ] [disk] 여유 35GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 35GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+[revision][WARN ] [disk] 여유 35GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 35GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+[revision][WARN ] [disk] 여유 35GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 35GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+[revision][WARN ] [disk] 여유 35GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 35GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+[revision][WARN ] [disk] 여유 35GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 35GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+[revision][WARN ] [disk] 여유 35GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 35GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+[revision][WARN ] [disk] 여유 35GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 35GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+[revision][WARN ] [disk] 여유 35GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 35GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+[revision][WARN ] [disk] 여유 35GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 35GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+[revision][WARN ] [disk] 여유 35GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 35GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+[revision][WARN ] [disk] 여유 35GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 35GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+[revision][WARN ] [disk] 여유 35GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 35GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+[revision][WARN ] [disk] 여유 35GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 35GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+[revision][WARN ] [disk] 여유 35GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 35GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+[revision][WARN ] [disk] 여유 35GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 35GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+[revision][WARN ] [disk] 여유 35GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 35GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+[revision][WARN ] [disk] 여유 35GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 35GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+
+════════════════ 실패한 셀 (24) ════════════════
+  - lora  bt/llama2_7b/gsm8k lr=3e-4 batch=4x4 (disk)
+  - asft(λ=1.0)  bt/llama2_7b/gsm8k lr=3e-4 batch=4x4 (disk)
+  - safelora(thr=0.3)  bt/llama2_7b/gsm8k lr=3e-4 batch=4x4 (disk)
+  - lisa(ρ=1.0)  bt/llama2_7b/gsm8k lr=3e-4 batch=4x4 (disk)
+  - salora(r_s=32,r_t=32)  bt/llama2_7b/gsm8k lr=3e-4 batch=4x4 (disk)
+  - wsr_lora(ρ=0.1)  bt/llama2_7b/gsm8k lr=3e-4 batch=4x4 (disk)
+  - lora  bt/llama2_7b/medqa lr=3e-4 batch=4x4 (disk)
+  - asft(λ=1.0)  bt/llama2_7b/medqa lr=3e-4 batch=4x4 (disk)
+  - safelora(thr=0.3)  bt/llama2_7b/medqa lr=3e-4 batch=4x4 (disk)
+  - lisa(ρ=1.0)  bt/llama2_7b/medqa lr=3e-4 batch=4x4 (disk)
+  - salora(r_s=32,r_t=32)  bt/llama2_7b/medqa lr=3e-4 batch=4x4 (disk)
+  - wsr_lora(ρ=0.1)  bt/llama2_7b/medqa lr=3e-4 batch=4x4 (disk)
+  - lora  bt/llama2_7b/arc lr=3e-4 batch=4x4 (disk)
+  - asft(λ=1.0)  bt/llama2_7b/arc lr=3e-4 batch=4x4 (disk)
+  - safelora(thr=0.3)  bt/llama2_7b/arc lr=3e-4 batch=4x4 (disk)
+  - lisa(ρ=1.0)  bt/llama2_7b/arc lr=3e-4 batch=4x4 (disk)
+  - salora(r_s=32,r_t=32)  bt/llama2_7b/arc lr=3e-4 batch=4x4 (disk)
+  - wsr_lora(ρ=0.1)  bt/llama2_7b/arc lr=3e-4 batch=4x4 (disk)
+  - lora  bt/llama2_7b/agnews lr=7e-5 batch=4x4 (disk)
+  - asft(λ=1.0)  bt/llama2_7b/agnews lr=7e-5 batch=4x4 (disk)
+  - safelora(thr=0.3)  bt/llama2_7b/agnews lr=7e-5 batch=4x4 (disk)
+  - lisa(ρ=1.0)  bt/llama2_7b/agnews lr=7e-5 batch=4x4 (disk)
+  - salora(r_s=32,r_t=32)  bt/llama2_7b/agnews lr=7e-5 batch=4x4 (disk)
+  - wsr_lora(ρ=0.1)  bt/llama2_7b/agnews lr=7e-5 batch=4x4 (disk)
+[revision][WARN ] [stage 20] 실패한 셀이 있다 (위 로그 확인)
+
+  ── STAGE 21  21_seal.sh  MODELS=llama2_7b SAFETY_SETS=bt   (08-28 07:11:01)
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/edgeai_lab/Safety-WaRP-LLM
+   python    : /home/edgeai_lab/miniforge3/envs/hb/bin/python
+   safety    : bt
+   models    : llama2_7b
+   methods   : fullft safeinstr resta safedelta wsr_tune lora asft lisa seal safelora salora wsr_lora
+   tasks     : <모델별 자동>
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=1, basis 삭제=1)
+════════════════════════════════════════════════════════════════
+
+  SEAL top-p     : 0.8 (top80)
+  selector epochs: 2
+  S2 (full-param): lr=5e-5 wd=0.01 warmup=0.1 epochs=3
+  selector ckpt  : /home/edgeai_lab/Safety-WaRP-LLM/seal/ckpt/revision
+[revision][WARN ] [disk] 여유 35GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 35GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+[revision][WARN ] [disk] 공간이 없어 시작하지 않는다
+[revision][WARN ] [disk] 여유 35GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 35GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+[revision][WARN ] [disk] 공간이 없어 시작하지 않는다
+[revision][WARN ] [disk] 여유 35GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 35GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+[revision][WARN ] [disk] 공간이 없어 시작하지 않는다
+[revision][WARN ] [disk] 여유 35GB < 45GB — 업로드 끝난 셀부터 회수한다
+[revision][WARN ] [disk] 회수 후에도 35GB 뿐이다 — 이 셀은 시작하지 않는다(재실행하면 이어서 간다)
+[revision][WARN ] [disk] 공간이 없어 시작하지 않는다
+
+실패한 셀 없음.
+[revision] [stage 21] 완료
+
+  ── STAGE 11  11_posthoc.sh  MODELS=llama2_7b SAFETY_SETS=bt   (08-28 07:11:03)
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/edgeai_lab/Safety-WaRP-LLM
+   python    : /home/edgeai_lab/miniforge3/envs/hb/bin/python
+   safety    : bt
+   models    : llama2_7b
+   methods   : fullft safeinstr resta safedelta wsr_tune lora asft lisa seal safelora salora wsr_lora
+   tasks     : <모델별 자동>
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=1, basis 삭제=1)
+════════════════════════════════════════════════════════════════
+
+  RESTA γ      : 0.3
+  SafeDelta s  : 0.1  (nsamples=512 seq_len=512)
+  SafeDelta dir: /home/edgeai_lab/SafeDelta
+[revision][WARN ] [bt/llama2_7b/gsm8k] fullft 산출물이 없다 (/home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/bt/llama2_7b/gsm8k/fullft) → 10_fullft_safeinstr.sh 먼저. 건너뜀.
+[revision][WARN ] [bt/llama2_7b/medqa] fullft 산출물이 없다 (/home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/bt/llama2_7b/medqa/fullft) → 10_fullft_safeinstr.sh 먼저. 건너뜀.
+[revision][WARN ] [bt/llama2_7b/arc] fullft 산출물이 없다 (/home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/bt/llama2_7b/arc/fullft) → 10_fullft_safeinstr.sh 먼저. 건너뜀.
+[revision][WARN ] [bt/llama2_7b/agnews] fullft 산출물이 없다 (/home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/bt/llama2_7b/agnews/fullft) → 10_fullft_safeinstr.sh 먼저. 건너뜀.
+
+════════════════ 실패한 셀 (4) ════════════════
+  - posthoc/bt/llama2_7b/gsm8k (no fullft)
+  - posthoc/bt/llama2_7b/medqa (no fullft)
+  - posthoc/bt/llama2_7b/arc (no fullft)
+  - posthoc/bt/llama2_7b/agnews (no fullft)
+[revision][WARN ] [stage 11] 실패한 셀이 있다 (위 로그 확인)
+
+════════════════════════════════════════════════════════════════
+ 최종 요약    ts=20260828_071037
+════════════════════════════════════════════════════════════════
+  bt/llama2_7b/gsm8k : -fullft -safeinstr -resta -safedelta wsr_tune -lora -asft -lisa -seal -safelora -salora -wsr_lora
+  bt/llama2_7b/medqa : -fullft -safeinstr -resta -safedelta -wsr_tune -lora -asft -lisa -seal -safelora -salora -wsr_lora
+  bt/llama2_7b/arc : -fullft -safeinstr -resta -safedelta -wsr_tune -lora -asft -lisa -seal -safelora -salora -wsr_lora
+  bt/llama2_7b/agnews : -fullft -safeinstr -resta -safedelta -wsr_tune -lora -asft -lisa -seal -safelora -salora -wsr_lora
+
+  완료 1 / 48 셀   (앞에 '-' 가 붙은 것이 미완료)
+  산출물: /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/<safety>/<model>/<task>/<method>/   (모델 경로는 각 셀의 MODEL_DIR 파일)
+  로그  : /home/edgeai_lab/Safety-WaRP-LLM/logs/revision/
+
+  실패한 스테이지: 10:10_fullft_safeinstr.sh (MODELS=llama2_7b SAFETY_SETS=bt) 20:20_lora_family.sh (MODELS=llama2_7b SAFETY_SETS=bt) 11:11_posthoc.sh (MODELS=llama2_7b SAFETY_SETS=bt)
+  같은 명령을 그대로 다시 실행하면 완료된 셀은 건너뛰고 실패분만 재시도한다.
+
+════ 결과 ════
+  kmseong/gemma2_9b-it-CB_SSFT-lisa_gsm8k_rho1.0_lr3e-4
+  kmseong/gemma2_9b-it-CB_SSFT-lora_gsm8k_lr3e-4
+  kmseong/gemma2_9b-it-CB_SSFT-salora_gsm8k_rs32rt32_lr3e-4
+  kmseong/gemma2_9b-it-CB_SSFT-seal_gsm8k_topp0.8_lr5e-5
+  kmseong/gemma2_9b-it-CB_SSFT-wsr-lora_gsm8k_rho0.1_lr3e-4
+  kmseong/llama2_7b-chat-CB_SSFT-asft_agnews_lambda1.0_lr7e-5
+  kmseong/llama2_7b-chat-CB_SSFT-fullft_agnews_lr5e-5
+  kmseong/llama2_7b-chat-CB_SSFT-lisa_agnews_rho1.0_lr7e-5
+  kmseong/llama2_7b-chat-CB_SSFT-lora_agnews_lr7e-5
+  kmseong/llama2_7b-chat-CB_SSFT-resta_agnews_gamma0.3_lr5e-5
+  kmseong/llama2_7b-chat-CB_SSFT-safedelta_agnews_s0.1_lr5e-5
+  kmseong/llama2_7b-chat-CB_SSFT-safeinstr_agnews_mix0.1_lr5e-5
+  kmseong/llama2_7b-chat-CB_SSFT-safelora_agnews_thr0.3_lr7e-5
+  kmseong/llama2_7b-chat-CB_SSFT-salora_agnews_rs32rt32_lr7e-5
+  kmseong/llama2_7b-chat-CB_SSFT-seal_agnews_topp0.8_lr5e-5
+  kmseong/llama2_7b-chat-CB_SSFT-wsr-lora_agnews_rho0.1_lr7e-5
+  kmseong/llama2_7b-chat-CB_SSFT-wsr-tune_agnews_rho0.1_lr5e-5
+  kmseong/llama2_7b-chat-CB_SSFT-asft_arc_lambda1.0_lr3e-4
+  kmseong/llama2_7b-chat-CB_SSFT-lisa_arc_rho1.0_lr3e-4
+  kmseong/llama2_7b-chat-CB_SSFT-lora_arc_lr3e-4
+  kmseong/llama2_7b-chat-CB_SSFT-safelora_arc_thr0.3_lr3e-4
+  kmseong/llama2_7b-chat-CB_SSFT-salora_arc_rs32rt32_lr3e-4
+  kmseong/llama2_7b-chat-CB_SSFT-seal_arc_topp0.8_lr5e-5
+  kmseong/llama2_7b-chat-CB_SSFT-wsr-lora_arc_rho0.1_lr3e-4
+  kmseong/llama2_7b-chat-CB_SSFT-asft_gsm8k_lambda1.0_lr3e-4
+  kmseong/llama2_7b-chat-CB_SSFT-lisa_gsm8k_rho1.0_lr3e-4
+  kmseong/llama2_7b-chat-CB_SSFT-lora_gsm8k_lr3e-4
+  kmseong/llama2_7b-chat-CB_SSFT-safelora_gsm8k_thr0.3_lr3e-4
+  kmseong/llama2_7b-chat-CB_SSFT-salora_gsm8k_rs32rt32_lr3e-4
+  kmseong/llama2_7b-chat-CB_SSFT-seal_gsm8k_topp0.8_lr5e-5
+  kmseong/llama2_7b-chat-CB_SSFT-wsr-lora_gsm8k_rho0.1_lr3e-4
+  kmseong/llama2_7b-chat-CB_SSFT-asft_medqa_lambda1.0_lr3e-4
+  kmseong/llama2_7b-chat-CB_SSFT-lisa_medqa_rho1.0_lr3e-4
+  kmseong/llama2_7b-chat-CB_SSFT-lora_medqa_lr3e-4
+  kmseong/llama2_7b-chat-CB_SSFT-safelora_medqa_thr0.3_lr3e-4
+  kmseong/llama2_7b-chat-CB_SSFT-salora_medqa_rs32rt32_lr3e-4
+  kmseong/llama2_7b-chat-CB_SSFT-seal_medqa_topp0.8_lr5e-5
+  kmseong/llama2_7b-chat-CB_SSFT-wsr-lora_medqa_rho0.1_lr3e-4
+  kmseong/llama3_1_8b-instruct-CB_SSFT-asft_math_lambda1.0_lr3e-4
+  kmseong/llama3_1_8b-instruct-CB_SSFT-lisa_math_rho1.0_lr3e-4
+  kmseong/llama3_1_8b-instruct-CB_SSFT-lora_math_lr3e-4
+  kmseong/llama3_1_8b-instruct-CB_SSFT-safelora_math_thr0.3_lr3e-4
+  kmseong/llama3_1_8b-instruct-CB_SSFT-salora_math_rs32rt32_lr3e-4
+  kmseong/llama3_2_3b-instruct-CB_SSFT-asft_math_lambda1.0_lr3e-4
+  kmseong/llama3_2_3b-instruct-CB_SSFT-lisa_math_rho1.0_lr3e-4
+  kmseong/llama3_2_3b-instruct-CB_SSFT-lora_math_lr3e-4
+  kmseong/llama3_2_3b-instruct-CB_SSFT-safelora_math_thr0.3_lr3e-4
+  kmseong/llama3_2_3b-instruct-CB_SSFT-seal_math_topp0.8_lr5e-5
+  kmseong/llama3_2_3b-instruct-CB_SSFT-wsr-lora_math_rho0.1_lr3e-4
+  kmseong/qwen2_5_7b-instruct-CB_SSFT-lisa_gsm8k_rho1.0_lr3e-4
+  kmseong/qwen2_5_7b-instruct-CB_SSFT-lora_gsm8k_lr3e-4
+  kmseong/qwen2_5_7b-instruct-CB_SSFT-safelora_gsm8k_thr0.3_lr3e-4
+  kmseong/qwen2_5_7b-instruct-CB_SSFT-salora_gsm8k_rs32rt32_lr3e-4
+  kmseong/qwen2_5_7b-instruct-CB_SSFT-seal_gsm8k_topp0.8_lr5e-5
+  kmseong/qwen2_5_7b-instruct-CB_SSFT-wsr-lora_gsm8k_rho0.1_lr3e-4
+  → 누적 55개 업로드
