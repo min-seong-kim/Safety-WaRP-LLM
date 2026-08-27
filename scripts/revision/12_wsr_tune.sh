@@ -85,6 +85,7 @@ for safety in $SAFETY_SETS; do
       if is_done "$odir"; then log "[skip] wsr_tune  $safety/$mkey/$task  (이미 완료)"; continue; fi
 
       deadline_passed && { log "[deadline] 마감 초과 — 시작하지 않는다"; continue; }
+      disk_ok || { warn "[disk] 공간이 없어 시작하지 않는다"; continue; }
       hdr "wsr_tune(ρ=$KEEP_RATIO)  $safety/$mkey/$task  lr=$FULL_LR batch=${MB_WARP}x${accum}"
       mkdir -p "$odir"
 

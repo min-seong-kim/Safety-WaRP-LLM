@@ -76,6 +76,7 @@ for safety in $SAFETY_SETS; do
         log "[skip] seal-S1 selector  $safety/$mkey/$task  (이미 존재: $SEL_PT)"
       else
         deadline_passed && { log "[deadline] 마감 초과 — 시작하지 않는다"; continue; }
+        disk_ok || { warn "[disk] 공간이 없어 시작하지 않는다"; continue; }
         hdr "seal-S1 selector  $safety/$mkey/$task  batch=$MB_LORA"
         if [[ "$DRY_RUN" == "1" ]]; then
           echo "  [dry-run] $PY -m seal.train_selector --model_path $ALIGNED \\"
