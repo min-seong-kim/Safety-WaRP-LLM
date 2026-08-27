@@ -61,6 +61,28 @@ except Exception as e:
   warn "  해결: 셸에서  hf auth login --token <YOUR_TOKEN>   또는  export HF_TOKEN=<...>"
 fi
 
+# gated base 모델 접근 — AsFT / SafeLoRA / RESTA 가 V = W_aligned − W_base 를 만들려면
+# **base 모델을 실제로 내려받을 수 있어야 한다.** 토큰이 있어도 라이선스 수락을 안 했으면 403 이다.
+# 셀 실행 시점에 알면 몇 시간을 날리므로 여기서 미리 확인한다.
+hdr "1-b. gated base 모델 접근"
+"$PY" - <<'PYEOF2'
+from transformers import AutoConfig
+BASES = ["meta-llama/Llama-2-7b-chat-hf", "meta-llama/Llama-2-13b-chat-hf",
+         "meta-llama/Llama-3.2-3B-Instruct", "meta-llama/Llama-3.1-8B-Instruct",
+         "Qwen/Qwen2.5-7B-Instruct", "google/gemma-2-9b-it"]
+bad = []
+for m in BASES:
+    try:
+        AutoConfig.from_pretrained(m, cache_dir="./cache")
+        print(f"  ✓ {m}")
+    except Exception as e:
+        print(f"  ✗ {m}  ({type(e).__name__})")
+        bad.append(m)
+if bad:
+    print("\n  [WARN] 위 base 모델을 받을 수 없다. 해당 모델의 AsFT / SafeLoRA / RESTA 셀이 실패한다.")
+    print("         해당 페이지에서 라이선스를 수락하라: " + " , ".join("https://huggingface.co/"+m for m in bad))
+PYEOF2
+
 # SafeDelta 외부 저장소
 if has_method safedelta; then
   if [[ -f "$SAFEDELTA_DIR/llama2/run_safedelta.py" ]]; then

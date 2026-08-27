@@ -44,6 +44,12 @@ def _build_projectors(base_path, aligned_path, target_modules, compute_device, l
     for (b_name, b_param), (a_name, a_param) in zip(base_model.named_parameters(),
                                                     aligned_model.named_parameters()):
         if any(m in a_name for m in target_modules):
+            # ⚠️ Qwen2.5 처럼 q/k/v_proj 에 bias 가 있는 모델에서는 이름 부분일치만으로는
+            # 1-D bias 까지 잡힌다. projector 는 가중치 행렬로만 정의되므로 제외한다
+            # (torch.mm(vec, vec.t()) 가 1-D 에서 터지므로 조용히 틀리지는 않지만, 애초에
+            #  positional 대응이 깨진다 — AsFT 에서 실제로 발생했다).
+            if b_param.ndim != 2:
+                continue
             assert b_param.shape == a_param.shape, (
                 f"base/aligned weight shape mismatch: {b_name} {tuple(b_param.shape)} "
                 f"vs {a_name} {tuple(a_param.shape)}")

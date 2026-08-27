@@ -63,6 +63,12 @@ def build_alignment_dirs(base_path, aligned_path, target_modules, device,
                                                     aligned_model.named_parameters()):
         if not any(m in a_name for m in target_modules):
             continue
+        # ⚠️ 이름 부분일치만으로 고르면 **bias 도 걸린다.** Qwen2.5 는 q/k/v_proj 에 bias 가
+        # 있어서 층당 5개가 아니라 8개(q.w,q.b,k.w,k.b,v.w,v.b,up.w,down.w)가 잡혔고,
+        # positional 대응이 어긋나 28층×8=224 개가 만들어졌다(정상은 140).
+        # alignment direction 은 가중치 행렬 V = W_aligned − W_base 로만 정의된다.
+        if b_param.ndim != 2:
+            continue
         assert b_param.shape == a_param.shape, (
             f"base/aligned weight shape mismatch: {b_name} {tuple(b_param.shape)} "
             f"vs {a_name} {tuple(a_param.shape)}")
