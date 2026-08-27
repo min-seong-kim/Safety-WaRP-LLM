@@ -530,9 +530,13 @@ prune_basis_if_done() {  # <safety> <model>
   # (없는데도 아래 루프를 돌면 "쓸 곳이 없다"로 판정되어 남의 basis 를 지워버린다.)
   has_method wsr_tune || has_method wsr_lora || return 0
   local safety="$1" mkey="$2" task d
-  for task in $(tasks_for_model "$mkey"); do
+  for task in $(tasks_for_model "$mkey" "$safety"); do
     for m in wsr_tune wsr_lora; do
-      has_method "$m" || continue
+      # ⚠️ has_method 가 아니라 want_cell 이어야 한다. 논문에 이미 있어 이번에 **안 돌릴** 셀은
+      #    영원히 .done 이 생기지 않으므로, has_method 로 보면 매번 "아직 안 끝났다"가 되어
+      #    basis 가 한 번도 지워지지 않는다 (실제로 72GB 가 남아 디스크를 압박했다).
+      #    tasks_for_model 에 $safety 를 넘기는 것도 필수 — BT 축은 태스크 목록이 다르다.
+      want_cell "$safety" "$mkey" "$task" "$m" || continue
       d="$(out_dir "$safety" "$mkey" "$task" "$m")"
       is_done "$d" || return 0     # 아직 쓸 곳이 남았다
     done
