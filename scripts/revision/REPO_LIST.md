@@ -8,10 +8,10 @@
 | | |
 |---|---|
 | 네임스페이스 | `kmseong` |
-| **새로 만들 학습 셀** | **116개** |
-| 논문/rebuttal 에 이미 있어 건너뛰는 셀 | 40개 |
+| **새로 만들 학습 셀** | **114개** |
+| 논문/rebuttal 에 이미 있어 건너뛰는 셀 | 42개 |
 | BT 안전정렬 출발모델 리포 | 0개 |
-| **합계 (새로 생성)** | **116개** |
+| **합계 (새로 생성)** | **114개** |
 
 ### 이번 범위
 
@@ -300,7 +300,7 @@ kmseong/{model}-{CB|BT}_SSFT-{method}_{task}[_{hparam}]_lr{lr}
 | SaLoRA | `qwen2_5_7b-instruct-CB_SSFT-salora_gsm8k_rs32rt32_lr3e-4` | **신규** |
 | WSR-LoRA | `qwen2_5_7b-instruct-CB_SSFT-wsr-lora_gsm8k_rho0.1_lr3e-4` | **신규** |
 
-### `gemma2_9b`  (`gemma2_9b-it`) — 신규 7개
+### `gemma2_9b`  (`gemma2_9b-it`) — 신규 5개
 
 #### CB · GSM8K  — Table 2 / Table 4
 
@@ -312,10 +312,10 @@ kmseong/{model}-{CB|BT}_SSFT-{method}_{task}[_{hparam}]_lr{lr}
 | SafeDelta | `gemma2_9b-it-CB_SSFT-safedelta_gsm8k_s0.1_lr5e-5` | 기존 (논문/rebuttal) |
 | WSR-Tune | `gemma2_9b-it-CB_SSFT-wsr-tune_gsm8k_rho0.1_lr5e-5` | 기존 (논문/rebuttal) |
 | Vanilla LoRA | `gemma2_9b-it-CB_SSFT-lora_gsm8k_lr3e-4` | **신규** |
-| AsFT | `gemma2_9b-it-CB_SSFT-asft_gsm8k_lambda1.0_lr3e-4` | **신규** |
+| AsFT | `gemma2_9b-it-CB_SSFT-asft_gsm8k_lambda1.0_lr3e-4` | 기존 (논문/rebuttal) |
 | LISA | `gemma2_9b-it-CB_SSFT-lisa_gsm8k_rho1.0_lr3e-4` | **신규** |
 | SEAL | `gemma2_9b-it-CB_SSFT-seal_gsm8k_topp0.8_lr5e-5` | **신규** |
-| SafeLoRA | `gemma2_9b-it-CB_SSFT-safelora_gsm8k_thr0.3_lr3e-4` | **신규** |
+| SafeLoRA | `gemma2_9b-it-CB_SSFT-safelora_gsm8k_thr0.3_lr3e-4` | 기존 (논문/rebuttal) |
 | SaLoRA | `gemma2_9b-it-CB_SSFT-salora_gsm8k_rs32rt32_lr3e-4` | **신규** |
 | WSR-LoRA | `gemma2_9b-it-CB_SSFT-wsr-lora_gsm8k_rho0.1_lr3e-4` | **신규** |
 
@@ -438,10 +438,8 @@ kmseong/qwen2_5_7b-instruct-CB_SSFT-safelora_gsm8k_thr0.3_lr3e-4
 kmseong/qwen2_5_7b-instruct-CB_SSFT-salora_gsm8k_rs32rt32_lr3e-4
 kmseong/qwen2_5_7b-instruct-CB_SSFT-wsr-lora_gsm8k_rho0.1_lr3e-4
 kmseong/gemma2_9b-it-CB_SSFT-lora_gsm8k_lr3e-4
-kmseong/gemma2_9b-it-CB_SSFT-asft_gsm8k_lambda1.0_lr3e-4
 kmseong/gemma2_9b-it-CB_SSFT-lisa_gsm8k_rho1.0_lr3e-4
 kmseong/gemma2_9b-it-CB_SSFT-seal_gsm8k_topp0.8_lr5e-5
-kmseong/gemma2_9b-it-CB_SSFT-safelora_gsm8k_thr0.3_lr3e-4
 kmseong/gemma2_9b-it-CB_SSFT-salora_gsm8k_rs32rt32_lr3e-4
 kmseong/gemma2_9b-it-CB_SSFT-wsr-lora_gsm8k_rho0.1_lr3e-4
 ```
@@ -452,7 +450,7 @@ kmseong/gemma2_9b-it-CB_SSFT-wsr-lora_gsm8k_rho0.1_lr3e-4
 
 이 목록은 아래를 만족한다 (`gen_repo_list.sh` 가 매번 재확인).
 
-- 총 **116개**, 고유 **116개** — 중복 0건
+- 총 **114개**, 고유 **114개** — 중복 0건
 - 리포명 최장 **56자** (Hugging Face 한도: 네임스페이스 제외 96자)
 - HF 허용문자 `[A-Za-z0-9._-]` 위반: **0건**
 
@@ -470,4 +468,4 @@ print(f"계획 {len(planned)} · 기존 {len(existing)} · 충돌 {len(clash)}",
 PY
 ```
 
-생성 시각: 2026-08-26 21:43:33 KST
+생성 시각: 2026-08-27 23:35:37 KST

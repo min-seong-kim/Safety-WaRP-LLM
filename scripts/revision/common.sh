@@ -316,10 +316,30 @@ already_published() {  # <safety> <model> <task> <method>
   return 1
 }
 
-# 이 셀을 이번에 돌려야 하는가 (선택자 + 기발표 여부).
+# ══════════════ 돌릴 수 없어 제외하는 셀 ══════════════
+#  AsFT / SafeLoRA / RESTA 는 V = W_aligned − W_base 를 만들어야 해서 **base 모델을 실제로
+#  내려받을 수 있어야** 한다. gated repo 의 라이선스를 수락하지 않은 계정에서는 403 이 난다.
+#
+#  google/gemma-2-9b-it : 2026-08-27 현재 이 계정에 접근권이 없다(사용자가 지금은 수락 불가).
+#    → gemma2_9b 의 asft · safelora 셀은 아무리 재시도해도 실패하므로 아예 제외한다.
+#      나머지 5종(lora/lisa/seal/salora/wsr_lora)은 aligned 모델만 쓰므로 정상 진행한다.
+#
+#  ▶ 라이선스를 수락한 뒤에는:
+#      BASE_BLOCKED_MODELS="" bash scripts/revision/run_all.sh
+#    한 줄이면 두 셀이 다시 대상이 되고, .done 이 없으므로 그때 학습된다.
+BASE_BLOCKED_MODELS="${BASE_BLOCKED_MODELS:-gemma2_9b}"
+BASE_REQUIRING_METHODS="asft safelora resta"
+
+cell_blocked() {  # <safety> <model> <task> <method>
+  [[ " $BASE_BLOCKED_MODELS " == *" $2 "* ]] || return 1
+  [[ " $BASE_REQUIRING_METHODS " == *" $4 "* ]]
+}
+
+# 이 셀을 이번에 돌려야 하는가 (선택자 + 기발표 + base 접근 가능 여부).
 cell_wanted() {  # <safety> <model> <task> <method>
   safety_applies "$1" "$2" || return 1
   already_published "$1" "$2" "$3" "$4" && return 1
+  cell_blocked "$1" "$2" "$3" "$4" && return 1
   return 0
 }
 
