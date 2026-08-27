@@ -87,6 +87,9 @@ for safety in $SAFETY_SETS; do
       basis_ut_arg=""
       [[ "$BASIS_OMIT_UT" == "1" ]] && basis_ut_arg="--basis_omit_ut"
       deadline_passed && { log "[deadline] 마감 초과 — 시작하지 않는다"; continue; }
+      # basis 는 조합당 8~31GB 를 쓴다. 여유가 없으면 시작하지 말아야 한다 —
+      # 쓰다가 디스크가 0 이 되면 로그·git 까지 망가진다(run_cell 과 같은 가드).
+      disk_ok || { warn "[disk] basis 를 만들 공간이 없다 — $safety/$mkey 건너뜀"; continue; }
       hdr "Phase 1 (basis)  $safety/$mkey   model=$ALIGNED   batch=$MB_P12  dtype=$BASIS_SAVE_DTYPE omit_ut=$BASIS_OMIT_UT"
       if [[ "$DRY_RUN" == "1" ]]; then
         echo "  [dry-run] $PY train.py --phase 1 --phase0_model_dir $ALIGNED \\"
