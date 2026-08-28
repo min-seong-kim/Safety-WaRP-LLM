@@ -391,6 +391,35 @@ Only `apply_safety_basis_rotation.py` does float32 math on the basis — pass
   `SSFT_GRAD_ACCUM`); hardcoded 4×4 OOMs on 13B/9B. Keep the product at 16.
 - `/home/edgeai_lab/SafeDelta/llama2/run_safedelta.py` had `CUDA_VISIBLE_DEVICES="2,3"` at
   import time; patched to `setdefault`. SafeDelta is an **external** repo dependency.
+- `finish_cb.sh` originally ran `git add -A REVISION_PROGRESS.md REPO_LIST.md …`, but
+  `REPO_LIST.md` lives in `scripts/revision/`, not the repo root. `git add` aborts wholesale on a
+  missing path, so the final commit silently staged **nothing**. Never mix an unverified path into
+  a `git add` list in an unattended script.
+
+### Current state (2026-08-28) and how to resume
+
+`REVISION_PROGRESS.md` at the repo root is the live status table. It is **generated**, never
+hand-written: `python scripts/revision/gen_progress_md.py --out REVISION_PROGRESS.md` derives it
+from `common.sh`'s registry plus the real hub/local state. A repo that merely *exists* on the hub
+does not count as done — an interrupted upload leaves an empty repo, so cells without a verified
+`.uploaded` marker are checked for actual `safetensors`.
+
+As of 2026-08-28: **62 of 114 new cells uploaded**, 2 trained but blocked, 50 not run
+(3 CB + 47 BT), 40 reused from the paper.
+
+**The binding constraint is HF public storage, not compute.** Uploads fail with
+`403 Forbidden: You have exceeded your public storage space`. `upload_and_prune.py` only deletes
+local weights after all four verifications pass, so a blocked cell is preserved, not lost — but
+this box is ephemeral, so a blocked cell dies with the box. Freeing hub space (or PRO) is the
+prerequisite for any further progress, and the two Qwen2.5-32B `only-{sn,rsn}-tuned` repos were
+deleted for exactly this reason. Qwen2.5-**32B** appears nowhere in the paper, the rebuttal record,
+or `baselines_multimodel.md` (those all use Qwen2.5-**7B**); eight 32B repos remain and are the
+obvious next candidates, but they are a coherent 8-arm set — get explicit confirmation first.
+
+Resume with `bash scripts/revision/finish_cb.sh` (CB) or `SAFETY_SETS=bt bash
+scripts/revision/run_all.sh` (BT). **Do not delete the `.done` / `.uploaded` markers under
+`outputs/revision/`** — they are the only record that an already-uploaded cell is finished, and
+without them the pipeline retrains everything from scratch.
 
 ## Evaluation
 

@@ -57,7 +57,8 @@ python "$HERE/gen_progress_md.py" --out "$REPO_DIR/REVISION_PROGRESS.md" || echo
 
 # ── ④ git ──
 echo ""; echo "════ ④ git ════"
-git add -A REVISION_PROGRESS.md REPO_LIST.md logs/revision_unattended scripts/revision 2>/dev/null
+# 존재하지 않는 경로를 섞으면 git add 가 통째로 실패해 커밋이 비어 버린다.
+git add -A REVISION_PROGRESS.md logs/revision_unattended scripts/revision 2>/dev/null
 n=$(find "$OUT_ROOT" -name .uploaded 2>/dev/null | wc -l)
 if git diff --cached --quiet; then echo "   커밋할 변경 없음"; else
   git commit -q -m "revision: CB axis finish ${TS} — ${n} cells on the hub

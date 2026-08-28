@@ -14,9 +14,9 @@ python scripts/revision/gen_progress_md.py --out REVISION_PROGRESS.md
 | 새로 만들 셀(전체) | **114** |
 | └ CB 축 | 66 |
 | └ BT 축 | 48 |
-| ✅ 허브 업로드 완료 | **61** |
-| 🟡 학습 완료·업로드 대기(로컬) | 0 |
-| ⬜ 미실행 | 53 |
+| ✅ 허브 업로드 완료 | **62** |
+| 🟡 학습 완료·업로드 대기(로컬) | 2 |
+| ⬜ 미실행 | 50 |
 | ♻️ 논문 기존 결과 재사용(새로 안 만듦) | 40 |
 | 🚫 라이선스 차단(gemma-2-9b-it) | 3 |
 
@@ -66,7 +66,7 @@ RESTA γ=0.3 · SafeDelta s=0.1.
 
 | task | Full FT | SafeInstr | RESTA | SafeDelta | WSR-Tune | Vanilla LoRA | AsFT | LISA | SEAL | SafeLoRA | SaLoRA | WSR-LoRA |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| gsm8k | ♻️ | ♻️ | ♻️ | ♻️ | ♻️ | ✅ | ⬜ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| gsm8k | ♻️ | ♻️ | ♻️ | ♻️ | ♻️ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 **gemma-2-9b-it**
 
@@ -84,7 +84,7 @@ RESTA γ=0.3 · SafeDelta s=0.1.
 
 | task | Full FT | SafeInstr | RESTA | SafeDelta | WSR-Tune | Vanilla LoRA | AsFT | LISA | SEAL | SafeLoRA | SaLoRA | WSR-LoRA |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| gsm8k | ♻️ | ♻️ | ♻️ | ♻️ | ♻️ | ✅ | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
+| gsm8k | ♻️ | ♻️ | ♻️ | ♻️ | ♻️ | ✅ | ✅ | 🟡 | ⬜ | 🟡 | ⬜ | ⬜ |
 
 ### BT 축 (safety dataset = BeaverTails)
 
@@ -97,14 +97,16 @@ RESTA γ=0.3 · SafeDelta s=0.1.
 | arc | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 | agnews | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 
+## 업로드 대기 중인 로컬 모델
+
+- `kmseong/llama2_13b-chat-CB_SSFT-lisa_gsm8k_rho1.0_lr3e-4`
+- `kmseong/llama2_13b-chat-CB_SSFT-safelora_gsm8k_thr0.3_lr3e-4`
+
 ## 남은 셀
 
-- cb/llama2_13b/gsm8k/lisa → `kmseong/llama2_13b-chat-CB_SSFT-lisa_gsm8k_rho1.0_lr3e-4`
 - cb/llama2_13b/gsm8k/seal → `kmseong/llama2_13b-chat-CB_SSFT-seal_gsm8k_topp0.8_lr5e-5`
-- cb/llama2_13b/gsm8k/safelora → `kmseong/llama2_13b-chat-CB_SSFT-safelora_gsm8k_thr0.3_lr3e-4`
 - cb/llama2_13b/gsm8k/salora → `kmseong/llama2_13b-chat-CB_SSFT-salora_gsm8k_rs32rt32_lr3e-4`
 - cb/llama2_13b/gsm8k/wsr_lora → `kmseong/llama2_13b-chat-CB_SSFT-wsr-lora_gsm8k_rho0.1_lr3e-4`
-- cb/qwen25_7b/gsm8k/asft → `kmseong/qwen2_5_7b-instruct-CB_SSFT-asft_gsm8k_lambda1.0_lr3e-4`
 - bt/llama2_7b/gsm8k/fullft → `kmseong/llama2_7b-chat-BT_SSFT-fullft_gsm8k_lr5e-5`
 - bt/llama2_7b/gsm8k/safeinstr → `kmseong/llama2_7b-chat-BT_SSFT-safeinstr_gsm8k_mix0.1_lr5e-5`
 - bt/llama2_7b/gsm8k/resta → `kmseong/llama2_7b-chat-BT_SSFT-resta_gsm8k_gamma0.3_lr5e-5`
@@ -156,6 +158,37 @@ RESTA γ=0.3 · SafeDelta s=0.1.
 ## 차단된 셀 (gemma-2-9b-it 게이트 라이선스 미승인)
 
 3개. 라이선스를 수락한 뒤 `common.sh` 의 `BASE_BLOCKED_MODELS=""` 로 두면 다시 잡힌다.
+
+## 지금 막혀 있는 것
+
+**HF 공개 스토리지 쿼터 초과.** 업로드가 `403 Forbidden: You have exceeded your public storage space`
+로 거부된다. 학습 자체는 정상이고, 검증에 실패한 셀은 로컬 가중치를 **지우지 않고 보존**한다
+(`upload_and_prune.py` 는 4단계 검증을 통과한 셀만 지운다).
+
+학습은 끝났지만 이 이유로 허브에 올리지 못한 셀:
+
+- `cb/llama2_13b/gsm8k/lisa` → `kmseong/llama2_13b-chat-CB_SSFT-lisa_gsm8k_rho1.0_lr3e-4`
+- `cb/llama2_13b/gsm8k/safelora` → `kmseong/llama2_13b-chat-CB_SSFT-safelora_gsm8k_thr0.3_lr3e-4`
+
+풀려면 셋 중 하나가 필요하다 — ① 계정에서 쓰지 않는 리포지토리 삭제, ② HF PRO 구독,
+③ HF 에 공개 연구용 스토리지 상향 요청(`website@huggingface.co`).
+
+## 다음 환경으로 넘길 때
+
+이 저장소만 클론하면 이어서 돌아간다. 상태는 전부 파일에 있다:
+
+- 완료 판정은 셀 디렉터리의 `.done` / `.uploaded` 마커다. `run_all.sh` 는 마커가 있는 셀을 건너뛴다.
+- 이미 허브에 올라간 셀은 로컬에 가중치가 없어도 `.uploaded` 마커만으로 완료로 인정된다.
+- 그러므로 **`outputs/revision/` 의 마커 파일을 지우지 말 것** — 지우면 끝난 셀을 처음부터 다시 돈다.
+
+```bash
+conda activate hb
+setsid nohup bash scripts/revision/finish_cb.sh > /dev/null 2>&1 &   # CB 축 잔여
+SAFETY_SETS=bt bash scripts/revision/run_all.sh                      # BT 축 (학습만 ~35h)
+```
+
+BT 축은 Llama-2-7B 한 모델에 4개 task × 12개 기법이고, 출발 모델
+`wvnvwn/llama2-7b-chat-lr5e-5-ssft-bv` 는 이미 허브에 있으므로 SSFT 를 다시 하지 않는다.
 
 ## 업로드된 모델 (허브)
 
@@ -214,6 +247,7 @@ RESTA γ=0.3 · SafeDelta s=0.1.
 - [`kmseong/llama3_2_3b-instruct-CB_SSFT-salora_math_rs32rt32_lr3e-4`](https://huggingface.co/kmseong/llama3_2_3b-instruct-CB_SSFT-salora_math_rs32rt32_lr3e-4)
 - [`kmseong/llama3_2_3b-instruct-CB_SSFT-seal_math_topp0.8_lr5e-5`](https://huggingface.co/kmseong/llama3_2_3b-instruct-CB_SSFT-seal_math_topp0.8_lr5e-5)
 - [`kmseong/llama3_2_3b-instruct-CB_SSFT-wsr-lora_math_rho0.1_lr3e-4`](https://huggingface.co/kmseong/llama3_2_3b-instruct-CB_SSFT-wsr-lora_math_rho0.1_lr3e-4)
+- [`kmseong/qwen2_5_7b-instruct-CB_SSFT-asft_gsm8k_lambda1.0_lr3e-4`](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-asft_gsm8k_lambda1.0_lr3e-4)
 - [`kmseong/qwen2_5_7b-instruct-CB_SSFT-lisa_gsm8k_rho1.0_lr3e-4`](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-lisa_gsm8k_rho1.0_lr3e-4)
 - [`kmseong/qwen2_5_7b-instruct-CB_SSFT-lora_gsm8k_lr3e-4`](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-lora_gsm8k_lr3e-4)
 - [`kmseong/qwen2_5_7b-instruct-CB_SSFT-safelora_gsm8k_thr0.3_lr3e-4`](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-safelora_gsm8k_thr0.3_lr3e-4)

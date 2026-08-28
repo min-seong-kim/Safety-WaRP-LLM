@@ -189,6 +189,29 @@ def main():
         w("## 차단된 셀 (gemma-2-9b-it 게이트 라이선스 미승인)\n")
         w(f"{len(blocked)}개. 라이선스를 수락한 뒤 `common.sh` 의 `BASE_BLOCKED_MODELS=\"\"` 로 두면 다시 잡힌다.\n")
 
+    w("## 지금 막혀 있는 것\n")
+    w("**HF 공개 스토리지 쿼터 초과.** 업로드가 `403 Forbidden: You have exceeded your public storage space`")
+    w("로 거부된다. 학습 자체는 정상이고, 검증에 실패한 셀은 로컬 가중치를 **지우지 않고 보존**한다")
+    w("(`upload_and_prune.py` 는 4단계 검증을 통과한 셀만 지운다).\n")
+    if local:
+        w("학습은 끝났지만 이 이유로 허브에 올리지 못한 셀:\n")
+        for r in local:
+            w(f"- `{r['safety']}/{r['model']}/{r['task']}/{r['method']}` → `{r['repo']}`")
+        w("")
+    w("풀려면 셋 중 하나가 필요하다 — ① 계정에서 쓰지 않는 리포지토리 삭제, ② HF PRO 구독,")
+    w("③ HF 에 공개 연구용 스토리지 상향 요청(`website@huggingface.co`).\n")
+
+    w("## 다음 환경으로 넘길 때\n")
+    w("이 저장소만 클론하면 이어서 돌아간다. 상태는 전부 파일에 있다:\n")
+    w("- 완료 판정은 셀 디렉터리의 `.done` / `.uploaded` 마커다. `run_all.sh` 는 마커가 있는 셀을 건너뛴다.")
+    w("- 이미 허브에 올라간 셀은 로컬에 가중치가 없어도 `.uploaded` 마커만으로 완료로 인정된다.")
+    w("- 그러므로 **`outputs/revision/` 의 마커 파일을 지우지 말 것** — 지우면 끝난 셀을 처음부터 다시 돈다.\n")
+    w("```bash\nconda activate hb\n"
+      "setsid nohup bash scripts/revision/finish_cb.sh > /dev/null 2>&1 &   # CB 축 잔여\n"
+      "SAFETY_SETS=bt bash scripts/revision/run_all.sh                      # BT 축 (학습만 ~35h)\n```\n")
+    w("BT 축은 Llama-2-7B 한 모델에 4개 task × 12개 기법이고, 출발 모델")
+    w("`wvnvwn/llama2-7b-chat-lr5e-5-ssft-bv` 는 이미 허브에 있으므로 SSFT 를 다시 하지 않는다.\n")
+
     w("## 업로드된 모델 (허브)\n")
     for r in sorted(done, key=lambda x: x["repo"]): w(f"- [`{r['repo']}`](https://huggingface.co/{r['repo']})")
     w("")
