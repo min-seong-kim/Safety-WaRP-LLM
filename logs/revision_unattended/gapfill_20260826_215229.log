@@ -1986,3 +1986,7 @@
   kmseong/qwen2_5_7b-instruct-CB_SSFT-seal_gsm8k_topp0.8_lr5e-5
   kmseong/qwen2_5_7b-instruct-CB_SSFT-wsr-lora_gsm8k_rho0.1_lr3e-4
   → 누적 55개 업로드
+  커밋: 91c3f0c2 revision: gap-fill 20260826_215229 — 55 cells uploaded (cumulative)
+To https://github.com/min-seong-kim/Safety-WaRP-LLM.git
+   75b6ef4a..91c3f0c2  HEAD -> main
+════ 끝  2026-08-28 07:11:07 ════
