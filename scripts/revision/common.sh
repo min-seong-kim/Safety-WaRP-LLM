@@ -116,8 +116,12 @@ SAFEDELTA_SEQLEN="${SAFEDELTA_SEQLEN:-512}"
 SAFEDELTA_DIR="${SAFEDELTA_DIR:-/home/edgeai_lab/SafeDelta}"
 
 KEEP_RATIO="${KEEP_RATIO:-0.1}"             # WSR-Tune / WSR-LoRA freeze ratio rho = 10%
+# WSR-LoRA 전용 alpha 오버라이드. 비우면 LORA_ALPHA(=32)를 그대로 쓴다.
+#   2026-08-31: α16 vs α32 (scaling 1.0 vs 2.0) ablation 용. 값이 있으면 리포명에 _a<값> 이 붙어
+#   기존 α32 셀과 충돌하지 않는다.
+WSR_LORA_ALPHA="${WSR_LORA_ALPHA:-}"
 ASFT_LAMBDA_REG="${ASFT_LAMBDA_REG:-1.0}"   # 사용자 지정 λ=1.0 (= 참조 구현 AsFT_reg1_p_0.1.sh)
-LISA_RHO="${LISA_RHO:-1.0}"                 # 사용자 지정
+LISA_RHO="${LISA_RHO:-0.0}"                 # 2026-08-31 사용자 결정: rebuttal 모델(rho0)과 맞춘다
 LISA_ALIGNMENT_STEP="${LISA_ALIGNMENT_STEP:-100}"
 LISA_FINETUNE_STEP="${LISA_FINETUNE_STEP:-900}"
 SAFELORA_THRESHOLD="${SAFELORA_THRESHOLD:-0.3}"   # 사용자 지정 thr=0.3
@@ -327,7 +331,7 @@ already_published() {  # <safety> <model> <task> <method>
 #  ▶ 라이선스를 수락한 뒤에는:
 #      BASE_BLOCKED_MODELS="" bash scripts/revision/run_all.sh
 #    한 줄이면 두 셀이 다시 대상이 되고, .done 이 없으므로 그때 학습된다.
-BASE_BLOCKED_MODELS="${BASE_BLOCKED_MODELS:-gemma2_9b}"
+BASE_BLOCKED_MODELS="${BASE_BLOCKED_MODELS-gemma2_9b}"
 BASE_REQUIRING_METHODS="asft safelora resta"
 
 cell_blocked() {  # <safety> <model> <task> <method>
@@ -443,7 +447,7 @@ hf_hparam_tag() {
     resta)     echo "gamma${RESTA_GAMMA}" ;;
     safedelta) echo "s${SAFEDELTA_SCALE}" ;;
     wsr_tune)  echo "rho${KEEP_RATIO}" ;;
-    wsr_lora)  echo "rho${KEEP_RATIO}" ;;
+    wsr_lora)  echo "rho${KEEP_RATIO}${WSR_LORA_ALPHA:+_a${WSR_LORA_ALPHA}}" ;;
     asft)      echo "lambda${ASFT_LAMBDA_REG}" ;;
     lisa)      echo "rho${LISA_RHO}" ;;
     seal)      echo "topp${SEAL_TOPP}" ;;

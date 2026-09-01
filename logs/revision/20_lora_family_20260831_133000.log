@@ -1,0 +1,29 @@
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/edgeai_lab/Safety-WaRP-LLM
+   python    : /home/edgeai_lab/miniconda3/envs/hb/bin/python
+   safety    : cb
+   models    : gemma2_9b
+   methods   : asft
+   tasks     : <모델별 자동>
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=1, basis 삭제=1)
+   *** DRY RUN ***
+════════════════════════════════════════════════════════════════
+
+  AsFT λ          : 1.0
+  SafeLoRA thr    : 0.3  (load dtype=float32)
+  LISA            : ρ=1.0 align_step=100 ft_step=900
+  SaLoRA          : salora/salora_lora.py · r_s=32 r_t=32 init=task n_harmful=256 n_task=256
+  WSR-LoRA ρ      : 0.1  (Phase1 basis 필요)
+
+──────────────────────────────────────────────────────────────
+  asft(λ=1.0)  cb/gemma2_9b/gsm8k lr=3e-4 batch=2x8   (08-31 13:30:00)
+──────────────────────────────────────────────────────────────
+  [dry-run] python finetune_gsm8k_lora.py --method asft --model_name wvnvwn/gemma-2-9b-it-ssft-lr3e-5 --output_dir /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/gemma2_9b/gsm8k/asft --task_data_path /home/edgeai_lab/Safety-WaRP-LLM/data/gsm8k_train_task_7473.json --task_samples 0 --target_modules q_proj\,k_proj\,v_proj\,up_proj\,down_proj --layer_type attn_q\,attn_k\,attn_v\,ffn_up\,ffn_down --target_layers all --asft_base_model google/gemma-2-9b-it --asft_aligned_model wvnvwn/gemma-2-9b-it-ssft-lr3e-5 --asft_lambda_reg 1.0 --asft_store_dtype float32 --asft_check_equiv --lora_r 16 --lora_alpha 32 --lora_dropout 0.05 --learning_rate 3e-4 --epochs 3 --batch_size 2 --gradient_accumulation_steps 8 --max_length 1024 --warmup_ratio 0.03 --weight_decay 0.0 --seed 42 --dtype bfloat16 --gradient_checkpointing --save_merged_model
+
+실패한 셀 없음.

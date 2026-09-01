@@ -1,0 +1,44 @@
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/edgeai_lab/Safety-WaRP-LLM
+   python    : /home/edgeai_lab/miniconda3/envs/hb/bin/python
+   safety    : cb
+   models    : llama2_7b
+   methods   : lisa
+   tasks     : <모델별 자동>
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision
+   hf        : 업로드 안 함 (PUSH_TO_HUB=0) — 디스크 3.4TB 필요
+   *** DRY RUN ***
+════════════════════════════════════════════════════════════════
+
+  AsFT λ          : 1.0
+  SafeLoRA thr    : 0.3  (load dtype=float32)
+  LISA            : ρ=0.0 align_step=100 ft_step=900
+  SaLoRA          : salora/salora_lora.py · r_s=32 r_t=32 init=task n_harmful=256 n_task=256
+  WSR-LoRA ρ      : 0.1  (Phase1 basis 필요)
+
+──────────────────────────────────────────────────────────────
+  lisa(ρ=0.0)  cb/llama2_7b/gsm8k lr=3e-4 batch=4x4   (08-31 17:04:53)
+──────────────────────────────────────────────────────────────
+  [dry-run] python gsm8k_eval/finetune_gsm8k_lisa.py --model_path kmseong/llama2_7b-chat-Safety-FT-lr5e-5 --output_dir /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/gsm8k/lisa --task_data_path /home/edgeai_lab/Safety-WaRP-LLM/data/gsm8k_train_task_7473.json --task_samples 0 --num_eval_samples 0 --safety_data_path /home/edgeai_lab/Safety-WaRP-LLM/data/circuit_breakers_train.json --guide_data_num 4994 --rho 0.0 --alignment_step 100 --finetune_step 900 --lora --lora_target_modules q_proj k_proj v_proj up_proj down_proj --lora_r 16 --lora_alpha 32 --lora_dropout 0.05 --learning_rate 3e-4 --epochs 3 --batch_size 4 --grad_accum 4 --max_length 1024 --warmup_ratio 0.03 --weight_decay 0.0 --lr_scheduler_type cosine --max_grad_norm 1.0 --seed 42 --bf16 --gradient_checkpointing --report_to none
+
+──────────────────────────────────────────────────────────────
+  lisa(ρ=0.0)  cb/llama2_7b/medqa lr=3e-4 batch=4x4   (08-31 17:04:53)
+──────────────────────────────────────────────────────────────
+  [dry-run] python gsm8k_eval/finetune_gsm8k_lisa.py --model_path kmseong/llama2_7b-chat-Safety-FT-lr5e-5 --output_dir /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/medqa/lisa --task_data_path /home/edgeai_lab/Safety-WaRP-LLM/data/medqa_train_task_10178.json --task_samples 0 --num_eval_samples 0 --safety_data_path /home/edgeai_lab/Safety-WaRP-LLM/data/circuit_breakers_train.json --guide_data_num 4994 --rho 0.0 --alignment_step 100 --finetune_step 900 --lora --lora_target_modules q_proj k_proj v_proj up_proj down_proj --lora_r 16 --lora_alpha 32 --lora_dropout 0.05 --learning_rate 3e-4 --epochs 3 --batch_size 4 --grad_accum 4 --max_length 1024 --warmup_ratio 0.03 --weight_decay 0.0 --lr_scheduler_type cosine --max_grad_norm 1.0 --seed 42 --bf16 --gradient_checkpointing --report_to none
+
+──────────────────────────────────────────────────────────────
+  lisa(ρ=0.0)  cb/llama2_7b/arc lr=3e-4 batch=4x4   (08-31 17:04:53)
+──────────────────────────────────────────────────────────────
+  [dry-run] python gsm8k_eval/finetune_gsm8k_lisa.py --model_path kmseong/llama2_7b-chat-Safety-FT-lr5e-5 --output_dir /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/arc/lisa --task_data_path /home/edgeai_lab/Safety-WaRP-LLM/data/arc_challenge_train_task_1119.json --task_samples 0 --num_eval_samples 0 --safety_data_path /home/edgeai_lab/Safety-WaRP-LLM/data/circuit_breakers_train.json --guide_data_num 4994 --rho 0.0 --alignment_step 100 --finetune_step 900 --lora --lora_target_modules q_proj k_proj v_proj up_proj down_proj --lora_r 16 --lora_alpha 32 --lora_dropout 0.05 --learning_rate 3e-4 --epochs 3 --batch_size 4 --grad_accum 4 --max_length 1024 --warmup_ratio 0.03 --weight_decay 0.0 --lr_scheduler_type cosine --max_grad_norm 1.0 --seed 42 --bf16 --gradient_checkpointing --report_to none
+
+──────────────────────────────────────────────────────────────
+  lisa(ρ=0.0)  cb/llama2_7b/agnews lr=7e-5 batch=4x4   (08-31 17:04:53)
+──────────────────────────────────────────────────────────────
+  [dry-run] python gsm8k_eval/finetune_gsm8k_lisa.py --model_path kmseong/llama2_7b-chat-Safety-FT-lr5e-5 --output_dir /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/agnews/lisa --task_data_path /home/edgeai_lab/Safety-WaRP-LLM/data/agnews_train_8k_seed42.json --task_samples 0 --num_eval_samples 0 --safety_data_path /home/edgeai_lab/Safety-WaRP-LLM/data/circuit_breakers_train.json --guide_data_num 4994 --rho 0.0 --alignment_step 100 --finetune_step 900 --lora --lora_target_modules q_proj k_proj v_proj up_proj down_proj --lora_r 16 --lora_alpha 32 --lora_dropout 0.05 --learning_rate 7e-5 --epochs 3 --batch_size 4 --grad_accum 4 --max_length 1024 --warmup_ratio 0.03 --weight_decay 0.0 --lr_scheduler_type cosine --max_grad_norm 1.0 --seed 42 --bf16 --gradient_checkpointing --report_to none
+
+실패한 셀 없음.

@@ -11,14 +11,14 @@ python scripts/revision/gen_progress_md.py --out REVISION_PROGRESS.md
 
 | 항목 | 셀 수 |
 |---|---|
-| 새로 만들 셀(전체) | **114** |
-| └ CB 축 | 66 |
+| 새로 만들 셀(전체) | **116** |
+| └ CB 축 | 68 |
 | └ BT 축 | 48 |
-| ✅ 허브 업로드 완료 | **62** |
-| 🟡 학습 완료·업로드 대기(로컬) | 2 |
-| ⬜ 미실행 | 50 |
+| ✅ 허브 업로드 완료 | **69** |
+| 🟡 학습 완료·업로드 대기(로컬) | 0 |
+| ⬜ 미실행 | 100 |
 | ♻️ 논문 기존 결과 재사용(새로 안 만듦) | 40 |
-| 🚫 라이선스 차단(gemma-2-9b-it) | 3 |
+| 🚫 라이선스 차단(gemma-2-9b-it) | 0 |
 
 ## 실험 설계 (모든 셀 공통)
 
@@ -72,7 +72,7 @@ RESTA γ=0.3 · SafeDelta s=0.1.
 
 | task | Full FT | SafeInstr | RESTA | SafeDelta | WSR-Tune | Vanilla LoRA | AsFT | LISA | SEAL | SafeLoRA | SaLoRA | WSR-LoRA |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| gsm8k | ♻️ | ♻️ | ♻️ | ♻️ | ♻️ | ✅ | 🚫 | ✅ | ✅ | 🚫 | ✅ | ✅ |
+| gsm8k | ♻️ | ♻️ | ♻️ | ♻️ | ♻️ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 **Llama-3.1-8B-It**
 
@@ -84,7 +84,7 @@ RESTA γ=0.3 · SafeDelta s=0.1.
 
 | task | Full FT | SafeInstr | RESTA | SafeDelta | WSR-Tune | Vanilla LoRA | AsFT | LISA | SEAL | SafeLoRA | SaLoRA | WSR-LoRA |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| gsm8k | ♻️ | ♻️ | ♻️ | ♻️ | ♻️ | ✅ | ✅ | 🟡 | ⬜ | 🟡 | ⬜ | ⬜ |
+| gsm8k | ♻️ | ♻️ | ♻️ | ♻️ | ♻️ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 ### BT 축 (safety dataset = BeaverTails)
 
@@ -97,23 +97,68 @@ RESTA γ=0.3 · SafeDelta s=0.1.
 | arc | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 | agnews | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
 
-## 업로드 대기 중인 로컬 모델
-
-- `kmseong/llama2_13b-chat-CB_SSFT-lisa_gsm8k_rho1.0_lr3e-4`
-- `kmseong/llama2_13b-chat-CB_SSFT-safelora_gsm8k_thr0.3_lr3e-4`
-
 ## 남은 셀
 
-- cb/llama2_13b/gsm8k/seal → `kmseong/llama2_13b-chat-CB_SSFT-seal_gsm8k_topp0.8_lr5e-5`
-- cb/llama2_13b/gsm8k/salora → `kmseong/llama2_13b-chat-CB_SSFT-salora_gsm8k_rs32rt32_lr3e-4`
-- cb/llama2_13b/gsm8k/wsr_lora → `kmseong/llama2_13b-chat-CB_SSFT-wsr-lora_gsm8k_rho0.1_lr3e-4`
+- cb/llama2_7b/gsm8k/lora → `kmseong/llama2_7b-chat-CB_SSFT-lora_gsm8k_lr3e-4`
+- cb/llama2_7b/gsm8k/asft → `kmseong/llama2_7b-chat-CB_SSFT-asft_gsm8k_lambda1.0_lr3e-4`
+- cb/llama2_7b/gsm8k/seal → `kmseong/llama2_7b-chat-CB_SSFT-seal_gsm8k_topp0.8_lr5e-5`
+- cb/llama2_7b/gsm8k/safelora → `kmseong/llama2_7b-chat-CB_SSFT-safelora_gsm8k_thr0.3_lr3e-4`
+- cb/llama2_7b/gsm8k/salora → `kmseong/llama2_7b-chat-CB_SSFT-salora_gsm8k_rs32rt32_lr3e-4`
+- cb/llama2_7b/medqa/lora → `kmseong/llama2_7b-chat-CB_SSFT-lora_medqa_lr3e-4`
+- cb/llama2_7b/medqa/asft → `kmseong/llama2_7b-chat-CB_SSFT-asft_medqa_lambda1.0_lr3e-4`
+- cb/llama2_7b/medqa/seal → `kmseong/llama2_7b-chat-CB_SSFT-seal_medqa_topp0.8_lr5e-5`
+- cb/llama2_7b/medqa/safelora → `kmseong/llama2_7b-chat-CB_SSFT-safelora_medqa_thr0.3_lr3e-4`
+- cb/llama2_7b/medqa/salora → `kmseong/llama2_7b-chat-CB_SSFT-salora_medqa_rs32rt32_lr3e-4`
+- cb/llama2_7b/medqa/wsr_lora → `kmseong/llama2_7b-chat-CB_SSFT-wsr-lora_medqa_rho0.1_lr3e-4`
+- cb/llama2_7b/arc/lora → `kmseong/llama2_7b-chat-CB_SSFT-lora_arc_lr3e-4`
+- cb/llama2_7b/arc/asft → `kmseong/llama2_7b-chat-CB_SSFT-asft_arc_lambda1.0_lr3e-4`
+- cb/llama2_7b/arc/seal → `kmseong/llama2_7b-chat-CB_SSFT-seal_arc_topp0.8_lr5e-5`
+- cb/llama2_7b/arc/safelora → `kmseong/llama2_7b-chat-CB_SSFT-safelora_arc_thr0.3_lr3e-4`
+- cb/llama2_7b/arc/salora → `kmseong/llama2_7b-chat-CB_SSFT-salora_arc_rs32rt32_lr3e-4`
+- cb/llama2_7b/arc/wsr_lora → `kmseong/llama2_7b-chat-CB_SSFT-wsr-lora_arc_rho0.1_lr3e-4`
+- cb/llama2_7b/agnews/fullft → `kmseong/llama2_7b-chat-CB_SSFT-fullft_agnews_lr5e-5`
+- cb/llama2_7b/agnews/safeinstr → `kmseong/llama2_7b-chat-CB_SSFT-safeinstr_agnews_mix0.1_lr5e-5`
+- cb/llama2_7b/agnews/resta → `kmseong/llama2_7b-chat-CB_SSFT-resta_agnews_gamma0.3_lr5e-5`
+- cb/llama2_7b/agnews/safedelta → `kmseong/llama2_7b-chat-CB_SSFT-safedelta_agnews_s0.1_lr5e-5`
+- cb/llama2_7b/agnews/wsr_tune → `kmseong/llama2_7b-chat-CB_SSFT-wsr-tune_agnews_rho0.1_lr5e-5`
+- cb/llama2_7b/agnews/lora → `kmseong/llama2_7b-chat-CB_SSFT-lora_agnews_lr7e-5`
+- cb/llama2_7b/agnews/asft → `kmseong/llama2_7b-chat-CB_SSFT-asft_agnews_lambda1.0_lr7e-5`
+- cb/llama2_7b/agnews/seal → `kmseong/llama2_7b-chat-CB_SSFT-seal_agnews_topp0.8_lr5e-5`
+- cb/llama2_7b/agnews/safelora → `kmseong/llama2_7b-chat-CB_SSFT-safelora_agnews_thr0.3_lr7e-5`
+- cb/llama2_7b/agnews/salora → `kmseong/llama2_7b-chat-CB_SSFT-salora_agnews_rs32rt32_lr7e-5`
+- cb/llama2_7b/agnews/wsr_lora → `kmseong/llama2_7b-chat-CB_SSFT-wsr-lora_agnews_rho0.1_lr7e-5`
+- cb/llama2_13b/gsm8k/lora → `kmseong/llama2_13b-chat-CB_SSFT-lora_gsm8k_lr3e-4`
+- cb/llama2_13b/gsm8k/asft → `kmseong/llama2_13b-chat-CB_SSFT-asft_gsm8k_lambda1.0_lr3e-4`
+- cb/llama32_3b/math/lora → `kmseong/llama3_2_3b-instruct-CB_SSFT-lora_math_lr3e-4`
+- cb/llama32_3b/math/asft → `kmseong/llama3_2_3b-instruct-CB_SSFT-asft_math_lambda1.0_lr3e-4`
+- cb/llama32_3b/math/seal → `kmseong/llama3_2_3b-instruct-CB_SSFT-seal_math_topp0.8_lr5e-5`
+- cb/llama32_3b/math/safelora → `kmseong/llama3_2_3b-instruct-CB_SSFT-safelora_math_thr0.3_lr3e-4`
+- cb/llama32_3b/math/salora → `kmseong/llama3_2_3b-instruct-CB_SSFT-salora_math_rs32rt32_lr3e-4`
+- cb/llama32_3b/math/wsr_lora → `kmseong/llama3_2_3b-instruct-CB_SSFT-wsr-lora_math_rho0.1_lr3e-4`
+- cb/llama31_8b/math/lora → `kmseong/llama3_1_8b-instruct-CB_SSFT-lora_math_lr3e-4`
+- cb/llama31_8b/math/asft → `kmseong/llama3_1_8b-instruct-CB_SSFT-asft_math_lambda1.0_lr3e-4`
+- cb/llama31_8b/math/seal → `kmseong/llama3_1_8b-instruct-CB_SSFT-seal_math_topp0.8_lr5e-5`
+- cb/llama31_8b/math/safelora → `kmseong/llama3_1_8b-instruct-CB_SSFT-safelora_math_thr0.3_lr3e-4`
+- cb/llama31_8b/math/salora → `kmseong/llama3_1_8b-instruct-CB_SSFT-salora_math_rs32rt32_lr3e-4`
+- cb/llama31_8b/math/wsr_lora → `kmseong/llama3_1_8b-instruct-CB_SSFT-wsr-lora_math_rho0.1_lr3e-4`
+- cb/qwen25_7b/gsm8k/lora → `kmseong/qwen2_5_7b-instruct-CB_SSFT-lora_gsm8k_lr3e-4`
+- cb/qwen25_7b/gsm8k/asft → `kmseong/qwen2_5_7b-instruct-CB_SSFT-asft_gsm8k_lambda1.0_lr3e-4`
+- cb/qwen25_7b/gsm8k/seal → `kmseong/qwen2_5_7b-instruct-CB_SSFT-seal_gsm8k_topp0.8_lr5e-5`
+- cb/qwen25_7b/gsm8k/safelora → `kmseong/qwen2_5_7b-instruct-CB_SSFT-safelora_gsm8k_thr0.3_lr3e-4`
+- cb/qwen25_7b/gsm8k/salora → `kmseong/qwen2_5_7b-instruct-CB_SSFT-salora_gsm8k_rs32rt32_lr3e-4`
+- cb/qwen25_7b/gsm8k/wsr_lora → `kmseong/qwen2_5_7b-instruct-CB_SSFT-wsr-lora_gsm8k_rho0.1_lr3e-4`
+- cb/gemma2_9b/gsm8k/lora → `kmseong/gemma2_9b-it-CB_SSFT-lora_gsm8k_lr3e-4`
+- cb/gemma2_9b/gsm8k/seal → `kmseong/gemma2_9b-it-CB_SSFT-seal_gsm8k_topp0.8_lr5e-5`
+- cb/gemma2_9b/gsm8k/salora → `kmseong/gemma2_9b-it-CB_SSFT-salora_gsm8k_rs32rt32_lr3e-4`
+- cb/gemma2_9b/gsm8k/wsr_lora → `kmseong/gemma2_9b-it-CB_SSFT-wsr-lora_gsm8k_rho0.1_lr3e-4`
 - bt/llama2_7b/gsm8k/fullft → `kmseong/llama2_7b-chat-BT_SSFT-fullft_gsm8k_lr5e-5`
 - bt/llama2_7b/gsm8k/safeinstr → `kmseong/llama2_7b-chat-BT_SSFT-safeinstr_gsm8k_mix0.1_lr5e-5`
 - bt/llama2_7b/gsm8k/resta → `kmseong/llama2_7b-chat-BT_SSFT-resta_gsm8k_gamma0.3_lr5e-5`
 - bt/llama2_7b/gsm8k/safedelta → `kmseong/llama2_7b-chat-BT_SSFT-safedelta_gsm8k_s0.1_lr5e-5`
+- bt/llama2_7b/gsm8k/wsr_tune → `kmseong/llama2_7b-chat-BT_SSFT-wsr-tune_gsm8k_rho0.1_lr5e-5`
 - bt/llama2_7b/gsm8k/lora → `kmseong/llama2_7b-chat-BT_SSFT-lora_gsm8k_lr3e-4`
 - bt/llama2_7b/gsm8k/asft → `kmseong/llama2_7b-chat-BT_SSFT-asft_gsm8k_lambda1.0_lr3e-4`
-- bt/llama2_7b/gsm8k/lisa → `kmseong/llama2_7b-chat-BT_SSFT-lisa_gsm8k_rho1.0_lr3e-4`
+- bt/llama2_7b/gsm8k/lisa → `kmseong/llama2_7b-chat-BT_SSFT-lisa_gsm8k_rho0.0_lr3e-4`
 - bt/llama2_7b/gsm8k/seal → `kmseong/llama2_7b-chat-BT_SSFT-seal_gsm8k_topp0.8_lr5e-5`
 - bt/llama2_7b/gsm8k/safelora → `kmseong/llama2_7b-chat-BT_SSFT-safelora_gsm8k_thr0.3_lr3e-4`
 - bt/llama2_7b/gsm8k/salora → `kmseong/llama2_7b-chat-BT_SSFT-salora_gsm8k_rs32rt32_lr3e-4`
@@ -125,7 +170,7 @@ RESTA γ=0.3 · SafeDelta s=0.1.
 - bt/llama2_7b/medqa/wsr_tune → `kmseong/llama2_7b-chat-BT_SSFT-wsr-tune_medqa_rho0.1_lr5e-5`
 - bt/llama2_7b/medqa/lora → `kmseong/llama2_7b-chat-BT_SSFT-lora_medqa_lr3e-4`
 - bt/llama2_7b/medqa/asft → `kmseong/llama2_7b-chat-BT_SSFT-asft_medqa_lambda1.0_lr3e-4`
-- bt/llama2_7b/medqa/lisa → `kmseong/llama2_7b-chat-BT_SSFT-lisa_medqa_rho1.0_lr3e-4`
+- bt/llama2_7b/medqa/lisa → `kmseong/llama2_7b-chat-BT_SSFT-lisa_medqa_rho0.0_lr3e-4`
 - bt/llama2_7b/medqa/seal → `kmseong/llama2_7b-chat-BT_SSFT-seal_medqa_topp0.8_lr5e-5`
 - bt/llama2_7b/medqa/safelora → `kmseong/llama2_7b-chat-BT_SSFT-safelora_medqa_thr0.3_lr3e-4`
 - bt/llama2_7b/medqa/salora → `kmseong/llama2_7b-chat-BT_SSFT-salora_medqa_rs32rt32_lr3e-4`
@@ -137,7 +182,7 @@ RESTA γ=0.3 · SafeDelta s=0.1.
 - bt/llama2_7b/arc/wsr_tune → `kmseong/llama2_7b-chat-BT_SSFT-wsr-tune_arc_rho0.1_lr5e-5`
 - bt/llama2_7b/arc/lora → `kmseong/llama2_7b-chat-BT_SSFT-lora_arc_lr3e-4`
 - bt/llama2_7b/arc/asft → `kmseong/llama2_7b-chat-BT_SSFT-asft_arc_lambda1.0_lr3e-4`
-- bt/llama2_7b/arc/lisa → `kmseong/llama2_7b-chat-BT_SSFT-lisa_arc_rho1.0_lr3e-4`
+- bt/llama2_7b/arc/lisa → `kmseong/llama2_7b-chat-BT_SSFT-lisa_arc_rho0.0_lr3e-4`
 - bt/llama2_7b/arc/seal → `kmseong/llama2_7b-chat-BT_SSFT-seal_arc_topp0.8_lr5e-5`
 - bt/llama2_7b/arc/safelora → `kmseong/llama2_7b-chat-BT_SSFT-safelora_arc_thr0.3_lr3e-4`
 - bt/llama2_7b/arc/salora → `kmseong/llama2_7b-chat-BT_SSFT-salora_arc_rs32rt32_lr3e-4`
@@ -149,26 +194,17 @@ RESTA γ=0.3 · SafeDelta s=0.1.
 - bt/llama2_7b/agnews/wsr_tune → `kmseong/llama2_7b-chat-BT_SSFT-wsr-tune_agnews_rho0.1_lr5e-5`
 - bt/llama2_7b/agnews/lora → `kmseong/llama2_7b-chat-BT_SSFT-lora_agnews_lr7e-5`
 - bt/llama2_7b/agnews/asft → `kmseong/llama2_7b-chat-BT_SSFT-asft_agnews_lambda1.0_lr7e-5`
-- bt/llama2_7b/agnews/lisa → `kmseong/llama2_7b-chat-BT_SSFT-lisa_agnews_rho1.0_lr7e-5`
+- bt/llama2_7b/agnews/lisa → `kmseong/llama2_7b-chat-BT_SSFT-lisa_agnews_rho0.0_lr7e-5`
 - bt/llama2_7b/agnews/seal → `kmseong/llama2_7b-chat-BT_SSFT-seal_agnews_topp0.8_lr5e-5`
 - bt/llama2_7b/agnews/safelora → `kmseong/llama2_7b-chat-BT_SSFT-safelora_agnews_thr0.3_lr7e-5`
 - bt/llama2_7b/agnews/salora → `kmseong/llama2_7b-chat-BT_SSFT-salora_agnews_rs32rt32_lr7e-5`
 - bt/llama2_7b/agnews/wsr_lora → `kmseong/llama2_7b-chat-BT_SSFT-wsr-lora_agnews_rho0.1_lr7e-5`
-
-## 차단된 셀 (gemma-2-9b-it 게이트 라이선스 미승인)
-
-3개. 라이선스를 수락한 뒤 `common.sh` 의 `BASE_BLOCKED_MODELS=""` 로 두면 다시 잡힌다.
 
 ## 지금 막혀 있는 것
 
 **HF 공개 스토리지 쿼터 초과.** 업로드가 `403 Forbidden: You have exceeded your public storage space`
 로 거부된다. 학습 자체는 정상이고, 검증에 실패한 셀은 로컬 가중치를 **지우지 않고 보존**한다
 (`upload_and_prune.py` 는 4단계 검증을 통과한 셀만 지운다).
-
-학습은 끝났지만 이 이유로 허브에 올리지 못한 셀:
-
-- `cb/llama2_13b/gsm8k/lisa` → `kmseong/llama2_13b-chat-CB_SSFT-lisa_gsm8k_rho1.0_lr3e-4`
-- `cb/llama2_13b/gsm8k/safelora` → `kmseong/llama2_13b-chat-CB_SSFT-safelora_gsm8k_thr0.3_lr3e-4`
 
 풀려면 셋 중 하나가 필요하다 — ① 계정에서 쓰지 않는 리포지토리 삭제, ② HF PRO 구독,
 ③ HF 에 공개 연구용 스토리지 상향 요청(`website@huggingface.co`).
@@ -192,23 +228,30 @@ BT 축은 Llama-2-7B 한 모델에 4개 task × 12개 기법이고, 출발 모�
 
 ## 업로드된 모델 (허브)
 
-- [`kmseong/gemma2_9b-it-CB_SSFT-lisa_gsm8k_rho1.0_lr3e-4`](https://huggingface.co/kmseong/gemma2_9b-it-CB_SSFT-lisa_gsm8k_rho1.0_lr3e-4)
+- [`kmseong/gemma2_9b-it-CB_SSFT-asft_gsm8k_lambda1.0_lr3e-4`](https://huggingface.co/kmseong/gemma2_9b-it-CB_SSFT-asft_gsm8k_lambda1.0_lr3e-4)
+- [`kmseong/gemma2_9b-it-CB_SSFT-lisa_gsm8k_rho0.0_lr3e-4`](https://huggingface.co/kmseong/gemma2_9b-it-CB_SSFT-lisa_gsm8k_rho0.0_lr3e-4)
 - [`kmseong/gemma2_9b-it-CB_SSFT-lora_gsm8k_lr3e-4`](https://huggingface.co/kmseong/gemma2_9b-it-CB_SSFT-lora_gsm8k_lr3e-4)
+- [`kmseong/gemma2_9b-it-CB_SSFT-safelora_gsm8k_thr0.3_lr3e-4`](https://huggingface.co/kmseong/gemma2_9b-it-CB_SSFT-safelora_gsm8k_thr0.3_lr3e-4)
 - [`kmseong/gemma2_9b-it-CB_SSFT-salora_gsm8k_rs32rt32_lr3e-4`](https://huggingface.co/kmseong/gemma2_9b-it-CB_SSFT-salora_gsm8k_rs32rt32_lr3e-4)
 - [`kmseong/gemma2_9b-it-CB_SSFT-seal_gsm8k_topp0.8_lr5e-5`](https://huggingface.co/kmseong/gemma2_9b-it-CB_SSFT-seal_gsm8k_topp0.8_lr5e-5)
 - [`kmseong/gemma2_9b-it-CB_SSFT-wsr-lora_gsm8k_rho0.1_lr3e-4`](https://huggingface.co/kmseong/gemma2_9b-it-CB_SSFT-wsr-lora_gsm8k_rho0.1_lr3e-4)
 - [`kmseong/llama2_13b-chat-CB_SSFT-asft_gsm8k_lambda1.0_lr3e-4`](https://huggingface.co/kmseong/llama2_13b-chat-CB_SSFT-asft_gsm8k_lambda1.0_lr3e-4)
+- [`kmseong/llama2_13b-chat-CB_SSFT-lisa_gsm8k_rho0.0_lr3e-4`](https://huggingface.co/kmseong/llama2_13b-chat-CB_SSFT-lisa_gsm8k_rho0.0_lr3e-4)
 - [`kmseong/llama2_13b-chat-CB_SSFT-lora_gsm8k_lr3e-4`](https://huggingface.co/kmseong/llama2_13b-chat-CB_SSFT-lora_gsm8k_lr3e-4)
+- [`kmseong/llama2_13b-chat-CB_SSFT-safelora_gsm8k_thr0.3_lr3e-4`](https://huggingface.co/kmseong/llama2_13b-chat-CB_SSFT-safelora_gsm8k_thr0.3_lr3e-4)
+- [`kmseong/llama2_13b-chat-CB_SSFT-salora_gsm8k_rs32rt32_lr3e-4`](https://huggingface.co/kmseong/llama2_13b-chat-CB_SSFT-salora_gsm8k_rs32rt32_lr3e-4)
+- [`kmseong/llama2_13b-chat-CB_SSFT-seal_gsm8k_topp0.8_lr5e-5`](https://huggingface.co/kmseong/llama2_13b-chat-CB_SSFT-seal_gsm8k_topp0.8_lr5e-5)
+- [`kmseong/llama2_13b-chat-CB_SSFT-wsr-lora_gsm8k_rho0.1_lr3e-4`](https://huggingface.co/kmseong/llama2_13b-chat-CB_SSFT-wsr-lora_gsm8k_rho0.1_lr3e-4)
 - [`kmseong/llama2_7b-chat-BT_SSFT-wsr-tune_gsm8k_rho0.1_lr5e-5`](https://huggingface.co/kmseong/llama2_7b-chat-BT_SSFT-wsr-tune_gsm8k_rho0.1_lr5e-5)
 - [`kmseong/llama2_7b-chat-CB_SSFT-asft_agnews_lambda1.0_lr7e-5`](https://huggingface.co/kmseong/llama2_7b-chat-CB_SSFT-asft_agnews_lambda1.0_lr7e-5)
 - [`kmseong/llama2_7b-chat-CB_SSFT-asft_arc_lambda1.0_lr3e-4`](https://huggingface.co/kmseong/llama2_7b-chat-CB_SSFT-asft_arc_lambda1.0_lr3e-4)
 - [`kmseong/llama2_7b-chat-CB_SSFT-asft_gsm8k_lambda1.0_lr3e-4`](https://huggingface.co/kmseong/llama2_7b-chat-CB_SSFT-asft_gsm8k_lambda1.0_lr3e-4)
 - [`kmseong/llama2_7b-chat-CB_SSFT-asft_medqa_lambda1.0_lr3e-4`](https://huggingface.co/kmseong/llama2_7b-chat-CB_SSFT-asft_medqa_lambda1.0_lr3e-4)
 - [`kmseong/llama2_7b-chat-CB_SSFT-fullft_agnews_lr5e-5`](https://huggingface.co/kmseong/llama2_7b-chat-CB_SSFT-fullft_agnews_lr5e-5)
-- [`kmseong/llama2_7b-chat-CB_SSFT-lisa_agnews_rho1.0_lr7e-5`](https://huggingface.co/kmseong/llama2_7b-chat-CB_SSFT-lisa_agnews_rho1.0_lr7e-5)
-- [`kmseong/llama2_7b-chat-CB_SSFT-lisa_arc_rho1.0_lr3e-4`](https://huggingface.co/kmseong/llama2_7b-chat-CB_SSFT-lisa_arc_rho1.0_lr3e-4)
-- [`kmseong/llama2_7b-chat-CB_SSFT-lisa_gsm8k_rho1.0_lr3e-4`](https://huggingface.co/kmseong/llama2_7b-chat-CB_SSFT-lisa_gsm8k_rho1.0_lr3e-4)
-- [`kmseong/llama2_7b-chat-CB_SSFT-lisa_medqa_rho1.0_lr3e-4`](https://huggingface.co/kmseong/llama2_7b-chat-CB_SSFT-lisa_medqa_rho1.0_lr3e-4)
+- [`kmseong/llama2_7b-chat-CB_SSFT-lisa_agnews_rho0.0_lr7e-5`](https://huggingface.co/kmseong/llama2_7b-chat-CB_SSFT-lisa_agnews_rho0.0_lr7e-5)
+- [`kmseong/llama2_7b-chat-CB_SSFT-lisa_arc_rho0.0_lr3e-4`](https://huggingface.co/kmseong/llama2_7b-chat-CB_SSFT-lisa_arc_rho0.0_lr3e-4)
+- [`kmseong/llama2_7b-chat-CB_SSFT-lisa_gsm8k_rho0.0_lr3e-4`](https://huggingface.co/kmseong/llama2_7b-chat-CB_SSFT-lisa_gsm8k_rho0.0_lr3e-4)
+- [`kmseong/llama2_7b-chat-CB_SSFT-lisa_medqa_rho0.0_lr3e-4`](https://huggingface.co/kmseong/llama2_7b-chat-CB_SSFT-lisa_medqa_rho0.0_lr3e-4)
 - [`kmseong/llama2_7b-chat-CB_SSFT-lora_agnews_lr7e-5`](https://huggingface.co/kmseong/llama2_7b-chat-CB_SSFT-lora_agnews_lr7e-5)
 - [`kmseong/llama2_7b-chat-CB_SSFT-lora_arc_lr3e-4`](https://huggingface.co/kmseong/llama2_7b-chat-CB_SSFT-lora_arc_lr3e-4)
 - [`kmseong/llama2_7b-chat-CB_SSFT-lora_gsm8k_lr3e-4`](https://huggingface.co/kmseong/llama2_7b-chat-CB_SSFT-lora_gsm8k_lr3e-4)
@@ -234,21 +277,21 @@ BT 축은 Llama-2-7B 한 모델에 4개 task × 12개 기법이고, 출발 모�
 - [`kmseong/llama2_7b-chat-CB_SSFT-wsr-lora_medqa_rho0.1_lr3e-4`](https://huggingface.co/kmseong/llama2_7b-chat-CB_SSFT-wsr-lora_medqa_rho0.1_lr3e-4)
 - [`kmseong/llama2_7b-chat-CB_SSFT-wsr-tune_agnews_rho0.1_lr5e-5`](https://huggingface.co/kmseong/llama2_7b-chat-CB_SSFT-wsr-tune_agnews_rho0.1_lr5e-5)
 - [`kmseong/llama3_1_8b-instruct-CB_SSFT-asft_math_lambda1.0_lr3e-4`](https://huggingface.co/kmseong/llama3_1_8b-instruct-CB_SSFT-asft_math_lambda1.0_lr3e-4)
-- [`kmseong/llama3_1_8b-instruct-CB_SSFT-lisa_math_rho1.0_lr3e-4`](https://huggingface.co/kmseong/llama3_1_8b-instruct-CB_SSFT-lisa_math_rho1.0_lr3e-4)
+- [`kmseong/llama3_1_8b-instruct-CB_SSFT-lisa_math_rho0.0_lr3e-4`](https://huggingface.co/kmseong/llama3_1_8b-instruct-CB_SSFT-lisa_math_rho0.0_lr3e-4)
 - [`kmseong/llama3_1_8b-instruct-CB_SSFT-lora_math_lr3e-4`](https://huggingface.co/kmseong/llama3_1_8b-instruct-CB_SSFT-lora_math_lr3e-4)
 - [`kmseong/llama3_1_8b-instruct-CB_SSFT-safelora_math_thr0.3_lr3e-4`](https://huggingface.co/kmseong/llama3_1_8b-instruct-CB_SSFT-safelora_math_thr0.3_lr3e-4)
 - [`kmseong/llama3_1_8b-instruct-CB_SSFT-salora_math_rs32rt32_lr3e-4`](https://huggingface.co/kmseong/llama3_1_8b-instruct-CB_SSFT-salora_math_rs32rt32_lr3e-4)
 - [`kmseong/llama3_1_8b-instruct-CB_SSFT-seal_math_topp0.8_lr5e-5`](https://huggingface.co/kmseong/llama3_1_8b-instruct-CB_SSFT-seal_math_topp0.8_lr5e-5)
 - [`kmseong/llama3_1_8b-instruct-CB_SSFT-wsr-lora_math_rho0.1_lr3e-4`](https://huggingface.co/kmseong/llama3_1_8b-instruct-CB_SSFT-wsr-lora_math_rho0.1_lr3e-4)
 - [`kmseong/llama3_2_3b-instruct-CB_SSFT-asft_math_lambda1.0_lr3e-4`](https://huggingface.co/kmseong/llama3_2_3b-instruct-CB_SSFT-asft_math_lambda1.0_lr3e-4)
-- [`kmseong/llama3_2_3b-instruct-CB_SSFT-lisa_math_rho1.0_lr3e-4`](https://huggingface.co/kmseong/llama3_2_3b-instruct-CB_SSFT-lisa_math_rho1.0_lr3e-4)
+- [`kmseong/llama3_2_3b-instruct-CB_SSFT-lisa_math_rho0.0_lr3e-4`](https://huggingface.co/kmseong/llama3_2_3b-instruct-CB_SSFT-lisa_math_rho0.0_lr3e-4)
 - [`kmseong/llama3_2_3b-instruct-CB_SSFT-lora_math_lr3e-4`](https://huggingface.co/kmseong/llama3_2_3b-instruct-CB_SSFT-lora_math_lr3e-4)
 - [`kmseong/llama3_2_3b-instruct-CB_SSFT-safelora_math_thr0.3_lr3e-4`](https://huggingface.co/kmseong/llama3_2_3b-instruct-CB_SSFT-safelora_math_thr0.3_lr3e-4)
 - [`kmseong/llama3_2_3b-instruct-CB_SSFT-salora_math_rs32rt32_lr3e-4`](https://huggingface.co/kmseong/llama3_2_3b-instruct-CB_SSFT-salora_math_rs32rt32_lr3e-4)
 - [`kmseong/llama3_2_3b-instruct-CB_SSFT-seal_math_topp0.8_lr5e-5`](https://huggingface.co/kmseong/llama3_2_3b-instruct-CB_SSFT-seal_math_topp0.8_lr5e-5)
 - [`kmseong/llama3_2_3b-instruct-CB_SSFT-wsr-lora_math_rho0.1_lr3e-4`](https://huggingface.co/kmseong/llama3_2_3b-instruct-CB_SSFT-wsr-lora_math_rho0.1_lr3e-4)
 - [`kmseong/qwen2_5_7b-instruct-CB_SSFT-asft_gsm8k_lambda1.0_lr3e-4`](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-asft_gsm8k_lambda1.0_lr3e-4)
-- [`kmseong/qwen2_5_7b-instruct-CB_SSFT-lisa_gsm8k_rho1.0_lr3e-4`](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-lisa_gsm8k_rho1.0_lr3e-4)
+- [`kmseong/qwen2_5_7b-instruct-CB_SSFT-lisa_gsm8k_rho0.0_lr3e-4`](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-lisa_gsm8k_rho0.0_lr3e-4)
 - [`kmseong/qwen2_5_7b-instruct-CB_SSFT-lora_gsm8k_lr3e-4`](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-lora_gsm8k_lr3e-4)
 - [`kmseong/qwen2_5_7b-instruct-CB_SSFT-safelora_gsm8k_thr0.3_lr3e-4`](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-safelora_gsm8k_thr0.3_lr3e-4)
 - [`kmseong/qwen2_5_7b-instruct-CB_SSFT-salora_gsm8k_rs32rt32_lr3e-4`](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-salora_gsm8k_rs32rt32_lr3e-4)

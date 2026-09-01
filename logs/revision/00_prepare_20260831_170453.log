@@ -1,0 +1,57 @@
+════════════════════════════════════════════════════════════════
+ Stage 00 — 데이터 준비 / 환경 점검     ts=20260831_170453
+════════════════════════════════════════════════════════════════
+
+──────────────────────────────────────────────────────────────
+  1. 환경 점검   (08-31 17:04:53)
+──────────────────────────────────────────────────────────────
+  python       3.10.19  (/home/edgeai_lab/miniconda3/envs/hb/bin/python)
+  torch        2.10.0+cu128  cuda_build=12.8  avail=True
+  gpu          NVIDIA B200  178.4 GiB  sm_100  (n=1)
+  transformers 4.57.3   peft 0.18.1   accelerate 1.12.0   datasets 4.4.1
+  fire         0.7.1   (SafeDelta 에 필요)
+
+  CUDA_VISIBLE_DEVICES = '<unset>'  (스케줄러가 넣어준 값을 그대로 쓴다)
+  hf user      kmseong
+
+──────────────────────────────────────────────────────────────
+  1-b. gated base 모델 접근   (08-31 17:04:57)
+──────────────────────────────────────────────────────────────
+  ✓ meta-llama/Llama-2-7b-chat-hf
+  ✓ meta-llama/Llama-2-13b-chat-hf
+  ✓ meta-llama/Llama-3.2-3B-Instruct
+  ✓ meta-llama/Llama-3.1-8B-Instruct
+  ✓ Qwen/Qwen2.5-7B-Instruct
+  ✓ google/gemma-2-9b-it
+
+──────────────────────────────────────────────────────────────
+  2. 안전 데이터   (08-31 17:05:00)
+──────────────────────────────────────────────────────────────
+  [cb]  4994 rows   /home/edgeai_lab/Safety-WaRP-LLM/data/circuit_breakers_train.json
+  [bt]  4994 rows   /home/edgeai_lab/Safety-WaRP-LLM/data/beavertails_cb_train.json
+
+──────────────────────────────────────────────────────────────
+  3. 태스크 데이터 생성/점검   (08-31 17:05:01)
+──────────────────────────────────────────────────────────────
+  [gsm8k]  이미 존재 — skip
+  [math]   이미 존재 — skip
+  [arc]    이미 존재 — skip
+  [medqa]  이미 존재 — skip
+  [agnews] 이미 존재 — skip
+
+──────────────────────────────────────────────────────────────
+  4. 태스크 데이터 요약   (08-31 17:05:01)
+──────────────────────────────────────────────────────────────
+  task        rows   q(chars)  r(chars)  file
+  gsm8k       7473        235       287  data/gsm8k_train_task_7473.json
+  math        7500        210       547  data/math_train_task_7500.json
+  arc         1119        488        20  data/arc_challenge_train_task_1119.json
+  medqa      10178       1052        30  data/medqa_train_task_10178.json
+  agnews      8000        360         7  data/agnews_train_8k_seed42.json
+
+  5개 태스크 JSON 모두 준비됨.
+
+다음 단계:
+  bash scripts/revision/01_ssft_bt.sh          # BeaverTails 안전정렬 출발모델
+  bash scripts/revision/02_warp_basis_mask.sh  # Phase1 basis + Phase2 mask
+  또는  bash scripts/revision/run_all.sh       # 전체

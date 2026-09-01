@@ -1,0 +1,29 @@
+2026-09-01 02:27:36 - __main__ - INFO - 
+======================================================================
+2026-09-01 02:27:36 - __main__ - INFO -   🚀 LISA (Bi-State Optimization) GSM8K Fine-tuning
+2026-09-01 02:27:36 - __main__ - INFO - ======================================================================
+
+2026-09-01 02:27:36 - __main__ - INFO - Log file: ./logs/lisa_gsm8k/finetune_gsm8k_lisa_20260901_022736.log
+2026-09-01 02:27:36 - __main__ - INFO - ⚙️  Configuration:
+2026-09-01 02:27:36 - __main__ - INFO -    ├─ Base model: kmseong/Llama-3.1-8B-Instruct-ssft_lr5e-5
+2026-09-01 02:27:36 - __main__ - INFO -    ├─ Input formatting: chat template
+2026-09-01 02:27:36 - __main__ - INFO -    ├─ Tuning: LoRA (r=16, alpha=32)
+2026-09-01 02:27:36 - __main__ - INFO -    ├─ BSO: ON  rho=0.0 align_step=100 finetune_step=900
+2026-09-01 02:27:36 - __main__ - INFO -    ├─ Safety(alignment) data: /home/edgeai_lab/Safety-WaRP-LLM/data/circuit_breakers_train.json (guide_data_num=4994)
+2026-09-01 02:27:36 - __main__ - INFO -    ├─ Downstream: /home/edgeai_lab/Safety-WaRP-LLM/data/math_train_task_7500.json (로컬 태스크 JSON), clean (no poison)
+2026-09-01 02:27:36 - __main__ - INFO -    ├─ LR: 0.0003  epochs: 3  eff.batch: 16
+2026-09-01 02:27:36 - __main__ - INFO -    └─ Output dir: /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama31_8b/math/lisa
+
+2026-09-01 02:27:36 - __main__ - INFO - [1/4] Loading tokenizer
+2026-09-01 02:27:41 - __main__ - INFO - ✅ Tokenizer loaded (vocab=128256, pad=<|eot_id|>)
+2026-09-01 02:27:41 - __main__ - INFO - [2/4] Loading model (bf16)
+2026-09-01 02:29:03 - __main__ - INFO - ✓ LoRA applied: r=16, alpha=32, targets=['q_proj', 'k_proj', 'v_proj', 'up_proj', 'down_proj']
+2026-09-01 02:29:03 - __main__ - INFO - ✅ Model loaded (8.06B total, 28.3M trainable = 0.35%)
+2026-09-01 02:29:03 - __main__ - INFO - [3/4] Loading & tokenizing 로컬 태스크 'math' (/home/edgeai_lab/Safety-WaRP-LLM/data/math_train_task_7500.json) — downstream/finetune
+2026-09-01 02:29:07 - __main__ - INFO - ✅ math train: 7500 samples
+2026-09-01 02:29:09 - __main__ - INFO - ✅ Alignment(safety) data: 4994 samples (from /home/edgeai_lab/Safety-WaRP-LLM/data/circuit_breakers_train.json)
+2026-09-01 02:29:09 - __main__ - INFO - [4/4] Training with LISA BSO
+2026-09-01 02:29:09 - __main__ - INFO - Starting training...
+2026-09-01 02:50:02 - __main__ - INFO - Saving model
+2026-09-01 02:50:12 - __main__ - INFO - ✅ Saved to /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision/cb/llama31_8b/math/lisa
+2026-09-01 02:50:12 - __main__ - INFO - ✅ LISA fine-tuning complete!

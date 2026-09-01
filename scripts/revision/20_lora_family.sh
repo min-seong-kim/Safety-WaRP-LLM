@@ -212,7 +212,7 @@ for safety in $SAFETY_SETS; do
               --basis_dir "$BASIS_DIR" --basis_samples "$SAFETY_SAMPLES" --reparam \
               --rho "$KEEP_RATIO" --mask_B 1 --mask_A 1 \
               --target_modules "$TARGET_MODULES_CSV" \
-              --rank "$LORA_R" --alpha "$LORA_ALPHA" --dropout "$LORA_DROPOUT" \
+              --rank "$LORA_R" --alpha "${WSR_LORA_ALPHA:-$LORA_ALPHA}" --dropout "$LORA_DROPOUT" \
               --lr "$LR" --epochs "$EPOCHS" \
               --batch_size "$MB_LORA" --grad_accum "$accum" \
               --max_length "$MAX_LENGTH" \
