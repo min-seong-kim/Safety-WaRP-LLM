@@ -24,3 +24,6 @@
 2026-09-01 22:46:09 - __main__ - INFO - ✅ Alignment(safety) data: 4994 samples (from /home/edgeai_lab/Safety-WaRP-LLM/data/circuit_breakers_train.json)
 2026-09-01 22:46:09 - __main__ - INFO - [4/4] Training with LISA BSO
 2026-09-01 22:46:09 - __main__ - INFO - Starting training...
+2026-09-01 23:08:57 - __main__ - INFO - Saving model
+2026-09-01 23:09:07 - __main__ - INFO - ✅ Saved to /home/edgeai_lab/Safety-WaRP-LLM/outputs/revision_lisa_rho1/cb/llama31_8b/math/lisa
+2026-09-01 23:09:07 - __main__ - INFO - ✅ LISA fine-tuning complete!

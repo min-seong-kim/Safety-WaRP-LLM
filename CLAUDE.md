@@ -396,30 +396,81 @@ Only `apply_safety_basis_rotation.py` does float32 math on the basis — pass
   missing path, so the final commit silently staged **nothing**. Never mix an unverified path into
   a `git add` list in an unattended script.
 
-### Current state (2026-08-28) and how to resume
+### Current state (2026-09-02) and how to resume
 
-`REVISION_PROGRESS.md` at the repo root is the live status table. It is **generated**, never
-hand-written: `python scripts/revision/gen_progress_md.py --out REVISION_PROGRESS.md` derives it
-from `common.sh`'s registry plus the real hub/local state. A repo that merely *exists* on the hub
-does not count as done — an interrupted upload leaves an empty repo, so cells without a verified
-`.uploaded` marker are checked for actual `safetensors`.
+`REVISION_PROGRESS.md` (cell status) and `RESULTS.md` (measured numbers) are both **generated**,
+never hand-written:
 
-As of 2026-08-28: **62 of 114 new cells uploaded**, 2 trained but blocked, 50 not run
-(3 CB + 47 BT), 40 reused from the paper.
+```bash
+python scripts/revision/gen_progress_md.py --out REVISION_PROGRESS.md   # 셀 진행 상태
+python scripts/revision/gen_results_md.py  --out RESULTS.md             # ASR + downstream 결과표
+```
 
-**The binding constraint is HF public storage, not compute.** Uploads fail with
-`403 Forbidden: You have exceeded your public storage space`. `upload_and_prune.py` only deletes
-local weights after all four verifications pass, so a blocked cell is preserved, not lost — but
-this box is ephemeral, so a blocked cell dies with the box. Freeing hub space (or PRO) is the
-prerequisite for any further progress, and the two Qwen2.5-32B `only-{sn,rsn}-tuned` repos were
-deleted for exactly this reason. Qwen2.5-**32B** appears nowhere in the paper, the rebuttal record,
-or `baselines_multimodel.md` (those all use Qwen2.5-**7B**); eight 32B repos remain and are the
-obvious next candidates, but they are a coherent 8-arm set — get explicit confirmation first.
+A repo that merely *exists* on the hub does not count as done — an interrupted upload leaves an
+empty repo, so cells without a verified `.uploaded` marker are checked for actual `safetensors`.
+`gen_results_md.py` additionally cross-checks each number's measurement time against the hub's
+`lastModified` and drops values that predate a retrain (marked `⟲재학습`).
 
-Resume with `bash scripts/revision/finish_cb.sh` (CB) or `SAFETY_SETS=bt bash
-scripts/revision/run_all.sh` (BT). **Do not delete the `.done` / `.uploaded` markers under
-`outputs/revision/`** — they are the only record that an already-uploaded cell is finished, and
-without them the pipeline retrains everything from scratch.
+**The CB axis is complete for the six models**, plus two ablations added on 2026-09-01/02.
+The HF storage quota that blocked 2026-08-28 has been resolved. Full narrative — what was run, in
+what order, and every trap hit — is in **`scripts/revision/SESSION_2026-09.md`**. Read it before
+resuming; the traps below cost hours each.
+
+**Two ablations now exist beyond the 12-method grid:**
+- **LISA ρ** — `LISA_RHO` default is now **0.0** (the rebuttal model's own `finetune_config.json`
+  says ρ=0.0; ρ=1.0 collapses GSM8K 0.39→0.17). ρ=1.0 was rebuilt for all 9 cells so both sides
+  exist. **The result does not generalize**: ρ=1.0 usually trades utility for safety, but on
+  llama32_3b/llama31_8b it loses *both*. Do not report one side alone.
+- **WSR-LoRA α** — `wsr_lora.py:83` is `scaling = alpha / rank`. The rebuttal's `-rot` models used
+  α=16 (scaling 1.0) while revision uses α=32 (scaling 2.0), so the two were **different
+  hyperparameter generations being compared as if they were the same method**. A controlled 2×2
+  (start model × α) confirmed α dominates (1.8–2.7×), start model is secondary. α=16 is safer or
+  equal on 5/6 models with *higher* downstream on 4/6. ⚠️ Every other LoRA arm is α=32, so shipping
+  WSR-LoRA at α=16 alone means our own method gets half the update budget — report it as an
+  ablation with a footnote, not as the headline row. Use `WSR_LORA_ALPHA=16` (repo name gains
+  `_a16`; empty = unchanged behaviour).
+
+**Two cells fail reproducibly** (retrained, identical results — seed is fixed):
+`cb/llama2_13b/gsm8k/salora` (GSM8K 0.072 / JB 0.451) and `cb/gemma2_9b/gsm8k/seal`
+(GSM8K 0.187 / JB 0.594, Direct ASR 0.45). Both are normal on the other four models with the same
+settings, and 13B SaLoRA's training log is clean (loss converged, merge/save fine), so these are
+cell-specific failure modes, not pipeline bugs. Change a hyperparameter (`r_s` / `topp`) or
+footnote them; do not ship the current numbers as-is.
+
+**Traps that cost hours — do not re-introduce:**
+- **`/tmp` is `noexec` on this box.** Triton JIT-compiles `.so` files and cannot mmap their exec
+  segments there → `ImportError: __triton_launcher...so: failed to map segment from shared
+  object`. This is *not* cache corruption, so clearing the cache does not help. `harmbench_eval.sh`
+  already redirects to `$HOME`; `lm-evaluation-harness/eval_models.sh` had those lines commented
+  out (with a stale `/NHNHOME/...` path), so only lm-eval died — now fixed.
+- **Gemma-2 needs `block_size: 32`** (head_size 256 breaks FlashInfer's block_size 16). Both
+  `models.yaml` entries *and* lm-eval's `MODEL_ARGS` need it; `attention_backend=FLASH_ATTN` does
+  not help on vLLM 0.17. `add_models_to_yaml.py`'s `build_block()` now emits it for gemma keys.
+- **`pgrep -f "<script>.sh"` matches any process whose command line contains that string** —
+  including a watchdog you launched to monitor it. This stalled an unattended run for 5 hours.
+  Gate on a completion marker in the log or a PID file (`kill -0 $(cat /tmp/orch.pid)`), never on
+  a process-name match.
+- **`out_dir` does not encode hyperparameters** (`outputs/revision/<safety>/<model>/<task>/<method>/`);
+  only the repo name does. Running the same cell at a different ρ/α is skipped as "already done".
+  Isolate with `OUT_ROOT=outputs/revision_<tag>` — never by deleting `.done` markers.
+- **`check_disk` reads 0 GB when `OUT_ROOT` does not exist** (`df` fails → empty → 0), and
+  `disk_ok` runs *before* `mkdir` in `run_cell`, so every cell silently skips with `(disk)` on a
+  fresh box. `mkdir -p outputs/revision` first.
+- **`HfApi().list_models()` leaves `lastModified` as `None`** — pass `expand=["lastModified"]`, or
+  freshness checks silently pass and stale numbers get published.
+- **Never edit a running bash script.** Bash reads scripts by byte offset; an edit makes it jump
+  mid-execution. To change plans, detect completion and start a new script instead.
+
+**Environment gotcha:** `environment_hb.yml`'s `apex==0.9.10.dev0` is *not* NVIDIA Apex — it is a
+Pyramid auth toolkit whose `cryptacular` dependency cannot build, and pip resolves all metadata
+before installing anything, so it aborts the **entire** pip section. Drop `apex` and `cryptacular`
+(336/338 install fine); nothing in this repo imports them.
+
+Resume the CB axis with `bash scripts/revision/finish_cb.sh`, or the untouched BT axis with
+`SAFETY_SETS=bt bash scripts/revision/run_all.sh` — but note `SAFEDELTA_DIR`
+(`common.sh:116`) points at an **external repo that is not on this box**, and the BT axis has four
+`safedelta` cells. **Do not delete the `.done` / `.uploaded` markers under `outputs/revision/`** —
+they are the only record that an already-uploaded cell is finished.
 
 ## Evaluation
 
