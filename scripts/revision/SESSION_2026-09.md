@@ -187,3 +187,18 @@ bash 는 스크립트를 바이트 오프셋으로 이어 읽는다. 실행 중 
 * **BT 축 47셀** — 손대지 않았다. `SAFETY_SETS=bt bash scripts/revision/run_all.sh`.
   단 `common.sh:116` 의 `SAFEDELTA_DIR=/home/edgeai_lab/SafeDelta` 는 **외부 저장소 런타임 의존**이고
   이 박스에 없다. BT 축에는 safedelta 4셀이 있으므로 먼저 받아와야 한다.
+
+---
+
+## 7. 2026-09-04 → 09-07 (새 박스 aigpu0317) — 재현 확인과 ρ/thr sweep
+
+09-02~04 작업이 커밋 없이 유실돼(모델은 허브, 측정 로그는 HarmBench/lm-eval logs 에 남음) RESULTS.md 를 스프레드시트+로그로 재구성했다(A–D).
+이어서 이 박스가 실험을 재현하는지 확인했다: SafeLoRA thr0.35 α16 (llama32_3b/math) 를 hb(tf 5.13)·hb_repro(tf 4.57.3, 원본 박스와 동일)·hb_repro 재실행
+세 번 학습하고 원본과 비교 → 평가 파이프라인은 원본 수치를 자릿수까지 재현하지만, 학습은 같은 env·GPU·seed 로도 Δ 코사인 ≈0.54, ASR ±0.05 로 갈린다.
+결론: 라이브러리/GPU 차이가 아니라 학습 자체의 비결정성. 그래도 이후 sweep 은 원본과 라이브러리를 맞춘 hb_repro 로 돌렸다.
+
+Sweep: 6모델 × {WSR-LoRA ρ0.4/0.5, SafeLoRA thr0.2/0.25} α16, 24셀 학습·업로드 + HarmBench 96조합 + lm-eval 24회 (RESULTS.md E/F).
+드라이버는 v1(GPU0 고정) → v2(GPU 자동) → v3(평가 뒤로) → v4(기법별 메모리 요구량, SafeLoRA 우선) → v6(GPU 0 전용) 으로 진화했다
+(`scripts/revision/sweep_gpu_adaptive.sh` = v6). 겪은 문제와 대응: 다른 사용자의 idle-wait 스크립트가 스테이지 사이에 GPU 0 을 점유 → SIGSTOP/CONT 게이트,
+시작 직후 메모리 예약 hook(`gpu_reserve_sitecustomize.py`); hb env 저장 모델의 `TokenizersBackend` → tokenizer_config 패치; 업로드 후 로컬 삭제 + 9 MB/s 다운로드 →
+평가 전 재다운로드 7시간(다음부터 PRUNE_AFTER_UPLOAD=0); lm-eval RESUME 이 그룹 task 를 못 건너뛰던 glob → 수정. 세부는 CLAUDE.md "Current state (2026-09-07)".

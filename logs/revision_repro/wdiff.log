@@ -1,0 +1,15 @@
+Fetching 8 files:   0%|          | 0/8 [00:00<?, ?it/s]Fetching 8 files: 100%|██████████| 8/8 [00:00<00:00, 5541.61it/s]
+Fetching 9 files:   0%|          | 0/9 [00:00<?, ?it/s]Fetching 9 files:  67%|██████▋   | 6/9 [00:00<00:00,  7.93it/s]Fetching 9 files: 100%|██████████| 9/9 [00:00<00:00, 11.89it/s]
+keys equal: True 254
+module       |orig-rep|   |orig-ali|    |rep-ali|  ratio |o-r|/|o-a|
+down_proj       14.9539      15.9786      16.0308  0.936
+gate_proj        0.0000       0.0000       0.0000  0.000
+k_proj           6.3722       6.3724       6.2457  1.000
+o_proj           0.0000       0.0000       0.0000  0.000
+other            0.0000       0.0000       0.0000  0.000
+q_proj           8.2952       7.7127       7.3747  1.076
+up_proj          9.4337       9.7571       9.9046  0.967
+v_proj           4.9491       5.3859       5.2815  0.919
+TOTAL           21.1311      21.9002      21.8261  0.965
+cos(delta_orig, delta_rep) over proj layers: 0.5329262294204423
+tensors identical to aligned: orig 114 repro 114

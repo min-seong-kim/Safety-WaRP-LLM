@@ -461,6 +461,61 @@ footnote them; do not ship the current numbers as-is.
 - **Never edit a running bash script.** Bash reads scripts by byte offset; an edit makes it jump
   mid-execution. To change plans, detect completion and start a new script instead.
 
+### Current state (2026-09-07) — this box (aigpu0317), reproduction + ρ/thr sweep
+
+Two days of work (09-02→04) were lost uncommitted on the old box; models survived on the hub and the
+measurement logs in `~/HarmBench/logs` / `~/lm-evaluation-harness/logs`. `RESULTS.md` was rebuilt from
+the user's spreadsheet + those logs (sections A–D), then extended with sections E/F below.
+
+**Environment.** Training now runs in conda env **`hb_repro`** = the old box's library versions
+(`environment_hb_repro.yml` = `environment_hb.yml` minus `apex`/`cryptacular`: torch 2.10.0+cu128,
+transformers 4.57.3, peft 0.18.1; works on the RTX PRO 6000 Blackwell). The other env `hb` has
+transformers 5.13 — models saved from it carry `"tokenizer_class": "TokenizersBackend"` in
+`tokenizer_config.json`, which the `harmbench` env (transformers 4.57.6 / vLLM 0.16) **cannot load**;
+patch to `PreTrainedTokenizerFast` before evaluating (`upload_and_prune.py` does not catch this — it
+verifies with the hb tokenizer). Jobs here run directly on the node (no `sbatch`); **use GPU 0 only**
+(user decision 2026-09-06), it is shared with other users.
+
+**Reproducibility finding** (`scripts/revision/repro_2026-09/REPORT_safelora_3b_thr0.35_a16.md`):
+the evaluation pipeline reproduces old numbers exactly (re-measured original models match to the
+digit), but training is **not bitwise reproducible even with identical env/GPU/seed** — Δ-cosine
+between two same-config runs is ≈0.54 (same ‖Δ‖, same touched modules), and keyword ASR moves by
+±0.05 run-to-run. Library version does not close that gap; do not read ASR differences under ~0.05
+between single runs as real. `weight_delta_cosine.py` there computes the comparison.
+
+**Sweep 2026-09-04→07** (RESULTS.md sections E/F; raw table `logs/revision_sweep/RESULTS_sweep.md`):
+6 models × WSR-LoRA ρ=0.4/0.5 + SafeLoRA thr=0.2/0.25, all α=16, 24 cells uploaded as
+`kmseong/<model>-CB_SSFT-{wsr-lora_<task>_rho0.{4,5}|safelora_<task>_thr0.2{,5}}_a16_lr3e-4`.
+Driver: `scripts/revision/sweep_gpu_adaptive.sh` (env: `ALLOWED_GPUS`, `MODELS_ORDER`,
+`EVAL_PER_MODEL`, `WSR_NEED_OVERRIDE`; picks the allowed GPU with the most free memory per stage,
+waits otherwise, evaluates in a final two-pass gap-fill: non-7B at ≥73 GiB, 7B at ≥88 GiB) +
+`sweep_gapfill_eval.sh`. `common.sh` regained the lost `lora_alpha_tag()` rule (`_a16` on
+lora/asft/lisa/safelora/salora names when `LORA_ALPHA≠32`); `20_lora_family.sh` gained
+`WSR_BASIS_BS` (importance-pass batch, default 2 = unchanged; never used ≠2 in shipped numbers).
+Only measurement deviation: llama2_7b HarmBench util 0.85 (old rows 0.95; 0.95 cannot start on a
+shared GPU).
+
+**Traps hit this round — do not re-introduce:**
+- **Other users' `wait_for_idle` scripts grab GPU 0 the moment it goes quiet** between our stages
+  (up to 80 GB), then our next stage OOMs mid-load or HarmBench sits in `WaitForVram` (90 min per
+  combo). Mitigations that worked: pause the whole tree with SIGSTOP and SIGCONT when memory frees
+  (WaitForVram's counter does not advance while stopped); and **reserve memory at process start** —
+  `scripts/revision/gpu_reserve_sitecustomize.py` installed as `sitecustomize.py` in `hb_repro`'s
+  site-packages grabs the amount listed in `logs/revision_sweep/RESERVE_GPU_GIB` for
+  `wsr_lora.py`/`finetune_gsm8k_lora.py`/`train.py` and neutralises `torch.cuda.empty_cache`
+  (otherwise `wsr_lora.py` releases the reservation between phases). Memory-only, no numeric effect.
+- **WSR-LoRA's safety-importance pass is the memory peak**: 63 GiB on gemma-2-9B, ~85 GiB on 13B
+  (`basis_batch_size 2`, all 210 PiSSA layers). Budget for it; the LoRA train loop itself is smaller.
+- **`PRUNE_AFTER_UPLOAD=1` deletes the local weights, and this box downloads at ~9 MB/s aggregate**
+  (hf_transfer does not help) — re-fetching 12 repos for evaluation cost ~7 h. With >1 TB free, run
+  sweeps with `PRUNE_AFTER_UPLOAD=0` or evaluate from the local `merged_model` before pruning.
+- `eval_models.sh`'s `LMEVAL_RESUME` glob (`samples_<task>_*.jsonl`) never matched group tasks such as
+  `hendrycks_math_safe` (only per-subtask files exist) → MATH re-ran on every resume. Fixed 2026-09-07
+  (also checks `results_*.json` for the task key) — that repo is committed separately.
+- Hub uploads/downloads drop with `IncompleteRead` a few times a day; `harmbench_eval.sh` retries 3×
+  but a whole combo can still fail — always finish with a `RESUME=true LMEVAL_RESUME=1` gap-fill pass.
+- `pgrep -f <script>` again matched the shell issuing it (two shells killed this round). Use pid files.
+
 **Environment gotcha:** `environment_hb.yml`'s `apex==0.9.10.dev0` is *not* NVIDIA Apex — it is a
 Pyramid auth toolkit whose `cryptacular` dependency cannot build, and pip resolves all metadata
 before installing anything, so it aborts the **entire** pip section. Drop `apex` and `cryptacular`

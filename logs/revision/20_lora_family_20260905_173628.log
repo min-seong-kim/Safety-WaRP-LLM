@@ -1,0 +1,45 @@
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/users/minseong/Safety-WaRP-LLM
+   python    : /home/users/minseong/.conda/envs/hb_repro/bin/python
+   safety    : cb
+   models    : gemma2_9b
+   methods   : wsr_lora
+   tasks     : gsm8k
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/users/minseong/Safety-WaRP-LLM/outputs/revision_sweep/wsr_lora_rho0.5_a16
+   hf        : kmseong  (업로드 후 로컬 삭제=1, basis 삭제=0)
+════════════════════════════════════════════════════════════════
+
+  AsFT λ          : 1.0
+  SafeLoRA thr    : 0.3  (load dtype=float32)
+  LISA            : ρ=0.0 align_step=100 ft_step=900
+  SaLoRA          : salora/salora_lora.py · r_s=32 r_t=32 init=task n_harmful=256 n_task=256
+  WSR-LoRA ρ      : 0.5  (Phase1 basis 필요)
+
+──────────────────────────────────────────────────────────────
+  wsr_lora(ρ=0.5)  cb/gemma2_9b/gsm8k lr=3e-4 batch=2x8   (09-05 17:36:28)
+──────────────────────────────────────────────────────────────
+[wsrlora] WSR-LoRA(rotation) mode=wsr_lora targets=['q_proj', 'k_proj', 'v_proj', 'up_proj', 'down_proj'] r=16 alpha=16.0 dropout=0.05 rho=0.5 mask_B=1 mask_A=1 lr=0.0003 effective_batch=16 W0=wvnvwn/gemma-2-9b-it-ssft-lr3e-5
+`torch_dtype` is deprecated! Use `dtype` instead!
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:00<00:00, 246.25it/s]
+[wsrlora] 210 target Linear layers
+[wsrlora] reusing shared Phase-1 SVD basis -> /home/users/minseong/Safety-WaRP-LLM/checkpoints/revision/warp/cb/gemma2_9b/phase1_20260905_143513/basis (samples=4994)
+[wsrlora] PiSSA wrapped 16/210 layers
+[wsrlora] PiSSA wrapped 32/210 layers
+[wsrlora] PiSSA wrapped 48/210 layers
+[wsrlora] PiSSA wrapped 64/210 layers
+[wsrlora] PiSSA wrapped 80/210 layers
+[wsrlora] PiSSA wrapped 96/210 layers
+[wsrlora] PiSSA wrapped 112/210 layers
+[wsrlora] PiSSA wrapped 128/210 layers
+[wsrlora] PiSSA wrapped 144/210 layers
+[wsrlora] PiSSA wrapped 160/210 layers
+[wsrlora] PiSSA wrapped 176/210 layers
+[wsrlora] PiSSA wrapped 192/210 layers
+[wsrlora] PiSSA wrapped 208/210 layers
+[wsrlora] PiSSA wrapped 210/210 layers
+[wsrlora] computing factor safety importance on 4994 rows (2497 batches)...

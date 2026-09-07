@@ -448,13 +448,24 @@ hf_hparam_tag() {
     safedelta) echo "s${SAFEDELTA_SCALE}" ;;
     wsr_tune)  echo "rho${KEEP_RATIO}" ;;
     wsr_lora)  echo "rho${KEEP_RATIO}${WSR_LORA_ALPHA:+_a${WSR_LORA_ALPHA}}" ;;
-    asft)      echo "lambda${ASFT_LAMBDA_REG}" ;;
-    lisa)      echo "rho${LISA_RHO}" ;;
+    asft)      echo "lambda${ASFT_LAMBDA_REG}$(lora_alpha_tag)" ;;
+    lisa)      echo "rho${LISA_RHO}$(lora_alpha_tag)" ;;
     seal)      echo "topp${SEAL_TOPP}" ;;
-    safelora)  echo "thr${SAFELORA_THRESHOLD}" ;;
-    salora)    echo "rs${SALORA_R_S}rt${SALORA_R_T}" ;;
-    *)         echo "" ;;   # fullft / lora
+    safelora)  echo "thr${SAFELORA_THRESHOLD}$(lora_alpha_tag)" ;;
+    salora)    echo "rs${SALORA_R_S}rt${SALORA_R_T}$(lora_alpha_tag)" ;;
+    lora)      echo "${LORA_ALPHA_TAG_LORA:-$(lora_alpha_tag | sed 's/^_//')}" ;;
+    *)         echo "" ;;   # fullft
   esac
+}
+
+# LoRA 계열(lora/asft/lisa/safelora/salora)의 alpha 태그. 기본 alpha=32 이면 빈 문자열,
+# 그 외(예: 16)면 "_a16" 을 붙여 α=32 셀과 리포명이 충돌하지 않게 한다.
+#   (2026-09-02~04 사이에 원본 박스에서 추가됐다가 유실된 규칙을 복원. 허브의 기존 이름
+#    `..._thr0.35_a16_lr3e-4`, `...-lora_gsm8k_a16_lr3e-4` 와 일치한다.)
+#   wsr_lora 는 별도 변수 WSR_LORA_ALPHA 를 쓰므로 여기 포함하지 않는다.
+lora_alpha_tag() {
+  [[ "${LORA_ALPHA:-32}" == "32" ]] && return 0
+  echo "_a${LORA_ALPHA}"
 }
 
 # 기법 × 태스크 → 실제로 쓴 learning rate.

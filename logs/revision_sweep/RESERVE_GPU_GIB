@@ -1,0 +1,6 @@
+# <model>_<wsr|ft>=GiB ; wsr=wsr_lora.py, ft=finetune_gsm8k_lora.py(SafeLoRA 등)
+gemma_wsr=70
+gemma_ft=45
+13b_wsr=82
+13b_ft=60
+default=0

@@ -1,0 +1,14 @@
+Fetching 9 files:   0%|          | 0/9 [00:00<?, ?it/s]Fetching 9 files: 100%|██████████| 9/9 [00:00<00:00, 17371.71it/s]
+Fetching 8 files:   0%|          | 0/8 [00:00<?, ?it/s]Fetching 8 files: 100%|██████████| 8/8 [00:00<00:00, 10076.41it/s]
+‖Δ‖: {'orig': 21.9, 'repro1(tf5.13)': 21.826, 'repro2(tf4.57)': 21.611}
+pair                                 cos   ‖Δa−Δb‖/‖Δa‖
+orig vs repro1(tf5.13)             0.533          0.965
+orig vs repro2(tf4.57)             0.529          0.964
+repro1(tf5.13) vs repro2(tf4.57)   0.556          0.938
+
+per-module cos: orig vs repro1(tf5.13) | orig vs repro2(tf4.57) | repro1(tf5.13) vs repro2(tf4.57)
+  q_proj     0.396  0.421  0.447
+  k_proj     0.490  0.492  0.508
+  v_proj     0.570  0.550  0.561
+  up_proj    0.540  0.504  0.517
+  down_proj  0.564  0.567  0.602

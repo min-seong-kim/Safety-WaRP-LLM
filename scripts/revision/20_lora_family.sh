@@ -41,6 +41,9 @@ mkdir -p "$LOG_ROOT"
 exec > >(tee -a "$LOG_ROOT/20_lora_family_${TS}.log") 2>&1
 
 SAFELORA_LOAD_DTYPE="${SAFELORA_LOAD_DTYPE:-float32}"
+# WSR-LoRA safety-importance 역전파 배치(기본 2 = 기존 전 셀). 공유 GPU 메모리 부족 시 1 로 낮출 수 있다
+#   (9B 에서 63GiB→약 절반). 값이 다르면 importance 누적이 미세하게 달라지므로 결과 표에 표기할 것.
+WSR_BASIS_BS="${WSR_BASIS_BS:-2}"
 ASFT_STORE_DTYPE="${ASFT_STORE_DTYPE:-float32}"
 
 preflight
@@ -209,7 +212,7 @@ for safety in $SAFETY_SETS; do
               --model_name "$ALIGNED" --output_dir "$odir" \
               --safety_data "$SAFE_DATA" --safety_samples "$SAFETY_SAMPLES" \
               --gsm8k_json "$TASK_DATA" --train_samples "$TASK_SAMPLES" \
-              --basis_dir "$BASIS_DIR" --basis_samples "$SAFETY_SAMPLES" --reparam \
+              --basis_dir "$BASIS_DIR" --basis_samples "$SAFETY_SAMPLES" --basis_batch_size "${WSR_BASIS_BS:-2}" --reparam \
               --rho "$KEEP_RATIO" --mask_B 1 --mask_A 1 \
               --target_modules "$TARGET_MODULES_CSV" \
               --rank "$LORA_R" --alpha "${WSR_LORA_ALPHA:-$LORA_ALPHA}" --dropout "$LORA_DROPOUT" \

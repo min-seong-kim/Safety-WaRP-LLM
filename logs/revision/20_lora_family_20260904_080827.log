@@ -1,0 +1,29 @@
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /home/users/minseong/Safety-WaRP-LLM
+   python    : /home/users/minseong/.conda/envs/hb/bin/python
+   safety    : cb
+   models    : llama32_3b
+   methods   : safelora
+   tasks     : math
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=16 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /home/users/minseong/Safety-WaRP-LLM/outputs/revision_repro
+   hf        : 업로드 안 함 (PUSH_TO_HUB=0) — 디스크 3.4TB 필요
+   *** DRY RUN ***
+════════════════════════════════════════════════════════════════
+
+  AsFT λ          : 1.0
+  SafeLoRA thr    : 0.35  (load dtype=float32)
+  LISA            : ρ=0.0 align_step=100 ft_step=900
+  SaLoRA          : salora/salora_lora.py · r_s=32 r_t=32 init=task n_harmful=256 n_task=256
+  WSR-LoRA ρ      : 0.1  (Phase1 basis 필요)
+
+──────────────────────────────────────────────────────────────
+  safelora(thr=0.35)  cb/llama32_3b/math lr=3e-4 batch=8x2   (09-04 08:08:27)
+──────────────────────────────────────────────────────────────
+  [dry-run] /home/users/minseong/.conda/envs/hb/bin/python finetune_gsm8k_lora.py --method safe_lora --model_name kmseong/llama3_2_3b-instruct-SSFT-lr5e-5 --output_dir /home/users/minseong/Safety-WaRP-LLM/outputs/revision_repro/cb/llama32_3b/math/safelora --task_data_path /home/users/minseong/Safety-WaRP-LLM/data/math_train_task_7500.json --task_samples 0 --target_modules q_proj\,k_proj\,v_proj\,up_proj\,down_proj --layer_type attn_q\,attn_k\,attn_v\,ffn_up\,ffn_down --target_layers all --safelora_base_model meta-llama/Llama-3.2-3B-Instruct --safelora_aligned_model kmseong/llama3_2_3b-instruct-SSFT-lr5e-5 --safelora_select_type threshold --safelora_threshold 0.35 --safelora_load_dtype float32 --lora_r 16 --lora_alpha 16 --lora_dropout 0.05 --learning_rate 3e-4 --epochs 3 --batch_size 8 --gradient_accumulation_steps 2 --max_length 1024 --warmup_ratio 0.03 --weight_decay 0.0 --seed 42 --dtype bfloat16 --gradient_checkpointing --save_merged_model
+
+실패한 셀 없음.
