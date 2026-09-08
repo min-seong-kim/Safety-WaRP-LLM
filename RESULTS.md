@@ -360,26 +360,7 @@ threshold 가 높을수록 projection 되는 layer 가 많아 안전 쪽으로 �
 
 교차 importance 및 Basis 50%/25% 모델은 원본에 모델 이름만 있고 소유자 namespace가 없어 주소를 **없음**으로 표시했다. `bvbasis1_00`(L128)은 주표의 `bvwarp4994`와 수치가 다르므로 Full 행으로 대체하지 않았다.
 
-## 추가 BV LoRA learning-rate 기록 (주표와 별개)
-
-최종 rebuttal에서 선택한 행과 혼동하지 않도록 나머지 명시적인 baseline LR 실험을 별도로 보존한다. `matched-r16-a32` 모델의 rank/alpha는 주소상 r=16/α=32이다. WSR-LoRA의 rank/alpha는 해당 주소에 없어 추정하지 않았다.
-
-| 모델 주소 | 메소드 | Direct | AutoDAN | PAIR | PAP | ASR AVG | Task acc (GSM8K) |
-|---|---|---:|---:|---:|---:|---:|---:|
-| [kmseong/llama2_7b-chat-gsm8k-lora-matched-r16-a32-lr1e-4-beavertails](https://huggingface.co/kmseong/llama2_7b-chat-gsm8k-lora-matched-r16-a32-lr1e-4-beavertails) | Vanilla LoRA (lr=1e-4) (원본 L53) | 0.0019 | 0.0019 | 0.1865 | 0.2031 | 0.0983 | 0.3313 |
-| [kmseong/llama2_7b-chat-gsm8k-lora-matched-r16-a32-lr2e-4-beavertails](https://huggingface.co/kmseong/llama2_7b-chat-gsm8k-lora-matched-r16-a32-lr2e-4-beavertails) | Vanilla LoRA (lr=2e-4) (원본 L54) | 0.0019 | 0.0173 | 0.2212 | 0.3192 | 0.1399 | 0.3745 |
-| [kmseong/llama2_7b-chat-gsm8k-salora-matched-r16-a32-lr1e-4-beavertails](https://huggingface.co/kmseong/llama2_7b-chat-gsm8k-salora-matched-r16-a32-lr1e-4-beavertails) | SaLoRA (이전 matched; lr=1e-4) (원본 L56) | 0.0019 | 0.0231 | 0.1712 | 0.1915 | 0.0969 | 0.3245 |
-| [kmseong/llama2_7b-chat-gsm8k-salora-matched-r16-a32-lr2e-4-beavertails](https://huggingface.co/kmseong/llama2_7b-chat-gsm8k-salora-matched-r16-a32-lr2e-4-beavertails) | SaLoRA (이전 matched; lr=2e-4) (원본 L57) | 0.0019 | 0.1923 | 0.5000 | 0.6665 | 0.3402 | 0.3897 |
-| [kmseong/llama2_7b-chat-gsm8k-salora-matched-r16-a32-lr3e-4-beavertails](https://huggingface.co/kmseong/llama2_7b-chat-gsm8k-salora-matched-r16-a32-lr3e-4-beavertails) | SaLoRA (이전 matched; lr=3e-4) (원본 L58) | 0.0423 | 0.3827 | 0.7288 | 0.8196 | 0.4933 | 0.3351 |
-| [kmseong/llama2_7b-chat-gsm8k-safelora-matched-r16-a32-lr1e-4-beavertails](https://huggingface.co/kmseong/llama2_7b-chat-gsm8k-safelora-matched-r16-a32-lr1e-4-beavertails) | SafeLoRA (lr=1e-4) (원본 L59) | 0.0019 | 0.0019 | 0.1769 | 0.1919 | 0.0931 | 0.3563 |
-| [kmseong/llama2_7b-chat-gsm8k-safelora-matched-r16-a32-lr2e-4-beavertails](https://huggingface.co/kmseong/llama2_7b-chat-gsm8k-safelora-matched-r16-a32-lr2e-4-beavertails) | SafeLoRA (lr=2e-4) (원본 L60) | 0.0019 | 0.0115 | 0.2115 | 0.2992 | 0.1310 | 0.3654 |
-| [kmseong/llama2_7b-chat-gsm8k-lisa-matched-r16-a32-lr1e-4-beavertails](https://huggingface.co/kmseong/llama2_7b-chat-gsm8k-lisa-matched-r16-a32-lr1e-4-beavertails) | Lisa (lr=1e-4) (원본 L62) | 0.1788 | 0.0885 | 0.6365 | 0.4142 | 0.3295 | 0.1948 |
-| [kmseong/llama2_7b-chat-gsm8k-lisa-matched-r16-a32-lr2e-4-beavertails](https://huggingface.co/kmseong/llama2_7b-chat-gsm8k-lisa-matched-r16-a32-lr2e-4-beavertails) | Lisa (lr=2e-4) (원본 L63) | 0.0000 | 0.0000 | 0.1058 | 0.1127 | 0.0546 | 0.2009 |
-| [wvnvwn/llama2-7b-chat-lr5e-5-gsm8k-lr1e-4-bvasft](https://huggingface.co/wvnvwn/llama2-7b-chat-lr5e-5-gsm8k-lr1e-4-bvasft) | AsFT (lr=1e-4) (원본 L93) | 0.0000 | 0.0019 | 0.1538 | 0.1696 | 0.0813 | 0.2547 |
-| [wvnvwn/llama2-7b-chat-lr5e-5-gsm8k-lr2e-4-bvasft](https://huggingface.co/wvnvwn/llama2-7b-chat-lr5e-5-gsm8k-lr2e-4-bvasft) | AsFT (lr=2e-4) (원본 L94) | 0.0000 | 0.0038 | 0.1904 | 0.1708 | 0.0912 | 0.2585 |
-| 없음 (namespace 미기재; `llama2-7b-chat-lr5e-5-gsm8k-lr1e-4-bvwsr-4994`) | WSR-LoRA (4994; lr=1e-4) (원본 L76) | 0.0000 | 0.0019 | 0.1615 | 0.1904 | 0.0885 | 0.3177 |
-| 없음 (namespace 미기재; `llama2-7b-chat-lr5e-5-gsm8k-lr2e-4-bvwsr-4994`) | WSR-LoRA (4994; lr=2e-4) (원본 L77) | 0.0019 | 0.0212 | 0.1635 | 0.2396 | 0.1066 | 0.3851 |
-
+---
 
 # 추가 실험 2 (2026-09-04 ~ 09-07, hb_repro 환경 재학습분) — 6개 모델 · α=16
 
@@ -486,3 +467,81 @@ threshold 가 높을수록 projection 되는 layer 가 많아 안전 쪽으로 �
 | [`gemma2_9b-it-CB_SSFT-safelora_gsm8k_thr0.25_a16_lr3e-4`](https://huggingface.co/kmseong/gemma2_9b-it-CB_SSFT-safelora_gsm8k_thr0.25_a16_lr3e-4) | SafeLoRA thr=0.25 | 0.0000 | 0.0000 | 0.0154 | 0.2208 | 0.0590 | 0.7096 | -0.0702 | +0.0022 | +0.0724 |
 
 요약: ρ 를 0.5 까지 올리면 Llama-3.2-3B · Gemma-2-9B · Llama-2-13B 에서는 AVG 가 계속 내려가고 task 가 유지되어 Δoverall 이 A 의 최고치(ρ=0.3)를 소폭 넘고, Llama-2-7B · Llama-3.1-8B 에서는 task 가 떨어져 ρ=0.3 근처가 최적이다. SafeLoRA 는 thr=0.2 가 Vanilla LoRA 에 가깝고 thr=0.25 가 B 의 thr=0.3 수준이다. 로그: HarmBench `logs/run_all_2026-09-0{4,5,6,7}_*_summary.csv`, 원표 `logs/revision_sweep/RESULTS_sweep.md`.
+
+
+# 추가 실험 3 (2026-09-07 ~ 09-08) — MedQA · ARC-C · BeaverTails-GSM8K · 전 기법 α=16
+
+`scripts/revision/run_qa_a16.sh` + `run_bt_then_eval.sh` 로 21셀을 한 번에 학습·평가했다.
+**LoRA scaling 을 1.0 으로 통일**한 것이 이 절의 전제다 — r=16, α=16 이므로 여섯 LoRA 기법의
+업데이트 예산이 모두 같다. 위 A~F 절 및 본문 표의 α=32 행과는 **직접 비교할 수 없다**.
+
+공통 설정: 출발 모델 CB축 `kmseong/llama2_7b-chat-Safety-FT-lr5e-5` · BT축
+`wvnvwn/llama2-7b-chat-lr5e-5-ssft-bv`, epochs 3 · effective batch 16 · max_len 1024 · seed 42 ·
+bf16 · cosine, LoRA lr 3e-4 (r16/α16/dropout .05, targets q,k,v,up,down), SEAL 은 full-param lr 5e-5.
+안전 데이터는 출발 모델이 안전정렬된 데이터셋을 그대로 쓴다(CB=`circuit_breakers`, BT=`beavertails_cb_train`).
+ASR 은 HarmBench keyword 채점(`sys` 조건), Δ 는 각 표의 **Vanilla LoRA(α=16)** 기준이다.
+
+† SEAL 의 S2 는 full-parameter SFT 라 LoRA 예산과 다르다. 같은 표에 두되 예산이 동등한 비교가 아니다.
+
+
+**G. Llama-2-7B-chat / MedQA (CB 축) — 10,178 샘플 전량**
+
+| 모델 | 기법 | Direct | AutoDAN | PAIR | PAP | AVG | MedQA | Δsafe | Δdown | Δoverall |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| [`llama2_7b-chat-CB_SSFT-lora_medqa_a16_lr3e-4`](https://huggingface.co/kmseong/llama2_7b-chat-CB_SSFT-lora_medqa_a16_lr3e-4) | ▸ Vanilla LoRA (α=16) | 0.0000 | 0.0019 | 0.2346 | 0.4081 | 0.1612 | 0.4595 | — | — | — |
+| [`llama2_7b-chat-CB_SSFT-asft_medqa_lambda1.0_a16_lr3e-4`](https://huggingface.co/kmseong/llama2_7b-chat-CB_SSFT-asft_medqa_lambda1.0_a16_lr3e-4) | AsFT λ=1.0 | 0.0000 | 0.0000 | 0.0519 | 0.1023 | 0.0386 | 0.3284 | -0.1226 | -0.1311 | -0.0085 |
+| [`llama2_7b-chat-CB_SSFT-lisa_medqa_rho1.0_a16_lr3e-4`](https://huggingface.co/kmseong/llama2_7b-chat-CB_SSFT-lisa_medqa_rho1.0_a16_lr3e-4) | Lisa ρ=1.0 | 0.0000 | 0.0000 | 0.1212 | 0.1573 | 0.0696 | 0.3181 | -0.0916 | -0.1414 | -0.0498 |
+| [`llama2_7b-chat-CB_SSFT-safelora_medqa_thr0.3_a16_lr3e-4`](https://huggingface.co/kmseong/llama2_7b-chat-CB_SSFT-safelora_medqa_thr0.3_a16_lr3e-4) | SafeLoRA thr=0.3 | 0.0000 | 0.0019 | 0.2038 | 0.3877 | 0.1484 | 0.4595 | -0.0128 | +0.0000 | +0.0128 |
+| [`llama2_7b-chat-CB_SSFT-salora_medqa_rs32rt32_a16_lr3e-4`](https://huggingface.co/kmseong/llama2_7b-chat-CB_SSFT-salora_medqa_rs32rt32_a16_lr3e-4) | SaLoRA r_s=32,r_t=32 | 0.0000 | 0.0115 | 0.2923 | 0.6954 | 0.2498 | 0.4211 | +0.0886 | -0.0384 | -0.1270 |
+| [`llama2_7b-chat-CB_SSFT-seal_medqa_topp0.8_lr5e-5`](https://huggingface.co/kmseong/llama2_7b-chat-CB_SSFT-seal_medqa_topp0.8_lr5e-5) | SEAL top-p 0.8 † | 0.0038 | 0.1327 | 0.4558 | 0.7531 | 0.3364 | 0.3574 | +0.1752 | -0.1021 | -0.2773 |
+| [`llama2_7b-chat-CB_SSFT-wsr-lora_medqa_rho0.3_a16_lr3e-4`](https://huggingface.co/kmseong/llama2_7b-chat-CB_SSFT-wsr-lora_medqa_rho0.3_a16_lr3e-4) | **WSR-LoRA ρ=0.3** | 0.0000 | 0.0000 | 0.1365 | 0.2642 | 0.1002 | 0.4517 | -0.0610 | -0.0078 | +0.0532 |
+
+**H. Llama-2-7B-chat / ARC-C (CB 축)**
+
+| 모델 | 기법 | Direct | AutoDAN | PAIR | PAP | AVG | ARC-C | Δsafe | Δdown | Δoverall |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| [`llama2_7b-chat-CB_SSFT-lora_arc_a16_lr3e-4`](https://huggingface.co/kmseong/llama2_7b-chat-CB_SSFT-lora_arc_a16_lr3e-4) | ▸ Vanilla LoRA (α=16) | 0.0000 | 0.0000 | 0.2000 | 0.3623 | 0.1406 | 0.6109 | — | — | — |
+| [`llama2_7b-chat-CB_SSFT-asft_arc_lambda1.0_a16_lr3e-4`](https://huggingface.co/kmseong/llama2_7b-chat-CB_SSFT-asft_arc_lambda1.0_a16_lr3e-4) | AsFT λ=1.0 | 0.0000 | 0.0000 | 0.0596 | 0.1808 | 0.0601 | 0.3874 | -0.0805 | -0.2235 | -0.1430 |
+| [`llama2_7b-chat-CB_SSFT-lisa_arc_rho1.0_a16_lr3e-4`](https://huggingface.co/kmseong/llama2_7b-chat-CB_SSFT-lisa_arc_rho1.0_a16_lr3e-4) | Lisa ρ=1.0 | 0.0000 | 0.0000 | 0.0942 | 0.2723 | 0.0916 | 0.3157 | -0.0490 | -0.2952 | -0.2462 |
+| [`llama2_7b-chat-CB_SSFT-safelora_arc_thr0.3_a16_lr3e-4`](https://huggingface.co/kmseong/llama2_7b-chat-CB_SSFT-safelora_arc_thr0.3_a16_lr3e-4) | SafeLoRA thr=0.3 | 0.0000 | 0.0000 | 0.1846 | 0.3312 | 0.1290 | 0.6195 | -0.0116 | +0.0086 | +0.0202 |
+| [`llama2_7b-chat-CB_SSFT-salora_arc_rs32rt32_a16_lr3e-4`](https://huggingface.co/kmseong/llama2_7b-chat-CB_SSFT-salora_arc_rs32rt32_a16_lr3e-4) | SaLoRA r_s=32,r_t=32 | 0.0000 | 0.0038 | 0.2135 | 0.3685 | 0.1464 | 0.6297 | +0.0058 | +0.0188 | +0.0130 |
+| [`llama2_7b-chat-CB_SSFT-seal_arc_topp0.8_lr5e-5`](https://huggingface.co/kmseong/llama2_7b-chat-CB_SSFT-seal_arc_topp0.8_lr5e-5) | SEAL top-p 0.8 † | 0.0000 | 0.0058 | 0.2923 | 0.5354 | 0.2084 | 0.6067 | +0.0678 | -0.0042 | -0.0720 |
+| [`llama2_7b-chat-CB_SSFT-wsr-lora_arc_rho0.3_a16_lr3e-4`](https://huggingface.co/kmseong/llama2_7b-chat-CB_SSFT-wsr-lora_arc_rho0.3_a16_lr3e-4) | **WSR-LoRA ρ=0.3** | 0.0000 | 0.0000 | 0.1885 | 0.2969 | 0.1213 | 0.6157 | -0.0193 | +0.0048 | +0.0241 |
+
+**I. Llama-2-7B-chat / GSM8K (BT 축) — 위 「BeaverTails (BV)」 절 326~331행의 재수행분**
+
+| 모델 | 기법 | Direct | AutoDAN | PAIR | PAP | AVG | GSM8K | Δsafe | Δdown | Δoverall |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| [`llama2_7b-chat-BT_SSFT-lora_gsm8k_a16_lr3e-4`](https://huggingface.co/kmseong/llama2_7b-chat-BT_SSFT-lora_gsm8k_a16_lr3e-4) | ▸ Vanilla LoRA (α=16) | 0.0019 | 0.0096 | 0.2192 | 0.3238 | 0.1386 | 0.3662 | — | — | — |
+| [`llama2_7b-chat-BT_SSFT-asft_gsm8k_lambda1.0_a16_lr3e-4`](https://huggingface.co/kmseong/llama2_7b-chat-BT_SSFT-asft_gsm8k_lambda1.0_a16_lr3e-4) | AsFT λ=1.0 | 0.0038 | 0.2692 | 0.2635 | 0.2585 | 0.1987 | 0.2115 | +0.0601 | -0.1547 | -0.2148 |
+| [`llama2_7b-chat-BT_SSFT-lisa_gsm8k_rho1.0_a16_lr3e-4`](https://huggingface.co/kmseong/llama2_7b-chat-BT_SSFT-lisa_gsm8k_rho1.0_a16_lr3e-4) | Lisa ρ=1.0 | 0.0000 | 0.0077 | 0.1615 | 0.1519 | 0.0803 | 0.1873 | -0.0583 | -0.1789 | -0.1206 |
+| [`llama2_7b-chat-BT_SSFT-safelora_gsm8k_thr0.3_a16_lr3e-4`](https://huggingface.co/kmseong/llama2_7b-chat-BT_SSFT-safelora_gsm8k_thr0.3_a16_lr3e-4) | SafeLoRA thr=0.3 | 0.0019 | 0.0038 | 0.2019 | 0.2731 | 0.1202 | 0.3753 | -0.0184 | +0.0091 | +0.0275 |
+| [`llama2_7b-chat-BT_SSFT-salora_gsm8k_rs32rt32_a16_lr3e-4`](https://huggingface.co/kmseong/llama2_7b-chat-BT_SSFT-salora_gsm8k_rs32rt32_a16_lr3e-4) | SaLoRA r_s=32,r_t=32 | 0.0019 | 0.1827 | 0.3615 | 0.4412 | 0.2468 | 0.3616 | +0.1082 | -0.0046 | -0.1128 |
+| [`llama2_7b-chat-BT_SSFT-seal_gsm8k_topp0.8_lr5e-5`](https://huggingface.co/kmseong/llama2_7b-chat-BT_SSFT-seal_gsm8k_topp0.8_lr5e-5) | SEAL top-p 0.8 † | 0.0019 | 0.0558 | 0.2750 | 0.2608 | 0.1484 | 0.3904 | +0.0098 | +0.0242 | +0.0144 |
+| [`llama2_7b-chat-BT_SSFT-wsr-lora_gsm8k_rho0.3_a16_lr3e-4`](https://huggingface.co/kmseong/llama2_7b-chat-BT_SSFT-wsr-lora_gsm8k_rho0.3_a16_lr3e-4) | **WSR-LoRA ρ=0.3** | 0.0019 | 0.0058 | 0.1865 | 0.2265 | 0.1052 | 0.3692 | -0.0334 | +0.0030 | +0.0364 |
+
+**관측**
+
+- **WSR-LoRA(ρ=0.3) 가 세 설정 모두에서 Pareto 위에 있다.** MedQA 는 Vanilla LoRA 대비
+  utility 를 0.0078 만 잃고 AVG 를 0.0610 낮췄고(Δoverall +0.0532), BT/GSM8K 에서는
+  utility 가 오히려 높으면서(0.3692 vs 0.3662) AVG 가 가장 낮은 축이다(0.1052).
+- **AsFT · Lisa 는 더 안전하지만 utility 를 크게 깎아서 얻은 것이다.** MedQA 에서 AVG 는
+  0.0386 / 0.0696 로 가장 낮지만 정확도가 0.3284 / 0.3181 로 Vanilla LoRA(0.4595)보다
+  0.13~0.14 낮다. ARC-C 도 같은 패턴이다(0.3874 / 0.3157 vs 0.6109).
+- **⚠️ BT/GSM8K 의 AsFT 는 AutoDAN 이 0.2692 로 튄다.** 같은 기법의 CB 축 두 셀은 AutoDAN
+  이 모두 0.0000 인데 BT 축만 이렇고, utility 도 0.2115 로 낮다. 위 「AsFT 의 상충하는 원본
+  기록」 절에 남아 있는 불안정성과 방향이 같으므로, 이 행을 결론에 쓰기 전에 재학습으로
+  재현 여부를 확인할 것.
+- **⚠️ BT/GSM8K 의 Lisa(ρ=1.0) 는 utility 가 0.1873 으로 붕괴했다.** CLAUDE.md 에 기록된
+  "ρ=1.0 은 GSM8K 0.39→0.17 로 붕괴" 가 그대로 재현됐다. 이 절은 사용자 지정으로 ρ=1.0
+  만 돌렸으므로, 보고할 때는 ρ=0.0 쪽도 만들어 양쪽을 함께 제시할 것.
+- SEAL 은 CB/MedQA 에서 AVG 0.3364 로 이 절에서 가장 나쁘다. 기존 CB/GSM8K SEAL(0.3045)
+  과 같은 경향이다.
+
+**알려진 차이**: MedQA 는 전체 10,178 샘플을 썼다. 논문의 MedQA 행은 10,000 샘플이므로
++1.7% 차이가 있다(`scripts/revision/common.sh` 에 기록된 기존 차이).
+
+로그: HarmBench `logs/run_all_2026-09-08_01-30-49_summary.csv` ·
+요약 `HarmBench/results/evaluation_summary_2026-09-08_01-31-04.csv` ·
+lm-eval `logs/eval_20260908_040823_gpu0_results.csv`.
+학습 로그 `logs/qa_a16_20260907_173959.log` · `logs/bt_then_eval_20260907_200827.log`.

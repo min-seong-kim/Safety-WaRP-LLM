@@ -12,7 +12,7 @@ REPO=$HOME/Safety-WaRP-LLM; HB=$HOME/HarmBench; cd "$REPO"
 export PY=$HOME/.conda/envs/hb_repro/bin/python
 export PATH=$HOME/.conda/envs/hb_repro/bin:$PATH
 export TRITON_CACHE_DIR=$HOME/.triton/cache_hb_repro TORCHINDUCTOR_CACHE_DIR=$HOME/.torchinductor_cache_hb_repro
-export HF_HUB_DISABLE_XET=1 HF_HUB_ENABLE_HF_TRANSFER=0
+export HF_HUB_DISABLE_XET="${HF_HUB_DISABLE_XET:-0}" HF_HUB_ENABLE_HF_TRANSFER="${HF_HUB_ENABLE_HF_TRANSFER:-0}"
 export SAFETY_SETS=cb PUSH_TO_HUB=1 PRUNE_AFTER_UPLOAD=1 PRUNE_BASIS=0 PRUNE_HF_CACHE=0 CONTINUE_ON_ERROR=1
 export BASE_BLOCKED_MODELS=""
 SW=$REPO/outputs/revision_sweep

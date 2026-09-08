@@ -2,7 +2,7 @@
 # sweep 에서 네트워크 등으로 실패한 평가 조합을 RESUME=true 로 메운다. 업로드 마커(.uploaded)가 있는 sweep 리포 전부를 넣는다.
 set -uo pipefail
 REPO=$HOME/Safety-WaRP-LLM; HB=$HOME/HarmBench; cd "$REPO"
-export HF_HUB_DISABLE_XET=1 HF_HUB_ENABLE_HF_TRANSFER=0
+export HF_HUB_DISABLE_XET="${HF_HUB_DISABLE_XET:-0}" HF_HUB_ENABLE_HF_TRANSFER="${HF_HUB_ENABLE_HF_TRANSFER:-0}"
 REPOS=()
 for cfg in "wsr_lora rho0.4 KEEP_RATIO=0.4 WSR_LORA_ALPHA=16" "wsr_lora rho0.5 KEEP_RATIO=0.5 WSR_LORA_ALPHA=16" "safelora thr0.2 SAFELORA_THRESHOLD=0.2 LORA_ALPHA=16" "safelora thr0.25 SAFELORA_THRESHOLD=0.25 LORA_ALPHA=16"; do
   set -- $cfg; m=$1; tag=$2; shift 2
