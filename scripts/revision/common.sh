@@ -124,6 +124,15 @@ ASFT_LAMBDA_REG="${ASFT_LAMBDA_REG:-1.0}"   # 사용자 지정 λ=1.0 (= 참조 
 LISA_RHO="${LISA_RHO:-0.0}"                 # 2026-08-31 사용자 결정: rebuttal 모델(rho0)과 맞춘다
 LISA_ALIGNMENT_STEP="${LISA_ALIGNMENT_STEP:-100}"
 LISA_FINETUNE_STEP="${LISA_FINETUNE_STEP:-900}"
+# ── SafeGrad (arXiv:2508.07172) ─────────────────────────────────────────────
+#  safegrad/ 패키지. 유저 태스크 그래디언트와 KL alignment 그래디언트가 충돌할 때
+#  (전역 내적 < 0) 유저 쪽을 alignment 의 직교평면으로 투영한 뒤 ρ 가중합한다.
+#  ⚠️ 기본 METHODS 목록에는 **넣지 않았다**. 116셀 계획을 말없이 늘리지 않기 위함이며,
+#     돌릴 때 METHODS=safegrad 로 명시한다.
+SAFEGRAD_RHO="${SAFEGRAD_RHO:-1.0}"                       # 논문 기본값 ρ=1.0
+SAFEGRAD_REF_MODE="${SAFEGRAD_REF_MODE:-adapter_off}"     # θ0 = 어댑터 끈 현재 모델(= 출발 모델). separate 와 수학적 동치, 메모리 한 벌 절약
+SAFEGRAD_KL_REDUCTION="${SAFEGRAD_KL_REDUCTION:-ref}"     # 참조 구현 재현 (패딩 포함 sum ÷ 응답토큰수)
+SAFEGRAD_ALIGN_BS="${SAFEGRAD_ALIGN_BS:-0}"               # 0 = 태스크 배치와 동일(참조 구현과 같음)
 SAFELORA_THRESHOLD="${SAFELORA_THRESHOLD:-0.3}"   # 사용자 지정 thr=0.3
 # SaLoRA 는 salora/salora_lora.py + salora/salora_impl.py (Li et al., ICLR'25 포팅) 를 쓴다.
 #   r_s : safety 부분공간 차원 — C_S = I − U_C U_Cᵀ (U_C = top-r_s left SV of W X_harmful)
@@ -451,6 +460,7 @@ hf_hparam_tag() {
     asft)      echo "lambda${ASFT_LAMBDA_REG}$(lora_alpha_tag)" ;;
     lisa)      echo "rho${LISA_RHO}$(lora_alpha_tag)" ;;
     seal)      echo "topp${SEAL_TOPP}" ;;
+    safegrad)  echo "rho${SAFEGRAD_RHO}$(lora_alpha_tag)" ;;
     safelora)  echo "thr${SAFELORA_THRESHOLD}$(lora_alpha_tag)" ;;
     salora)    echo "rs${SALORA_R_S}rt${SALORA_R_T}$(lora_alpha_tag)" ;;
     lora)      echo "${LORA_ALPHA_TAG_LORA:-$(lora_alpha_tag | sed 's/^_//')}" ;;

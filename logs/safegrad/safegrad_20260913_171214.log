@@ -1,0 +1,28 @@
+2026-09-13 17:12:14 - safegrad - INFO - ======================================================================
+2026-09-13 17:12:14 - safegrad - INFO -   🛡️  SafeGrad — gradient surgery + KL alignment
+2026-09-13 17:12:14 - safegrad - INFO - ======================================================================
+2026-09-13 17:12:14 - safegrad - INFO - Log file: /NHNHOME/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/logs/safegrad/safegrad_20260913_171214.log
+2026-09-13 17:12:14 - safegrad - INFO - ⚙️  Configuration:
+2026-09-13 17:12:14 - safegrad - INFO -    ├─ Base/aligned model : /NHNHOME/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/tmp/safegrad_smoke_42372/tiny-model
+2026-09-13 17:12:14 - safegrad - INFO -    ├─ Reference θ0       : /NHNHOME/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/tmp/safegrad_smoke_42372/tiny-model  (mode=separate)
+2026-09-13 17:12:14 - safegrad - INFO -    ├─ Input formatting   : base plain prompt
+2026-09-13 17:12:14 - safegrad - INFO -    ├─ Tuning             : LoRA (r=4, alpha=8)
+2026-09-13 17:12:14 - safegrad - INFO -    ├─ SafeGrad           : rho=1.0 projection=True kl_reduction=ref kl_fp32=False
+2026-09-13 17:12:14 - safegrad - INFO -    ├─ Alignment data     : /NHNHOME/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/tmp/safegrad_smoke_42372/safety.json (n=16)
+2026-09-13 17:12:14 - safegrad - INFO -    ├─ Downstream         : /NHNHOME/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/tmp/safegrad_smoke_42372/task.json  (clean)
+2026-09-13 17:12:14 - safegrad - INFO -    ├─ LR 0.0001  epochs 1  eff.batch 4
+2026-09-13 17:12:14 - safegrad - INFO -    └─ Output             : /NHNHOME/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/tmp/safegrad_smoke_42372/out_separate
+2026-09-13 17:12:14 - safegrad - INFO - [1/5] 토크나이저 로드
+2026-09-13 17:12:14 - safegrad - INFO - ✅ Tokenizer (vocab=32000, pad=</s>)
+2026-09-13 17:12:14 - safegrad - INFO - [2/5] 모델 로드
+2026-09-13 17:12:15 - safegrad - INFO -    · reference θ0 를 따로 로드: /NHNHOME/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/tmp/safegrad_smoke_42372/tiny-model
+2026-09-13 17:12:15 - safegrad - INFO - ✓ LoRA: r=4, alpha=8, targets=['q_proj', 'k_proj', 'v_proj', 'up_proj', 'down_proj']
+2026-09-13 17:12:15 - safegrad - INFO - ✅ Model (0.00B total, 0.0M trainable = 0.15%)
+2026-09-13 17:12:15 - safegrad - INFO - [3/5] 다운스트림 'task' 로드 (/NHNHOME/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/tmp/safegrad_smoke_42372/task.json)
+2026-09-13 17:12:15 - safegrad - INFO - ✅ task train: 24 samples
+2026-09-13 17:12:15 - safegrad - INFO - [4/5] alignment(safety) 데이터 준비
+2026-09-13 17:12:15 - safegrad - INFO - ✅ Alignment(safety): 16 samples (from /NHNHOME/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/tmp/safegrad_smoke_42372/safety.json, field=llama3_output)
+2026-09-13 17:12:15 - safegrad - INFO - [5/5] SafeGrad 학습 시작
+2026-09-13 17:12:16 - safegrad - INFO - 모델 저장
+2026-09-13 17:12:16 - safegrad - INFO - ✅ Saved to /NHNHOME/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/tmp/safegrad_smoke_42372/out_separate
+2026-09-13 17:12:16 - safegrad - INFO - ✅ SafeGrad fine-tuning complete!

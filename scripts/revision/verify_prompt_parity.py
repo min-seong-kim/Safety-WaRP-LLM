@@ -15,6 +15,10 @@ revision 실험은 12개 기법을 한 셀에서 비교한다. 러너가 6갈래
   5. wsr-lora/pissa_wsr_lora._chat_ids                             → WSR-LoRA
   6. models.phase3_extra_learning._tokenize_question_answer_example → WSR-Tune
 
+SafeGrad(safegrad/finetune_safegrad.py)는 7번째 구현을 만들지 않고 3번(LISA)의 함수를
+**그대로 import** 한다. 아래 `_check_safegrad_reuses_lisa` 가 그 사실(같은 함수 객체)을
+검사한다 — 누군가 나중에 복사해 두 벌로 갈라지면 여기서 걸린다.
+
 이 중 하나라도 다른 문자열을 만들면 "기법 차이"가 아니라 "프롬프트 차이"를 재게 된다.
 이 스크립트는 **같은 태스크 JSON의 같은 행**을 6갈래에 통과시켜 (input_ids, labels)
 가 완전히 일치하는지 확인한다. GPU 도 모델 가중치도 필요 없다(토크나이저만 받는다).
@@ -97,6 +101,21 @@ def _make_phase3_stub(tokenizer, model_ref):
     return stub
 
 
+def _check_safegrad_reuses_lisa() -> str:
+    """SafeGrad 가 LISA 의 토큰화 함수를 그대로 쓰는지(복사본이 아닌지) 확인."""
+    lisa = importlib.import_module("gsm8k_eval.finetune_gsm8k_lisa")
+    try:
+        safegrad = importlib.import_module("safegrad.finetune_safegrad")
+    except Exception as e:                     # peft 등이 없는 환경
+        return f"safegrad: import 실패로 건너뜀 ({type(e).__name__})"
+    if safegrad.tokenize_sft_example is not lisa.tokenize_sft_example:
+        raise SystemExit(
+            "❌ safegrad/finetune_safegrad.py 가 LISA 의 tokenize_sft_example 을 더 이상 "
+            "그대로 쓰지 않습니다 (복사본으로 갈라졌습니다). build_paths 에 별도 경로로 "
+            "추가하거나 import 를 되돌리세요.")
+    return "safegrad: LISA 토큰화 함수 재사용 확인 ✓"
+
+
 def build_paths(tokenizer, model_ref, max_length):
     """이름 → (question, response) 를 (input_ids, labels) 로 바꾸는 콜러블."""
     agnews = importlib.import_module("agnews_eval.finetune_agnews_full_params")
@@ -139,6 +158,7 @@ def build_paths(tokenizer, model_ref, max_length):
 
 def main():
     args = parse_args()
+    print(_check_safegrad_reuses_lisa())
     from transformers import AutoTokenizer
     from data.local_task_dataset import load_task_pairs
 

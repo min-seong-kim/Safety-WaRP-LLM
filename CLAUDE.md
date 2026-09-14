@@ -542,6 +542,90 @@ Many root-level scripts are analysis/plotting one-offs: `plot_*.py`, `singular_v
 `upload_to_huggingface.py` (and `upload_phase0_to_hf.py`, `upload_phase3_to_hf.py`) push trained checkpoints to the
 Hub. `patch_chat_template.py` fixes tokenizer chat templates on saved models.
 
+## Original-space freeze sweep (논문 Table 1 재현, `scripts/run_origspace_freeze_sweep.sh`)
+
+Table 1 의 "FT (X% frozen)" 행을 **chat 라인**으로 다시 만든 것. 재파라미터화 없이
+(U=V=I) 원래 weight 공간에서 safety importance 를 재고 상위 ρ 를 얼린 뒤 gsm8k 로
+full-param FT 한다. WSR-Tune 과의 차이는 **마스크가 어느 좌표계에서 매겨지는가** 하나뿐.
+
+```bash
+KEEP_RATIOS="0.05 0.2 0.3 0.4 0.5" bash scripts/run_origspace_freeze_sweep.sh
+bash scripts/upload_origspace_freeze.sh          # 업로드만 따로
+bash scripts/eval_origspace_freeze_safety.sh     # HB_ONLY=1, safety 만
+```
+
+- 출발 모델 `kmseong/llama2_7b-chat-Safety-FT-lr5e-5`, lr 5e-5 · 3ep · eff.batch 16 ·
+  wd 0.01 · warmup 0.1 · seed 42. **ρ=0 기준행은 이미 있다**:
+  `kmseong/llama2_7b-chat_gsm8k_full_ft_lr5e-5` (동일 출발 모델·동일 동작점, AVG 0.2078).
+- 리포: `kmseong/llama2_7b-chat-origspace-freeze-p{05,20,30,40,50}-gsm8k-lr5e-5` (2026-09-13).
+  B200 에서 비율당 Phase2 2.5분 + Phase3 15분 ≈ **18분**, 5개 1시간 25분.
+- 구현은 기존 `models/phase2_importance_original_space.py` +
+  `models/phase3_extra_learning_original_space.py` 를 그대로 쓴다 (`--original_space_mask`).
+  Phase 2 는 `load_basis`/`convert_to_warp_modules`/`reparameterize_weights` 를 **no-op 으로
+  오버라이드**하므로 basis 가 필요 없고, 마스크는 레이어별 `quantile(1-ρ)` 다.
+
+**동결이 실제로 걸렸는지 확인하는 법 (bf16 보정 필수).** 원공간 이진 마스크면 mask=1 위치는
+출발 모델과 bit-identical 이어야 한다. 그런데 bf16 은 가수가 8비트라 **lr 5e-5 로 학습된
+파라미터도 55% 가 반올림으로 값이 그대로다**. 그래서 단순 일치율을 ρ 로 읽으면 안 된다.
+마스크가 없는 파라미터의 일치율을 바닥값 `r` 로 삼아 보정한다:
+
+    관측 = f + (1-f)·r   →   f = (관측 - r) / (1 - r)
+
+실측(2026-09-13): p05 4.46% · p20 19.34% · p30 29.23% · p40 39.14% — 요청값과 전부 일치
+(오차 -0.5~-0.9%p, 대상 모듈의 바닥값이 조금 낮아 생기는 일관된 과소추정).
+
+- **기존 2026-05-07 배치도 유효하다.** `kmseong/llama2-7b-chat-original-space-freeze-p{10,20,25,30,40,50}-lr5e-5`
+  는 `model_metadata.json` 이 전부 `keep_ratio: 0.1` / `base_model: "unknown"` 인 **빈 템플릿**
+  이라 메타데이터로는 검증이 안 되지만, 위 방법으로 재면 p10 → 9.48%, p50 → 49.09% 로
+  이름과 맞는다. 바닥값도 신규 배치와 같은 55% 대라 제조 방식이 동일하다. 메타데이터가
+  비었다는 이유만으로 재학습하지 말 것 — 먼저 동결률을 재라.
+
+**스윕 스크립트의 업로드 단계 버그(2026-09-13, 수정 완료).** `run_origspace_freeze_sweep.sh` 는
+`upload_and_prune.py --cell_dir "$MODEL_DIR"` 로 호출하는데, 그 도구는 `.done` 과 `MODEL_DIR`
+이 들어 있는 **셀 디렉토리**를 받아야 한다(`model_dir_of` 가 `MODEL_DIR` 파일을 읽어 가중치
+위치를 찾는다). 그래서 5개 셀 모두 `.done 이 없다` 로 업로드가 실패했다 — **학습은 정상**.
+`--cell_dir "$CELL"` 로 고쳤다. 업로드만 다시 돌려야 할 때는
+`scripts/upload_origspace_freeze.sh` (재실행 안전, `.uploaded` 로 건너뜀).
+
+## SafeGrad baseline (`safegrad/`)
+
+**SafeGrad** (Yi et al., arXiv:2508.07172) ported as a comparison arm. Per step it takes two
+gradients — user task and safety alignment — and **only when they conflict** (whole-model dot
+product < 0) projects the user gradient onto the plane orthogonal to the alignment gradient,
+then combines: `g_final = g'_user + ρ·g_align`. The alignment loss is **KL to the frozen
+start model** (`D_KL(P_θ0 ‖ P_θ)`), not refusal-token CE — that is what makes it work with as
+few as 10 alignment samples in the paper.
+
+- `safegrad/safegrad_trainer.py` (`SafeGradTrainer`), `safegrad/finetune_safegrad.py` (runner,
+  mirrors `gsm8k_eval/finetune_gsm8k_lisa.py`), `safegrad/test_safegrad.py` (6 checks),
+  `safegrad/scripts/_smoke_safegrad.sh` (~1 min). Full docs: **`safegrad/README.md`**.
+- Wired into `scripts/revision/20_lora_family.sh` + `common.sh`, but **deliberately not in the
+  default `METHODS`** — run it with `METHODS=safegrad ...` so the 116-cell plan does not grow
+  silently. Knobs: `SAFEGRAD_RHO` (1.0), `SAFEGRAD_REF_MODE` (adapter_off),
+  `SAFEGRAD_KL_REDUCTION` (ref), `SAFEGRAD_ALIGN_BS` (0 = same as task batch).
+- Runs on **clean** task data like every other arm here (the paper poisons the user data with
+  ratio `hr`); alignment data follows the `$safety` axis, same file and field as LISA.
+
+**Three things that must not be "fixed":**
+- **`param.grad` is accumulated, not assigned.** The reference impl does `param.grad =
+  final_grad`, which silently drops all but the last micro-batch. Harmless there
+  (`gradient_accumulation_steps=1` in every reference script), fatal here (effective batch 16 =
+  4×4). `test_safegrad.py` check [5] guards it.
+- **`F.kl_div(log_p_theta, p_ref)` is `KL(P_ref ‖ P_theta)`** in PyTorch's argument convention,
+  which is what paper Eq. 6 asks for. Do not swap the arguments.
+- **A huge `projection_scalar` is normal**, not an instability. With LoRA, `B=0` at step 0 means
+  θ=θ0 and `g_align=0`; when `‖g_align‖` is tiny the ratio `dot/‖g_align‖²` blows up, but
+  Cauchy–Schwarz bounds what is actually subtracted by `‖g_user‖`. Do not add clipping on it.
+
+`--ref_mode adapter_off` (default) uses the LoRA-disabled model as θ0 instead of loading a
+second copy — exact whenever the adapter sits directly on the start model (verified equal in
+check [6]), and it is what saves the extra model in VRAM. It is **wrong** after merging some
+other adapter first, and the runner refuses it for full-param.
+
+SafeGrad does **not** add a 7th tokenization implementation — it imports LISA's
+`tokenize_sft_example`. `scripts/revision/verify_prompt_parity.py` asserts it is literally the
+same function object, so a future copy-paste breaks the check instead of the comparison.
+
 ## SEAL × WaRP integration (`seal/`)
 
 `seal/` reimplements **SEAL** (Safety-Enhanced Aligned LLM finetuning via *bilevel data selection*, ICLR'25)

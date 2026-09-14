@@ -37,6 +37,15 @@
 | [`llama2-7b-chat-lr5e-5-gsm8k-lr3e-4-cbsalora-new`](https://huggingface.co/wvnvwn/llama2-7b-chat-lr5e-5-gsm8k-lr3e-4-cbsalora-new) | SaLoRA (α=16) † | 0.0000 | 0.0596 | 0.4615 | 0.7088 | 0.3075 | 0.3874 | +0.0489 | +0.0258 | -0.0231 |
 | [`llama2_7b-chat-CB_SSFT-wsr-lora_gsm8k_rho0.1_lr3e-4`](https://huggingface.co/kmseong/llama2_7b-chat-CB_SSFT-wsr-lora_gsm8k_rho0.1_lr3e-4) | WSR-LoRA (α=32) | 0.0000 | 0.1192 | 0.2731 | 0.5258 | 0.2295 | 0.3685 | -0.1385 | -0.0235 | +0.1150 |
 | [`llama2-7b-chat-lr5e-5-gsm8k-lr3e-4-cbwsrlora-rot`](https://huggingface.co/wvnvwn/llama2-7b-chat-lr5e-5-gsm8k-lr3e-4-cbwsrlora-rot) | WSR-LoRA (α=16) † | 0.0000 | 0.0000 | 0.1577 | 0.2438 | 0.1004 | 0.3692 | -0.1582 | +0.0076 | +0.1658 |
+| [`llama2_7b-chat-CB_SSFT-safegrad_gsm8k_rho1.0_a16_lr3e-4`](https://huggingface.co/kmseong/llama2_7b-chat-CB_SSFT-safegrad_gsm8k_rho1.0_a16_lr3e-4) | SafeGrad ρ=1 (α=16) ‡ | 0.0000 | 0.0000 | 0.0712 | 0.1362 | 0.0518 | 0.3662 | -0.2068 | +0.0046 | +0.2114 |
+
+‡ **SafeGrad** (arXiv:2508.07172) — 2026-09-13 이 박스에서 새로 학습·측정. 구현은 `safegrad/`.
+  다른 행과 동일 조건(sys 모드 · GRADING=hard · AdvBench standard · GSM8K 5-shot flexible-extract,
+  LoRA r16/α16 · lr 3e-4 · 3 epoch · eff.batch 16 · seed 42)에서 단일 run 으로 측정했다.
+  ⚠️ AVG 0.0518 과 AsFT 의 0.0527 차이(0.0009)는 **재현 오차 범위 안**이다
+  (`scripts/revision/repro_2026-09/` 기준 동일 설정 재학습 시 keyword ASR 이 ±0.05 움직인다).
+  두 기법을 "SafeGrad 가 더 안전하다" 로 읽으면 안 되고, **같은 안전 수준을 downstream 손실
+  없이 달성했다**(GSM8K 0.3662 vs AsFT 0.1971)는 점이 차이다.
 
 ## Llama-2-13B-chat / GSM8K
 
@@ -545,3 +554,52 @@ ASR 은 HarmBench keyword 채점(`sys` 조건), Δ 는 각 표의 **Vanilla LoRA
 요약 `HarmBench/results/evaluation_summary_2026-09-08_01-31-04.csv` ·
 lm-eval `logs/eval_20260908_040823_gpu0_results.csv`.
 학습 로그 `logs/qa_a16_20260907_173959.log` · `logs/bt_then_eval_20260907_200827.log`.
+
+## G. 원공간 동결 비율 sweep — 논문 Table 1 의 chat 라인 재현 (safety only)
+
+**2026-09-13 측정.** 재파라미터화 없이(U=V=I) **원래 weight 공간**에서 safety importance 를
+재고 상위 ρ 를 얼린 뒤 gsm8k 로 full-param FT 했다. WSR-Tune 과의 차이는 **마스크가 어느
+좌표계에서 매겨지는가** 하나뿐이다. 논문 Table 1 은 llama2-7b **base** 모델 실험이고, 이 표는
+같은 실험을 **chat 라인**(safety-tuned Llama-2-7B-chat)에서 다시 돌린 것이다.
+
+학습: `scripts/run_origspace_freeze_sweep.sh` — 출발 `kmseong/llama2_7b-chat-Safety-FT-lr5e-5`,
+Phase 2 `--original_space_mask` + circuit_breakers 4994(레이어별 quantile),
+Phase 3 gsm8k full-param FT, lr 5e-5 · 3ep · eff.batch 16 · wd 0.01 · warmup 0.1 · seed 42 · bf16.
+측정: 표 상단의 공통 조건과 동일(sys 모드 · GRADING=hard · AdvBench standard · 4종 공격).
+**downstream 은 측정하지 않았다**(`HB_ONLY=1`) — 이 표만으로 Δoverall 을 논하면 안 된다.
+
+| 동결 ρ | 모델 | Direct | AutoDAN | PAIR | PAP | AVG ↓ |
+|---|---|---:|---:|---:|---:|---:|
+| 0.00 | [`llama2_7b-chat_gsm8k_full_ft_lr5e-5`](https://huggingface.co/kmseong/llama2_7b-chat_gsm8k_full_ft_lr5e-5) † | 0.0000 | 0.0827 | 0.2635 | 0.4850 | 0.2078 |
+| 0.05 | [`...origspace-freeze-p05-gsm8k-lr5e-5`](https://huggingface.co/kmseong/llama2_7b-chat-origspace-freeze-p05-gsm8k-lr5e-5) | 0.0000 | 0.0096 | 0.1481 | 0.2942 | 0.1130 |
+| 0.20 | [`...origspace-freeze-p20-gsm8k-lr5e-5`](https://huggingface.co/kmseong/llama2_7b-chat-origspace-freeze-p20-gsm8k-lr5e-5) | 0.0000 | 0.0019 | 0.1135 | 0.1927 | 0.0770 |
+| 0.30 | [`...origspace-freeze-p30-gsm8k-lr5e-5`](https://huggingface.co/kmseong/llama2_7b-chat-origspace-freeze-p30-gsm8k-lr5e-5) | 0.0000 | 0.0019 | 0.1058 | 0.1700 | 0.0694 |
+| 0.40 | [`...origspace-freeze-p40-gsm8k-lr5e-5`](https://huggingface.co/kmseong/llama2_7b-chat-origspace-freeze-p40-gsm8k-lr5e-5) | 0.0000 | 0.0038 | 0.1019 | 0.1569 | **0.0657** |
+| 0.50 | [`...origspace-freeze-p50-gsm8k-lr5e-5`](https://huggingface.co/kmseong/llama2_7b-chat-origspace-freeze-p50-gsm8k-lr5e-5) | 0.0000 | 0.0038 | 0.1038 | 0.1573 | 0.0662 |
+| *0.10* | *[`llama-2-7b-chat-warp-ratio-0.1`](https://huggingface.co/wvnvwn/llama-2-7b-chat-warp-ratio-0.1)* † — **WSR-Tune(재파라미터화)** | 0.0000 | 0.0000 | 0.0962 | 0.1800 | *0.0691* |
+
+† 기존 측정치(같은 출발 모델·같은 동작점·같은 평가 조건). 나머지 5행이 이번에 새로 학습·측정한 것.
+
+**읽는 법 — 세 가지만 말할 수 있다.**
+
+1. **곡선은 ρ≈0.3 에서 포화된다.** 0.2078 → 0.1130 → 0.0770 → 0.0694 → 0.0657 → 0.0662.
+   ρ=0.5 는 ρ=0.4 보다 나아지지 않는다. 더 얼려도 더 안전해지지 않는다.
+2. **ρ≥0.3 의 원공간 동결은 WSR-Tune 10% 와 같은 안전 수준이다.** 0.0657~0.0694 vs 0.0691 의
+   차이는 전부 이 저장소의 재현 오차(`scripts/revision/repro_2026-09/`, 동일 설정 재학습 시
+   keyword ASR ±0.05) 안이므로 **우열로 읽으면 안 된다**.
+3. **논문 Table 1 의 구도는 chat 라인에서 재현되지 않는다.** base 모델에서는 원공간 50%
+   동결(12.85)조차 WSR-Tune 10%(11.32)에 못 미쳤지만, 여기서는 ρ=0.3 에서 이미 동률이다.
+   ⚠️ 따라서 **"원공간 마스킹은 비율을 아무리 올려도 WSR-Tune 에 도달하지 못한다"** 는 서술을
+   chat 모델 결과에 그대로 쓰면 이 표와 충돌한다. 살아남는 주장은 **예산 효율**이다 —
+   같은 안전 수준을 3배 적은 예산(10% vs 30%)으로 달성한다. 다만 그 주장을 완성하려면
+   downstream(GSM8K)이 필요하다: ρ=0.3~0.5 는 학습 가능 파라미터가 그만큼 줄어 성능 손실이
+   클 것으로 예상되나 **이번에 측정하지 않았다**.
+
+**동결이 실제로 걸렸는지 검증했다.** 원공간 이진 마스크면 mask=1 위치는 출발 모델과
+bit-identical 이어야 하지만, bf16 은 가수가 8비트라 **학습된 파라미터도 55% 가 반올림으로
+값이 그대로**다. 마스크 없는 파라미터의 일치율을 바닥값 `r` 로 두고 `f = (관측-r)/(1-r)` 로
+보정하면: p05 4.46% · p20 19.34% · p30 29.23% · p40 39.14% · p50 48.98% — 요청값과 일치
+(오차 −0.5~−1.0%p, ρ 에 비례하는 일관된 과소추정).
+
+로그: HarmBench 요약 `HarmBench/results/evaluation_summary_2026-09-13_21-06-01.csv` ·
+학습 `logs/origspace_freeze/sweep_20260913_192410.log`.
