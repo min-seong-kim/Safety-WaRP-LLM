@@ -545,3 +545,53 @@ ASR 은 HarmBench keyword 채점(`sys` 조건), Δ 는 각 표의 **Vanilla LoRA
 요약 `HarmBench/results/evaluation_summary_2026-09-08_01-31-04.csv` ·
 lm-eval `logs/eval_20260908_040823_gpu0_results.csv`.
 학습 로그 `logs/qa_a16_20260907_173959.log` · `logs/bt_then_eval_20260907_200827.log`.
+
+# 추가 실험 4 (2026-09-08) — 논문 Table 3 확장: SEAL + WSR-Tune
+
+논문 Table 3(기존 안전기법 위에 WSR-Tune 을 얹었을 때의 변화)에 **SEAL** 열을 추가한다.
+7B 는 이미 쌍이 있었고(`llama2_7b_chat_seal_5e-5` / `..._seal_warp_5e-5`), 13B 는 SEAL 만
+있어 이번에 WaRP 팔을 만들었다: `seal/scripts/run_warp_seal_13b.sh`.
+
+**두 팔이 같은 데이터를 본다.** SEAL 은 selector 가 고른 부분집합으로 학습하므로, WaRP 팔이
+selector 를 다시 돌리면 (학습은 bitwise 재현되지 않아) 다른 부분집합이 뽑혀 **데이터 차이가
+교란요인**이 된다. 그래서 selector 를 재학습하지 않고 기존 13B SEAL 저장소의
+`sft_config.json > select_meta` 에 저장돼 있던 인덱스 **5,978/7,473 (top-p 0.8)** 을 그대로
+복원해 썼다. 두 팔의 차이는 **WaRP 재매개변수화 하나뿐**이다.
+
+설정(기존 13B SEAL 의 `sft_config.json` 에서 읽어 맞춤): 출발 모델
+`wvnvwn/llama-2-13b-chat-hf-SSFT-lr5e-5` · epochs 3 · lr 5e-5 · wd 0.01 · warmup 0.1 · cosine ·
+batch 1×16 · max_len 1024 · seed 42 · bf16 · gradient_checkpointing.
+WaRP 는 7B WSR-SEAL 과 동일하게 circuit_breakers 전량(4994) · ρ=0.1 · `--perlayer` ·
+layer_type `attn_q,attn_k,attn_v,ffn_up,ffn_down` · target_layers `all`
+(적용 모듈 200개, 동결 계수 비율 10.07%, 학습 8.81B / 전체 13.02B).
+
+**Llama-2-13B-chat / GSM8K**
+
+| 모델 | 기법 | Direct | AutoDAN | PAIR | PAP | AVG | GSM8K |
+|---|---|---:|---:|---:|---:|---:|---:|
+| [`llama2_13b-chat-CB_SSFT-seal_gsm8k_topp0.8_lr5e-5`](https://huggingface.co/kmseong/llama2_13b-chat-CB_SSFT-seal_gsm8k_topp0.8_lr5e-5) | SEAL | 0.0000 | 0.0096 | 0.1519 | 0.2496 | 0.1028 | 0.4519 |
+| [`llama2_13b-chat-CB_SSFT-seal-warp_gsm8k_topp0.8_rho0.1_lr5e-5`](https://huggingface.co/kmseong/llama2_13b-chat-CB_SSFT-seal-warp_gsm8k_topp0.8_rho0.1_lr5e-5) | **SEAL + WSR-Tune** | 0.0000 | 0.0000 | 0.0269 | 0.0131 | **0.0100** | **0.4867** |
+| | 변화 | +0.0000 | -0.0096 | -0.1250 | -0.2365 | **-0.0928** | **+0.0348** |
+
+**Llama-2-7B-chat / GSM8K** (기존 쌍, 참고)
+
+| 모델 | 기법 | Direct | AutoDAN | PAIR | PAP | AVG | GSM8K |
+|---|---|---:|---:|---:|---:|---:|---:|
+| [`llama2_7b_chat_seal_5e-5`](https://huggingface.co/kmseong/llama2_7b_chat_seal_5e-5) | SEAL | 0.0019 | 0.1077 | 0.4481 | 0.6604 | 0.3045 | 0.3889 |
+| [`llama2_7b_chat_seal_warp_5e-5`](https://huggingface.co/kmseong/llama2_7b_chat_seal_warp_5e-5) | SEAL + WSR-Tune | 미기록 | 미기록 | 미기록 | 미기록 | 미기록 | 0.3829 |
+
+**관측**
+
+- 13B 에서 WSR-Tune 을 얹으면 **안전과 downstream 이 동시에 좋아진다** — AVG 0.1028→0.0100
+  (-0.0928), GSM8K 0.4519→0.4867 (+0.0348).
+  이는 논문 Table 3 에서 SN-Tune·SafeInstr 에 대해 관찰된 패턴(둘 다 개선)과 같은 방향이다.
+- 특히 AutoDAN 이 0.0096→0.0000, PAP 가 0.2496→0.0131 로 크게 떨어졌다.
+- **⚠️ 7B WSR-SEAL 의 ASR 은 이 박스에 기록이 없다.** lm-eval 의 GSM8K(0.3829)만
+  `lm-evaluation-harness/logs/eval_20260715_122811_results.csv` 에 남아 있고, HarmBench
+  요약 CSV 에는 이 모델 행이 없다. 7B 쌍을 표에 실으려면 ASR 을 재측정해야 한다
+  (모델은 허브에 있으므로 `run_all_eval.sh kmseong/llama2_7b_chat_seal_warp_5e-5` 한 번이면 된다).
+
+로그: HarmBench `logs/run_all_2026-09-08_14-06-45_summary.csv` ·
+학습 `seal/logs/warp_seal_13b_20260908_102907.log` ·
+스크립트 `seal/scripts/run_warp_seal_13b.sh`.
+
