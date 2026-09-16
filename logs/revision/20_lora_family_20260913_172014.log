@@ -1,0 +1,30 @@
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /NHNHOME/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM
+   python    : /NHNHOME/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/bin/python
+   safety    : cb
+   models    : llama2_7b
+   methods   : safegrad
+   tasks     : gsm8k
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=16 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /NHNHOME/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=0, basis 삭제=1)
+   *** DRY RUN ***
+════════════════════════════════════════════════════════════════
+
+  AsFT λ          : 1.0
+  SafeLoRA thr    : 0.3  (load dtype=float32)
+  LISA            : ρ=0.0 align_step=100 ft_step=900
+  SaLoRA          : salora/salora_lora.py · r_s=32 r_t=32 init=task n_harmful=256 n_task=256
+  WSR-LoRA ρ      : 0.1  (Phase1 basis 필요)
+  SafeGrad        : ρ=1.0 ref_mode=adapter_off kl=ref
+
+──────────────────────────────────────────────────────────────
+  safegrad(ρ=1.0)  cb/llama2_7b/gsm8k lr=3e-4 batch=4x4   (09-13 17:20:14)
+──────────────────────────────────────────────────────────────
+  [dry-run] /NHNHOME/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/bin/python safegrad/finetune_safegrad.py --model_path kmseong/llama2_7b-chat-Safety-FT-lr5e-5 --output_dir /NHNHOME/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/gsm8k/safegrad --task_data_path /NHNHOME/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/data/gsm8k_train_task_7473.json --task_samples 0 --safety_data_path /NHNHOME/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/data/circuit_breakers_train.json --guide_data_num 4994 --rho 1.0 --ref_mode adapter_off --kl_reduction ref --align_batch_size 0 --lora --lora_target_modules q_proj k_proj v_proj up_proj down_proj --lora_r 16 --lora_alpha 16 --lora_dropout 0.05 --learning_rate 3e-4 --epochs 3 --batch_size 4 --grad_accum 4 --max_length 1024 --warmup_ratio 0.03 --weight_decay 0.0 --lr_scheduler_type cosine --max_grad_norm 1.0 --seed 42 --bf16 --gradient_checkpointing --report_to none
+
+실패한 셀 없음.

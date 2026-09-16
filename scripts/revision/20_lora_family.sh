@@ -8,6 +8,7 @@
 #    lisa      LISA (ρ=1.0)          gsm8k_eval/finetune_gsm8k_lisa.py
 #    salora    SaLoRA                finetune_gsm8k_salora.py
 #    wsr_lora  WSR-LoRA              wsr-lora/wsr_lora.py --reparam
+#    safegrad  SafeGrad (rho=1.0)    safegrad/finetune_safegrad.py   ← 기본 METHODS 에는 없다
 #
 #  ── 예산 정합 (전 기법 공통) ──────────────────────────────────────────────
 #    r=16, alpha=32, dropout=0.05, targets={q,k,v,up,down},
@@ -50,7 +51,7 @@ preflight
 print_plan
 
 _any=0
-for m in lora asft safelora lisa salora wsr_lora; do has_method "$m" && _any=1; done
+for m in lora asft safelora lisa salora wsr_lora safegrad; do has_method "$m" && _any=1; done
 (( _any )) || { log "LoRA 계열 기법이 METHODS 에 없다 — 종료"; exit 0; }
 
 echo ""
@@ -59,6 +60,7 @@ echo "  SafeLoRA thr    : $SAFELORA_THRESHOLD  (load dtype=$SAFELORA_LOAD_DTYPE)
 echo "  LISA            : ρ=$LISA_RHO align_step=$LISA_ALIGNMENT_STEP ft_step=$LISA_FINETUNE_STEP"
 echo "  SaLoRA          : salora/salora_lora.py · r_s=$SALORA_R_S r_t=$SALORA_R_T init=$SALORA_INIT_MODE n_harmful=$SALORA_N_HARMFUL n_task=$SALORA_N_TASK"
 echo "  WSR-LoRA ρ      : $KEEP_RATIO  (Phase1 basis 필요)"
+echo "  SafeGrad        : ρ=$SAFEGRAD_RHO ref_mode=$SAFEGRAD_REF_MODE kl=$SAFEGRAD_KL_REDUCTION"
 
 for safety in $SAFETY_SETS; do
   SAFE_DATA="$(safety_json "$safety")"
@@ -169,6 +171,30 @@ for safety in $SAFETY_SETS; do
             --lr_scheduler_type "$LORA_SCHEDULER" --max_grad_norm "$MAX_GRAD_NORM" \
             --seed "$SEED" --bf16 --gradient_checkpointing --report_to none
         post_cell "$odir" "$safety" "$mkey" "$task" lisa
+      fi
+
+      # ═══════════════ SafeGrad ═══════════════
+      # 유저 태스크 그래디언트와 KL alignment 그래디언트의 전역 내적이 음수일 때만
+      # 유저 쪽을 alignment 의 직교평면으로 투영한 뒤 ρ 로 가중합한다 (논문 Eq.4~5).
+      # alignment 데이터는 LISA 와 **같은 파일·같은 필드**(llama3_output)를 쓴다.
+      if want_cell "$safety" "$mkey" "$task" safegrad; then
+        odir="$(out_dir "$safety" "$mkey" "$task" safegrad)"
+        run_cell "$odir" "safegrad(ρ=$SAFEGRAD_RHO)  $TAG" -- \
+          "$PY" safegrad/finetune_safegrad.py \
+            --model_path "$ALIGNED" --output_dir "$odir" \
+            --task_data_path "$TASK_DATA" --task_samples "$TASK_SAMPLES" \
+            --safety_data_path "$SAFE_DATA" --guide_data_num "$SAFETY_SAMPLES" \
+            --rho "$SAFEGRAD_RHO" --ref_mode "$SAFEGRAD_REF_MODE" \
+            --kl_reduction "$SAFEGRAD_KL_REDUCTION" --align_batch_size "$SAFEGRAD_ALIGN_BS" \
+            --lora --lora_target_modules "${TARGET_MODULES_LIST[@]}" \
+            --lora_r "$LORA_R" --lora_alpha "$LORA_ALPHA" --lora_dropout "$LORA_DROPOUT" \
+            --learning_rate "$LR" --epochs "$EPOCHS" \
+            --batch_size "$MB_LORA" --grad_accum "$accum" \
+            --max_length "$MAX_LENGTH" \
+            --warmup_ratio "$LORA_WARMUP_RATIO" --weight_decay "$LORA_WEIGHT_DECAY" \
+            --lr_scheduler_type "$LORA_SCHEDULER" --max_grad_norm "$MAX_GRAD_NORM" \
+            --seed "$SEED" --bf16 --gradient_checkpointing --report_to none
+        post_cell "$odir" "$safety" "$mkey" "$task" safegrad
       fi
 
       # ═══════════════ SaLoRA ═══════════════

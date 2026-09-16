@@ -1,0 +1,28 @@
+2026-09-13 17:21:28 - safegrad - INFO - ======================================================================
+2026-09-13 17:21:28 - safegrad - INFO -   🛡️  SafeGrad — gradient surgery + KL alignment
+2026-09-13 17:21:28 - safegrad - INFO - ======================================================================
+2026-09-13 17:21:28 - safegrad - INFO - Log file: /NHNHOME/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/logs/safegrad/safegrad_20260913_172128.log
+2026-09-13 17:21:28 - safegrad - INFO - ⚙️  Configuration:
+2026-09-13 17:21:28 - safegrad - INFO -    ├─ Base/aligned model : kmseong/llama2_7b-chat-Safety-FT-lr5e-5
+2026-09-13 17:21:28 - safegrad - INFO -    ├─ Reference θ0       : kmseong/llama2_7b-chat-Safety-FT-lr5e-5  (mode=adapter_off)
+2026-09-13 17:21:28 - safegrad - INFO -    ├─ Input formatting   : chat template
+2026-09-13 17:21:28 - safegrad - INFO -    ├─ Tuning             : LoRA (r=16, alpha=16)
+2026-09-13 17:21:28 - safegrad - INFO -    ├─ SafeGrad           : rho=1.0 projection=True kl_reduction=ref kl_fp32=False
+2026-09-13 17:21:28 - safegrad - INFO -    ├─ Alignment data     : /NHNHOME/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/data/circuit_breakers_train.json (n=4994)
+2026-09-13 17:21:28 - safegrad - INFO -    ├─ Downstream         : /NHNHOME/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/data/gsm8k_train_task_7473.json  (clean)
+2026-09-13 17:21:28 - safegrad - INFO -    ├─ LR 0.0003  epochs 3  eff.batch 16
+2026-09-13 17:21:28 - safegrad - INFO -    └─ Output             : /NHNHOME/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/gsm8k/safegrad
+2026-09-13 17:21:28 - safegrad - INFO - [1/5] 토크나이저 로드
+2026-09-13 17:21:34 - safegrad - INFO - ✅ Tokenizer (vocab=32000, pad=</s>)
+2026-09-13 17:21:34 - safegrad - INFO - [2/5] 모델 로드
+2026-09-13 17:25:21 - safegrad - INFO -    · reference θ0 = LoRA 어댑터를 끈 현재 모델 (메모리 한 벌 절약)
+2026-09-13 17:25:52 - safegrad - INFO - ✓ LoRA: r=16, alpha=16, targets=['q_proj', 'k_proj', 'v_proj', 'up_proj', 'down_proj']
+2026-09-13 17:25:52 - safegrad - INFO - ✅ Model (6.77B total, 28.0M trainable = 0.41%)
+2026-09-13 17:25:52 - safegrad - INFO - [3/5] 다운스트림 'gsm8k_train_task_7473' 로드 (/NHNHOME/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/data/gsm8k_train_task_7473.json)
+2026-09-13 17:25:54 - safegrad - INFO - ✅ gsm8k_train_task_7473 train: 7473 samples
+2026-09-13 17:25:54 - safegrad - INFO - [4/5] alignment(safety) 데이터 준비
+2026-09-13 17:25:56 - safegrad - INFO - ✅ Alignment(safety): 4994 samples (from /NHNHOME/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/data/circuit_breakers_train.json, field=llama3_output)
+2026-09-13 17:25:56 - safegrad - INFO - [5/5] SafeGrad 학습 시작
+2026-09-13 17:54:45 - safegrad - INFO - 모델 저장
+2026-09-13 17:55:00 - safegrad - INFO - ✅ Saved to /NHNHOME/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/revision/cb/llama2_7b/gsm8k/safegrad
+2026-09-13 17:55:00 - safegrad - INFO - ✅ SafeGrad fine-tuning complete!
