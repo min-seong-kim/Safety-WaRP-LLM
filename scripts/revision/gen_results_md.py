@@ -9,9 +9,35 @@
 """
 import argparse, glob, os, re, subprocess, sys
 
-HB = "/home/edgeai_lab/HarmBench"
-LM = "/home/edgeai_lab/lm-evaluation-harness"
 HERE = os.path.dirname(os.path.abspath(__file__))
+
+
+def _find_sibling(name, env):
+    """HarmBench / lm-evaluation-harness 위치를 찾는다.
+
+    ⚠️ 예전에는 /home/edgeai_lab/<name> 으로 **하드코딩**돼 있었다. 박스를 옮기면
+    그 경로가 없어 glob 이 전부 비고, 오류 없이 **빈 표**가 생성된다(조용한 실패).
+    우선순위: 환경변수 → 리포와 같은 부모 디렉토리 → 홈 → 옛 경로.
+    """
+    cand = [os.environ.get(env)] if os.environ.get(env) else []
+    repo_parent = os.path.dirname(os.path.dirname(HERE))          # <...>/Safety-WaRP-LLM
+    cand += [
+        os.path.join(os.path.dirname(repo_parent), name),          # 형제 디렉토리 (이 박스)
+        os.path.join(os.path.expanduser("~"), name),
+        os.path.join("/home/edgeai_lab", name),                    # 옛 박스
+    ]
+    for c in cand:
+        if c and os.path.isdir(c):
+            return c
+    return cand[0]                                                 # 없으면 첫 후보(경고는 아래에서)
+
+
+HB = _find_sibling("HarmBench", "HARMBENCH_DIR")
+LM = _find_sibling("lm-evaluation-harness", "LMEVAL_DIR")
+for _n, _p in (("HarmBench", HB), ("lm-evaluation-harness", LM)):
+    if not os.path.isdir(_p):
+        print(f"[warn] {_n} 디렉토리를 찾지 못했다: {_p} — 그쪽 수치는 빈칸이 된다. "
+              f"HARMBENCH_DIR / LMEVAL_DIR 로 지정할 것.", file=sys.stderr)
 
 MODELS = [  # (prefix, task, 표시명, downstream 지표명)
     ("llama2_7b-chat",       "gsm8k",  "Llama-2-7B-chat",   "GSM8K"),

@@ -89,7 +89,13 @@ MAX_GRAD_NORM=1.0
 DTYPE=bfloat16
 
 # Full-parameter 계열 (Full FT / SafeInstr / SEAL-S4 / WSR-Tune Phase3)
-FULL_LR="${FULL_LR:-5e-5}"
+# full-param learning rate.
+#   · 모델별 기본값이 있다 — model_cfg() 가 덮어쓴다(gemma2_9b=1e-5, base 라인=1e-5/3e-5).
+#   · 호출자가 FULL_LR 을 **명시**했으면 그쪽이 이긴다(FULL_LR_EXPLICIT).
+#     예: FULL_LR=3e-5 bash scripts/revision/21_seal.sh
+if [[ -n "${FULL_LR:-}" ]]; then FULL_LR_EXPLICIT=1; else FULL_LR_EXPLICIT=0; fi
+FULL_LR_DEFAULT="${FULL_LR:-5e-5}"
+FULL_LR="$FULL_LR_DEFAULT"
 FULL_WEIGHT_DECAY=0.01
 FULL_WARMUP_RATIO=0.1
 FULL_SCHEDULER=cosine
@@ -211,6 +217,7 @@ model_cfg() {
       ALIGNED_BT="${LLAMA2_7B_ALIGNED_BT:-wvnvwn/llama2-7b-chat-lr5e-5-ssft-bv}"
       PRIMARY_TASK="${LLAMA2_7B_TASK:-gsm8k}"
       SSFT_LR="${LLAMA2_7B_SSFT_LR:-5e-5}"
+      [[ "$FULL_LR_EXPLICIT" == "1" ]] || FULL_LR="${LLAMA2_7B_FULL_LR:-$FULL_LR_DEFAULT}"
       MB_FULL="${LLAMA2_7B_MB_FULL:-4}";  MB_WARP="${LLAMA2_7B_MB_WARP:-1}"
       MB_LORA="${LLAMA2_7B_MB_LORA:-4}";  MB_P12="${LLAMA2_7B_MB_P12:-2}" ;;
     llama2_13b)
@@ -219,6 +226,7 @@ model_cfg() {
       ALIGNED_BT="${LLAMA2_13B_ALIGNED_BT:-}"
       PRIMARY_TASK="${LLAMA2_13B_TASK:-gsm8k}"
       SSFT_LR="${LLAMA2_13B_SSFT_LR:-5e-5}"
+      [[ "$FULL_LR_EXPLICIT" == "1" ]] || FULL_LR="${LLAMA2_13B_FULL_LR:-$FULL_LR_DEFAULT}"
       MB_FULL="${LLAMA2_13B_MB_FULL:-1}"; MB_WARP="${LLAMA2_13B_MB_WARP:-1}"
       MB_LORA="${LLAMA2_13B_MB_LORA:-2}"; MB_P12="${LLAMA2_13B_MB_P12:-1}" ;;
     llama32_3b)
@@ -227,6 +235,7 @@ model_cfg() {
       ALIGNED_BT="${LLAMA32_3B_ALIGNED_BT:-}"
       PRIMARY_TASK="${LLAMA32_3B_TASK:-math}"
       SSFT_LR="${LLAMA32_3B_SSFT_LR:-5e-5}"
+      [[ "$FULL_LR_EXPLICIT" == "1" ]] || FULL_LR="${LLAMA32_3B_FULL_LR:-$FULL_LR_DEFAULT}"
       MB_FULL="${LLAMA32_3B_MB_FULL:-8}"; MB_WARP="${LLAMA32_3B_MB_WARP:-2}"
       MB_LORA="${LLAMA32_3B_MB_LORA:-8}"; MB_P12="${LLAMA32_3B_MB_P12:-2}" ;;
     llama31_8b)
@@ -235,14 +244,52 @@ model_cfg() {
       ALIGNED_BT="${LLAMA31_8B_ALIGNED_BT:-}"
       PRIMARY_TASK="${LLAMA31_8B_TASK:-math}"
       SSFT_LR="${LLAMA31_8B_SSFT_LR:-5e-5}"
+      [[ "$FULL_LR_EXPLICIT" == "1" ]] || FULL_LR="${LLAMA31_8B_FULL_LR:-$FULL_LR_DEFAULT}"
       MB_FULL="${LLAMA31_8B_MB_FULL:-2}"; MB_WARP="${LLAMA31_8B_MB_WARP:-1}"
       MB_LORA="${LLAMA31_8B_MB_LORA:-4}"; MB_P12="${LLAMA31_8B_MB_P12:-2}" ;;
+    # ── base(non-chat) 라인 ─────────────────────────────────────────────
+    #  논문 Table 7 (C.1 "Results on Base Models"). 출발 모델은 base → SSFT 이며
+    #  chat template 이 **없다**. 모든 러너의 is_instruct_model() 이 모델 참조 문자열에
+    #  "chat"/"instruct"/"it" 이 있는지로 판정하므로, 리포/디렉토리 이름에 그 토큰이
+    #  들어가지 않아야 `Question: {q}\nAnswer:` plain 프롬프트로 학습된다.
+    #  (HarmBench 의 chat_template: llama-{2,3}-base 와 같은 문자열이다.)
+    llama2_7b_base)
+      BASE="meta-llama/Llama-2-7b-hf"
+      # 2026-09-14 생성. model_metadata.json 의 base_model 이 meta-llama/Llama-2-7b-hf 다.
+      ALIGNED_CB="${LLAMA2_7B_BASE_ALIGNED_CB:-kmseong/llama2_7b-base-CB_SSFT-lr3e-5}"
+      ALIGNED_BT="${LLAMA2_7B_BASE_ALIGNED_BT:-}"
+      PRIMARY_TASK="${LLAMA2_7B_BASE_TASK:-gsm8k}"
+      # ⚠️ 이 라인만 SSFT/full-param lr 이 3e-5 다 (허브의 seal_gsm8k_topp0.8_lr3e-5 와 일치).
+      SSFT_LR="${LLAMA2_7B_BASE_SSFT_LR:-3e-5}"
+      # 이 라인의 full-param 은 3e-5 다 — 허브의 llama2_7b-base-CB_SSFT-lr3e-5(SSFT) 와
+      # llama2_7b-base-CB_SSFT-seal_gsm8k_topp0.8_lr3e-5(SEAL) 이 그 값으로 만들어졌다.
+      [[ "$FULL_LR_EXPLICIT" == "1" ]] || FULL_LR="${LLAMA2_7B_BASE_FULL_LR:-3e-5}"
+      MB_FULL="${LLAMA2_7B_BASE_MB_FULL:-4}";  MB_WARP="${LLAMA2_7B_BASE_MB_WARP:-1}"
+      MB_LORA="${LLAMA2_7B_BASE_MB_LORA:-4}";  MB_P12="${LLAMA2_7B_BASE_MB_P12:-2}" ;;
+    llama31_8b_base)
+      # 진짜 base 다: 출발 모델의 generation_config eos_token_id=128001(<|end_of_text|>),
+      # tokenizer 에 chat_template 없음 — Instruct(128009 <|eot_id|>) 와 구분된다.
+      BASE="meta-llama/Llama-3.1-8B"
+      ALIGNED_CB="${LLAMA31_8B_BASE_ALIGNED_CB:-kmseong/Llama-3.1-8B-base-SSFT_lr5e-5}"
+      ALIGNED_BT="${LLAMA31_8B_BASE_ALIGNED_BT:-}"
+      PRIMARY_TASK="${LLAMA31_8B_BASE_TASK:-gsm8k}"
+      SSFT_LR="${LLAMA31_8B_BASE_SSFT_LR:-5e-5}"
+      # 논문 Table 7 의 full-param 행(FullFT/SafeInstr/Resta/SafeDelta/WSR-Tune)의 safety 는
+      # 전부 **lr 1e-5** 리포에서 나왔다(2026-09-16 확인: 그 모델을 재측정하니 논문값과
+      # 4개 공격 모두 0.00 차이로 일치). 기본값 5e-5 로 돌리면 그 표와 짝이 맞지 않는다.
+      [[ "$FULL_LR_EXPLICIT" == "1" ]] || FULL_LR="${LLAMA31_8B_BASE_FULL_LR:-1e-5}"
+      # ⚠️ Table 7 의 full-param 행(FullFT/SafeInstr/Resta/SafeDelta/WSR-Tune)은 lr 1e-5 로
+      #    만들어졌다(허브의 llama3.1-8b-base-*-lr1e-5 참고). full-param 계열을 새로 돌릴 때는
+      #    FULL_LR=1e-5 를 명시할 것 — 기본값 5e-5 로 돌리면 Table 7 과 짝이 맞지 않는다.
+      MB_FULL="${LLAMA31_8B_BASE_MB_FULL:-2}"; MB_WARP="${LLAMA31_8B_BASE_MB_WARP:-1}"
+      MB_LORA="${LLAMA31_8B_BASE_MB_LORA:-4}"; MB_P12="${LLAMA31_8B_BASE_MB_P12:-2}" ;;
     qwen25_7b)
       BASE="Qwen/Qwen2.5-7B-Instruct"
       ALIGNED_CB="${QWEN25_7B_ALIGNED_CB:-wvnvwn/qwen-2.5-7B-Instruct-SSFT-lr5e-5}"
       ALIGNED_BT="${QWEN25_7B_ALIGNED_BT:-}"
       PRIMARY_TASK="${QWEN25_7B_TASK:-gsm8k}"
       SSFT_LR="${QWEN25_7B_SSFT_LR:-5e-5}"
+      [[ "$FULL_LR_EXPLICIT" == "1" ]] || FULL_LR="${QWEN25_7B_FULL_LR:-$FULL_LR_DEFAULT}"
       MB_FULL="${QWEN25_7B_MB_FULL:-2}";  MB_WARP="${QWEN25_7B_MB_WARP:-1}"
       MB_LORA="${QWEN25_7B_MB_LORA:-4}";  MB_P12="${QWEN25_7B_MB_P12:-2}" ;;
     gemma2_9b)
@@ -252,11 +299,21 @@ model_cfg() {
       ALIGNED_BT="${GEMMA2_9B_ALIGNED_BT:-}"
       PRIMARY_TASK="${GEMMA2_9B_TASK:-gsm8k}"
       SSFT_LR="${GEMMA2_9B_SSFT_LR:-3e-5}"
+      # ⚠️ full-param lr 도 이 모델만 1e-5 다. RESULTS.md 측정조건표의
+      #    "full-param 계열 | lr 5e-5 (gemma 1e-5)" 가 이것이고, 허브의 기준 행
+      #    wvnvwn/gemma-2-9b-it-lr3e-5-gsm8k-lr1e-5(Full FT) ·
+      #    wvnvwn/gemma-2-9b-it-lr3e-5-WaRP-lr1e-5(WSR-Tune) 도 전부 1e-5 로 만들어졌다.
+      #    2026-09-16 확인: 이 override 가 **없어서** SEAL 셀만 전역 기본값 5e-5 로 학습됐고
+      #    (kmseong/gemma2_9b-it-CB_SSFT-seal_gsm8k_topp0.8_lr5e-5), 정렬이 무너졌다
+      #    (Direct ASR 0.45 · GSM8K 0.1865 — 같은 모델의 다른 arm 은 0.0000 / 0.48~0.71).
+      #    "재학습해도 같은 결과" 였던 이유도 같은 잘못된 lr 을 다시 썼기 때문이다.
+      [[ "$FULL_LR_EXPLICIT" == "1" ]] || FULL_LR="${GEMMA2_9B_FULL_LR:-1e-5}"
       MB_FULL="${GEMMA2_9B_MB_FULL:-1}";  MB_WARP="${GEMMA2_9B_MB_WARP:-1}"
       MB_LORA="${GEMMA2_9B_MB_LORA:-2}";  MB_P12="${GEMMA2_9B_MB_P12:-1}" ;;
     *)
       echo "[common] 알 수 없는 모델 키: $1" >&2
       echo "  선택지: llama2_7b llama2_13b llama32_3b llama31_8b qwen25_7b gemma2_9b" >&2
+      echo "          llama2_7b_base llama31_8b_base   (논문 Table 7 base 라인)" >&2
       return 1 ;;
   esac
   return 0
@@ -324,6 +381,12 @@ already_published() {  # <safety> <model> <task> <method>
     cb/llama31_8b/math)     return 0 ;;   # 논문 Table 2
     cb/qwen25_7b/gsm8k)     return 0 ;;   # 논문 Table 4
     cb/gemma2_9b/gsm8k)     return 0 ;;   # 논문 Table 4
+    # ── base 라인 (논문 Table 7 / C.1) ──────────────────────────────────
+    #  주의: 이 행들은 full-param lr 이 본 설정(5e-5)과 다르다.
+    #        llama2_7b_base → 3e-5, llama31_8b_base → 1e-5 로 만들어졌다.
+    #        재현·재실행이 필요하면 FULL_LR 을 그 값으로 주고 SKIP_PUBLISHED=0 으로 돌릴 것.
+    cb/llama2_7b_base/gsm8k)  return 0 ;;   # 논문 Table 7 (Llama-2-7B Base)
+    cb/llama31_8b_base/gsm8k) return 0 ;;   # 논문 Table 7 (Llama-3.1-8B Base)
     # cb/llama2_7b/agnews 는 재사용하지 않는다 — 동작점이 다르다(위 3번).
   esac
   return 1
@@ -433,6 +496,8 @@ hf_model_tag() {
     llama2_13b) echo "llama2_13b-chat" ;;
     llama32_3b) echo "llama3_2_3b-instruct" ;;
     llama31_8b) echo "llama3_1_8b-instruct" ;;
+    llama2_7b_base)  echo "llama2_7b-base" ;;
+    llama31_8b_base) echo "llama3_1_8b-base" ;;
     qwen25_7b)  echo "qwen2_5_7b-instruct" ;;
     gemma2_9b)  echo "gemma2_9b-it" ;;
     *) echo "$1" ;;
@@ -489,6 +554,11 @@ hf_lr_tag() {
 }
 
 hf_repo_id() {  # <safety> <model> <task> <method>
+  # ⚠️ FULL_LR 은 모델별이라 model_cfg 를 거쳐야 정확하다. 이 함수는 보통
+  #    `$( )` 안에서 불리는데, 그 서브셸에서 model_cfg 가 안 불렸으면 전역 기본값(5e-5)이
+  #    쓰여 **조용히 틀린 리포명**이 나온다(2026-09-16 실측: gemma seal 이 lr5e-5 로 나왔다).
+  #    여기서 직접 부른다 — 이미 불린 뒤라면 같은 값이라 무해하고, `$( )` 안이면 부작용도 없다.
+  model_cfg "$2" >/dev/null 2>&1 || true
   local hp; hp="$(hf_hparam_tag "$4")"
   local mid="$(hf_model_tag "$2")-$(hf_safety_tag "$1")_SSFT-$(hf_method_tag "$4")_${3}"
   [[ -n "$hp" ]] && mid="${mid}_${hp}"
@@ -763,7 +833,7 @@ preflight() {
 cell_gb() {
   case "$1" in
     llama32_3b) echo 7 ;;
-    llama2_7b|qwen25_7b|llama31_8b) echo 15 ;;
+    llama2_7b|qwen25_7b|llama31_8b|llama2_7b_base|llama31_8b_base) echo 15 ;;
     gemma2_9b) echo 19 ;;
     llama2_13b) echo 26 ;;
     *) echo 15 ;;
@@ -774,10 +844,10 @@ cell_gb() {
 #   (fp32 + UT 저장이면 4배다. config 의 L/hidden/intermediate 로 계산한 값.)
 basis_gb() {
   case "$1" in
-    llama2_7b)  echo 16 ;;
+    llama2_7b|llama2_7b_base)   echo 16 ;;
     llama2_13b) echo 31 ;;
     llama32_3b) echo 8  ;;
-    llama31_8b) echo 21 ;;
+    llama31_8b|llama31_8b_base) echo 21 ;;
     qwen25_7b)  echo 26 ;;
     gemma2_9b)  echo 26 ;;
     *) echo 30 ;;
@@ -855,7 +925,15 @@ print_plan() {
   if [[ "$SAFETY_SAMPLES" != "4994" ]]; then
     echo "   ⚠️ SAFETY_SAMPLES=$SAFETY_SAMPLES  (기본 4994 가 아니다 — 스모크 테스트 설정)"
   fi
-  echo "   full-param: lr=$FULL_LR wd=$FULL_WEIGHT_DECAY warmup=$FULL_WARMUP_RATIO"
+  # ⚠️ FULL_LR 은 model_cfg() 가 모델별로 덮어쓴다. 여기서 전역값만 찍으면 로그를 읽는
+  #    사람이 "5e-5 로 돌았다" 고 오해한다(gemma 는 1e-5, base 라인은 1e-5/3e-5).
+  #    실제로 쓰일 값을 모델별로 같이 보여준다.
+  local _plan_lr="" _mk
+  for _mk in $MODELS; do
+    ( model_cfg "$_mk" >/dev/null 2>&1; printf "%s=%s " "$_mk" "$FULL_LR" )
+  done > /tmp/.rev_plan_lr.$$ 2>/dev/null
+  _plan_lr="$(cat /tmp/.rev_plan_lr.$$ 2>/dev/null)"; rm -f /tmp/.rev_plan_lr.$$
+  echo "   full-param: lr=[${_plan_lr%% }] wd=$FULL_WEIGHT_DECAY warmup=$FULL_WARMUP_RATIO"
   echo "   lora      : r=$LORA_R a=$LORA_ALPHA drop=$LORA_DROPOUT wd=$LORA_WEIGHT_DECAY warmup=$LORA_WARMUP_RATIO"
   echo "               lr=$(lora_lr gsm8k) (gsm8k/math/medqa/arc) · $(lora_lr agnews) (agnews)"
   echo "   out       : $OUT_ROOT"

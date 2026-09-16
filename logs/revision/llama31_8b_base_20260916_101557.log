@@ -1,0 +1,37 @@
+════════════════════════════════════════════════════════════════
+  Table 7 · Llama-3.1-8B Base × PEFT 7종
+    python    : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/bin/python
+    HF_HOME   : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache
+    출발 모델 : kmseong/Llama-3.1-8B-base-SSFT_lr5e-5
+    LoRA      : r=16 alpha=16 lr=3e-4 ep3 eff.batch16
+    SEAL      : full-param lr=1e-5 topp=0.8
+    LISA ρ    : 1.0   WSR-LoRA ρ : 0.3   SafeLoRA thr : 0.3
+    stages    : 02 20a 21 20b
+    log       : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/logs/revision/llama31_8b_base_20260916_101557.log
+════════════════════════════════════════════════════════════════
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM
+   python    : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/bin/python
+   safety    : cb
+   models    : llama31_8b_base
+   methods   : lora asft lisa seal safelora salora wsr_lora
+   tasks     : gsm8k
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=16 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=0, basis 삭제=0)
+════════════════════════════════════════════════════════════════
+
+  디스크: 남은 셀 추정 105GB 필요 · /NHNHOME/26msit001_A/BASE/edge_ai_lab 여유 28610GB
+
+  생성될 리포:
+    lora      kmseong/llama3_1_8b-base-CB_SSFT-lora_gsm8k_a16_lr3e-4
+    asft      kmseong/llama3_1_8b-base-CB_SSFT-asft_gsm8k_lambda1.0_a16_lr3e-4
+    lisa      kmseong/llama3_1_8b-base-CB_SSFT-lisa_gsm8k_rho1.0_a16_lr3e-4
+    seal      kmseong/llama3_1_8b-base-CB_SSFT-seal_gsm8k_topp0.8_lr1e-5
+    safelora  kmseong/llama3_1_8b-base-CB_SSFT-safelora_gsm8k_thr0.3_a16_lr3e-4
+    salora    kmseong/llama3_1_8b-base-CB_SSFT-salora_gsm8k_rs32rt32_a16_lr3e-4
+    wsr_lora  kmseong/llama3_1_8b-base-CB_SSFT-wsr-lora_gsm8k_rho0.3_a16_lr3e-4

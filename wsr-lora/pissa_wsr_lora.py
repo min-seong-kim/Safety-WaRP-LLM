@@ -55,13 +55,48 @@ def is_target(name, targets):
 
 
 # ───────────────────────── datasets ──────────────────────────
+def _plain_ids(tokenizer, prompt, response, max_length):
+    """Base(non-chat) 모델용 plain prompt 토큰화.
+
+    `gsm8k_eval.finetune_gsm8k_full_params.tokenize_sft_example` 의 base 분기와
+    **토큰 단위로 동일**하게 유지할 것. 이 파일(WSR-LoRA / SaLoRA)과 그쪽
+    (Vanilla LoRA / AsFT / SafeLoRA), LISA, SEAL, WSR-Tune 이 같은 문자열을 봐야
+    "기법 차이"가 아닌 "프롬프트 차이"를 재는 사고가 안 난다.
+    검증: python scripts/revision/verify_prompt_parity.py --models <base model>
+    """
+    prompt = str(prompt).strip()
+    response = str(response).strip()
+    p_text = f"Question: {prompt}\nAnswer:"
+    p_ids = tokenizer(p_text, add_special_tokens=False,
+                      truncation=True, max_length=max_length)["input_ids"]
+    remain = max(1, max_length - len(p_ids))
+    a_ids = tokenizer(response, add_special_tokens=False,
+                      truncation=True, max_length=remain)["input_ids"]
+    eos = tokenizer.eos_token_id
+    if eos is not None and (len(a_ids) == 0 or a_ids[-1] != eos):
+        if len(p_ids) + len(a_ids) < max_length:
+            a_ids = a_ids + [eos]
+    full = (p_ids + a_ids)[:max_length]
+    labels = ([-100] * len(p_ids) + a_ids)[:max_length]
+    return full, labels
+
+
 def _chat_ids(tokenizer, prompt, response, max_length):
-    """Instruct chat-template tokenization with the prompt tokens masked out.
+    """Chat-template tokenization with the prompt tokens masked out.
 
     Render the template to text first, then tokenize (add_special_tokens=False so
     the template's own BOS isn't duplicated) — robust across transformers versions
     where apply_chat_template(tokenize=True) may return a tokenizers.Encoding.
+
+    ⚠️ chat_template 이 **없는 base 모델**에서는 apply_chat_template 이 예외를 던진다
+    (논문 Table 7 의 base 라인: kmseong/llama2_7b-base-CB_SSFT-*,
+     kmseong/Llama-3.1-8B-base-SSFT_lr5e-5). 그때는 다른 다섯 갈래의 러너와 같은
+    plain prompt 로 떨어진다. 다른 러너들은 모델 참조 **문자열**로 base 를 판정하지만
+    이 함수는 model_ref 를 받지 않으므로 토크나이저의 chat_template 유무로 판정한다
+    (레지스트리의 instruct 모델은 전부 chat_template 을 갖고 있어 판정이 일치한다).
     """
+    if not getattr(tokenizer, "chat_template", None):
+        return _plain_ids(tokenizer, prompt, response, max_length)
     p_text = tokenizer.apply_chat_template(
         [{"role": "user", "content": prompt}],
         tokenize=False, add_generation_prompt=True)

@@ -1,0 +1,22 @@
+
+---- RESTA linear merge ----
+  final = 1.0*[kmseong/Llama-3.1-8B-base-gsm8k-SSFT_lr1e-5]
+        + 0.3*[kmseong/Llama-3.1-8B-base-SSFT_lr5e-5]
+        + -0.3*[meta-llama/Llama-3.1-8B]
+  weight sum = 1.000000 (1.0 이어야 mergekit normalize 와 동일)
+  out dtype  = bfloat16    ->  outputs/revision/cb/llama31_8b_base/gsm8k/resta
+
+  downloading kmseong/Llama-3.1-8B-base-gsm8k-SSFT_lr1e-5 ...
+Fetching 12 files:   0%|          | 0/12 [00:00<?, ?it/s]Fetching 12 files: 100%|██████████| 12/12 [00:00<00:00, 172960.99it/s]
+  downloading kmseong/Llama-3.1-8B-base-SSFT_lr5e-5 ...
+Fetching 11 files:   0%|          | 0/11 [00:00<?, ?it/s]Fetching 11 files: 100%|██████████| 11/11 [00:00<00:00, 5978.66it/s]
+  downloading meta-llama/Llama-3.1-8B ...
+Fetching 12 files:   0%|          | 0/12 [00:00<?, ?it/s]Fetching 12 files:  67%|██████▋   | 8/12 [00:00<00:00, 17.95it/s]Fetching 12 files:  83%|████████▎ | 10/12 [00:02<00:00,  3.58it/s]Fetching 12 files: 100%|██████████| 12/12 [00:02<00:00,  5.32it/s]
+  saved model-00001-of-00004.safetensors  (82 tensors)
+  saved model-00002-of-00004.safetensors  (104 tensors)
+  saved model-00003-of-00004.safetensors  (100 tensors)
+  saved model-00004-of-00004.safetensors  (5 tensors)
+
+  merged 291 tensors  ->  outputs/revision/cb/llama31_8b_base/gsm8k/resta
+  chat_template present: False
+  ⚠️ chat_template 이 없습니다. model1 에 chat_template.jinja 가 있는지 확인하세요.

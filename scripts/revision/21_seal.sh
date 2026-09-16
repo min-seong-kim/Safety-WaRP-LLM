@@ -38,7 +38,10 @@ TOPP_PCT=$("$PY" -c "print(int(round($SEAL_TOPP*100)))")
 echo ""
 echo "  SEAL top-p     : $SEAL_TOPP (top${TOPP_PCT})"
 echo "  selector epochs: $SEAL_SEL_EPOCHS"
-echo "  S2 (full-param): lr=$FULL_LR wd=$FULL_WEIGHT_DECAY warmup=$FULL_WARMUP_RATIO epochs=$EPOCHS"
+# ⚠️ 여기서 $FULL_LR 은 아직 전역 기본값이다 — model_cfg() 가 모델별로 덮어쓰기 전이라
+#    그대로 찍으면 오해를 부른다(gemma=1e-5 인데 5e-5 로 보인다). 실제 값은 아래
+#    run_cell 라벨("seal-S2 SFT ... lr=...")과 명령줄의 --learning_rate 에 찍힌다.
+echo "  S2 (full-param): lr=<모델별, 아래 셀 라벨 참조> wd=$FULL_WEIGHT_DECAY warmup=$FULL_WARMUP_RATIO epochs=$EPOCHS"
 echo "  selector ckpt  : $SEAL_CKPT_ROOT"
 
 for safety in $SAFETY_SETS; do

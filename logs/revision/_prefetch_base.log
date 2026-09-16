@@ -1,0 +1,28 @@
+Fetching 14 files:   0%|          | 0/14 [00:00<?, ?it/s]Downloading 'LICENSE' to '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--meta-llama--Llama-3.1-8B/blobs/a7c3ca16cee30425ed6ad841a809590f2bcbf290.incomplete'
+Downloading 'generation_config.json' to '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--meta-llama--Llama-3.1-8B/blobs/fc9506438b7b55383dc04c0816561442324846c3.incomplete'
+Downloading '.gitattributes' to '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--meta-llama--Llama-3.1-8B/blobs/a6344aac8c09253b3b630fb776ae94478aa0275b.incomplete'
+Downloading 'model-00003-of-00004.safetensors' to '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--meta-llama--Llama-3.1-8B/blobs/d8e9504dd4e4a146d484c52a97584ec14dac92237c46b064934af67a85e7d383.incomplete'
+Downloading 'model-00001-of-00004.safetensors' to '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--meta-llama--Llama-3.1-8B/blobs/f8b9704ab09cdeb097aa4a0a24bca96f906eec36bad63ab495bc21475058601b.incomplete'
+Download complete. Moving file to /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--meta-llama--Llama-3.1-8B/blobs/a7c3ca16cee30425ed6ad841a809590f2bcbf290
+Download complete. Moving file to /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--meta-llama--Llama-3.1-8B/blobs/fc9506438b7b55383dc04c0816561442324846c3
+Download complete. Moving file to /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--meta-llama--Llama-3.1-8B/blobs/a6344aac8c09253b3b630fb776ae94478aa0275b
+Fetching 14 files:   7%|▋         | 1/14 [00:00<00:05,  2.25it/s]Downloading 'README.md' to '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--meta-llama--Llama-3.1-8B/blobs/e70490e45ef7a6a61087776f8b109b5541f62922.incomplete'
+Downloading 'USE_POLICY.md' to '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--meta-llama--Llama-3.1-8B/blobs/81ebb55902285e8dd5804ccf423d17ffb2a622ee.incomplete'
+Downloading 'special_tokens_map.json' to '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--meta-llama--Llama-3.1-8B/blobs/d8cd5076496dbe4be2320312abc10adc43097b81.incomplete'
+Downloading 'model.safetensors.index.json' to '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--meta-llama--Llama-3.1-8B/blobs/0fd8120f1c6acddc268ebc2583058efaf699a771.incomplete'
+Downloading 'model-00004-of-00004.safetensors' to '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--meta-llama--Llama-3.1-8B/blobs/e4486f35c040f683f7d790354f66c169c109eb9fa0954a4a35d7c458a108405d.incomplete'
+Download complete. Moving file to /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--meta-llama--Llama-3.1-8B/blobs/81ebb55902285e8dd5804ccf423d17ffb2a622ee
+Download complete. Moving file to /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--meta-llama--Llama-3.1-8B/blobs/e70490e45ef7a6a61087776f8b109b5541f62922
+Fetching 14 files:  21%|██▏       | 3/14 [00:00<00:02,  4.53it/s]Download complete. Moving file to /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--meta-llama--Llama-3.1-8B/blobs/d8cd5076496dbe4be2320312abc10adc43097b81
+Download complete. Moving file to /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--meta-llama--Llama-3.1-8B/blobs/0fd8120f1c6acddc268ebc2583058efaf699a771
+Downloading 'tokenizer.json' to '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--meta-llama--Llama-3.1-8B/blobs/f916e71031fa08f3c6ef1680a590c15b52d3cdd9.incomplete'
+Downloading 'tokenizer_config.json' to '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--meta-llama--Llama-3.1-8B/blobs/cb9ec25536e44d86778b10509d3e5bdca459a5cf.incomplete'
+Download complete. Moving file to /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--meta-llama--Llama-3.1-8B/blobs/cb9ec25536e44d86778b10509d3e5bdca459a5cf
+Downloading 'model-00002-of-00004.safetensors' to '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--meta-llama--Llama-3.1-8B/blobs/c28b25e7541751056ee126627e007f8d4288319733285e9f7b17b9ff6eb313f0.incomplete'
+Download complete. Moving file to /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--meta-llama--Llama-3.1-8B/blobs/f916e71031fa08f3c6ef1680a590c15b52d3cdd9
+Download complete. Moving file to /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--meta-llama--Llama-3.1-8B/blobs/e4486f35c040f683f7d790354f66c169c109eb9fa0954a4a35d7c458a108405d
+Download complete. Moving file to /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--meta-llama--Llama-3.1-8B/blobs/c28b25e7541751056ee126627e007f8d4288319733285e9f7b17b9ff6eb313f0
+Download complete. Moving file to /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--meta-llama--Llama-3.1-8B/blobs/d8e9504dd4e4a146d484c52a97584ec14dac92237c46b064934af67a85e7d383
+Download complete. Moving file to /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--meta-llama--Llama-3.1-8B/blobs/f8b9704ab09cdeb097aa4a0a24bca96f906eec36bad63ab495bc21475058601b
+Fetching 14 files:  50%|█████     | 7/14 [00:22<00:26,  3.82s/it]Fetching 14 files: 100%|██████████| 14/14 [00:22<00:00,  1.63s/it]
+/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--meta-llama--Llama-3.1-8B/snapshots/d04e592bb4f6aa9cfee91e2e20afa771667e1d4b

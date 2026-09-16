@@ -1,0 +1,39 @@
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM
+   python    : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/bin/python
+   safety    : cb
+   models    : gemma2_9b
+   methods   : seal
+   tasks     : gsm8k
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/revision_gemma_seal_lr1e-5
+   hf        : kmseong  (업로드 후 로컬 삭제=0, basis 삭제=0)
+   *** DRY RUN ***
+════════════════════════════════════════════════════════════════
+
+  SEAL top-p     : 0.8 (top80)
+  selector epochs: 2
+  S2 (full-param): lr=5e-5 wd=0.01 warmup=0.1 epochs=3
+  selector ckpt  : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/seal/ckpt/revision_gemma_lr1e-5
+
+──────────────────────────────────────────────────────────────
+  seal-S1 selector  cb/gemma2_9b/gsm8k  batch=2   (09-16 15:47:19)
+──────────────────────────────────────────────────────────────
+  [dry-run] /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/bin/python -m seal.train_selector --model_path wvnvwn/gemma-2-9b-it-ssft-lr3e-5 \
+      --safety_data_path /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/data/circuit_breakers_train.json --task_data_path /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/data/gsm8k_train_task_7473.json --num_ft_samples 0 \
+      --max_length 1024 --epochs 2 --batch_size 2 --lora \
+      --lora_r 16 --lora_alpha 32 --lora_dropout 0.05 \
+      --lora_target_modules q_proj k_proj v_proj up_proj down_proj \
+      --out_dir /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/seal/ckpt/revision_gemma_lr1e-5/cb/gemma2_9b --selector_name gsm8k_selector --seed 42
+  [dry-run] /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/bin/python -m seal.select_data --selector_path /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/seal/ckpt/revision_gemma_lr1e-5/cb/gemma2_9b/gsm8k_selector_softmax.pt --topp 0.8 --out /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/seal/ckpt/revision_gemma_lr1e-5/cb/gemma2_9b/gsm8k_selected_top80.json
+
+──────────────────────────────────────────────────────────────
+  seal-S2 SFT  cb/gemma2_9b/gsm8k  lr=1e-5 batch=1x16   (09-16 15:47:19)
+──────────────────────────────────────────────────────────────
+  [dry-run] /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/bin/python -m seal.train_sft --model_path wvnvwn/gemma-2-9b-it-ssft-lr3e-5 --task_data_path /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/data/gsm8k_train_task_7473.json --num_train_samples 0 --selected_indices /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/seal/ckpt/revision_gemma_lr1e-5/cb/gemma2_9b/gsm8k_selected_top80.json --max_length 1024 --epochs 3 --learning_rate 1e-5 --weight_decay 0.01 --warmup_ratio 0.1 --lr_scheduler_type cosine --max_grad_norm 1.0 --batch_size 1 --grad_accum 16 --gradient_checkpointing --seed 42 --output_dir /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/revision_gemma_seal_lr1e-5/cb/gemma2_9b/gsm8k/seal
+
+실패한 셀 없음.

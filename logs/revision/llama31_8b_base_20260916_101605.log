@@ -1,0 +1,177 @@
+════════════════════════════════════════════════════════════════
+  Table 7 · Llama-3.1-8B Base × PEFT 7종
+    python    : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/bin/python
+    HF_HOME   : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache
+    출발 모델 : kmseong/Llama-3.1-8B-base-SSFT_lr5e-5
+    LoRA      : r=16 alpha=16 lr=3e-4 ep3 eff.batch16
+    SEAL      : full-param lr=1e-5 topp=0.8
+    LISA ρ    : 1.0   WSR-LoRA ρ : 0.3   SafeLoRA thr : 0.3
+    stages    : 02 20a 21 20b
+    log       : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/logs/revision/llama31_8b_base_20260916_101605.log
+════════════════════════════════════════════════════════════════
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM
+   python    : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/bin/python
+   safety    : cb
+   models    : llama31_8b_base
+   methods   : wsr_lora
+   tasks     : gsm8k
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=16 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=0, basis 삭제=0)
+   *** DRY RUN ***
+════════════════════════════════════════════════════════════════
+
+  layer_type    : attn_q,attn_k,attn_v,ffn_up,ffn_down
+  target_layers : all
+  keep_ratio ρ  : 0.3
+  basis 저장    : dtype=bfloat16  omit_UT=1  (fp32+UT 대비 1/4)
+  출력          : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/checkpoints/revision/warp/<safety>/<model>/
+
+──────────────────────────────────────────────────────────────
+  Phase 1 (basis)  cb/llama31_8b_base   model=kmseong/Llama-3.1-8B-base-SSFT_lr5e-5   batch=2  dtype=bfloat16 omit_ut=1   (09-16 10:16:05)
+──────────────────────────────────────────────────────────────
+  [dry-run] /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/bin/python train.py --phase 1 --phase0_model_dir kmseong/Llama-3.1-8B-base-SSFT_lr5e-5 \
+      --safety_dataset circuit_breakers --circuit_breakers_path /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/data/circuit_breakers_train.json \
+      --circuit_breakers_samples_phase1 4994 --batch_size 2 \
+      --layer_type attn_q,attn_k,attn_v,ffn_up,ffn_down --target_layers all \
+      --output_dir /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/checkpoints/revision/warp/cb/llama31_8b_base --log_dir /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/logs/revision --device cuda --dtype bfloat16 --seed 42 --no_wandb
+[revision] [skip] phase2 cb/llama31_8b_base — 돌릴 wsr_tune 셀이 없다 (WSR-LoRA 는 basis 만 쓴다)
+
+════════════════ Stage 02 요약 ════════════════
+  cb  llama31_8b_base basis=MISSING  mask=MISSING 
+
+실패한 셀 없음.
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM
+   python    : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/bin/python
+   safety    : cb
+   models    : llama31_8b_base
+   methods   : lora lisa salora wsr_lora
+   tasks     : gsm8k
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=16 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=0, basis 삭제=0)
+   *** DRY RUN ***
+════════════════════════════════════════════════════════════════
+
+  AsFT λ          : 1.0
+  SafeLoRA thr    : 0.3  (load dtype=float32)
+  LISA            : ρ=1.0 align_step=100 ft_step=900
+  SaLoRA          : salora/salora_lora.py · r_s=32 r_t=32 init=task n_harmful=256 n_task=256
+  WSR-LoRA ρ      : 0.3  (Phase1 basis 필요)
+  SafeGrad        : ρ=1.0 ref_mode=adapter_off kl=ref
+
+──────────────────────────────────────────────────────────────
+  lora  cb/llama31_8b_base/gsm8k lr=3e-4 batch=4x4   (09-16 10:16:05)
+──────────────────────────────────────────────────────────────
+  [dry-run] /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/bin/python finetune_gsm8k_lora.py --method lora --model_name kmseong/Llama-3.1-8B-base-SSFT_lr5e-5 --output_dir /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/revision/cb/llama31_8b_base/gsm8k/lora --task_data_path /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/data/gsm8k_train_task_7473.json --task_samples 0 --target_modules q_proj\,k_proj\,v_proj\,up_proj\,down_proj --layer_type attn_q\,attn_k\,attn_v\,ffn_up\,ffn_down --target_layers all --lora_r 16 --lora_alpha 16 --lora_dropout 0.05 --learning_rate 3e-4 --epochs 3 --batch_size 4 --gradient_accumulation_steps 4 --max_length 1024 --warmup_ratio 0.03 --weight_decay 0.0 --seed 42 --dtype bfloat16 --gradient_checkpointing --save_merged_model
+
+──────────────────────────────────────────────────────────────
+  lisa(ρ=1.0)  cb/llama31_8b_base/gsm8k lr=3e-4 batch=4x4   (09-16 10:16:05)
+──────────────────────────────────────────────────────────────
+  [dry-run] /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/bin/python gsm8k_eval/finetune_gsm8k_lisa.py --model_path kmseong/Llama-3.1-8B-base-SSFT_lr5e-5 --output_dir /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/revision/cb/llama31_8b_base/gsm8k/lisa --task_data_path /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/data/gsm8k_train_task_7473.json --task_samples 0 --num_eval_samples 0 --safety_data_path /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/data/circuit_breakers_train.json --guide_data_num 4994 --rho 1.0 --alignment_step 100 --finetune_step 900 --lora --lora_target_modules q_proj k_proj v_proj up_proj down_proj --lora_r 16 --lora_alpha 16 --lora_dropout 0.05 --learning_rate 3e-4 --epochs 3 --batch_size 4 --grad_accum 4 --max_length 1024 --warmup_ratio 0.03 --weight_decay 0.0 --lr_scheduler_type cosine --max_grad_norm 1.0 --seed 42 --bf16 --gradient_checkpointing --report_to none
+
+──────────────────────────────────────────────────────────────
+  salora(r_s=32,r_t=32)  cb/llama31_8b_base/gsm8k lr=3e-4 batch=4x4   (09-16 10:16:05)
+──────────────────────────────────────────────────────────────
+  [dry-run] env PYTHONPATH=/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/salora:/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/wsr-lora:/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/bin/python salora/salora_lora.py --model_name kmseong/Llama-3.1-8B-base-SSFT_lr5e-5 --output_dir /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/revision/cb/llama31_8b_base/gsm8k/salora --safety_data /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/data/circuit_breakers_train.json --response_field llama3_output --gsm8k_json /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/data/gsm8k_train_task_7473.json --train_samples 0 --target_modules q_proj\,k_proj\,v_proj\,up_proj\,down_proj --rank 16 --lora_alpha 16 --lora_dropout 0.05 --r_s 32 --r_t 32 --init_mode task --n_harmful 256 --n_task 256 --salora_max_tokens 4096 --lr 3e-4 --epochs 3 --batch_size 4 --grad_accum 4 --max_length 1024 --warmup_ratio 0.03 --dtype bfloat16 --seed 42
+
+──────────────────────────────────────────────────────────────
+  wsr_lora(ρ=0.3)  cb/llama31_8b_base/gsm8k lr=3e-4 batch=4x4   (09-16 10:16:06)
+──────────────────────────────────────────────────────────────
+  [dry-run] /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/bin/python wsr-lora/wsr_lora.py --model_name kmseong/Llama-3.1-8B-base-SSFT_lr5e-5 --output_dir /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/revision/cb/llama31_8b_base/gsm8k/wsr_lora --safety_data /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/data/circuit_breakers_train.json --safety_samples 4994 --gsm8k_json /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/data/gsm8k_train_task_7473.json --train_samples 0 --basis_dir \<02_warp_basis_mask.sh\ 산출물\> --basis_samples 4994 --basis_batch_size 2 --reparam --rho 0.3 --mask_B 1 --mask_A 1 --target_modules q_proj\,k_proj\,v_proj\,up_proj\,down_proj --rank 16 --alpha 16 --dropout 0.05 --lr 3e-4 --epochs 3 --batch_size 4 --grad_accum 4 --max_length 1024 --warmup_ratio 0.03 --weight_decay 0.0 --scheduler cosine --dtype bfloat16 --seed 42
+
+실패한 셀 없음.
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM
+   python    : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/bin/python
+   safety    : cb
+   models    : llama31_8b_base
+   methods   : seal
+   tasks     : gsm8k
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=1e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=16 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=0, basis 삭제=0)
+   *** DRY RUN ***
+════════════════════════════════════════════════════════════════
+
+  SEAL top-p     : 0.8 (top80)
+  selector epochs: 2
+  S2 (full-param): lr=1e-5 wd=0.01 warmup=0.1 epochs=3
+  selector ckpt  : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/seal/ckpt/revision
+
+──────────────────────────────────────────────────────────────
+  seal-S1 selector  cb/llama31_8b_base/gsm8k  batch=4   (09-16 10:16:06)
+──────────────────────────────────────────────────────────────
+  [dry-run] /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/bin/python -m seal.train_selector --model_path kmseong/Llama-3.1-8B-base-SSFT_lr5e-5 \
+      --safety_data_path /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/data/circuit_breakers_train.json --task_data_path /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/data/gsm8k_train_task_7473.json --num_ft_samples 0 \
+      --max_length 1024 --epochs 2 --batch_size 4 --lora \
+      --lora_r 16 --lora_alpha 16 --lora_dropout 0.05 \
+      --lora_target_modules q_proj k_proj v_proj up_proj down_proj \
+      --out_dir /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/seal/ckpt/revision/cb/llama31_8b_base --selector_name gsm8k_selector --seed 42
+  [dry-run] /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/bin/python -m seal.select_data --selector_path /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/seal/ckpt/revision/cb/llama31_8b_base/gsm8k_selector_softmax.pt --topp 0.8 --out /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/seal/ckpt/revision/cb/llama31_8b_base/gsm8k_selected_top80.json
+
+──────────────────────────────────────────────────────────────
+  seal-S2 SFT  cb/llama31_8b_base/gsm8k  lr=1e-5 batch=2x8   (09-16 10:16:06)
+──────────────────────────────────────────────────────────────
+  [dry-run] /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/bin/python -m seal.train_sft --model_path kmseong/Llama-3.1-8B-base-SSFT_lr5e-5 --task_data_path /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/data/gsm8k_train_task_7473.json --num_train_samples 0 --selected_indices /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/seal/ckpt/revision/cb/llama31_8b_base/gsm8k_selected_top80.json --max_length 1024 --epochs 3 --learning_rate 1e-5 --weight_decay 0.01 --warmup_ratio 0.1 --lr_scheduler_type cosine --max_grad_norm 1.0 --batch_size 2 --grad_accum 8 --gradient_checkpointing --seed 42 --output_dir /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/revision/cb/llama31_8b_base/gsm8k/seal
+
+실패한 셀 없음.
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM
+   python    : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/bin/python
+   safety    : cb
+   models    : llama31_8b_base
+   methods   : asft safelora
+   tasks     : gsm8k
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=5e-5 wd=0.01 warmup=0.1
+   lora      : r=16 a=16 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=0, basis 삭제=0)
+   *** DRY RUN ***
+════════════════════════════════════════════════════════════════
+
+  AsFT λ          : 1.0
+  SafeLoRA thr    : 0.3  (load dtype=float32)
+  LISA            : ρ=1.0 align_step=100 ft_step=900
+  SaLoRA          : salora/salora_lora.py · r_s=32 r_t=32 init=task n_harmful=256 n_task=256
+  WSR-LoRA ρ      : 0.3  (Phase1 basis 필요)
+  SafeGrad        : ρ=1.0 ref_mode=adapter_off kl=ref
+
+──────────────────────────────────────────────────────────────
+  asft(λ=1.0)  cb/llama31_8b_base/gsm8k lr=3e-4 batch=4x4   (09-16 10:16:06)
+──────────────────────────────────────────────────────────────
+  [dry-run] /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/bin/python finetune_gsm8k_lora.py --method asft --model_name kmseong/Llama-3.1-8B-base-SSFT_lr5e-5 --output_dir /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/revision/cb/llama31_8b_base/gsm8k/asft --task_data_path /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/data/gsm8k_train_task_7473.json --task_samples 0 --target_modules q_proj\,k_proj\,v_proj\,up_proj\,down_proj --layer_type attn_q\,attn_k\,attn_v\,ffn_up\,ffn_down --target_layers all --asft_base_model meta-llama/Llama-3.1-8B --asft_aligned_model kmseong/Llama-3.1-8B-base-SSFT_lr5e-5 --asft_lambda_reg 1.0 --asft_store_dtype float32 --asft_check_equiv --lora_r 16 --lora_alpha 16 --lora_dropout 0.05 --learning_rate 3e-4 --epochs 3 --batch_size 4 --gradient_accumulation_steps 4 --max_length 1024 --warmup_ratio 0.03 --weight_decay 0.0 --seed 42 --dtype bfloat16 --gradient_checkpointing --save_merged_model
+
+──────────────────────────────────────────────────────────────
+  safelora(thr=0.3)  cb/llama31_8b_base/gsm8k lr=3e-4 batch=4x4   (09-16 10:16:06)
+──────────────────────────────────────────────────────────────
+  [dry-run] /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/bin/python finetune_gsm8k_lora.py --method safe_lora --model_name kmseong/Llama-3.1-8B-base-SSFT_lr5e-5 --output_dir /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/revision/cb/llama31_8b_base/gsm8k/safelora --task_data_path /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/data/gsm8k_train_task_7473.json --task_samples 0 --target_modules q_proj\,k_proj\,v_proj\,up_proj\,down_proj --layer_type attn_q\,attn_k\,attn_v\,ffn_up\,ffn_down --target_layers all --safelora_base_model meta-llama/Llama-3.1-8B --safelora_aligned_model kmseong/Llama-3.1-8B-base-SSFT_lr5e-5 --safelora_select_type threshold --safelora_threshold 0.3 --safelora_load_dtype float32 --lora_r 16 --lora_alpha 16 --lora_dropout 0.05 --learning_rate 3e-4 --epochs 3 --batch_size 4 --gradient_accumulation_steps 4 --max_length 1024 --warmup_ratio 0.03 --weight_decay 0.0 --seed 42 --dtype bfloat16 --gradient_checkpointing --save_merged_model
+
+실패한 셀 없음.
+
+════════════════════ 셀 상태 ════════════════════
+  lora      미완료
+  asft      미완료
+  lisa      미완료
+  seal      미완료
+  safelora  미완료
+  salora    미완료
+  wsr_lora  미완료
+전체 로그: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/logs/revision/llama31_8b_base_20260916_101605.log

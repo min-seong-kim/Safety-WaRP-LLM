@@ -227,6 +227,12 @@ for safety in $SAFETY_SETS; do
       # ═══════════════ WSR-LoRA ═══════════════
       if want_cell "$safety" "$mkey" "$task" wsr_lora; then
         odir="$(out_dir "$safety" "$mkey" "$task" wsr_lora)"
+        # ⚠️ BASIS_DIR 을 **여기서 다시 읽는다**. 모델 루프 진입 시 한 번만 읽으면,
+        #    02_warp_basis_mask.sh 를 병렬로 돌리는 중에 이 스크립트를 시작한 경우
+        #    (=시작 시점엔 포인터가 없던 경우) 나중에 basis 가 생겨도 영원히 빈 값이라
+        #    "no basis" 로 조용히 건너뛴다. 2026-09-16 llama31_8b_base 에서 실제로 발생:
+        #    20a 를 10:27 에 띄웠고 BASIS_DIR 은 10:58 에 생겨 wsr_lora 만 스킵됐다.
+        [[ -z "$BASIS_DIR" && -s "$BASIS_PTR" ]] && BASIS_DIR="$(cat "$BASIS_PTR")"
         if [[ "$DRY_RUN" != "1" && ( -z "$BASIS_DIR" || ! -d "$BASIS_DIR" ) ]]; then
           warn "[$safety/$mkey/$task] WSR-LoRA 에 필요한 Phase 1 basis 가 없다 → 02_warp_basis_mask.sh 먼저. 건너뜀."
           FAILED_CELLS+=("wsr_lora/$safety/$mkey/$task (no basis)")

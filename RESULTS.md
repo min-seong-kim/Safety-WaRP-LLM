@@ -132,7 +132,8 @@
 | 모델 | 기법 | Direct | AutoDAN | PAIR | PAP | AVG | GSM8K | Δsafe | Δdown | Δoverall |
 |---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | [`gemma-2-9b-it-lr3e-5-gsm8k-lr1e-5`](https://huggingface.co/wvnvwn/gemma-2-9b-it-lr3e-5-gsm8k-lr1e-5) | Full FT (SSFT+task) † | 0.0000 | 0.0038 | 0.0096 | 0.2015 | 0.0537 | 0.6975 | — | — | — |
-| [`gemma2_9b-it-CB_SSFT-seal_gsm8k_topp0.8_lr5e-5`](https://huggingface.co/kmseong/gemma2_9b-it-CB_SSFT-seal_gsm8k_topp0.8_lr5e-5) | SEAL | 0.4500 | 0.2558 | 0.8365 | 0.8354 | 0.5944 | 0.1865 | +0.5407 | -0.5110 | -1.0517 |
+| [`gemma2_9b-it-CB_SSFT-seal_gsm8k_topp0.8_lr5e-5`](https://huggingface.co/kmseong/gemma2_9b-it-CB_SSFT-seal_gsm8k_topp0.8_lr5e-5) | SEAL (lr 5e-5, **버그**) ‡ | 0.4500 | 0.2558 | 0.8365 | 0.8354 | 0.5944 | 0.1865 | +0.5407 | -0.5110 | -1.0517 |
+| [`gemma2_9b-it-CB_SSFT-seal_gsm8k_topp0.8_lr1e-5`](https://huggingface.co/kmseong/gemma2_9b-it-CB_SSFT-seal_gsm8k_topp0.8_lr1e-5) | SEAL (lr 1e-5, 재학습) ‡ | 0.0000 | 0.0038 | 0.0077 | 0.1631 | 0.0437 | 0.6831 | -0.0100 | -0.0144 | -0.0044 |
 | [`gemma-2-9b-it-lr3e-5-WaRP-lr1e-5`](https://huggingface.co/wvnvwn/gemma-2-9b-it-lr3e-5-WaRP-lr1e-5) | WSR-Tune † | 0.0000 | 0.0000 | 0.0077 | 0.1919 | 0.0499 | 0.7081 | -0.0038 | +0.0106 | +0.0144 |
 | [`gemma2_9b-it-CB_SSFT-lora_gsm8k_lr3e-4`](https://huggingface.co/kmseong/gemma2_9b-it-CB_SSFT-lora_gsm8k_lr3e-4) | Vanilla LoRA (α=32) | 0.0000 | 0.0577 | 0.1058 | 0.2454 | 0.1022 | 0.6937 | — | — | — |
 | [`gemma2_9b-it-CB_SSFT-lora_gsm8k_a16_lr3e-4`](https://huggingface.co/kmseong/gemma2_9b-it-CB_SSFT-lora_gsm8k_a16_lr3e-4) | Vanilla LoRA (α=16) | 0.0000 | 0.1423 | 0.0750 | 0.2996 | 0.1292 | 0.7074 | — | — | — |
@@ -146,6 +147,28 @@
 | [`gemma2_9b-it-CB_SSFT-salora_gsm8k_rs32rt32_a16_lr3e-4`](https://huggingface.co/kmseong/gemma2_9b-it-CB_SSFT-salora_gsm8k_rs32rt32_a16_lr3e-4) | SaLoRA (α=16) | 0.0000 | 0.0192 | 0.1038 | 0.3296 | 0.1132 | 0.6823 | -0.0160 | -0.0251 | -0.0091 |
 | [`gemma2_9b-it-CB_SSFT-wsr-lora_gsm8k_rho0.1_lr3e-4`](https://huggingface.co/kmseong/gemma2_9b-it-CB_SSFT-wsr-lora_gsm8k_rho0.1_lr3e-4) | WSR-LoRA (α=32) | 0.0000 | 0.0154 | 0.0327 | 0.2458 | 0.0735 | 0.6315 | -0.0287 | -0.0622 | -0.0335 |
 | [`gemma2_9b-it-CB_SSFT-wsr-lora_gsm8k_rho0.1_a16_lr3e-4`](https://huggingface.co/kmseong/gemma2_9b-it-CB_SSFT-wsr-lora_gsm8k_rho0.1_a16_lr3e-4) | WSR-LoRA (α=16) | 0.0000 | 0.0615 | 0.0269 | 0.2108 | 0.0748 | 0.6884 | -0.0544 | -0.0190 | +0.0354 |
+
+‡ **gemma2_9b SEAL 은 lr 버그로 망가져 있었다 (2026-09-16 규명·재학습).**
+`common.sh` 의 `model_cfg()` 가 gemma 에 대해 `SSFT_LR` 만 3e-5 로 덮어쓰고 `FULL_LR` 은
+전역 기본값 **5e-5** 를 그대로 썼다. 이 모델의 다른 full-param arm 은 전부 lr 1e-5 다
+(`wvnvwn/gemma-2-9b-it-lr3e-5-gsm8k-lr1e-5` · `...-WaRP-lr1e-5`, 위 측정조건표의
+"full-param 계열 | lr 5e-5 (gemma 1e-5)"). 즉 SEAL 만 **다른 arm 의 5배 lr** 로 full-param
+3 epoch 을 돌아 정렬과 성능이 함께 무너졌다.
+
+CLAUDE.md 는 이를 "cell-specific failure mode, not a pipeline bug" 로 적고 재학습했지만
+**같은 잘못된 lr 을 다시 써서** 같은 결과가 나왔다. 실제로는 레지스트리 버그다.
+
+lr 1e-5 로 재학습한 결과(AVG 0.5944 → **0.0437**, GSM8K 0.1865 → **0.6831**)는 같은 모델의
+다른 arm 과 자릿수가 맞고, 오히려 셋 중 **가장 안전하다**(SEAL 0.0437 < WSR-Tune 0.0499 <
+Full FT 0.0537). 표에는 재학습본을 쓰고 기존 행은 이력으로 남긴다.
+
+고친 것: `common.sh` 에 **모델별 `FULL_LR`** 도입(gemma2_9b=1e-5, llama2_7b_base=3e-5,
+llama31_8b_base=1e-5 — 전부 허브 리포명과 대조해 검증, 나머지 5e-5). 호출자가 `FULL_LR` 을
+명시하면 그쪽이 이긴다. 또한 `hf_repo_id()` 가 스스로 `model_cfg` 를 부르게 했다 —
+`$( )` 서브셸에서 불리면 모델별 lr 이 반영되지 않아 **조용히 틀린 리포명**(gemma 가 lr5e-5)이
+나왔다. `print_plan` / `21_seal.sh` 헤더가 `model_cfg` 전에 전역 lr 을 찍어 이 버그를
+가리던 것도 고쳤다.
+
 
 ---
 
@@ -652,3 +675,72 @@ bit-identical 이어야 하지만, bf16 은 가수가 8비트라 **학습된 파
 
 로그: HarmBench 요약 `HarmBench/results/evaluation_summary_2026-09-13_21-06-01.csv` ·
 학습 `logs/origspace_freeze/sweep_20260913_192410.log`.
+
+## Llama-3.1-8B **Base** / GSM8K  (논문 Table 7 확장 · 전 행 재측정)
+
+2026-09-16 이 박스(edgeai-1, B200)에서 **safety 와 downstream 을 한 배치에서** 측정했다. 출발 모델 [`Llama-3.1-8B-base-SSFT_lr5e-5`](https://huggingface.co/kmseong/Llama-3.1-8B-base-SSFT_lr5e-5) (CB 로 안전정렬된 **base**). full-param 계열은 lr 1e-5, LoRA 계열은 r=16/α=16/lr 3e-4, 공통 3 epoch · effective batch 16 · max_len 1024 · seed 42 · bf16.
+
+| 모델 | 기법 | Direct | AutoDAN | PAIR | PAP | AVG | GSM8K | Δsafe | Δdown | Δoverall |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| [`Llama-3.1-8B-base-SSFT_lr5e-5`](https://huggingface.co/kmseong/Llama-3.1-8B-base-SSFT_lr5e-5) | SSFT 출발모델 (downstream FT 전) | 0.0000 | 0.0000 | 0.0058 | 0.1435 | 0.0373 | 0.0834 | — | — | — |
+| [`Llama-3.1-8B-base-gsm8k-SSFT_lr1e-5`](https://huggingface.co/kmseong/Llama-3.1-8B-base-gsm8k-SSFT_lr1e-5) | Full Params FT | 0.0000 | 0.0019 | 0.0904 | 0.2600 | 0.0881 | 0.5732 | — | — | — |
+| [`llama3.1-8b-base-gsm8k-safeinstr-ratio_10p-lr1e-5`](https://huggingface.co/kmseong/llama3.1-8b-base-gsm8k-safeinstr-ratio_10p-lr1e-5) | SafeInstr (10%) | 0.0000 | 0.0000 | 0.0288 | 0.2335 | 0.0656 | 0.5694 | -0.0225 | -0.0038 | +0.0187 |
+| [`llama3_1_8b-base-CB_SSFT-resta_gsm8k_gamma0.3_lr1e-5`](https://huggingface.co/kmseong/llama3_1_8b-base-CB_SSFT-resta_gsm8k_gamma0.3_lr1e-5) | RESTA γ=0.3 † | 0.0000 | 0.0000 | 0.0769 | 0.2500 | 0.0817 | 0.4845 | -0.0063 | -0.0887 | -0.0824 |
+| [`llama3.1-8b-base-gsm8k-safedelta-scale0.1-lr1e-5`](https://huggingface.co/kmseong/llama3.1-8b-base-gsm8k-safedelta-scale0.1-lr1e-5) | SafeDelta s=0.1 | 0.0000 | 0.0000 | 0.0077 | 0.1519 | 0.0399 | 0.4132 | -0.0482 | -0.1600 | -0.1118 |
+| [`llama3.1-8B_base_gsm8k_ft_freeze_sn_lr1e-5`](https://huggingface.co/kmseong/llama3.1-8B_base_gsm8k_ft_freeze_sn_lr1e-5) | SN-Tune | 0.0904 | 0.2096 | 0.4827 | 0.6912 | 0.3685 | 0.6300 | +0.2804 | +0.0568 | -0.2236 |
+| [`llama3.1-8B_base_gsm8k_ft_freeze_rsn_lr1e-5`](https://huggingface.co/kmseong/llama3.1-8B_base_gsm8k_ft_freeze_rsn_lr1e-5) | RSN-Tune | 0.2327 | 0.1212 | 0.4038 | 0.3838 | 0.2854 | 0.6353 | +0.1973 | +0.0621 | -0.1352 |
+| [`llama3.1-8b-base-warp-gsm8k-lr1e-5`](https://huggingface.co/kmseong/llama3.1-8b-base-warp-gsm8k-lr1e-5) | WSR-Tune | 0.0000 | 0.0000 | 0.0135 | 0.1650 | 0.0446 | 0.5512 | -0.0435 | -0.0220 | +0.0215 |
+| [`llama3_1_8b-base-CB_SSFT-seal_gsm8k_topp0.8_lr1e-5`](https://huggingface.co/kmseong/llama3_1_8b-base-CB_SSFT-seal_gsm8k_topp0.8_lr1e-5) | SEAL (top-p 0.8) | 0.0000 | 0.0019 | 0.0808 | 0.2500 | 0.0832 | 0.5595 | -0.0049 | -0.0137 | -0.0088 |
+| [`llama3_1_8b-base-CB_SSFT-lora_gsm8k_a16_lr3e-4`](https://huggingface.co/kmseong/llama3_1_8b-base-CB_SSFT-lora_gsm8k_a16_lr3e-4) | Vanilla LoRA (α=16) | 0.0115 | 0.8173 | 0.3885 | 0.6812 | 0.4746 | 0.5724 | — | — | — |
+| [`llama3_1_8b-base-CB_SSFT-asft_gsm8k_lambda1.0_a16_lr3e-4`](https://huggingface.co/kmseong/llama3_1_8b-base-CB_SSFT-asft_gsm8k_lambda1.0_a16_lr3e-4) | AsFT λ=1.0 (α=16) | 0.0000 | 0.0000 | 0.0096 | 0.1562 | 0.0414 | 0.2714 | -0.4332 | -0.3010 | +0.1322 |
+| [`llama3_1_8b-base-CB_SSFT-lisa_gsm8k_rho1.0_a16_lr3e-4`](https://huggingface.co/kmseong/llama3_1_8b-base-CB_SSFT-lisa_gsm8k_rho1.0_a16_lr3e-4) | LISA ρ=1.0 (α=16) | 0.0000 | 0.0000 | 0.0019 | 0.1873 | 0.0473 | 0.3025 | -0.4273 | -0.2699 | +0.1574 |
+| [`llama3_1_8b-base-CB_SSFT-safelora_gsm8k_thr0.3_a16_lr3e-4`](https://huggingface.co/kmseong/llama3_1_8b-base-CB_SSFT-safelora_gsm8k_thr0.3_a16_lr3e-4) | SafeLoRA thr=0.3 (α=16) | 0.0000 | 0.0038 | 0.0731 | 0.3358 | 0.1032 | 0.4837 | -0.3714 | -0.0887 | +0.2827 |
+| [`llama3_1_8b-base-CB_SSFT-salora_gsm8k_rs32rt32_a16_lr3e-4`](https://huggingface.co/kmseong/llama3_1_8b-base-CB_SSFT-salora_gsm8k_rs32rt32_a16_lr3e-4) | SaLoRA r_s=r_t=32 (α=16) ‡ | 0.0154 | 0.9327 | 0.2827 | 0.7069 | 0.4844 | 0.5641 | +0.0098 | -0.0083 | -0.0181 |
+| [`llama3_1_8b-base-CB_SSFT-wsr-lora_gsm8k_rho0.3_a16_lr3e-4`](https://huggingface.co/kmseong/llama3_1_8b-base-CB_SSFT-wsr-lora_gsm8k_rho0.3_a16_lr3e-4) | WSR-LoRA ρ=0.3 (α=16) | 0.0000 | 0.0596 | 0.0808 | 0.2750 | 0.1038 | 0.5929 | -0.3708 | +0.0205 | +0.3913 |
+
+**Δ 기준행**: full-param 9행은 **Full Params FT**, LoRA 6행은 **Vanilla LoRA(α=16)**. SSFT 출발모델은 downstream FT 전이라 기준에서 제외했다(GSM8K 0.0834 는 gsm8k 학습을 안 한 값이다).
+
+**측정 조건**은 이 문서의 다른 표와 같다 — HarmBench AdvBench standard · sys 모드 · `GRADING=hard`(keyword) · lm-eval 5-shot **flexible-extract**. base 모델이라 프롬프트는 `Question: {q}\nAnswer:` 이고, 학습 / HarmBench(`llama-2-base`≡`llama-3-base`) / lm-eval(`gsm8k.yaml doc_to_text`) 세 곳이 글자 단위로 같음을 확인했다. AutoDAN/PAIR test case 는 `llama3_1_8b-base` 것을 재사용했다.
+
+### 논문 Table 7 과의 관계
+
+**이 표는 논문 Table 7 의 GSM8K 열과 직접 비교하면 안 된다.** 그 표는 safety 와 downstream 이 **서로 다른 모델**에서 나왔다 — safety 는 lr 1e-5 리포, GSM8K 는 lr 5e-5 리포다(2026-09-16 규명). 위 표는 전부 lr 1e-5 모델 하나에서 둘 다 잰 것이라 **한 모델 = 한 행**이 성립한다.
+
+| 행 | 논문 AVG | 위 표 AVG | 논문 GSM8K (lr5e-5 모델) | 위 표 GSM8K (lr1e-5 모델) |
+|---|---:|---:|---:|---:|
+| Full Params FT | 8.81 | 8.81 | 42.38 | 57.32 |
+| SafeInstr | 6.56 | 6.56 | 32.83 | 56.94 |
+| SafeDelta | 3.99 | 3.99 | 10.54 | 41.32 |
+| SN-Tune | 36.85 | 36.85 | 48.90 | 63.00 |
+| RSN-Tune | 28.54 | 28.54 | 46.02 | 63.53 |
+| WSR-Tune | 4.46 | 4.46 | 44.66 | 55.12 |
+
+**ASR 은 소수점까지 그대로 재현된다.** Full Params FT 는 이번에 기존 결과 재사용이 아니라 **새 키로 독립 측정**했는데도 0.0000 / 0.0019 / 0.0904 / 0.2600 으로 논문값(0.00/0.19/9.04/26.00)과 완전히 같았다. GSM8K 만 모델이 달라 큰 차이가 난다.
+
+† **RESTA 는 새로 만든 것이다.** 논문 Resta 행을 만든 리포 `kmseong/llama3.1-8b-base-lr5e-5-gsm8k-resta-gamma0.3` 와 `kmseong/llama3.1-8b-base-gsm8k-resta-gamma0.3-lr1e-5` 가 **둘 다 허브에서 404** 이고(2026-09-16 확인), kmseong 전체에 llama3.1-8b **base** 용 resta 리포가 하나도 없다. 그래서 논문 §4.1 레시피대로 다시 병합했다: `W_resta = W_ft + 0.3·(W_align − W_base)`, W_ft=`Llama-3.1-8B-base-gsm8k-SSFT_lr1e-5`, W_align=`Llama-3.1-8B-base-SSFT_lr5e-5`, W_base=`meta-llama/Llama-3.1-8B` (`scripts/resta_add_safety.py`, 가중치 합 1.000000 = mergekit `linear` normalize 와 동치). **원본과 bit-identical 하다고 보장할 수 없다** — 없어진 리포가 어떤 W_ft 로 만들어졌는지 확인할 방법이 없다. 논문 AVG 8.37 / GSM8K 38.82 와 비교하면 이 재생성본은 AVG 0.0817 / GSM8K 0.4845 다.
+
+‡ SaLoRA 의 AutoDAN 은 keyword 오탐이 섞여 있다(원 0.9327 → 보정 하한 0.7423). 아래 'AutoDAN keyword ASR 의 오탐' 각주 참조.
+
+## Llama-2-7B **Base** / GSM8K  (논문 Table 7 확장 · rebuttal PEFT 9셀)
+
+2026-09-15 학습(다른 세션) · 2026-09-16 이 박스(edgeai-1, B200)에서 평가. 출발 모델 [`llama2_7b-base-CB_SSFT-lr3e-5`](https://huggingface.co/kmseong/llama2_7b-base-CB_SSFT-lr3e-5). LISA 와 WSR-LoRA 는 ρ 두 값이 모두 허브에 있어 둘 다 실었다.
+
+| 모델 | 기법 | Direct | AutoDAN | PAIR | PAP | AVG | GSM8K | Δsafe | Δdown | Δoverall |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| [`llama2_7b-base-CB_SSFT-lora_gsm8k_a16_lr3e-4`](https://huggingface.co/kmseong/llama2_7b-base-CB_SSFT-lora_gsm8k_a16_lr3e-4) | Vanilla LoRA (α=16) | 0.0692 | 0.7442 | 0.7885 | 0.7292 | 0.5828 | 0.3791 | — | — | — |
+| [`llama2_7b-base-CB_SSFT-asft_gsm8k_lambda1.0_a16_lr3e-4`](https://huggingface.co/kmseong/llama2_7b-base-CB_SSFT-asft_gsm8k_lambda1.0_a16_lr3e-4) | AsFT λ=1.0 (α=16) | 0.0000 | 0.0000 | 0.0731 | 0.3323 | 0.1013 | 0.1713 | -0.4814 | -0.2078 | +0.2736 |
+| [`llama2_7b-base-CB_SSFT-lisa_gsm8k_rho0.0_a16_lr3e-4`](https://huggingface.co/kmseong/llama2_7b-base-CB_SSFT-lisa_gsm8k_rho0.0_a16_lr3e-4) | LISA ρ=0.0 (α=16) | 0.0000 | 0.0000 | 0.1038 | 0.3192 | 0.1058 | 0.3920 | -0.4770 | +0.0129 | +0.4899 |
+| [`llama2_7b-base-CB_SSFT-lisa_gsm8k_rho1.0_a16_lr3e-4`](https://huggingface.co/kmseong/llama2_7b-base-CB_SSFT-lisa_gsm8k_rho1.0_a16_lr3e-4) | LISA ρ=1.0 (α=16) | 0.0000 | 0.0000 | 0.1096 | 0.2958 | 0.1013 | 0.1706 | -0.4814 | -0.2085 | +0.2729 |
+| [`llama2_7b-base-CB_SSFT-safelora_gsm8k_thr0.3_a16_lr3e-4`](https://huggingface.co/kmseong/llama2_7b-base-CB_SSFT-safelora_gsm8k_thr0.3_a16_lr3e-4) | SafeLoRA thr=0.3 (α=16) | 0.0077 | 0.0596 | 0.5404 | 0.6615 | 0.3173 | 0.3465 | -0.2655 | -0.0326 | +0.2329 |
+| [`llama2_7b-base-CB_SSFT-salora_gsm8k_rs32rt32_a16_lr3e-4`](https://huggingface.co/kmseong/llama2_7b-base-CB_SSFT-salora_gsm8k_rs32rt32_a16_lr3e-4) | SaLoRA r_s=r_t=32 (α=16) † | 0.0635 | 0.9404 | 0.7173 | 0.7531 | 0.6186 | 0.3654 | +0.0358 | -0.0137 | -0.0495 |
+| [`llama2_7b-base-CB_SSFT-wsr-lora_gsm8k_rho0.1_a16_lr3e-4`](https://huggingface.co/kmseong/llama2_7b-base-CB_SSFT-wsr-lora_gsm8k_rho0.1_a16_lr3e-4) | WSR-LoRA ρ=0.1 (α=16) | 0.0038 | 0.7404 | 0.5192 | 0.5665 | 0.4575 | 0.3783 | -0.1253 | -0.0008 | +0.1245 |
+| [`llama2_7b-base-CB_SSFT-wsr-lora_gsm8k_rho0.3_a16_lr3e-4`](https://huggingface.co/kmseong/llama2_7b-base-CB_SSFT-wsr-lora_gsm8k_rho0.3_a16_lr3e-4) | WSR-LoRA ρ=0.3 (α=16) | 0.0019 | 0.6135 | 0.3442 | 0.5077 | 0.3668 | 0.3723 | -0.2160 | -0.0068 | +0.2092 |
+| [`llama2_7b-base-CB_SSFT-seal_gsm8k_topp0.8_lr3e-5`](https://huggingface.co/kmseong/llama2_7b-base-CB_SSFT-seal_gsm8k_topp0.8_lr3e-5) | SEAL top-p 0.8 (full-param, lr 3e-5) | 0.0000 | 0.0135 | 0.2788 | 0.4308 | 0.1808 | 0.3829 | — | — | — |
+
+† SaLoRA 의 AutoDAN 0.9404 는 **오탐이 지배적이다** — 489건 중 348건이 `[PROMPT]` 자리표시자를 그대로 출력한 것이라 보정 하한은 0.2404 다. 위 '각주: AutoDAN keyword ASR 의 오탐' 절 참조.
+
+**측정 조건**은 이 문서의 다른 표와 동일하다 — HarmBench AdvBench standard · sys 모드 · `GRADING=hard`(keyword) · lm-eval 5-shot **flexible-extract**. base 모델이라 프롬프트는 `Question: {q}\nAnswer:` 이고 HarmBench 는 `llama-2-base` 템플릿(= `llama-3-base` 와 동일 문자열)을 쓴다. AutoDAN/PAIR test case 는 `llama2_7b-base` 것을 재사용했다.
+
+**Δ 기준행**은 Vanilla LoRA(α=16). SEAL 은 full-param 이라 기준이 Full FT 여야 하는데 이 라인의 Full FT 행이 없어 Δ 를 비웠다.
+
+**논문 Table 7 의 Llama-2-7B Base 7행은 이 표에 붙이지 않았다.** llama3_1_8b-base 와 달리 그 행들의 HarmBench 결과 파일이 이 박스의 결과 트리에 **없다** — AutoDAN 10개 · PAIR 10개 디렉토리의 모든 조합을 훑어도 논문값(FullFT 18.56 / SafeInstr 16.06 / Resta 12.56 / SafeDelta 11.80 / SN 23.38 / RSN 32.37 / WSR-Tune 11.32)과 일치하는 키가 하나도 없다. 따라서 '기존 결과로 논문값 재현 → 같은 잣대 확인' 을 할 수 없다. 이어 붙이려면 그 7개 모델을 이 박스에서 새로 재야 한다(7 × 4공격 ≈ 3~4시간).
