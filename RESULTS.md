@@ -1069,7 +1069,7 @@ GSM8K 로 full-param FT 한다.
 
 ---
 
-# 추가 실험 6 (2026-09-19) — **학습 범위를 WSR-Tune 과 맞춘** AsFT · Lisa (8셀)
+# 추가 실험 6 (2026-09-19 ~ 20) — **학습 범위를 WSR-Tune 과 맞춘** AsFT · Lisa (16셀)
 
 ## 왜 다시 했는가 — 이전 비교는 불공정했다
 
@@ -1093,7 +1093,10 @@ WSR-Tune 은 `basis_coeff` 만 학습한다(`models/phase3_extra_learning.py:205
 Llama-2-7B 66.73% / 13B 67.67% / 3.1-8B 56.83% / 3.2-3B 57.57% 가 학습된다
 (Llama-3 계열이 낮은 것은 vocab 128k 라 embedding·lm_head 비중이 크기 때문).
 
-## 결과 — 같은 학습 범위에서 WSR-Tune 이 4셀 중 3셀 1위
+## 결과 — 같은 학습 범위에서 WSR-Tune 이 **Δ 기준행이 있는 6셀 중 3셀** 1위
+
+이기는 셀에서는 크게 이기고(+0.09 ~ +0.13), 지는 셀에서는 작게 진다(-0.003 ~ -0.083).
+MedQA·ARC-C 2셀은 쓸 수 있는 기준행이 없어 Δ 를 계산하지 않았다(아래 각 표의 설명 참조).
 
 ### Llama-2-7B-Chat / GSM8K
 기준 **Full Params FT**: ASR 0.2078 / downstream 0.4117
@@ -1139,6 +1142,48 @@ Llama-2-7B 66.73% / 13B 67.67% / 3.1-8B 56.83% / 3.2-3B 57.57% 가 학습된다
 | *AsFT (참고)* | [`llama3_2_3b-instruct-CB_SSFT-asft_math_lambda1.0_fullft_lr5e-5`](https://huggingface.co/kmseong/llama3_2_3b-instruct-CB_SSFT-asft_math_lambda1.0_fullft_lr5e-5) | *전체* | *0.0579* | *0.2224* | *-0.0286* | *+0.0072* | *+0.0358* |
 | *Lisa (참고)* | [`llama3_2_3b-instruct-CB_SSFT-lisa_math_rho1.0_fullft_lr5e-5`](https://huggingface.co/kmseong/llama3_2_3b-instruct-CB_SSFT-lisa_math_rho1.0_fullft_lr5e-5) | *전체* | *0.0825* | *0.1566* | *-0.0040* | *-0.0586* | *-0.0546* |
 
+### Qwen2.5-7B-Instruct / GSM8K
+기준 **Full Params FT** ([`qwen-2.5-7B-Instruct-SSFT-gsm8k-lr5e-5`](https://huggingface.co/wvnvwn/qwen-2.5-7B-Instruct-SSFT-gsm8k-lr5e-5)): ASR 0.0362 / downstream 0.6732
+
+| 기법 | 모델 | 학습 범위 | JB AVG ↓ | down ↑ | Δsafe | Δdown | **Δoverall** |
+|---|---|---|---:|---:|---:|---:|---:|
+| **WSR-Tune** | [`qwen-2.5-7B-Instruct-WaRP-lr5e-5`](https://huggingface.co/wvnvwn/qwen-2.5-7B-Instruct-WaRP-lr5e-5) | q,k,v,up,down | 0.0289 | 0.6945 | -0.0073 | +0.0213 | **+0.0286** |
+| **AsFT** | [`qwen2_5_7b-instruct-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr5e-5_tgtonly`](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr5e-5_tgtonly) | q,k,v,up,down | 0.0352 | 0.7240 | -0.0010 | +0.0508 | **+0.0518** |
+| **Lisa** | [`qwen2_5_7b-instruct-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr5e-5_tgtonly`](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr5e-5_tgtonly) | q,k,v,up,down | 0.0433 | 0.7377 | +0.0071 | +0.0645 | **+0.0574** |
+| *AsFT (참고)* | [`qwen2_5_7b-instruct-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr5e-5`](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr5e-5) | *전체 module* | 0.0197 | 0.7127 | -0.0165 | +0.0395 | *+0.0560* |
+| *Lisa (참고)* | [`qwen2_5_7b-instruct-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr5e-5`](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr5e-5) | *전체 module* | 0.0424 | 0.7195 | +0.0062 | +0.0463 | *+0.0401* |
+
+### Gemma-2-9B-IT / GSM8K
+기준 **Full Params FT** ([`gemma-2-9b-it-lr3e-5-gsm8k-lr1e-5`](https://huggingface.co/wvnvwn/gemma-2-9b-it-lr3e-5-gsm8k-lr1e-5)): ASR 0.0537 / downstream 0.6975
+
+| 기법 | 모델 | 학습 범위 | JB AVG ↓ | down ↑ | Δsafe | Δdown | **Δoverall** |
+|---|---|---|---:|---:|---:|---:|---:|
+| **WSR-Tune** | [`gemma-2-9b-it-lr3e-5-WaRP-lr1e-5`](https://huggingface.co/wvnvwn/gemma-2-9b-it-lr3e-5-WaRP-lr1e-5) | q,k,v,up,down | 0.0499 | 0.7081 | -0.0038 | +0.0106 | **+0.0144** |
+| **AsFT** | [`gemma2_9b-it-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr1e-5_tgtonly`](https://huggingface.co/kmseong/gemma2_9b-it-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr1e-5_tgtonly) | q,k,v,up,down | 0.0563 | 0.6164 | +0.0026 | -0.0811 | **-0.0837** |
+| **Lisa** | [`gemma2_9b-it-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr1e-5_tgtonly`](https://huggingface.co/kmseong/gemma2_9b-it-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr1e-5_tgtonly) | q,k,v,up,down | 0.0647 | 0.7255 | +0.0110 | +0.0280 | **+0.0170** |
+| *AsFT (참고)* | [`gemma2_9b-it-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr1e-5`](https://huggingface.co/kmseong/gemma2_9b-it-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr1e-5) | *전체 module* | 0.0554 | 0.7339 | +0.0017 | +0.0364 | *+0.0347* |
+| *Lisa (참고)* | [`gemma2_9b-it-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr1e-5`](https://huggingface.co/kmseong/gemma2_9b-it-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr1e-5) | *전체 module* | 0.0681 | 0.7165 | +0.0144 | +0.0190 | *+0.0046* |
+
+### Llama-2-7B-Chat / MedQA
+기준 **Full Params FT**: **없음** — medqa full-param 은 lr 3e-5 / 1e-5 만 있고 이 라인(lr 5e-5)과 맞는 동작점이 없다. Δ 는 계산하지 않는다.
+
+| 기법 | 모델 | 학습 범위 | JB AVG ↓ | down ↑ | Δsafe | Δdown | **Δoverall** |
+|---|---|---|---:|---:|---:|---:|---:|
+| **AsFT** | [`llama2_7b-chat-CB_SSFT-asft_medqa_lambda1.0_fullft_lr5e-5_tgtonly`](https://huggingface.co/kmseong/llama2_7b-chat-CB_SSFT-asft_medqa_lambda1.0_fullft_lr5e-5_tgtonly) | q,k,v,up,down | 0.0487 | 0.3472 | — | — | — |
+| **Lisa** | [`llama2_7b-chat-CB_SSFT-lisa_medqa_rho1.0_fullft_lr5e-5_tgtonly`](https://huggingface.co/kmseong/llama2_7b-chat-CB_SSFT-lisa_medqa_rho1.0_fullft_lr5e-5_tgtonly) | q,k,v,up,down | 0.0686 | 0.3904 | — | — | — |
+| *AsFT (참고)* | [`llama2_7b-chat-CB_SSFT-asft_medqa_lambda1.0_fullft_lr5e-5`](https://huggingface.co/kmseong/llama2_7b-chat-CB_SSFT-asft_medqa_lambda1.0_fullft_lr5e-5) | *전체 module* | 0.0667 | 0.4643 | — | — | — |
+| *Lisa (참고)* | [`llama2_7b-chat-CB_SSFT-lisa_medqa_rho1.0_fullft_lr5e-5`](https://huggingface.co/kmseong/llama2_7b-chat-CB_SSFT-lisa_medqa_rho1.0_fullft_lr5e-5) | *전체 module* | 0.0624 | 0.3888 | — | — | — |
+
+### Llama-2-7B-Chat / ARC-C
+기준 **Full Params FT**: **쓸 수 없음** — `kmseong/llama2_7b-chat-arc_ssft_lr5e-5` 는 ARC 0.0794(무작위 0.25 미만)로 망가진 모델이다. Δ 는 계산하지 않는다.
+
+| 기법 | 모델 | 학습 범위 | JB AVG ↓ | down ↑ | Δsafe | Δdown | **Δoverall** |
+|---|---|---|---:|---:|---:|---:|---:|
+| **AsFT** | [`llama2_7b-chat-CB_SSFT-asft_arc_lambda1.0_fullft_lr5e-5_tgtonly`](https://huggingface.co/kmseong/llama2_7b-chat-CB_SSFT-asft_arc_lambda1.0_fullft_lr5e-5_tgtonly) | q,k,v,up,down | 0.0667 | 0.5375 | — | — | — |
+| **Lisa** | [`llama2_7b-chat-CB_SSFT-lisa_arc_rho1.0_fullft_lr5e-5_tgtonly`](https://huggingface.co/kmseong/llama2_7b-chat-CB_SSFT-lisa_arc_rho1.0_fullft_lr5e-5_tgtonly) | q,k,v,up,down | 0.0585 | 0.5717 | — | — | — |
+| *AsFT (참고)* | [`llama2_7b-chat-CB_SSFT-asft_arc_lambda1.0_fullft_lr5e-5`](https://huggingface.co/kmseong/llama2_7b-chat-CB_SSFT-asft_arc_lambda1.0_fullft_lr5e-5) | *전체 module* | 0.0844 | 0.6391 | — | — | — |
+| *Lisa (참고)* | [`llama2_7b-chat-CB_SSFT-lisa_arc_rho1.0_fullft_lr5e-5`](https://huggingface.co/kmseong/llama2_7b-chat-CB_SSFT-lisa_arc_rho1.0_fullft_lr5e-5) | *전체 module* | 0.0416 | 0.5734 | — | — | — |
+
 ## 읽는 법
 
 **안전성은 세 기법이 대체로 구별되지 않는다.** Δsafe 차이가 대부분 재현 오차(±0.05) 안쪽이다.
@@ -1150,11 +1195,30 @@ Llama-2-7B 66.73% / 13B 67.67% / 3.1-8B 56.83% / 3.2-3B 57.57% 가 학습된다
 | 13B GSM8K | **0.4958** | 0.3161 | 0.3745 |
 | 3B MATH | **0.2238** | 0.1074 | 0.1448 |
 | 8B MATH | 0.1370 | 0.1476 | **0.1950** |
+| Qwen2.5-7B GSM8K | 0.6945 | 0.7240 | **0.7377** |
+| Gemma-2-9B GSM8K | 0.7081 | 0.6164 | **0.7255** |
 
-**예외: Llama-3.1-8B / MATH 한 셀에서 Lisa 가 1위다**(+0.1331 vs WSR-Tune +0.0498).
-원인 미상이다. "기준 downstream 이 낮은 셀이라" 는 가설을 세웠으나, 기준이 더 높은
-3.2-3B/MATH(0.2152 > 0.1238)에서 WSR-Tune 이 이겼으므로 **반증됐다.**
-⚠️ 이 셀을 빼고 보고하면 cherry-picking 이다. 4셀 전부 싣고 예외를 각주로 남길 것.
+**예외는 3셀이고, 크기가 전혀 다르다.** Δoverall 1위와의 격차로 정리하면:
+
+| 셀 | WSR-Tune Δoverall | 1위 | 격차 |
+|---|---:|---|---:|
+| 7B GSM8K | **+0.1169** ★ | WSR-Tune | +0.1345 |
+| 13B GSM8K | **+0.1233** ★ | WSR-Tune | +0.1273 |
+| 3B MATH | **+0.0311** ★ | WSR-Tune | +0.0925 |
+| 8B MATH | +0.0498 | Lisa +0.1331 | **-0.0833** |
+| Qwen GSM8K | +0.0286 | Lisa +0.0574 | -0.0288 |
+| Gemma GSM8K | +0.0144 | Lisa +0.0170 | **-0.0026** |
+
+즉 **이기는 3셀에서는 2위를 0.09~0.13 차로 크게 따돌리고, 지는 3셀 중 2셀은 격차가
+0.003~0.029 로 재현 오차(±0.05) 안쪽**이다. 실질적 패배는 Llama-3.1-8B / MATH 한 셀뿐이다.
+"기준 downstream 이 낮은 셀이라 Lisa 가 유리하다" 는 가설은 3.2-3B/MATH(기준 0.2152 >
+8B 의 0.1238)에서 WSR-Tune 이 이겼으므로 **반증됐다** — 원인은 여전히 미상이다.
+
+⚠️ 셀을 골라 싣으면 cherry-picking 이다. **6셀 전부 싣고 예외를 각주로 남길 것.**
+
+**Gemma AsFT(타깃한정)의 downstream 붕괴는 따로 봐야 한다** — 0.7339(전체) → **0.6164**
+(타깃한정) 로 0.117 떨어졌다. 학습 범위를 줄였을 때 downstream 이 이만큼 무너진 셀은
+여기뿐이라, 재측정 또는 재학습으로 한 번 확인하는 편이 안전하다.
 
 **전체학습과 비교하면 AsFT 의 이전 우위가 어디서 왔는지 드러난다.** 7B GSM8K 에서
 AsFT 는 전체학습 +0.1238 → 타깃한정 **-0.0411** 로 0.165 폭락한다. 추가 파라미터
@@ -1171,6 +1235,20 @@ baseline 을 약화시켰다는 의심도 차단한다.
 (차이 0.0026)로 재현됐으므로 신뢰할 만하지만, **완전히 같은 잣대로 만들려면 WSR-Tune
 4개 모델도 오늘 파이프라인으로 재측정해야 한다**(약 40분).
 
-리포: `kmseong/{model}-CB_SSFT-{asft_*_lambda1.0|lisa_*_rho1.0}_fullft_lr5e-5_tgtonly`
+리포: `kmseong/{model}-CB_SSFT-{asft_*_lambda1.0|lisa_*_rho1.0}_fullft_lr{5e-5|1e-5}_tgtonly`
 
-마지막 갱신: 2026-09-19
+**재현성 확인 (2026-09-20).** C1 평가에서 3.2-3B / 3.1-8B MATH 4셀이 재측정됐다.
+같은 모델·같은 설정인데 값이 미세하게 움직였다:
+
+| 셀 | 09-19 | 09-20 | 차이 |
+|---|---:|---:|---:|
+| 3B MATH AsFT | 0.1074 | 0.1066 | -0.0008 |
+| 3B MATH Lisa | 0.1448 | 0.1486 | +0.0038 |
+| 8B MATH AsFT | 0.1476 | 0.1478 | +0.0002 |
+| 8B MATH Lisa | 0.1950 | 0.1952 | +0.0002 |
+
+전부 **≤0.004** 로, vLLM 배치 구성에 따른 비결정성 범위다(이 저장소가 기록한
+batch-invariance 한계와 일치). 위 표는 09-19 측정값을 그대로 둔다 — 한 섹션 안에서
+측정 시점을 섞지 않기 위해서다.
+
+마지막 갱신: 2026-09-20

@@ -29,7 +29,12 @@ PATHS=()
 for cell in "$ROOT"/*/*; do
   [ -d "$cell" ] || continue
   [ -f "$cell/.done" ] || continue
-  [ -f "$cell/.uploaded" ] && continue          # 허브에 있는 것은 허브로 평가
+  # ⚠️ 업로드된 셀도 **포함**한다. 체인의 (C2) 단계는 32_eval_cells.sh 를 쓰는데 그 스크립트는
+  #    셀 안의 `REPO` 파일을 찾는다. 그런데 run_origspace_freeze_sweep.sh 는 `REPO` 를 만들지
+  #    않고 `UPLOAD.json` + `.uploaded` 만 쓴다 → (C2) 가 "평가할 리포가 없다" 로 **아무것도
+  #    하지 않고 rc=0** 으로 끝났다(2026-09-20 실측). 그래서 실험 2 는 업로드 여부와 무관하게
+  #    여기서 전부 평가한다. 가중치는 어차피 10셀 모두 로컬에 있다.
+  [ "${SKIP_UPLOADED:-0}" = "1" ] && [ -f "$cell/.uploaded" ] && continue
   md="$(cat "$cell/MODEL_DIR" 2>/dev/null)"; [ -n "$md" ] && [ -d "$md" ] || continue
   ls "$md"/*.safetensors >/dev/null 2>&1 || continue
   mkey="$(basename "$(dirname "$cell")")"; tag="$(basename "$cell")"
@@ -44,11 +49,11 @@ for cell in "$ROOT"/*/*; do
 done
 
 if [ "${#PATHS[@]}" -eq 0 ]; then
-  echo "로컬 평가할 셀이 없다 (전부 업로드됐거나 학습 미완료)"; exit 0
+  echo "로컬 평가할 셀이 없다 (학습 완료된 셀이 없음)"; exit 0
 fi
 
 echo "════════════════════════════════════════════════════════════════"
-echo "  로컬 평가 ${#PATHS[@]} 개 (업로드 실패분)"
+echo "  로컬 평가 ${#PATHS[@]} 개 (실험 2 완료 셀 전부)"
 printf '   - %s\n' "${PATHS[@]##*/}"
 echo "════════════════════════════════════════════════════════════════"
 [ "${DRY_RUN:-0}" = "1" ] && exit 0
