@@ -68,8 +68,17 @@ def load_hb_stage_csv(path, grading="keyword"):
 
 
 def load_rows(variant="sys", grading="keyword"):
-    """{repo: (mtime, rowdict, csvpath)} — 최신 CSV 우선."""
-    best = {}
+    """{repo: (mtime, rowdict, csvpath)} — **열 단위로** 최신 비어있지 않은 값을 모은다.
+
+    왜 행 단위가 아닌가 (2026-09-20 실측):
+      RESUME/LMEVAL_RESUME 로 다시 돌리면 lm-eval 이 이미 끝난 task 를 건너뛴다.
+      그 실행의 통합 CSV 에는 ASR 만 채워지고 downstream 열은 **빈칸**이 된다.
+      "가장 최근 행" 하나만 택하면 그 빈칸이 이전에 제대로 측정된 downstream 을
+      덮어써서 표에 `—` 가 찍힌다 (llama2_7b ... _tgtonly 의 gsm8k 0.2252 가 실제로 사라졌다).
+      → 열마다 "값이 있는 가장 최근 CSV" 를 따로 고른다.
+    """
+    merged = {}        # repo -> {col: (mtime, value)}
+    newest = {}        # repo -> (mtime, path)   표시용(가장 최근 등장 시점)
     for path in sorted(glob.glob(os.path.join(HB_LOGS, "run_all_*_summary.csv")),
                        key=os.path.getmtime):
         mt = os.path.getmtime(path)
@@ -79,16 +88,28 @@ def load_rows(variant="sys", grading="keyword"):
                     m = (row.get("model") or "").strip()
                     if not m:
                         continue
-                    prev = best.get(m)
-                    # 값이 실제로 채워진 행만 채택 (빈 행이 최신이라고 덮어쓰지 않도록)
-                    key = f"{variant}_ASR({grading})_AVG"
-                    if not (row.get(key) or "").strip():
-                        if prev is not None:
+                    cells = merged.setdefault(m, {})
+                    for col, val in row.items():
+                        if not col or col == "model":
                             continue
-                    if prev is None or mt >= prev[0]:
-                        best[m] = (mt, row, path)
+                        val = (val or "").strip()
+                        if not val:
+                            continue        # 빈칸은 절대 덮어쓰지 않는다
+                        prev = cells.get(col)
+                        if prev is None or mt >= prev[0]:
+                            cells[col] = (mt, val)
+                    n = newest.get(m)
+                    if n is None or mt >= n[0]:
+                        newest[m] = (mt, path)
         except Exception as e:  # CSV 가 깨져 있어도 나머지는 살린다
             print(f"[warn] {path}: {type(e).__name__}: {e}", file=sys.stderr)
+
+    best = {}
+    for m, cells in merged.items():
+        row = {"model": m}
+        row.update({c: v for c, (_, v) in cells.items()})
+        mt, path = newest.get(m, (0, ""))
+        best[m] = (mt, row, path)
     return best
 
 
