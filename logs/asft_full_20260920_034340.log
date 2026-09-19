@@ -1,0 +1,38 @@
+2026-09-20 03:43:40,552 [INFO] ======================================================================
+2026-09-20 03:43:40,552 [INFO]   ⚓ AsFT (full-parameter) — alignment-direction subspace penalty
+2026-09-20 03:43:40,552 [INFO] ======================================================================
+2026-09-20 03:43:40,552 [INFO] Log file: logs/asft_full_20260920_034340.log
+2026-09-20 03:43:40,552 [INFO]    ├─ start / aligned (W₀) : kmseong/llama2_7b-chat-Safety-FT-lr5e-5
+2026-09-20 03:43:40,552 [INFO]    ├─ base (for V)         : meta-llama/Llama-2-7b-chat-hf
+2026-09-20 03:43:40,552 [INFO]    ├─ Input formatting     : chat template
+2026-09-20 03:43:40,552 [INFO]    ├─ λ = 1.0   targets = ['q_proj', 'k_proj', 'v_proj', 'up_proj', 'down_proj']
+2026-09-20 03:43:40,552 [INFO]    ├─ Downstream           : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/data/arc_challenge_train_task_1119.json
+2026-09-20 03:43:40,552 [INFO]    ├─ lr 5e-05  epochs 3.0  eff.batch 16  wd 0.01
+2026-09-20 03:43:40,552 [INFO]    └─ Output               : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly/llama2_7b/arc/asft/model
+2026-09-20 03:43:40,552 [INFO] [1/4] 토크나이저 로드
+2026-09-20 03:43:41,533 [INFO] [2/4] 모델 로드 + alignment direction 구성
+2026-09-20 03:43:48,019 [INFO] [AsFT] loading base   : meta-llama/Llama-2-7b-chat-hf (dtype=torch.float32)
+2026-09-20 03:44:27,338 [INFO] [AsFT] loading aligned: kmseong/llama2_7b-chat-Safety-FT-lr5e-5 (dtype=torch.float32)
+2026-09-20 03:45:33,367 [INFO] [AsFT] built 160 alignment directions on cuda (8.38 GiB, dtype=torch.bfloat16)
+2026-09-20 03:45:33,388 [INFO] [AsFT] ‖V‖_F range: [1.6176, 4.1001] mean=2.4257
+2026-09-20 03:45:36,601 [INFO] [AsFT-full] regularizer 연결: 160 개 weight, λ=1.0, W₀+V 저장 16.75 GiB on GPU
+2026-09-20 03:45:36,602 [INFO] [AsFT-full] --train_only_targets: 학습 4,496,293,888 / 동결 2,242,121,728 (66.73% 학습)
+2026-09-20 03:45:36,605 [INFO] [3/4] 다운스트림 'arc' 로드 (/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/data/arc_challenge_train_task_1119.json)
+2026-09-20 03:45:37,053 [INFO] ✅ arc train: 1119 samples
+2026-09-20 03:45:37,054 [INFO] [4/4] 학습 시작
+2026-09-20 03:45:39,583 [INFO] [AsFT-full] gradient 검증 (weight 0): ‖auto‖=4.680394e-03 ‖manual‖=4.680394e-03 rel_err=2.919e-06
+2026-09-20 03:45:53,682 [INFO] [train] {'loss': 0.546, 'grad_norm': 7.4375, 'learning_rate': 4.523809523809524e-05, 'asft_reg': 1.062952}
+2026-09-20 03:46:09,723 [INFO] [train] {'loss': 0.1833, 'grad_norm': 10.8125, 'learning_rate': 4.888932014465352e-05, 'asft_reg': 0.911064}
+2026-09-20 03:46:25,668 [INFO] [train] {'loss': 0.1527, 'grad_norm': 8.8125, 'learning_rate': 4.5176461813806904e-05, 'asft_reg': 0.735721}
+2026-09-20 03:46:41,452 [INFO] [train] {'loss': 0.1442, 'grad_norm': 7.71875, 'learning_rate': 3.925418674667405e-05, 'asft_reg': 0.487617}
+2026-09-20 03:46:57,331 [INFO] [train] {'loss': 0.1363, 'grad_norm': 5.40625, 'learning_rate': 3.177101170357513e-05, 'asft_reg': 0.424083}
+2026-09-20 03:47:13,005 [INFO] [train] {'loss': 0.1187, 'grad_norm': 13.375, 'learning_rate': 2.3546379277238107e-05, 'asft_reg': 0.293693}
+2026-09-20 03:47:28,407 [INFO] [train] {'loss': 0.1279, 'grad_norm': 6.125, 'learning_rate': 1.5480925104388762e-05, 'asft_reg': 0.222478}
+2026-09-20 03:47:44,146 [INFO] [train] {'loss': 0.0886, 'grad_norm': 7.1875, 'learning_rate': 8.45785406007852e-06, 'asft_reg': 0.183145}
+2026-09-20 03:47:59,862 [INFO] [train] {'loss': 0.0821, 'grad_norm': 11.0, 'learning_rate': 3.2462252017684797e-06, 'asft_reg': 0.172426}
+2026-09-20 03:48:15,606 [INFO] [train] {'loss': 0.0824, 'grad_norm': 9.3125, 'learning_rate': 4.16736213181515e-07, 'asft_reg': 0.1714}
+2026-09-20 03:48:23,416 [INFO] [train] {'train_runtime': 166.1374, 'train_samples_per_second': 20.206, 'train_steps_per_second': 1.264, 'total_flos': 2.322698001894605e+16, 'train_loss': 0.1613580794561477}
+2026-09-20 03:48:23,627 [INFO] 최종 벌점 값: 1.713889e-01
+2026-09-20 03:48:23,915 [INFO] 모델 저장
+2026-09-20 03:48:38,868 [INFO] ✅ Saved to /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly/llama2_7b/arc/asft/model
+2026-09-20 03:48:38,868 [INFO] ✅ AsFT (full-param) 완료

@@ -1,0 +1,3000 @@
+2026-09-20 03:43:40,552 [INFO] ======================================================================
+2026-09-20 03:43:40,552 [INFO]   ⚓ AsFT (full-parameter) — alignment-direction subspace penalty
+2026-09-20 03:43:40,552 [INFO] ======================================================================
+2026-09-20 03:43:40,552 [INFO] Log file: logs/asft_full_20260920_034340.log
+2026-09-20 03:43:40,552 [INFO]    ├─ start / aligned (W₀) : kmseong/llama2_7b-chat-Safety-FT-lr5e-5
+2026-09-20 03:43:40,552 [INFO]    ├─ base (for V)         : meta-llama/Llama-2-7b-chat-hf
+2026-09-20 03:43:40,552 [INFO]    ├─ Input formatting     : chat template
+2026-09-20 03:43:40,552 [INFO]    ├─ λ = 1.0   targets = ['q_proj', 'k_proj', 'v_proj', 'up_proj', 'down_proj']
+2026-09-20 03:43:40,552 [INFO]    ├─ Downstream           : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/data/arc_challenge_train_task_1119.json
+2026-09-20 03:43:40,552 [INFO]    ├─ lr 5e-05  epochs 3.0  eff.batch 16  wd 0.01
+2026-09-20 03:43:40,552 [INFO]    └─ Output               : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly/llama2_7b/arc/asft/model
+2026-09-20 03:43:40,552 [INFO] [1/4] 토크나이저 로드
+2026-09-20 03:43:41,533 [INFO] [2/4] 모델 로드 + alignment direction 구성
+`torch_dtype` is deprecated! Use `dtype` instead!
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards:  33%|███▎      | 1/3 [00:01<00:03,  1.90s/it]Loading checkpoint shards:  67%|██████▋   | 2/3 [00:03<00:01,  1.88s/it]Loading checkpoint shards: 100%|██████████| 3/3 [00:04<00:00,  1.57s/it]Loading checkpoint shards: 100%|██████████| 3/3 [00:04<00:00,  1.66s/it]
+2026-09-20 03:43:48,019 [INFO] [AsFT] loading base   : meta-llama/Llama-2-7b-chat-hf (dtype=torch.float32)
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:28<00:28, 28.86s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:38<00:00, 17.67s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:38<00:00, 19.34s/it]
+2026-09-20 03:44:27,338 [INFO] [AsFT] loading aligned: kmseong/llama2_7b-chat-Safety-FT-lr5e-5 (dtype=torch.float32)
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards:  33%|███▎      | 1/3 [00:15<00:30, 15.05s/it]Loading checkpoint shards:  67%|██████▋   | 2/3 [00:29<00:14, 14.73s/it]Loading checkpoint shards: 100%|██████████| 3/3 [00:39<00:00, 12.54s/it]Loading checkpoint shards: 100%|██████████| 3/3 [00:39<00:00, 13.17s/it]
+2026-09-20 03:45:33,367 [INFO] [AsFT] built 160 alignment directions on cuda (8.38 GiB, dtype=torch.bfloat16)
+2026-09-20 03:45:33,388 [INFO] [AsFT] ‖V‖_F range: [1.6176, 4.1001] mean=2.4257
+2026-09-20 03:45:36,601 [INFO] [AsFT-full] regularizer 연결: 160 개 weight, λ=1.0, W₀+V 저장 16.75 GiB on GPU
+2026-09-20 03:45:36,602 [INFO] [AsFT-full] --train_only_targets: 학습 4,496,293,888 / 동결 2,242,121,728 (66.73% 학습)
+2026-09-20 03:45:36,605 [INFO] [3/4] 다운스트림 'arc' 로드 (/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/data/arc_challenge_train_task_1119.json)
+Tokenizing arc:   0%|          | 0/1119 [00:00<?, ? examples/s]Tokenizing arc:  25%|██▌       | 285/1119 [00:00<00:00, 2821.60 examples/s]Tokenizing arc:  52%|█████▏    | 582/1119 [00:00<00:00, 2901.51 examples/s]Tokenizing arc:  78%|███████▊  | 873/1119 [00:00<00:00, 2903.04 examples/s]Tokenizing arc: 100%|██████████| 1119/1119 [00:00<00:00, 2643.37 examples/s]
+2026-09-20 03:45:37,053 [INFO] ✅ arc train: 1119 samples
+2026-09-20 03:45:37,054 [INFO] [4/4] 학습 시작
+The model is already on multiple devices. Skipping the move to device specified in `args`.
+  0%|          | 0/210 [00:00<?, ?it/s]  0%|          | 1/210 [00:01<04:10,  1.20s/it]  1%|          | 2/210 [00:01<03:15,  1.06it/s]2026-09-20 03:45:39,583 [INFO] [AsFT-full] gradient 검증 (weight 0): ‖auto‖=4.680394e-03 ‖manual‖=4.680394e-03 rel_err=2.919e-06
+  1%|▏         | 3/210 [00:02<02:59,  1.16it/s]  2%|▏         | 4/210 [00:03<02:53,  1.19it/s]  2%|▏         | 5/210 [00:04<02:47,  1.22it/s]  3%|▎         | 6/210 [00:05<02:44,  1.24it/s]  3%|▎         | 7/210 [00:05<02:42,  1.25it/s]  4%|▍         | 8/210 [00:06<02:54,  1.16it/s]  4%|▍         | 9/210 [00:07<02:47,  1.20it/s]  5%|▍         | 10/210 [00:08<02:43,  1.22it/s]  5%|▌         | 11/210 [00:09<02:41,  1.24it/s]  6%|▌         | 12/210 [00:10<02:38,  1.25it/s]  6%|▌         | 13/210 [00:10<02:35,  1.27it/s]  7%|▋         | 14/210 [00:11<02:34,  1.27it/s]  7%|▋         | 15/210 [00:12<02:44,  1.19it/s]  8%|▊         | 16/210 [00:13<02:39,  1.22it/s]  8%|▊         | 17/210 [00:14<02:34,  1.25it/s]  9%|▊         | 18/210 [00:14<02:32,  1.26it/s]  9%|▉         | 19/210 [00:15<02:30,  1.27it/s] 10%|▉         | 20/210 [00:16<02:28,  1.28it/s]2026-09-20 03:45:53,682 [INFO] [train] {'loss': 0.546, 'grad_norm': 7.4375, 'learning_rate': 4.523809523809524e-05, 'asft_reg': 1.062952}
+                                                 10%|▉         | 20/210 [00:16<02:28,  1.28it/s] 10%|█         | 21/210 [00:17<02:28,  1.27it/s] 10%|█         | 22/210 [00:17<02:28,  1.27it/s] 11%|█         | 23/210 [00:18<02:38,  1.18it/s] 11%|█▏        | 24/210 [00:19<02:33,  1.21it/s] 12%|█▏        | 25/210 [00:20<02:31,  1.22it/s] 12%|█▏        | 26/210 [00:21<02:28,  1.24it/s] 13%|█▎        | 27/210 [00:22<02:25,  1.26it/s] 13%|█▎        | 28/210 [00:22<02:22,  1.27it/s] 14%|█▍        | 29/210 [00:23<02:20,  1.29it/s] 14%|█▍        | 30/210 [00:24<02:30,  1.19it/s] 15%|█▍        | 31/210 [00:25<02:26,  1.22it/s] 15%|█▌        | 32/210 [00:26<02:22,  1.25it/s] 16%|█▌        | 33/210 [00:26<02:20,  1.26it/s] 16%|█▌        | 34/210 [00:27<02:17,  1.28it/s] 17%|█▋        | 35/210 [00:28<02:15,  1.29it/s] 17%|█▋        | 36/210 [00:29<02:14,  1.30it/s] 18%|█▊        | 37/210 [00:29<02:13,  1.30it/s] 18%|█▊        | 38/210 [00:30<02:22,  1.20it/s] 19%|█▊        | 39/210 [00:31<02:18,  1.24it/s] 19%|█▉        | 40/210 [00:32<02:15,  1.26it/s]{'loss': 0.546, 'grad_norm': 7.4375, 'learning_rate': 4.523809523809524e-05, 'asft_reg': 1.062952, 'epoch': 0.29}
+2026-09-20 03:46:09,723 [INFO] [train] {'loss': 0.1833, 'grad_norm': 10.8125, 'learning_rate': 4.888932014465352e-05, 'asft_reg': 0.911064}
+                                                 19%|█▉        | 40/210 [00:32<02:15,  1.26it/s] 20%|█▉        | 41/210 [00:33<02:13,  1.26it/s] 20%|██        | 42/210 [00:33<02:12,  1.27it/s] 20%|██        | 43/210 [00:34<02:10,  1.28it/s] 21%|██        | 44/210 [00:35<02:08,  1.29it/s] 21%|██▏       | 45/210 [00:36<02:17,  1.20it/s] 22%|██▏       | 46/210 [00:37<02:12,  1.23it/s] 22%|██▏       | 47/210 [00:38<02:10,  1.25it/s] 23%|██▎       | 48/210 [00:38<02:07,  1.27it/s] 23%|██▎       | 49/210 [00:39<02:06,  1.28it/s] 24%|██▍       | 50/210 [00:40<02:05,  1.28it/s] 24%|██▍       | 51/210 [00:41<02:03,  1.29it/s] 25%|██▍       | 52/210 [00:42<02:10,  1.21it/s] 25%|██▌       | 53/210 [00:42<02:06,  1.24it/s] 26%|██▌       | 54/210 [00:43<02:04,  1.26it/s] 26%|██▌       | 55/210 [00:44<02:01,  1.28it/s] 27%|██▋       | 56/210 [00:45<01:59,  1.28it/s] 27%|██▋       | 57/210 [00:45<01:58,  1.30it/s] 28%|██▊       | 58/210 [00:46<01:57,  1.29it/s] 28%|██▊       | 59/210 [00:47<01:56,  1.29it/s] 29%|██▊       | 60/210 [00:48<02:05,  1.20it/s]{'loss': 0.1833, 'grad_norm': 10.8125, 'learning_rate': 4.888932014465352e-05, 'asft_reg': 0.911064, 'epoch': 0.57}
+2026-09-20 03:46:25,668 [INFO] [train] {'loss': 0.1527, 'grad_norm': 8.8125, 'learning_rate': 4.5176461813806904e-05, 'asft_reg': 0.735721}
+                                                 29%|██▊       | 60/210 [00:48<02:05,  1.20it/s] 29%|██▉       | 61/210 [00:49<02:01,  1.22it/s] 30%|██▉       | 62/210 [00:49<01:59,  1.24it/s] 30%|███       | 63/210 [00:50<01:57,  1.26it/s] 30%|███       | 64/210 [00:51<01:55,  1.27it/s] 31%|███       | 65/210 [00:52<01:54,  1.26it/s] 31%|███▏      | 66/210 [00:53<01:52,  1.28it/s] 32%|███▏      | 67/210 [00:54<02:00,  1.19it/s] 32%|███▏      | 68/210 [00:54<01:56,  1.22it/s] 33%|███▎      | 69/210 [00:55<01:53,  1.24it/s] 33%|███▎      | 70/210 [00:56<01:51,  1.26it/s] 34%|███▍      | 71/210 [00:57<01:49,  1.27it/s] 34%|███▍      | 72/210 [00:57<01:47,  1.28it/s] 35%|███▍      | 73/210 [00:58<01:46,  1.29it/s] 35%|███▌      | 74/210 [00:59<01:52,  1.21it/s] 36%|███▌      | 75/210 [01:00<01:49,  1.23it/s] 36%|███▌      | 76/210 [01:01<01:47,  1.25it/s] 37%|███▋      | 77/210 [01:01<01:44,  1.27it/s] 37%|███▋      | 78/210 [01:02<01:42,  1.29it/s] 38%|███▊      | 79/210 [01:03<01:41,  1.29it/s] 38%|███▊      | 80/210 [01:04<01:39,  1.30it/s]{'loss': 0.1527, 'grad_norm': 8.8125, 'learning_rate': 4.5176461813806904e-05, 'asft_reg': 0.735721, 'epoch': 0.86}
+2026-09-20 03:46:41,452 [INFO] [train] {'loss': 0.1442, 'grad_norm': 7.71875, 'learning_rate': 3.925418674667405e-05, 'asft_reg': 0.487617}
+                                                 38%|███▊      | 80/210 [01:04<01:39,  1.30it/s] 39%|███▊      | 81/210 [01:04<01:38,  1.31it/s] 39%|███▉      | 82/210 [01:05<01:44,  1.22it/s] 40%|███▉      | 83/210 [01:06<01:41,  1.25it/s] 40%|████      | 84/210 [01:07<01:39,  1.26it/s] 40%|████      | 85/210 [01:08<01:37,  1.28it/s] 41%|████      | 86/210 [01:08<01:35,  1.29it/s] 41%|████▏     | 87/210 [01:09<01:34,  1.30it/s] 42%|████▏     | 88/210 [01:10<01:33,  1.30it/s] 42%|████▏     | 89/210 [01:11<01:39,  1.22it/s] 43%|████▎     | 90/210 [01:12<01:36,  1.24it/s] 43%|████▎     | 91/210 [01:12<01:34,  1.26it/s] 44%|████▍     | 92/210 [01:13<01:32,  1.28it/s] 44%|████▍     | 93/210 [01:14<01:31,  1.28it/s] 45%|████▍     | 94/210 [01:15<01:31,  1.27it/s] 45%|████▌     | 95/210 [01:15<01:29,  1.28it/s] 46%|████▌     | 96/210 [01:16<01:28,  1.29it/s] 46%|████▌     | 97/210 [01:17<01:33,  1.21it/s] 47%|████▋     | 98/210 [01:18<01:30,  1.24it/s] 47%|████▋     | 99/210 [01:19<01:29,  1.25it/s] 48%|████▊     | 100/210 [01:20<01:27,  1.26it/s]{'loss': 0.1442, 'grad_norm': 7.71875, 'learning_rate': 3.925418674667405e-05, 'asft_reg': 0.487617, 'epoch': 1.14}
+2026-09-20 03:46:57,331 [INFO] [train] {'loss': 0.1363, 'grad_norm': 5.40625, 'learning_rate': 3.177101170357513e-05, 'asft_reg': 0.424083}
+                                                  48%|████▊     | 100/210 [01:20<01:27,  1.26it/s] 48%|████▊     | 101/210 [01:20<01:25,  1.28it/s] 49%|████▊     | 102/210 [01:21<01:23,  1.29it/s] 49%|████▉     | 103/210 [01:22<01:22,  1.30it/s] 50%|████▉     | 104/210 [01:23<01:27,  1.22it/s] 50%|█████     | 105/210 [01:23<01:24,  1.25it/s] 50%|█████     | 106/210 [01:24<01:22,  1.26it/s] 51%|█████     | 107/210 [01:25<01:20,  1.28it/s] 51%|█████▏    | 108/210 [01:26<01:18,  1.30it/s] 52%|█████▏    | 109/210 [01:27<01:17,  1.31it/s] 52%|█████▏    | 110/210 [01:27<01:16,  1.31it/s] 53%|█████▎    | 111/210 [01:28<01:20,  1.23it/s] 53%|█████▎    | 112/210 [01:29<01:18,  1.25it/s] 54%|█████▍    | 113/210 [01:30<01:16,  1.27it/s] 54%|█████▍    | 114/210 [01:30<01:14,  1.29it/s] 55%|█████▍    | 115/210 [01:31<01:13,  1.30it/s] 55%|█████▌    | 116/210 [01:32<01:11,  1.31it/s] 56%|█████▌    | 117/210 [01:33<01:10,  1.31it/s] 56%|█████▌    | 118/210 [01:34<01:15,  1.22it/s] 57%|█████▋    | 119/210 [01:34<01:12,  1.26it/s] 57%|█████▋    | 120/210 [01:35<01:10,  1.28it/s]{'loss': 0.1363, 'grad_norm': 5.40625, 'learning_rate': 3.177101170357513e-05, 'asft_reg': 0.424083, 'epoch': 1.43}
+2026-09-20 03:47:13,005 [INFO] [train] {'loss': 0.1187, 'grad_norm': 13.375, 'learning_rate': 2.3546379277238107e-05, 'asft_reg': 0.293693}
+                                                  57%|█████▋    | 120/210 [01:35<01:10,  1.28it/s] 58%|█████▊    | 121/210 [01:36<01:08,  1.29it/s] 58%|█████▊    | 122/210 [01:37<01:07,  1.31it/s] 59%|█████▊    | 123/210 [01:37<01:06,  1.31it/s] 59%|█████▉    | 124/210 [01:38<01:05,  1.32it/s] 60%|█████▉    | 125/210 [01:39<01:04,  1.32it/s] 60%|██████    | 126/210 [01:40<01:08,  1.23it/s] 60%|██████    | 127/210 [01:41<01:06,  1.25it/s] 61%|██████    | 128/210 [01:41<01:04,  1.27it/s] 61%|██████▏   | 129/210 [01:42<01:02,  1.29it/s] 62%|██████▏   | 130/210 [01:43<01:01,  1.30it/s] 62%|██████▏   | 131/210 [01:44<01:00,  1.31it/s] 63%|██████▎   | 132/210 [01:44<00:59,  1.32it/s] 63%|██████▎   | 133/210 [01:45<01:02,  1.24it/s] 64%|██████▍   | 134/210 [01:46<01:00,  1.26it/s] 64%|██████▍   | 135/210 [01:47<00:58,  1.29it/s] 65%|██████▍   | 136/210 [01:48<00:56,  1.30it/s] 65%|██████▌   | 137/210 [01:48<00:55,  1.31it/s] 66%|██████▌   | 138/210 [01:49<00:54,  1.32it/s] 66%|██████▌   | 139/210 [01:50<00:53,  1.33it/s] 67%|██████▋   | 140/210 [01:51<00:52,  1.32it/s]{'loss': 0.1187, 'grad_norm': 13.375, 'learning_rate': 2.3546379277238107e-05, 'asft_reg': 0.293693, 'epoch': 1.71}
+2026-09-20 03:47:28,407 [INFO] [train] {'loss': 0.1279, 'grad_norm': 6.125, 'learning_rate': 1.5480925104388762e-05, 'asft_reg': 0.222478}
+                                                  67%|██████▋   | 140/210 [01:51<00:52,  1.32it/s] 67%|██████▋   | 141/210 [01:52<00:55,  1.23it/s] 68%|██████▊   | 142/210 [01:52<00:53,  1.26it/s] 68%|██████▊   | 143/210 [01:53<00:52,  1.28it/s] 69%|██████▊   | 144/210 [01:54<00:51,  1.29it/s] 69%|██████▉   | 145/210 [01:55<00:50,  1.30it/s] 70%|██████▉   | 146/210 [01:55<00:49,  1.30it/s] 70%|███████   | 147/210 [01:56<00:48,  1.30it/s] 70%|███████   | 148/210 [01:57<00:51,  1.21it/s] 71%|███████   | 149/210 [01:58<00:49,  1.24it/s] 71%|███████▏  | 150/210 [01:59<00:47,  1.26it/s] 72%|███████▏  | 151/210 [01:59<00:46,  1.28it/s] 72%|███████▏  | 152/210 [02:00<00:44,  1.29it/s] 73%|███████▎  | 153/210 [02:01<00:43,  1.30it/s] 73%|███████▎  | 154/210 [02:02<00:42,  1.31it/s] 74%|███████▍  | 155/210 [02:02<00:41,  1.31it/s] 74%|███████▍  | 156/210 [02:03<00:44,  1.23it/s] 75%|███████▍  | 157/210 [02:04<00:42,  1.26it/s] 75%|███████▌  | 158/210 [02:05<00:40,  1.27it/s] 76%|███████▌  | 159/210 [02:06<00:39,  1.29it/s] 76%|███████▌  | 160/210 [02:06<00:38,  1.29it/s]{'loss': 0.1279, 'grad_norm': 6.125, 'learning_rate': 1.5480925104388762e-05, 'asft_reg': 0.222478, 'epoch': 2.0}
+2026-09-20 03:47:44,146 [INFO] [train] {'loss': 0.0886, 'grad_norm': 7.1875, 'learning_rate': 8.45785406007852e-06, 'asft_reg': 0.183145}
+                                                  76%|███████▌  | 160/210 [02:06<00:38,  1.29it/s] 77%|███████▋  | 161/210 [02:07<00:37,  1.30it/s] 77%|███████▋  | 162/210 [02:08<00:36,  1.30it/s] 78%|███████▊  | 163/210 [02:09<00:38,  1.22it/s] 78%|███████▊  | 164/210 [02:10<00:36,  1.25it/s] 79%|███████▊  | 165/210 [02:10<00:35,  1.27it/s] 79%|███████▉  | 166/210 [02:11<00:34,  1.28it/s] 80%|███████▉  | 167/210 [02:12<00:33,  1.29it/s] 80%|████████  | 168/210 [02:13<00:32,  1.30it/s] 80%|████████  | 169/210 [02:13<00:31,  1.30it/s] 81%|████████  | 170/210 [02:14<00:30,  1.31it/s] 81%|████████▏ | 171/210 [02:15<00:31,  1.22it/s] 82%|████████▏ | 172/210 [02:16<00:30,  1.25it/s] 82%|████████▏ | 173/210 [02:17<00:28,  1.28it/s] 83%|████████▎ | 174/210 [02:17<00:28,  1.28it/s] 83%|████████▎ | 175/210 [02:18<00:27,  1.30it/s] 84%|████████▍ | 176/210 [02:19<00:26,  1.30it/s] 84%|████████▍ | 177/210 [02:20<00:27,  1.22it/s] 85%|████████▍ | 178/210 [02:21<00:25,  1.24it/s] 85%|████████▌ | 179/210 [02:21<00:24,  1.27it/s] 86%|████████▌ | 180/210 [02:22<00:23,  1.29it/s]{'loss': 0.0886, 'grad_norm': 7.1875, 'learning_rate': 8.45785406007852e-06, 'asft_reg': 0.183145, 'epoch': 2.29}
+2026-09-20 03:47:59,862 [INFO] [train] {'loss': 0.0821, 'grad_norm': 11.0, 'learning_rate': 3.2462252017684797e-06, 'asft_reg': 0.172426}
+                                                  86%|████████▌ | 180/210 [02:22<00:23,  1.29it/s] 86%|████████▌ | 181/210 [02:23<00:22,  1.31it/s] 87%|████████▋ | 182/210 [02:24<00:21,  1.31it/s] 87%|████████▋ | 183/210 [02:24<00:20,  1.32it/s] 88%|████████▊ | 184/210 [02:25<00:19,  1.33it/s] 88%|████████▊ | 185/210 [02:26<00:20,  1.23it/s] 89%|████████▊ | 186/210 [02:27<00:19,  1.25it/s] 89%|████████▉ | 187/210 [02:28<00:18,  1.27it/s] 90%|████████▉ | 188/210 [02:28<00:17,  1.28it/s] 90%|█████████ | 189/210 [02:29<00:16,  1.28it/s] 90%|█████████ | 190/210 [02:30<00:15,  1.29it/s] 91%|█████████ | 191/210 [02:31<00:14,  1.30it/s] 91%|█████████▏| 192/210 [02:32<00:14,  1.22it/s] 92%|█████████▏| 193/210 [02:32<00:13,  1.24it/s] 92%|█████████▏| 194/210 [02:33<00:12,  1.26it/s] 93%|█████████▎| 195/210 [02:34<00:11,  1.28it/s] 93%|█████████▎| 196/210 [02:35<00:10,  1.29it/s] 94%|█████████▍| 197/210 [02:35<00:10,  1.30it/s] 94%|█████████▍| 198/210 [02:36<00:09,  1.30it/s] 95%|█████████▍| 199/210 [02:37<00:08,  1.30it/s] 95%|█████████▌| 200/210 [02:38<00:08,  1.22it/s]{'loss': 0.0821, 'grad_norm': 11.0, 'learning_rate': 3.2462252017684797e-06, 'asft_reg': 0.172426, 'epoch': 2.57}
+2026-09-20 03:48:15,606 [INFO] [train] {'loss': 0.0824, 'grad_norm': 9.3125, 'learning_rate': 4.16736213181515e-07, 'asft_reg': 0.1714}
+                                                  95%|█████████▌| 200/210 [02:38<00:08,  1.22it/s] 96%|█████████▌| 201/210 [02:39<00:07,  1.25it/s] 96%|█████████▌| 202/210 [02:39<00:06,  1.27it/s] 97%|█████████▋| 203/210 [02:40<00:05,  1.29it/s] 97%|█████████▋| 204/210 [02:41<00:04,  1.29it/s] 98%|█████████▊| 205/210 [02:42<00:03,  1.30it/s] 98%|█████████▊| 206/210 [02:42<00:03,  1.30it/s] 99%|█████████▊| 207/210 [02:43<00:02,  1.22it/s] 99%|█████████▉| 208/210 [02:44<00:01,  1.25it/s]100%|█████████▉| 209/210 [02:45<00:00,  1.26it/s]100%|██████████| 210/210 [02:46<00:00,  1.27it/s]{'loss': 0.0824, 'grad_norm': 9.3125, 'learning_rate': 4.16736213181515e-07, 'asft_reg': 0.1714, 'epoch': 2.86}
+2026-09-20 03:48:23,416 [INFO] [train] {'train_runtime': 166.1374, 'train_samples_per_second': 20.206, 'train_steps_per_second': 1.264, 'total_flos': 2.322698001894605e+16, 'train_loss': 0.1613580794561477}
+                                                 100%|██████████| 210/210 [02:46<00:00,  1.27it/s]100%|██████████| 210/210 [02:46<00:00,  1.26it/s]
+{'train_runtime': 166.1374, 'train_samples_per_second': 20.206, 'train_steps_per_second': 1.264, 'train_loss': 0.1613580794561477, 'epoch': 3.0}
+2026-09-20 03:48:23,627 [INFO] 최종 벌점 값: 1.713889e-01
+2026-09-20 03:48:23,915 [INFO] 모델 저장
+2026-09-20 03:48:38,868 [INFO] ✅ Saved to /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly/llama2_7b/arc/asft/model
+2026-09-20 03:48:38,868 [INFO] ✅ AsFT (full-param) 완료
+[upload] cell   : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly/llama2_7b/arc/asft
+[upload] repo   : kmseong/llama2_7b-chat-CB_SSFT-asft_arc_lambda1.0_fullft_lr5e-5_tgtonly
+[upload] model  : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly/llama2_7b/arc/asft/model
+[upload] files  : 13개 / 12.56 GiB (가중치 4개)
+[upload] chat_template 기대: 있어야 함
+[upload] hf user: kmseong
+[upload] 업로드 중 ...
+Processing Files (0 / 0)      : |          |  0.00B /  0.00B            
+New Data Upload               : |          |  0.00B /  0.00B            [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[AProcessing Files (1 / 5)      :   0%|          |  500kB / 13.5GB,   ???B/s  
+
+
+  ...0001-of-00003.safetensors:   5%|▌         |  259MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:   7%|▋         |  262MB / 3.59GB            [A[A[A[A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:   5%|▌         |  259MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:   7%|▋         |  262MB / 3.59GB            [A[A[A[AProcessing Files (1 / 5)      :   4%|▍         |  522MB / 13.5GB,   ???B/s  
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:   5%|▌         |  259MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:   7%|▋         |  263MB / 3.59GB            [A[A[A[AProcessing Files (1 / 5)      :   4%|▍         |  522MB / 13.5GB, 48.1MB/s  
+New Data Upload               :   0%|          |  610kB /  201MB, 59.2kB/s  [A
+
+
+
+
+  ...0002-of-00003.safetensors:   0%|          |  610kB / 4.95GB            [A[A[A[A[A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:   5%|▌         |  259MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:   7%|▋         |  263MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:   0%|          |  610kB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :   4%|▍         |  523MB / 13.5GB, 47.0MB/s  
+New Data Upload               :   1%|          | 1.22MB /  201MB,  117kB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:   5%|▌         |  259MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:   7%|▋         |  263MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:   0%|          |  610kB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :   4%|▍         |  524MB / 13.5GB, 46.0MB/s  
+New Data Upload               :   1%|          | 1.83MB /  335MB,  172kB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:   5%|▌         |  259MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:   7%|▋         |  265MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:   0%|          | 2.44MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :   4%|▍         |  527MB / 13.5GB, 45.2MB/s  
+New Data Upload               :   2%|▏         | 5.49MB /  335MB,  516kB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:   5%|▌         |  259MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:   7%|▋         |  267MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:   0%|          | 4.27MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :   4%|▍         |  531MB / 13.5GB, 44.5MB/s  
+New Data Upload               :   3%|▎         | 9.15MB /  335MB,  850kB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:   5%|▌         |  259MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:   8%|▊         |  271MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:   0%|          | 6.10MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :   4%|▍         |  536MB / 13.5GB, 44.0MB/s  
+New Data Upload               :   4%|▍         | 14.6MB /  335MB, 1.34MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:   5%|▌         |  259MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:   8%|▊         |  276MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:   0%|          | 11.0MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :   4%|▍         |  547MB / 13.5GB, 43.9MB/s  
+New Data Upload               :   7%|▋         | 25.0MB /  335MB, 2.28MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:   5%|▌         |  259MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:   8%|▊         |  282MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:   0%|          | 15.3MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :   4%|▍         |  556MB / 13.5GB, 43.8MB/s  
+New Data Upload               :  10%|█         | 34.8MB /  335MB, 3.13MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:   5%|▌         |  259MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:   8%|▊         |  285MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:   0%|          | 22.0MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :   4%|▍         |  567MB / 13.5GB, 43.7MB/s  
+New Data Upload               :  13%|█▎        | 45.2MB /  335MB, 4.02MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:   5%|▌         |  259MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:   8%|▊         |  293MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:   1%|          | 25.6MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :   4%|▍         |  578MB / 13.5GB, 43.7MB/s  
+New Data Upload               :  17%|█▋        | 56.1MB /  335MB, 4.93MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:   5%|▌         |  259MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:   8%|▊         |  296MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:   1%|          | 33.0MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :   4%|▍         |  589MB / 13.5GB, 43.7MB/s  
+New Data Upload               :  20%|██        | 67.1MB /  335MB, 5.82MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:   5%|▌         |  259MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:   8%|▊         |  302MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:   1%|          | 36.6MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :   4%|▍         |  598MB / 13.5GB, 43.6MB/s  
+New Data Upload               :  23%|██▎       | 76.3MB /  335MB, 6.52MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:   5%|▌         |  259MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:   9%|▊         |  307MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:   1%|          | 43.3MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :   5%|▍         |  610MB / 13.5GB, 43.7MB/s  
+New Data Upload               :  26%|██▋       | 88.5MB /  335MB, 7.47MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:   5%|▌         |  259MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:   9%|▊         |  311MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:   1%|          | 47.0MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :   5%|▍         |  617MB / 13.5GB, 43.4MB/s  
+New Data Upload               :  29%|██▊       | 95.8MB /  335MB, 7.96MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:   5%|▌         |  259MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:   9%|▉         |  318MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:   1%|          | 50.7MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :   5%|▍         |  628MB / 13.5GB, 43.3MB/s  
+New Data Upload               :  32%|███▏      |  106MB /  335MB, 8.70MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:   5%|▌         |  259MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:   9%|▉         |  321MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:   1%|          | 58.0MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :   5%|▍         |  639MB / 13.5GB, 43.4MB/s  
+New Data Upload               :  35%|███▍      |  117MB /  335MB, 9.48MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:   5%|▌         |  259MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:   9%|▉         |  327MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:   1%|          | 61.7MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :   5%|▍         |  649MB / 13.5GB, 43.3MB/s  
+New Data Upload               :  38%|███▊      |  127MB /  335MB, 10.1MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:   5%|▌         |  259MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:   9%|▉         |  329MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:   1%|▏         | 67.0MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :   5%|▍         |  656MB / 13.5GB, 42.9MB/s  
+New Data Upload               :  40%|███▉      |  134MB /  335MB, 10.5MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:   6%|▌         |  295MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:   9%|▉         |  333MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:   1%|▏         | 67.0MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :   5%|▌         |  696MB / 13.5GB, 43.7MB/s  
+New Data Upload               :  43%|████▎     |  143MB /  335MB, 10.6MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:   7%|▋         |  355MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:   9%|▉         |  335MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:   1%|▏         | 67.6MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :   6%|▌         |  759MB / 13.5GB, 48.1MB/s  
+New Data Upload               :  37%|███▋      |  147MB /  402MB, 10.8MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:   7%|▋         |  364MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  12%|█▏        |  428MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:   1%|▏         | 67.6MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :   6%|▋         |  860MB / 13.5GB, 55.8MB/s  
+New Data Upload               :  35%|███▍      |  163MB /  469MB, 11.9MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:   7%|▋         |  368MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  12%|█▏        |  436MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:   1%|▏         | 68.2MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :   6%|▋         |  873MB / 13.5GB, 55.7MB/s  
+New Data Upload               :  32%|███▏      |  171MB /  536MB, 12.3MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:   8%|▊         |  371MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  12%|█▏        |  441MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:   1%|▏         | 70.1MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :   7%|▋         |  882MB / 13.5GB, 55.3MB/s  
+New Data Upload               :  34%|███▎      |  181MB /  536MB, 12.9MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:   8%|▊         |  379MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  12%|█▏        |  448MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:   1%|▏         | 73.1MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :   7%|▋         |  900MB / 13.5GB, 55.7MB/s  
+New Data Upload               :  33%|███▎      |  198MB /  603MB, 14.1MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:   8%|▊         |  382MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  13%|█▎        |  452MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:   2%|▏         | 76.8MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :   7%|▋         |  911MB / 13.5GB, 55.4MB/s  
+New Data Upload               :  35%|███▍      |  209MB /  603MB, 14.7MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:   8%|▊         |  390MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  13%|█▎        |  459MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:   2%|▏         | 87.1MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :   7%|▋         |  937MB / 13.5GB, 56.4MB/s  
+New Data Upload               :  35%|███▌      |  235MB /  671MB, 16.6MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:   8%|▊         |  394MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  13%|█▎        |  463MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:   2%|▏         | 92.6MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :   7%|▋         |  950MB / 13.5GB, 56.3MB/s  
+New Data Upload               :  37%|███▋      |  248MB /  671MB, 17.3MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:   8%|▊         |  404MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  13%|█▎        |  467MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:   2%|▏         |  103MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :   7%|▋         |  974MB / 13.5GB, 57.2MB/s  
+New Data Upload               :  37%|███▋      |  272MB /  738MB, 19.0MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:   8%|▊         |  409MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  13%|█▎        |  474MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:   2%|▏         |  112MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :   7%|▋         |  996MB / 13.5GB, 57.8MB/s  
+New Data Upload               :  40%|███▉      |  294MB /  738MB, 20.4MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:   8%|▊         |  420MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  13%|█▎        |  478MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:   3%|▎         |  165MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :   8%|▊         | 1.06GB / 13.5GB, 62.2MB/s  
+New Data Upload               :  43%|████▎     |  320MB /  738MB, 22.2MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:   9%|▊         |  427MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  14%|█▎        |  488MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:   5%|▍         |  225MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :   8%|▊         | 1.14GB / 13.5GB, 67.2MB/s  
+New Data Upload               :  43%|████▎     |  348MB /  805MB, 24.0MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:   9%|▉         |  432MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  14%|█▎        |  492MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:   5%|▍         |  232MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :   9%|▊         | 1.16GB / 13.5GB, 67.2MB/s  
+New Data Upload               :  45%|████▌     |  365MB /  805MB, 24.9MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  10%|▉         |  472MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  14%|█▎        |  494MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:   5%|▌         |  247MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :   9%|▉         | 1.21GB / 13.5GB, 70.5MB/s  
+New Data Upload               :  48%|████▊     |  389MB /  805MB, 26.3MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  10%|▉         |  477MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  14%|█▍        |  497MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:   5%|▌         |  256MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :   9%|▉         | 1.23GB / 13.5GB, 70.4MB/s  
+New Data Upload               :  50%|█████     |  404MB /  805MB, 27.1MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  10%|▉         |  484MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  15%|█▌        |  542MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:   6%|▌         |  275MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  10%|▉         | 1.30GB / 13.5GB, 74.8MB/s  
+New Data Upload               :  51%|█████     |  442MB /  872MB, 29.6MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  10%|▉         |  488MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  15%|█▌        |  551MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:   6%|▋         |  321MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  10%|█         | 1.36GB / 13.5GB, 78.1MB/s  
+New Data Upload               :  50%|████▉     |  469MB /  939MB, 31.1MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  10%|█         |  501MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  16%|█▌        |  559MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:   7%|▋         |  342MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  10%|█         | 1.40GB / 13.5GB, 79.8MB/s  
+New Data Upload               :  54%|█████▍    |  509MB /  939MB, 33.8MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  10%|█         |  504MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  16%|█▌        |  575MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:   7%|▋         |  355MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  11%|█         | 1.43GB / 13.5GB, 80.8MB/s  
+New Data Upload               :  50%|█████     |  542MB / 1.07GB, 35.7MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  10%|█         |  517MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  16%|█▌        |  582MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:   7%|▋         |  366MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  11%|█         | 1.47GB / 13.5GB, 81.7MB/s  
+New Data Upload               :  53%|█████▎    |  573MB / 1.07GB, 37.5MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  11%|█         |  524MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  18%|█▊        |  659MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:   8%|▊         |  381MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  12%|█▏        | 1.56GB / 13.5GB, 88.0MB/s  
+New Data Upload               :  54%|█████▍    |  615MB / 1.14GB, 40.2MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  11%|█         |  531MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  20%|█▉        |  704MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:   8%|▊         |  391MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  12%|█▏        | 1.63GB / 13.5GB, 91.3MB/s  
+New Data Upload               :  51%|█████     |  645MB / 1.27GB, 41.7MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  11%|█         |  543MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  20%|██        |  733MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:   8%|▊         |  404MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  12%|█▏        | 1.68GB / 13.5GB, 93.7MB/s  
+New Data Upload               :  55%|█████▍    |  698MB / 1.27GB, 45.1MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  11%|█         |  548MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  21%|██        |  754MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:   8%|▊         |  417MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  13%|█▎        | 1.72GB / 13.5GB, 95.0MB/s  
+New Data Upload               :  55%|█████▍    |  737MB / 1.34GB, 47.4MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  11%|█▏        |  557MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  22%|██▏       |  781MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:   9%|▊         |  431MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  13%|█▎        | 1.77GB / 13.5GB, 97.0MB/s  
+New Data Upload               :  56%|█████▌    |  786MB / 1.41GB, 50.3MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  13%|█▎        |  655MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  23%|██▎       |  841MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:   9%|▉         |  451MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  14%|█▍        | 1.95GB / 13.5GB,  109MB/s  
+New Data Upload               :  57%|█████▋    |  842MB / 1.48GB, 53.7MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  13%|█▎        |  665MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  24%|██▍       |  864MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  11%|█         |  556MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  15%|█▌        | 2.09GB / 13.5GB,  118MB/s  
+New Data Upload               :  58%|█████▊    |  891MB / 1.54GB, 56.5MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  14%|█▎        |  678MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  25%|██▍       |  895MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  12%|█▏        |  578MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  16%|█▌        | 2.15GB / 13.5GB,  121MB/s  
+New Data Upload               :  62%|██████▏   |  955MB / 1.54GB, 60.5MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  14%|█▍        |  691MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  25%|██▌       |  913MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  12%|█▏        |  593MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  16%|█▋        | 2.20GB / 13.5GB,  122MB/s  
+New Data Upload               :  60%|█████▉    | 1.00GB / 1.68GB, 62.9MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  14%|█▍        |  708MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  26%|██▌       |  940MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  12%|█▏        |  609MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  17%|█▋        | 2.26GB / 13.5GB,  124MB/s  
+New Data Upload               :  61%|██████    | 1.06GB / 1.74GB, 66.4MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  15%|█▍        |  726MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  27%|██▋       |  955MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  13%|█▎        |  624MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  17%|█▋        | 2.30GB / 13.5GB,  126MB/s  
+New Data Upload               :  61%|██████    | 1.11GB / 1.81GB, 68.8MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  16%|█▌        |  780MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  27%|██▋       |  985MB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  13%|█▎        |  636MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  18%|█▊        | 2.40GB / 13.5GB,  131MB/s  
+New Data Upload               :  65%|██████▍   | 1.17GB / 1.81GB, 72.4MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  16%|█▌        |  800MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  28%|██▊       | 1.01GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  14%|█▍        |  693MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  19%|█▊        | 2.50GB / 13.5GB,  136MB/s  
+New Data Upload               :  64%|██████▎   | 1.24GB / 1.94GB, 76.0MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  17%|█▋        |  820MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  29%|██▉       | 1.03GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  14%|█▍        |  710MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  19%|█▉        | 2.56GB / 13.5GB,  138MB/s  
+New Data Upload               :  65%|██████▍   | 1.30GB / 2.01GB, 79.5MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  17%|█▋        |  838MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  32%|███▏      | 1.15GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  15%|█▍        |  737MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  20%|██        | 2.72GB / 13.5GB,  148MB/s  
+New Data Upload               :  64%|██████▍   | 1.37GB / 2.15GB, 83.2MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  17%|█▋        |  854MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  32%|███▏      | 1.15GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  15%|█▌        |  761MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  21%|██        | 2.77GB / 13.5GB,  148MB/s  
+New Data Upload               :  64%|██████▍   | 1.42GB / 2.21GB, 85.3MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  18%|█▊        |  881MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  33%|███▎      | 1.17GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  18%|█▊        |  882MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  22%|██▏       | 2.94GB / 13.5GB,  159MB/s  
+New Data Upload               :  67%|██████▋   | 1.49GB / 2.21GB, 89.6MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  20%|██        |  991MB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  34%|███▍      | 1.22GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  18%|█▊        |  900MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  23%|██▎       | 3.12GB / 13.5GB,  169MB/s  
+New Data Upload               :  66%|██████▌   | 1.55GB / 2.35GB, 92.2MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  21%|██        | 1.02GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  35%|███▍      | 1.25GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  19%|█▉        |  931MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  24%|██▍       | 3.20GB / 13.5GB,  173MB/s  
+New Data Upload               :  66%|██████▌   | 1.64GB / 2.48GB, 97.1MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  21%|██        | 1.03GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  35%|███▌      | 1.27GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  20%|█▉        |  968MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  24%|██▍       | 3.28GB / 13.5GB,  175MB/s  
+New Data Upload               :  65%|██████▌   | 1.71GB / 2.62GB,  101MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  22%|██▏       | 1.07GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  36%|███▌      | 1.30GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  20%|██        |  994MB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  25%|██▍       | 3.36GB / 13.5GB,  178MB/s  
+New Data Upload               :  67%|██████▋   | 1.79GB / 2.68GB,  105MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  23%|██▎       | 1.12GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  37%|███▋      | 1.33GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  21%|██        | 1.03GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  26%|██▌       | 3.48GB / 13.5GB,  184MB/s  
+New Data Upload               :  70%|███████   | 1.88GB / 2.68GB,  110MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  23%|██▎       | 1.14GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  39%|███▉      | 1.40GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  22%|██▏       | 1.10GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  27%|██▋       | 3.64GB / 13.5GB,  192MB/s  
+New Data Upload               :  71%|███████   | 1.95GB / 2.75GB,  114MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  24%|██▎       | 1.16GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  41%|████      | 1.47GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  23%|██▎       | 1.12GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  28%|██▊       | 3.76GB / 13.5GB,  198MB/s  
+New Data Upload               :  72%|███████▏  | 2.04GB / 2.82GB,  118MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  26%|██▌       | 1.27GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  42%|████▏     | 1.51GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  23%|██▎       | 1.15GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  29%|██▉       | 3.94GB / 13.5GB,  208MB/s  
+New Data Upload               :  72%|███████▏  | 2.12GB / 2.95GB,  122MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  27%|██▋       | 1.34GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  43%|████▎     | 1.54GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  24%|██▎       | 1.17GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  30%|███       | 4.06GB / 13.5GB,  213MB/s  
+New Data Upload               :  73%|███████▎  | 2.21GB / 3.02GB,  126MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  27%|██▋       | 1.35GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  44%|████▍     | 1.59GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  24%|██▍       | 1.20GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  31%|███       | 4.14GB / 13.5GB,  215MB/s  
+New Data Upload               :  73%|███████▎  | 2.29GB / 3.15GB,  130MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  28%|██▊       | 1.38GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  46%|████▌     | 1.66GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  26%|██▌       | 1.27GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  32%|███▏      | 4.31GB / 13.5GB,  224MB/s  
+New Data Upload               :  74%|███████▍  | 2.38GB / 3.22GB,  134MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  29%|██▊       | 1.41GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  47%|████▋     | 1.69GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  27%|██▋       | 1.34GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  33%|███▎      | 4.43GB / 13.5GB,  229MB/s  
+New Data Upload               :  73%|███████▎  | 2.46GB / 3.35GB,  138MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  30%|███       | 1.50GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  48%|████▊     | 1.74GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  27%|██▋       | 1.35GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  34%|███▍      | 4.59GB / 13.5GB,  236MB/s  
+New Data Upload               :  76%|███████▋  | 2.56GB / 3.35GB,  143MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  32%|███▏      | 1.57GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  52%|█████▏    | 1.86GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  28%|██▊       | 1.37GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  36%|███▌      | 4.80GB / 13.5GB,  248MB/s  
+New Data Upload               :  76%|███████▌  | 2.65GB / 3.49GB,  147MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  33%|███▎      | 1.61GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  53%|█████▎    | 1.89GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  28%|██▊       | 1.39GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  36%|███▋      | 4.89GB / 13.5GB,  250MB/s  
+New Data Upload               :  74%|███████▍  | 2.74GB / 3.69GB,  151MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  34%|███▍      | 1.68GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  54%|█████▎    | 1.92GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  29%|██▉       | 1.43GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  37%|███▋      | 5.03GB / 13.5GB,  256MB/s  
+New Data Upload               :  75%|███████▍  | 2.81GB / 3.76GB,  153MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  35%|███▍      | 1.73GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  54%|█████▍    | 1.95GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  29%|██▉       | 1.45GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  38%|███▊      | 5.13GB / 13.5GB,  259MB/s  
+New Data Upload               :  76%|███████▋  | 2.92GB / 3.82GB,  158MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  36%|███▌      | 1.77GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  55%|█████▌    | 1.99GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  32%|███▏      | 1.57GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  40%|███▉      | 5.33GB / 13.5GB,  268MB/s  
+New Data Upload               :  75%|███████▌  | 3.02GB / 4.02GB,  163MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  37%|███▋      | 1.81GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  57%|█████▋    | 2.05GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  32%|███▏      | 1.60GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  41%|████      | 5.46GB / 13.5GB,  273MB/s  
+New Data Upload               :  75%|███████▌  | 3.12GB / 4.16GB,  167MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  37%|███▋      | 1.84GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  58%|█████▊    | 2.08GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  33%|███▎      | 1.63GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  41%|████▏     | 5.56GB / 13.5GB,  276MB/s  
+New Data Upload               :  75%|███████▌  | 3.22GB / 4.29GB,  172MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  40%|███▉      | 1.96GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  62%|██████▏   | 2.21GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  34%|███▍      | 1.70GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  44%|████▎     | 5.87GB / 13.5GB,  294MB/s  
+New Data Upload               :  75%|███████▌  | 3.32GB / 4.43GB,  176MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  41%|████      | 2.01GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  62%|██████▏   | 2.24GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  35%|███▌      | 1.74GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  44%|████▍     | 5.99GB / 13.5GB,  297MB/s  
+New Data Upload               :  76%|███████▋  | 3.43GB / 4.49GB,  181MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  41%|████▏     | 2.05GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  63%|██████▎   | 2.27GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  36%|███▌      | 1.79GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  45%|████▌     | 6.10GB / 13.5GB,  300MB/s  
+New Data Upload               :  78%|███████▊  | 3.55GB / 4.56GB,  186MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  42%|████▏     | 2.09GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  64%|██████▍   | 2.30GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  37%|███▋      | 1.82GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  46%|████▌     | 6.21GB / 13.5GB,  302MB/s  
+New Data Upload               :  79%|███████▉  | 3.66GB / 4.63GB,  191MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  43%|████▎     | 2.12GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  65%|██████▍   | 2.33GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  40%|███▉      | 1.97GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  48%|████▊     | 6.42GB / 13.5GB,  312MB/s  
+New Data Upload               :  79%|███████▉  | 3.77GB / 4.76GB,  196MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  44%|████▍     | 2.18GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  67%|██████▋   | 2.39GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  41%|████      | 2.01GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  49%|████▉     | 6.59GB / 13.5GB,  319MB/s  
+New Data Upload               :  78%|███████▊  | 3.88GB / 4.96GB,  200MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  45%|████▍     | 2.21GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  67%|██████▋   | 2.42GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  42%|████▏     | 2.06GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  50%|████▉     | 6.70GB / 13.5GB,  321MB/s  
+New Data Upload               :  79%|███████▉  | 3.99GB / 5.03GB,  204MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  47%|████▋     | 2.33GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  68%|██████▊   | 2.45GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  43%|████▎     | 2.14GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  51%|█████▏    | 6.93GB / 13.5GB,  332MB/s  
+New Data Upload               :  81%|████████▏ | 4.09GB / 5.03GB,  208MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  48%|████▊     | 2.36GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  71%|███████▏  | 2.56GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  44%|████▍     | 2.19GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  53%|█████▎    | 7.11GB / 13.5GB,  339MB/s  
+New Data Upload               :  80%|████████  | 4.20GB / 5.23GB,  212MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  48%|████▊     | 2.39GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  73%|███████▎  | 2.62GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  45%|████▌     | 2.24GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  54%|█████▍    | 7.25GB / 13.5GB,  343MB/s  
+New Data Upload               :  81%|████████  | 4.32GB / 5.36GB,  217MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  49%|████▉     | 2.43GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  74%|███████▎  | 2.65GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  48%|████▊     | 2.38GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  55%|█████▌    | 7.45GB / 13.5GB,  352MB/s  
+New Data Upload               :  80%|███████▉  | 4.44GB / 5.57GB,  222MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  50%|█████     | 2.49GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  75%|███████▍  | 2.68GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  49%|████▉     | 2.43GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  56%|█████▋    | 7.60GB / 13.5GB,  356MB/s  
+New Data Upload               :  79%|███████▉  | 4.55GB / 5.77GB,  226MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  51%|█████     | 2.53GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  75%|███████▌  | 2.71GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  51%|█████     | 2.53GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  58%|█████▊    | 7.76GB / 13.5GB,  362MB/s  
+New Data Upload               :  80%|████████  | 4.68GB / 5.83GB,  232MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  52%|█████▏    | 2.56GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  78%|███████▊  | 2.78GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  52%|█████▏    | 2.58GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  59%|█████▊    | 7.92GB / 13.5GB,  366MB/s  
+New Data Upload               :  81%|████████▏ | 4.80GB / 5.90GB,  236MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  52%|█████▏    | 2.59GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  78%|███████▊  | 2.81GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  53%|█████▎    | 2.62GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  59%|█████▉    | 8.02GB / 13.5GB,  367MB/s  
+New Data Upload               :  80%|████████  | 4.90GB / 6.10GB,  239MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  55%|█████▌    | 2.72GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  79%|███████▉  | 2.85GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  56%|█████▌    | 2.76GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  62%|██████▏   | 8.32GB / 13.5GB,  383MB/s  
+New Data Upload               :  81%|████████▏ | 5.03GB / 6.17GB,  244MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  56%|█████▌    | 2.75GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  80%|████████  | 2.88GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  57%|█████▋    | 2.81GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  63%|██████▎   | 8.44GB / 13.5GB,  384MB/s  
+New Data Upload               :  82%|████████▏ | 5.14GB / 6.24GB,  248MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  57%|█████▋    | 2.82GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  84%|████████▎ | 3.00GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  58%|█████▊    | 2.86GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  64%|██████▍   | 8.68GB / 13.5GB,  395MB/s  
+New Data Upload               :  81%|████████  | 5.27GB / 6.51GB,  252MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  58%|█████▊    | 2.86GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  85%|████████▍ | 3.04GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  59%|█████▉    | 2.93GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  65%|██████▌   | 8.82GB / 13.5GB,  398MB/s  
+New Data Upload               :  82%|████████▏ | 5.39GB / 6.57GB,  257MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  61%|██████    | 3.00GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  86%|████████▌ | 3.07GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  61%|██████    | 3.00GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  67%|██████▋   | 9.07GB / 13.5GB,  408MB/s  
+New Data Upload               :  82%|████████▏ | 5.52GB / 6.77GB,  262MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  62%|██████▏   | 3.04GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  88%|████████▊ | 3.15GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  62%|██████▏   | 3.05GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  69%|██████▊   | 9.24GB / 13.5GB,  414MB/s  
+New Data Upload               :  82%|████████▏ | 5.66GB / 6.91GB,  267MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  63%|██████▎   | 3.12GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  89%|████████▊ | 3.18GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  63%|██████▎   | 3.10GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  70%|██████▉   | 9.41GB / 13.5GB,  418MB/s  
+New Data Upload               :  82%|████████▏ | 5.80GB / 7.04GB,  272MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  64%|██████▍   | 3.17GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  90%|████████▉ | 3.23GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  65%|██████▌   | 3.24GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  71%|███████▏  | 9.63GB / 13.5GB,  427MB/s  
+New Data Upload               :  84%|████████▍ | 5.93GB / 7.04GB,  277MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  65%|██████▍   | 3.21GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  91%|█████████ | 3.26GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  66%|██████▌   | 3.28GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  72%|███████▏  | 9.75GB / 13.5GB,  427MB/s  
+New Data Upload               :  85%|████████▌ | 6.05GB / 7.11GB,  280MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  66%|██████▌   | 3.26GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  92%|█████████▏| 3.29GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  67%|██████▋   | 3.31GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  73%|███████▎  | 9.86GB / 13.5GB,  428MB/s  
+New Data Upload               :  85%|████████▌ | 6.16GB / 7.24GB,  283MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  68%|██████▊   | 3.38GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  93%|█████████▎| 3.32GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  68%|██████▊   | 3.35GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  75%|███████▍  | 10.1GB / 13.5GB,  434MB/s  
+New Data Upload               :  85%|████████▍ | 6.27GB / 7.38GB,  286MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  70%|██████▉   | 3.44GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  93%|█████████▎| 3.34GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  69%|██████▉   | 3.43GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  76%|███████▌  | 10.2GB / 13.5GB,  438MB/s  
+New Data Upload               :  85%|████████▌ | 6.39GB / 7.51GB,  289MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  71%|███████   | 3.51GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  94%|█████████▍| 3.37GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  70%|███████   | 3.47GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  77%|███████▋  | 10.4GB / 13.5GB,  440MB/s  
+New Data Upload               :  85%|████████▍ | 6.50GB / 7.65GB,  292MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  74%|███████▍  | 3.67GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  94%|█████████▍| 3.39GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  73%|███████▎  | 3.61GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  79%|███████▉  | 10.7GB / 13.5GB,  454MB/s  
+New Data Upload               :  86%|████████▌ | 6.63GB / 7.71GB,  296MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  75%|███████▌  | 3.71GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  95%|█████████▍| 3.41GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  74%|███████▎  | 3.65GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  80%|███████▉  | 10.8GB / 13.5GB,  453MB/s  
+New Data Upload               :  86%|████████▌ | 6.73GB / 7.85GB,  298MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  77%|███████▋  | 3.80GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  95%|█████████▌| 3.42GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  75%|███████▍  | 3.70GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  81%|████████  | 10.9GB / 13.5GB,  457MB/s  
+New Data Upload               :  87%|████████▋ | 6.85GB / 7.91GB,  302MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  78%|███████▊  | 3.86GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  96%|█████████▌| 3.44GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  75%|███████▌  | 3.73GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  82%|████████▏ | 11.0GB / 13.5GB,  456MB/s  
+New Data Upload               :  86%|████████▌ | 6.95GB / 8.11GB,  304MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  81%|████████  | 4.00GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  96%|█████████▌| 3.45GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  77%|███████▋  | 3.80GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  84%|████████▎ | 11.3GB / 13.5GB,  464MB/s  
+New Data Upload               :  86%|████████▋ | 7.06GB / 8.18GB,  306MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  82%|████████▏ | 4.07GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  96%|█████████▌| 3.45GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  78%|███████▊  | 3.86GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  84%|████████▍ | 11.4GB / 13.5GB,  465MB/s  
+New Data Upload               :  86%|████████▋ | 7.19GB / 8.32GB,  310MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  84%|████████▍ | 4.16GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  96%|█████████▌| 3.45GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  79%|███████▊  | 3.89GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  85%|████████▌ | 11.5GB / 13.5GB,  466MB/s  
+New Data Upload               :  88%|████████▊ | 7.28GB / 8.32GB,  311MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  86%|████████▌ | 4.23GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  96%|█████████▋| 3.46GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  80%|███████▉  | 3.94GB / 4.95GB            [A[A[A[A[AProcessing Files (1 / 5)      :  86%|████████▋ | 11.6GB / 13.5GB,  466MB/s  
+New Data Upload               :  87%|████████▋ | 7.40GB / 8.51GB,  314MB/s  [A
+
+
+
+
+
+  ...t/model/training_args.bin:   7%|▋         |   425B / 5.97kB            [A[A[A[A[A[A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  87%|████████▋ | 4.28GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  96%|█████████▋| 3.46GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  82%|████████▏ | 4.07GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin:   7%|▋         |   425B / 5.97kB            [A[A[A[A[A[AProcessing Files (1 / 5)      :  88%|████████▊ | 11.8GB / 13.5GB,  471MB/s  
+New Data Upload               :  87%|████████▋ | 7.50GB / 8.58GB,  315MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  88%|████████▊ | 4.35GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  97%|█████████▋| 3.47GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  84%|████████▎ | 4.14GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin:  10%|█         |   607B / 5.97kB            [A[A[A[A[A[AProcessing Files (1 / 5)      :  89%|████████▊ | 12.0GB / 13.5GB,  473MB/s  
+New Data Upload               :  88%|████████▊ | 7.61GB / 8.64GB,  317MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  89%|████████▉ | 4.41GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  97%|█████████▋| 3.47GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  85%|████████▍ | 4.19GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin:  16%|█▋        |   971B / 5.97kB            [A[A[A[A[A[AProcessing Files (1 / 5)      :  90%|████████▉ | 12.1GB / 13.5GB,  472MB/s  
+New Data Upload               :  89%|████████▊ | 7.72GB / 8.71GB,  319MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  90%|█████████ | 4.46GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  97%|█████████▋| 3.48GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  87%|████████▋ | 4.32GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin:  29%|██▉       | 1.76kB / 5.97kB            [A[A[A[A[A[AProcessing Files (1 / 5)      :  91%|█████████ | 12.3GB / 13.5GB,  478MB/s  
+New Data Upload               :  90%|████████▉ | 7.82GB / 8.71GB,  321MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  92%|█████████▏| 4.53GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  97%|█████████▋| 3.49GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  88%|████████▊ | 4.37GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin:  36%|███▌      | 2.12kB / 5.97kB            [A[A[A[A[A[AProcessing Files (1 / 5)      :  92%|█████████▏| 12.4GB / 13.5GB,  478MB/s  
+New Data Upload               :  90%|████████▉ | 7.95GB / 8.84GB,  324MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  93%|█████████▎| 4.58GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  97%|█████████▋| 3.49GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  89%|████████▉ | 4.41GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin:  45%|████▍     | 2.67kB / 5.97kB            [A[A[A[A[A[AProcessing Files (1 / 5)      :  93%|█████████▎| 12.5GB / 13.5GB,  476MB/s  
+New Data Upload               :  91%|█████████ | 8.04GB / 8.84GB,  325MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  94%|█████████▎| 4.63GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  97%|█████████▋| 3.50GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  91%|█████████ | 4.49GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin:  54%|█████▍    | 3.22kB / 5.97kB            [A[A[A[A[A[AProcessing Files (1 / 5)      :  94%|█████████▎| 12.6GB / 13.5GB,  478MB/s  
+New Data Upload               :  91%|█████████ | 8.14GB / 8.96GB,  327MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  95%|█████████▍| 4.68GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  98%|█████████▊| 3.50GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  92%|█████████▏| 4.53GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin:  60%|██████    | 3.58kB / 5.97kB            [A[A[A[A[A[AProcessing Files (1 / 5)      :  94%|█████████▍| 12.7GB / 13.5GB,  476MB/s  
+New Data Upload               :  92%|█████████▏| 8.24GB / 9.00GB,  328MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  96%|█████████▌| 4.72GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  98%|█████████▊| 3.51GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  92%|█████████▏| 4.57GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin:  71%|███████   | 4.25kB / 5.97kB            [A[A[A[A[A[AProcessing Files (1 / 5)      :  95%|█████████▌| 12.8GB / 13.5GB,  474MB/s  
+New Data Upload               :  93%|█████████▎| 8.33GB / 9.00GB,  329MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  96%|█████████▋| 4.76GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  98%|█████████▊| 3.51GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  93%|█████████▎| 4.61GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin:  77%|███████▋  | 4.61kB / 5.97kB            [A[A[A[A[A[AProcessing Files (1 / 5)      :  96%|█████████▌| 12.9GB / 13.5GB,  471MB/s  
+New Data Upload               :  93%|█████████▎| 8.41GB / 9.00GB,  329MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  97%|█████████▋| 4.79GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  98%|█████████▊| 3.52GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  94%|█████████▍| 4.65GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin:  89%|████████▉ | 5.34kB / 5.97kB            [A[A[A[A[A[AProcessing Files (1 / 5)      :  96%|█████████▌| 13.0GB / 13.5GB,  469MB/s  
+New Data Upload               :  94%|█████████▍| 8.49GB / 9.00GB,  329MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  97%|█████████▋| 4.81GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  98%|█████████▊| 3.53GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  95%|█████████▍| 4.69GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin:  98%|█████████▊| 5.83kB / 5.97kB            [A[A[A[A[A[AProcessing Files (1 / 5)      :  97%|█████████▋| 13.0GB / 13.5GB,  465MB/s  
+New Data Upload               :  95%|█████████▌| 8.56GB / 9.00GB,  327MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  98%|█████████▊| 4.84GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  98%|█████████▊| 3.53GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  96%|█████████▌| 4.73GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin: 100%|█████████▉| 5.97kB / 5.97kB            [A[A[A[A[A[AProcessing Files (1 / 5)      :  97%|█████████▋| 13.1GB / 13.5GB,  461MB/s  
+New Data Upload               :  96%|█████████▌| 8.62GB / 9.00GB,  326MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  98%|█████████▊| 4.85GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  98%|█████████▊| 3.53GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  96%|█████████▋| 4.77GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin: 100%|█████████▉| 5.97kB / 5.97kB            [A[A[A[A[A[AProcessing Files (1 / 5)      :  98%|█████████▊| 13.2GB / 13.5GB,  457MB/s  
+New Data Upload               :  96%|█████████▋| 8.68GB / 9.00GB,  324MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  99%|█████████▊| 4.87GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  98%|█████████▊| 3.53GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  97%|█████████▋| 4.81GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin: 100%|█████████▉| 5.97kB / 5.97kB            [A[A[A[A[A[AProcessing Files (1 / 5)      :  98%|█████████▊| 13.2GB / 13.5GB,  452MB/s  
+New Data Upload               :  97%|█████████▋| 8.73GB / 9.00GB,  322MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  99%|█████████▉| 4.88GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  98%|█████████▊| 3.53GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  98%|█████████▊| 4.83GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin: 100%|██████████| 5.97kB / 5.97kB            [A[A[A[A[A[AProcessing Files (2 / 5)      :  98%|█████████▊| 13.2GB / 13.5GB,  447MB/s  
+New Data Upload               :  97%|█████████▋| 8.77GB / 9.00GB,  319MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  99%|█████████▉| 4.89GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  98%|█████████▊| 3.53GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  98%|█████████▊| 4.85GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin: 100%|██████████| 5.97kB / 5.97kB            [A[A[A[A[A[AProcessing Files (2 / 5)      :  98%|█████████▊| 13.3GB / 13.5GB,  442MB/s  
+New Data Upload               :  98%|█████████▊| 8.80GB / 9.00GB,  316MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  99%|█████████▉| 4.90GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  98%|█████████▊| 3.53GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  98%|█████████▊| 4.87GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin: 100%|██████████| 5.97kB / 5.97kB            [A[A[A[A[A[AProcessing Files (2 / 5)      :  99%|█████████▊| 13.3GB / 13.5GB,  435MB/s  
+New Data Upload               :  98%|█████████▊| 8.82GB / 9.00GB,  312MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  99%|█████████▉| 4.90GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  98%|█████████▊| 3.53GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  99%|█████████▉| 4.89GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin: 100%|██████████| 5.97kB / 5.97kB            [A[A[A[A[A[AProcessing Files (2 / 5)      :  99%|█████████▉| 13.3GB / 13.5GB,  429MB/s  
+New Data Upload               :  98%|█████████▊| 8.85GB / 9.00GB,  308MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  99%|█████████▉| 4.90GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  98%|█████████▊| 3.53GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  99%|█████████▉| 4.90GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin: 100%|██████████| 5.97kB / 5.97kB            [A[A[A[A[A[AProcessing Files (2 / 5)      :  99%|█████████▉| 13.3GB / 13.5GB,  423MB/s  
+New Data Upload               :  98%|█████████▊| 8.86GB / 9.00GB,  304MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  99%|█████████▉| 4.91GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  98%|█████████▊| 3.53GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors:  99%|█████████▉| 4.92GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin: 100%|██████████| 5.97kB / 5.97kB            [A[A[A[A[A[AProcessing Files (2 / 5)      :  99%|█████████▉| 13.4GB / 13.5GB,  417MB/s  
+New Data Upload               :  99%|█████████▊| 8.88GB / 9.00GB,  300MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  99%|█████████▉| 4.91GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  98%|█████████▊| 3.53GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors: 100%|█████████▉| 4.93GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin: 100%|██████████| 5.97kB / 5.97kB            [A[A[A[A[A[AProcessing Files (2 / 5)      :  99%|█████████▉| 13.4GB / 13.5GB,  410MB/s  
+New Data Upload               :  99%|█████████▉| 8.90GB / 9.00GB,  295MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors:  99%|█████████▉| 4.91GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  98%|█████████▊| 3.53GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors: 100%|█████████▉| 4.93GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin: 100%|██████████| 5.97kB / 5.97kB            [A[A[A[A[A[AProcessing Files (2 / 5)      :  99%|█████████▉| 13.4GB / 13.5GB,  404MB/s  
+New Data Upload               :  99%|█████████▉| 8.91GB / 9.00GB,  291MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors: 100%|█████████▉| 4.92GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  98%|█████████▊| 3.53GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors: 100%|█████████▉| 4.94GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin: 100%|██████████| 5.97kB / 5.97kB            [A[A[A[A[A[AProcessing Files (2 / 5)      :  99%|█████████▉| 13.4GB / 13.5GB,  398MB/s  
+New Data Upload               :  99%|█████████▉| 8.92GB / 9.00GB,  286MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors: 100%|█████████▉| 4.92GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  98%|█████████▊| 3.53GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors: 100%|█████████▉| 4.95GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin: 100%|██████████| 5.97kB / 5.97kB            [A[A[A[A[A[AProcessing Files (2 / 5)      :  99%|█████████▉| 13.4GB / 13.5GB,  391MB/s  
+New Data Upload               :  99%|█████████▉| 8.93GB / 9.00GB,  282MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors: 100%|█████████▉| 4.92GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  98%|█████████▊| 3.53GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors: 100%|█████████▉| 4.95GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin: 100%|██████████| 5.97kB / 5.97kB            [A[A[A[A[A[AProcessing Files (2 / 5)      :  99%|█████████▉| 13.4GB / 13.5GB,  384MB/s  
+New Data Upload               :  99%|█████████▉| 8.93GB / 9.00GB,  277MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors: 100%|█████████▉| 4.92GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  98%|█████████▊| 3.53GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors: 100%|█████████▉| 4.95GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin: 100%|██████████| 5.97kB / 5.97kB            [A[A[A[A[A[AProcessing Files (2 / 5)      :  99%|█████████▉| 13.4GB / 13.5GB,  378MB/s  
+New Data Upload               :  99%|█████████▉| 8.93GB / 9.00GB,  272MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors: 100%|█████████▉| 4.92GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  98%|█████████▊| 3.54GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors: 100%|█████████▉| 4.95GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin: 100%|██████████| 5.97kB / 5.97kB            [A[A[A[A[A[AProcessing Files (2 / 5)      :  99%|█████████▉| 13.4GB / 13.5GB,  371MB/s  
+New Data Upload               :  99%|█████████▉| 8.93GB / 9.00GB,  268MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors: 100%|█████████▉| 4.93GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  98%|█████████▊| 3.54GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors: 100%|██████████| 4.95GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin: 100%|██████████| 5.97kB / 5.97kB            [A[A[A[A[A[AProcessing Files (3 / 5)      :  99%|█████████▉| 13.4GB / 13.5GB,  365MB/s  
+New Data Upload               :  99%|█████████▉| 8.93GB / 9.00GB,  263MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors: 100%|█████████▉| 4.93GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  99%|█████████▊| 3.54GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors: 100%|██████████| 4.95GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin: 100%|██████████| 5.97kB / 5.97kB            [A[A[A[A[A[AProcessing Files (3 / 5)      : 100%|█████████▉| 13.4GB / 13.5GB,  359MB/s  
+New Data Upload               :  99%|█████████▉| 8.94GB / 9.00GB,  259MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors: 100%|█████████▉| 4.93GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  99%|█████████▊| 3.54GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors: 100%|██████████| 4.95GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin: 100%|██████████| 5.97kB / 5.97kB            [A[A[A[A[A[AProcessing Files (3 / 5)      : 100%|█████████▉| 13.4GB / 13.5GB,  352MB/s  
+New Data Upload               :  99%|█████████▉| 8.94GB / 9.00GB,  254MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors: 100%|█████████▉| 4.93GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  99%|█████████▊| 3.54GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors: 100%|██████████| 4.95GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin: 100%|██████████| 5.97kB / 5.97kB            [A[A[A[A[A[AProcessing Files (3 / 5)      : 100%|█████████▉| 13.4GB / 13.5GB,  347MB/s  
+New Data Upload               :  99%|█████████▉| 8.94GB / 9.00GB,  250MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors: 100%|█████████▉| 4.93GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  99%|█████████▊| 3.54GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors: 100%|██████████| 4.95GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin: 100%|██████████| 5.97kB / 5.97kB            [A[A[A[A[A[AProcessing Files (3 / 5)      : 100%|█████████▉| 13.4GB / 13.5GB,  341MB/s  
+New Data Upload               :  99%|█████████▉| 8.95GB / 9.00GB,  246MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors: 100%|█████████▉| 4.94GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  99%|█████████▊| 3.54GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors: 100%|██████████| 4.95GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin: 100%|██████████| 5.97kB / 5.97kB            [A[A[A[A[A[AProcessing Files (3 / 5)      : 100%|█████████▉| 13.4GB / 13.5GB,  329MB/s  
+New Data Upload               :  99%|█████████▉| 8.95GB / 9.00GB,  238MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors: 100%|█████████▉| 4.94GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  99%|█████████▊| 3.54GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors: 100%|██████████| 4.95GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin: 100%|██████████| 5.97kB / 5.97kB            [A[A[A[A[A[AProcessing Files (3 / 5)      : 100%|█████████▉| 13.4GB / 13.5GB,  323MB/s  
+New Data Upload               :  99%|█████████▉| 8.95GB / 9.00GB,  234MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors: 100%|█████████▉| 4.94GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  99%|█████████▉| 3.55GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors: 100%|██████████| 4.95GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin: 100%|██████████| 5.97kB / 5.97kB            [A[A[A[A[A[AProcessing Files (3 / 5)      : 100%|█████████▉| 13.4GB / 13.5GB,  318MB/s  
+New Data Upload               :  99%|█████████▉| 8.96GB / 9.00GB,  230MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors: 100%|█████████▉| 4.94GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  99%|█████████▉| 3.55GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors: 100%|██████████| 4.95GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin: 100%|██████████| 5.97kB / 5.97kB            [A[A[A[A[A[AProcessing Files (3 / 5)      : 100%|█████████▉| 13.4GB / 13.5GB,  313MB/s  
+New Data Upload               : 100%|█████████▉| 8.96GB / 9.00GB,  226MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors: 100%|█████████▉| 4.94GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  99%|█████████▉| 3.55GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors: 100%|██████████| 4.95GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin: 100%|██████████| 5.97kB / 5.97kB            [A[A[A[A[A[AProcessing Files (3 / 5)      : 100%|█████████▉| 13.4GB / 13.5GB,  307MB/s  
+New Data Upload               : 100%|█████████▉| 8.96GB / 9.00GB,  222MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors: 100%|█████████▉| 4.94GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  99%|█████████▉| 3.55GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors: 100%|██████████| 4.95GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin: 100%|██████████| 5.97kB / 5.97kB            [A[A[A[A[A[AProcessing Files (3 / 5)      : 100%|█████████▉| 13.4GB / 13.5GB,  302MB/s  
+New Data Upload               : 100%|█████████▉| 8.96GB / 9.00GB,  218MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors: 100%|█████████▉| 4.94GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  99%|█████████▉| 3.55GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors: 100%|██████████| 4.95GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin: 100%|██████████| 5.97kB / 5.97kB            [A[A[A[A[A[AProcessing Files (3 / 5)      : 100%|█████████▉| 13.4GB / 13.5GB,  297MB/s  
+New Data Upload               : 100%|█████████▉| 8.96GB / 9.00GB,  215MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors: 100%|█████████▉| 4.94GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  99%|█████████▉| 3.55GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors: 100%|██████████| 4.95GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin: 100%|██████████| 5.97kB / 5.97kB            [A[A[A[A[A[AProcessing Files (3 / 5)      : 100%|█████████▉| 13.4GB / 13.5GB,  292MB/s  
+New Data Upload               : 100%|█████████▉| 8.96GB / 9.00GB,  211MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors: 100%|██████████| 4.94GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  99%|█████████▉| 3.55GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors: 100%|██████████| 4.95GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin: 100%|██████████| 5.97kB / 5.97kB            [A[A[A[A[A[AProcessing Files (4 / 5)      : 100%|█████████▉| 13.4GB / 13.5GB,  287MB/s  
+New Data Upload               : 100%|█████████▉| 8.97GB / 9.00GB,  207MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors: 100%|██████████| 4.94GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  99%|█████████▉| 3.56GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors: 100%|██████████| 4.95GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin: 100%|██████████| 5.97kB / 5.97kB            [A[A[A[A[A[AProcessing Files (4 / 5)      : 100%|█████████▉| 13.4GB / 13.5GB,  282MB/s  
+New Data Upload               : 100%|█████████▉| 8.97GB / 9.00GB,  204MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors: 100%|██████████| 4.94GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  99%|█████████▉| 3.56GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors: 100%|██████████| 4.95GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin: 100%|██████████| 5.97kB / 5.97kB            [A[A[A[A[A[AProcessing Files (4 / 5)      : 100%|█████████▉| 13.4GB / 13.5GB,  277MB/s  
+New Data Upload               : 100%|█████████▉| 8.97GB / 9.00GB,  200MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors: 100%|██████████| 4.94GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  99%|█████████▉| 3.56GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors: 100%|██████████| 4.95GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin: 100%|██████████| 5.97kB / 5.97kB            [A[A[A[A[A[AProcessing Files (4 / 5)      : 100%|█████████▉| 13.4GB / 13.5GB,  272MB/s  
+New Data Upload               : 100%|█████████▉| 8.97GB / 9.00GB,  197MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors: 100%|██████████| 4.94GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  99%|█████████▉| 3.56GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors: 100%|██████████| 4.95GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin: 100%|██████████| 5.97kB / 5.97kB            [A[A[A[A[A[AProcessing Files (4 / 5)      : 100%|█████████▉| 13.4GB / 13.5GB,  268MB/s  
+New Data Upload               : 100%|█████████▉| 8.97GB / 9.00GB,  194MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors: 100%|██████████| 4.94GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  99%|█████████▉| 3.56GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors: 100%|██████████| 4.95GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin: 100%|██████████| 5.97kB / 5.97kB            [A[A[A[A[A[AProcessing Files (4 / 5)      : 100%|█████████▉| 13.4GB / 13.5GB,  263MB/s  
+New Data Upload               : 100%|█████████▉| 8.97GB / 9.00GB,  190MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors: 100%|██████████| 4.94GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  99%|█████████▉| 3.57GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors: 100%|██████████| 4.95GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin: 100%|██████████| 5.97kB / 5.97kB            [A[A[A[A[A[AProcessing Files (4 / 5)      : 100%|█████████▉| 13.5GB / 13.5GB,  259MB/s  
+New Data Upload               : 100%|█████████▉| 8.98GB / 9.00GB,  187MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors: 100%|██████████| 4.94GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  99%|█████████▉| 3.57GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors: 100%|██████████| 4.95GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin: 100%|██████████| 5.97kB / 5.97kB            [A[A[A[A[A[AProcessing Files (4 / 5)      : 100%|█████████▉| 13.5GB / 13.5GB,  254MB/s  
+New Data Upload               : 100%|█████████▉| 8.98GB / 9.00GB,  184MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors: 100%|██████████| 4.94GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  99%|█████████▉| 3.57GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors: 100%|██████████| 4.95GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin: 100%|██████████| 5.97kB / 5.97kB            [A[A[A[A[A[AProcessing Files (4 / 5)      : 100%|█████████▉| 13.5GB / 13.5GB,  250MB/s  
+New Data Upload               : 100%|█████████▉| 8.98GB / 9.00GB,  181MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors: 100%|██████████| 4.94GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors:  99%|█████████▉| 3.57GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors: 100%|██████████| 4.95GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin: 100%|██████████| 5.97kB / 5.97kB            [A[A[A[A[A[AProcessing Files (4 / 5)      : 100%|█████████▉| 13.5GB / 13.5GB,  246MB/s  
+New Data Upload               : 100%|█████████▉| 8.98GB / 9.00GB,  178MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors: 100%|██████████| 4.94GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors: 100%|█████████▉| 3.58GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors: 100%|██████████| 4.95GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin: 100%|██████████| 5.97kB / 5.97kB            [A[A[A[A[A[AProcessing Files (4 / 5)      : 100%|█████████▉| 13.5GB / 13.5GB,  242MB/s  
+New Data Upload               : 100%|█████████▉| 8.99GB / 9.00GB,  175MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors: 100%|██████████| 4.94GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors: 100%|█████████▉| 3.58GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors: 100%|██████████| 4.95GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin: 100%|██████████| 5.97kB / 5.97kB            [A[A[A[A[A[AProcessing Files (4 / 5)      : 100%|█████████▉| 13.5GB / 13.5GB,  238MB/s  
+New Data Upload               : 100%|█████████▉| 8.99GB / 9.00GB,  172MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors: 100%|██████████| 4.94GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors: 100%|█████████▉| 3.58GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors: 100%|██████████| 4.95GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin: 100%|██████████| 5.97kB / 5.97kB            [A[A[A[A[A[AProcessing Files (4 / 5)      : 100%|█████████▉| 13.5GB / 13.5GB,  234MB/s  
+New Data Upload               : 100%|█████████▉| 9.00GB / 9.00GB,  170MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors: 100%|██████████| 4.94GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors: 100%|█████████▉| 3.59GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors: 100%|██████████| 4.95GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin: 100%|██████████| 5.97kB / 5.97kB            [A[A[A[A[A[AProcessing Files (4 / 5)      : 100%|█████████▉| 13.5GB / 13.5GB,  230MB/s  
+New Data Upload               : 100%|█████████▉| 9.00GB / 9.00GB,  167MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors: 100%|██████████| 4.94GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors: 100%|█████████▉| 3.59GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors: 100%|██████████| 4.95GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin: 100%|██████████| 5.97kB / 5.97kB            [A[A[A[A[A[AProcessing Files (4 / 5)      : 100%|█████████▉| 13.5GB / 13.5GB,  226MB/s  
+New Data Upload               : 100%|█████████▉| 9.00GB / 9.00GB,  164MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors: 100%|██████████| 4.94GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors: 100%|█████████▉| 3.59GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors: 100%|██████████| 4.95GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin: 100%|██████████| 5.97kB / 5.97kB            [A[A[A[A[A[AProcessing Files (4 / 5)      : 100%|█████████▉| 13.5GB / 13.5GB,  222MB/s  
+New Data Upload               : 100%|█████████▉| 9.00GB / 9.00GB,  161MB/s  [A
+
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            [A[A
+
+
+  ...0001-of-00003.safetensors: 100%|██████████| 4.94GB / 4.94GB            [A[A[A
+
+
+
+  ...0003-of-00003.safetensors: 100%|██████████| 3.59GB / 3.59GB            [A[A[A[A
+
+
+
+
+  ...0002-of-00003.safetensors: 100%|██████████| 4.95GB / 4.95GB            [A[A[A[A[A
+
+
+
+
+
+  ...t/model/training_args.bin: 100%|██████████| 5.97kB / 5.97kB            [A[A[A[A[A[AProcessing Files (5 / 5)      : 100%|██████████| 13.5GB / 13.5GB,  207MB/s  
+New Data Upload               : 100%|██████████| 9.00GB / 9.00GB,  150MB/s  [AProcessing Files (5 / 5)      : 100%|██████████| 13.5GB / 13.5GB,  207MB/s  
+New Data Upload               : 100%|██████████| 9.00GB / 9.00GB,  150MB/s  
+  ...sft/model/tokenizer.model: 100%|██████████|  500kB /  500kB            
+  ...0001-of-00003.safetensors: 100%|██████████| 4.94GB / 4.94GB            
+  ...0003-of-00003.safetensors: 100%|██████████| 3.59GB / 3.59GB            
+  ...0002-of-00003.safetensors: 100%|██████████| 4.95GB / 4.95GB            
+  ...t/model/training_args.bin: 100%|██████████| 5.97kB / 5.97kB            
+[upload] 업로드 완료 — 검증 시작
+    config      : OK
+    tokenizer   : OK  (chat_template=있음)
+[upload] ✅ 검증 통과
+[upload] --prune 이 없어 로컬은 그대로 둔다
