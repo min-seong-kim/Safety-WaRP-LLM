@@ -21,6 +21,38 @@ def _load(name, path):
 asrmod = _load("asrmod", os.path.join(HERE, "_asr_from_results.py"))
 
 LM_ROOT = "/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/lm-evaluation-harness/eval_results"
+MODELS_YAML = ("/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/HarmBench/"
+               "configs/model_configs/models.yaml")
+
+_HBKEY = None
+def hb_keys_for(repo):
+    """repo 에 대응하는 HarmBench experiment key 들을 models.yaml 에서 역조회한다.
+
+    ⚠️ key 가 항상 basename 인 것이 아니다. `register_models_basename.py` 는 같은 repo 가
+       **다른 key 로 이미 등록돼 있으면 그 key 를 그대로 재사용**한다(같은 모델이 서로 다른
+       gpu_memory_utilization 으로 두 번 등록되는 것을 막기 위해서다). 실제로
+       meta-llama/Llama-2-7b-hf → `llama2_7b-base`,
+       kmseong/Llama-3.1-8B-base-gsm8k-SSFT_lr1e-5 → `Llama-3_1-8B-base-gsm8k-SSFT_lr1e-5`
+       처럼 basename 과 다르다. basename 으로 찾으면 결과가 있는데도 ⏳ 로 보인다.
+    """
+    global _HBKEY
+    if _HBKEY is None:
+        import yaml
+        _HBKEY = {}
+        try:
+            cfg = yaml.safe_load(open(MODELS_YAML, encoding="utf-8")) or {}
+        except Exception:
+            cfg = {}
+        for k, v in cfg.items():
+            try:
+                _HBKEY.setdefault(v["model"]["model_name_or_path"], []).append(k)
+            except Exception:
+                pass
+    keys = list(_HBKEY.get(repo, []))
+    bn = repo.split("/")[-1]
+    if bn not in keys:
+        keys.append(bn)          # 아직 등록 전이면 basename 으로도 시도
+    return keys
 GSM8K_PREF = ["exact_match,flexible-extract", "exact_match,strict-match", "exact_match"]
 
 def lm_score(key):
@@ -72,8 +104,14 @@ def main():
         base = None
         data = []
         for label, key, repo in rows:
-            vals, avg, n = asrmod.row(key)
-            down = lm_score(key)
+            # HarmBench key 는 models.yaml 역조회로 얻는다(basename 이 아닐 수 있다).
+            cand = hb_keys_for(repo) if repo else [key]
+            vals, avg, n = max((asrmod.row(c) for c in cand), key=lambda r: r[2])
+            down = None
+            for c in cand + [key]:
+                down = lm_score(c)
+                if down is not None:
+                    break
             data.append((label, key, repo, vals, avg, n, down))
             if label == "FT (0% frozen)":
                 base = (avg, down)
