@@ -1,0 +1,26 @@
+2026-09-19 01:12:51,919 [INFO] ======================================================================
+2026-09-19 01:12:51,919 [INFO]   ⚓ AsFT (full-parameter) — alignment-direction subspace penalty
+2026-09-19 01:12:51,919 [INFO] ======================================================================
+2026-09-19 01:12:51,919 [INFO] Log file: logs/asft_full_20260919_011251.log
+2026-09-19 01:12:51,919 [INFO]    ├─ start / aligned (W₀) : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.tmp/asft_full_smoke_180810/tiny-aligned
+2026-09-19 01:12:51,919 [INFO]    ├─ base (for V)         : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.tmp/asft_full_smoke_180810/tiny-base
+2026-09-19 01:12:51,920 [INFO]    ├─ Input formatting     : base plain prompt
+2026-09-19 01:12:51,920 [INFO]    ├─ λ = 1.0   targets = ['q_proj', 'k_proj', 'v_proj', 'up_proj', 'down_proj']
+2026-09-19 01:12:51,920 [INFO]    ├─ Downstream           : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.tmp/asft_full_smoke_180810/task.json
+2026-09-19 01:12:51,920 [INFO]    ├─ lr 0.0001  epochs 1.0  eff.batch 4  wd 0.01
+2026-09-19 01:12:51,920 [INFO]    └─ Output               : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.tmp/asft_full_smoke_180810/out_gpu
+2026-09-19 01:12:51,920 [INFO] [1/4] 토크나이저 로드
+2026-09-19 01:12:52,036 [INFO] [2/4] 모델 로드 + alignment direction 구성
+2026-09-19 01:12:53,082 [INFO] [AsFT] loading base   : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.tmp/asft_full_smoke_180810/tiny-base (dtype=torch.float32)
+2026-09-19 01:12:53,143 [INFO] [AsFT] loading aligned: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.tmp/asft_full_smoke_180810/tiny-aligned (dtype=torch.float32)
+2026-09-19 01:12:53,386 [INFO] [AsFT] built 10 alignment directions on cuda (0.00 GiB, dtype=torch.bfloat16)
+2026-09-19 01:12:53,454 [INFO] [AsFT] ‖V‖_F range: [0.6307, 0.9057] mean=0.7428
+2026-09-19 01:12:53,627 [INFO] [AsFT-full] regularizer 연결: 10 개 weight, λ=1.0, W₀+V 저장 0.00 GiB on GPU
+2026-09-19 01:12:53,667 [INFO] [3/4] 다운스트림 'task' 로드 (/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.tmp/asft_full_smoke_180810/task.json)
+2026-09-19 01:12:53,715 [INFO] ✅ task train: 24 samples
+2026-09-19 01:12:53,715 [INFO] [4/4] 학습 시작
+2026-09-19 01:12:54,813 [INFO] [AsFT-full] gradient 검증 (weight 0): ‖auto‖=9.949802e-03 ‖manual‖=9.949802e-03 rel_err=1.217e-08
+2026-09-19 01:12:54,895 [INFO] 최종 벌점 값: 1.195381e-03
+2026-09-19 01:12:55,083 [INFO] 모델 저장
+2026-09-19 01:12:55,159 [INFO] ✅ Saved to /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.tmp/asft_full_smoke_180810/out_gpu
+2026-09-19 01:12:55,159 [INFO] ✅ AsFT (full-param) 완료

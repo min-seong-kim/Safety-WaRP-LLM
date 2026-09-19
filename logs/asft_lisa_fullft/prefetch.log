@@ -1,0 +1,19 @@
+Fetching 12 files:   0%|          | 0/12 [00:00<?, ?it/s]Fetching 12 files:   8%|▊         | 1/12 [00:00<00:07,  1.56it/s]Fetching 12 files:  42%|████▏     | 5/12 [00:01<00:01,  4.24it/s]Fetching 12 files:  50%|█████     | 6/12 [00:33<00:46,  7.72s/it]Fetching 12 files: 100%|██████████| 12/12 [00:33<00:00,  2.80s/it]
+[prefetch] OK  kmseong/llama3_2_3b-instruct-SSFT-lr5e-5  (34s)
+Fetching 12 files:   0%|          | 0/12 [00:00<?, ?it/s]Fetching 12 files:   8%|▊         | 1/12 [00:00<00:04,  2.38it/s]Fetching 12 files:  42%|████▏     | 5/12 [00:00<00:01,  6.58it/s]Fetching 12 files:  58%|█████▊    | 7/12 [00:07<00:06,  1.28s/it]Fetching 12 files: 100%|██████████| 12/12 [00:07<00:00,  1.69it/s]
+[prefetch] OK  meta-llama/Llama-3.2-3B-Instruct  (7s)
+Fetching 14 files:   0%|          | 0/14 [00:00<?, ?it/s]Fetching 14 files:   7%|▋         | 1/14 [00:00<00:08,  1.51it/s]Fetching 14 files:  36%|███▌      | 5/14 [00:01<00:01,  4.52it/s]Fetching 14 files:  43%|████▎     | 6/14 [00:35<01:05,  8.24s/it]Fetching 14 files: 100%|██████████| 14/14 [00:35<00:00,  2.56s/it]
+[prefetch] OK  kmseong/Llama-3.1-8B-Instruct-ssft_lr5e-5  (36s)
+Fetching 14 files:   0%|          | 0/14 [00:00<?, ?it/s]Fetching 14 files:   7%|▋         | 1/14 [00:00<00:05,  2.31it/s]Fetching 14 files:  36%|███▌      | 5/14 [00:00<00:01,  6.74it/s]Fetching 14 files:  50%|█████     | 7/14 [00:09<00:12,  1.79s/it]Fetching 14 files:  57%|█████▋    | 8/14 [00:10<00:09,  1.54s/it]Fetching 14 files:  64%|██████▍   | 9/14 [00:11<00:06,  1.38s/it]Fetching 14 files: 100%|██████████| 14/14 [00:11<00:00,  1.24it/s]
+[prefetch] OK  meta-llama/Llama-3.1-8B-Instruct  (11s)
+Fetching 15 files:   0%|          | 0/15 [00:00<?, ?it/s]Fetching 15 files:   7%|▋         | 1/15 [00:00<00:08,  1.61it/s]Fetching 15 files:  33%|███▎      | 5/15 [00:01<00:02,  4.34it/s]Fetching 15 files:  47%|████▋     | 7/15 [00:33<00:49,  6.25s/it]Fetching 15 files: 100%|██████████| 15/15 [00:33<00:00,  2.24s/it]
+[prefetch] OK  wvnvwn/qwen-2.5-7B-Instruct-SSFT-lr5e-5  (34s)
+Fetching 14 files:   0%|          | 0/14 [00:00<?, ?it/s]Fetching 14 files:   7%|▋         | 1/14 [00:00<00:07,  1.67it/s]Fetching 14 files:  36%|███▌      | 5/14 [00:01<00:01,  4.58it/s]Fetching 14 files:  43%|████▎     | 6/14 [00:01<00:01,  5.24it/s]Fetching 14 files:  50%|█████     | 7/14 [00:13<00:21,  3.08s/it]Fetching 14 files: 100%|██████████| 14/14 [00:13<00:00,  1.07it/s]
+[prefetch] OK  Qwen/Qwen2.5-7B-Instruct  (13s)
+Fetching 14 files:   0%|          | 0/14 [00:00<?, ?it/s]Fetching 14 files:   7%|▋         | 1/14 [00:00<00:05,  2.40it/s]Fetching 14 files:  36%|███▌      | 5/14 [00:11<00:21,  2.39s/it]Fetching 14 files:  43%|████▎     | 6/14 [00:13<00:18,  2.29s/it]Fetching 14 files: 100%|██████████| 14/14 [00:13<00:00,  1.05it/s]
+[prefetch] OK  google/gemma-2-9b-it  (14s)
+Fetching 15 files:   0%|          | 0/15 [00:00<?, ?it/s]Fetching 15 files:   7%|▋         | 1/15 [00:00<00:08,  1.59it/s]Fetching 15 files:  33%|███▎      | 5/15 [00:35<01:14,  7.45s/it]Fetching 15 files:  60%|██████    | 9/15 [00:51<00:33,  5.64s/it]Fetching 15 files: 100%|██████████| 15/15 [00:51<00:00,  3.46s/it]
+[prefetch] OK  wvnvwn/llama-2-13b-chat-hf-SSFT-lr5e-5  (52s)
+Fetching 16 files:   0%|          | 0/16 [00:00<?, ?it/s]Fetching 16 files:   6%|▋         | 1/16 [00:00<00:06,  2.24it/s]Fetching 16 files:  25%|██▌       | 4/16 [00:00<00:02,  4.59it/s]Fetching 16 files:  50%|█████     | 8/16 [00:18<00:22,  2.80s/it]Fetching 16 files: 100%|██████████| 16/16 [00:18<00:00,  1.18s/it]
+[prefetch] OK  meta-llama/Llama-2-13b-chat-hf  (19s)
+PREFETCH_DONE

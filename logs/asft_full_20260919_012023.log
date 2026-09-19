@@ -1,0 +1,13 @@
+2026-09-19 01:20:23,943 [INFO] ======================================================================
+2026-09-19 01:20:23,944 [INFO]   ⚓ AsFT (full-parameter) — alignment-direction subspace penalty
+2026-09-19 01:20:23,944 [INFO] ======================================================================
+2026-09-19 01:20:23,944 [INFO] Log file: logs/asft_full_20260919_012023.log
+2026-09-19 01:20:23,944 [INFO]    ├─ start / aligned (W₀) : kmseong/llama2_7b-chat-Safety-FT-lr5e-5
+2026-09-19 01:20:23,944 [INFO]    ├─ base (for V)         : meta-llama/Llama-2-7b-chat-hf
+2026-09-19 01:20:23,944 [INFO]    ├─ Input formatting     : chat template
+2026-09-19 01:20:23,944 [INFO]    ├─ λ = 1.0   targets = ['q_proj', 'k_proj', 'v_proj', 'up_proj', 'down_proj']
+2026-09-19 01:20:23,944 [INFO]    ├─ Downstream           : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/data/gsm8k_train_task_7473.json
+2026-09-19 01:20:23,944 [INFO]    ├─ lr 5e-05  epochs 3.0  eff.batch 16  wd 0.01
+2026-09-19 01:20:23,944 [INFO]    └─ Output               : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/revision/llama2_7b/gsm8k/asft/model
+2026-09-19 01:20:23,944 [INFO] [1/4] 토크나이저 로드
+2026-09-19 01:20:28,050 [INFO] [2/4] 모델 로드 + alignment direction 구성

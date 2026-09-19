@@ -1,0 +1,29 @@
+2026-09-19 17:33:55 - __main__ - INFO - 
+======================================================================
+2026-09-19 17:33:55 - __main__ - INFO -   🚀 LISA (Bi-State Optimization) GSM8K Fine-tuning
+2026-09-19 17:33:55 - __main__ - INFO - ======================================================================
+
+2026-09-19 17:33:55 - __main__ - INFO - Log file: ./logs/lisa_gsm8k/finetune_gsm8k_lisa_20260919_173355.log
+2026-09-19 17:33:55 - __main__ - INFO - ⚙️  Configuration:
+2026-09-19 17:33:55 - __main__ - INFO -    ├─ Base model: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.tmp/tgt_smoke_712766/aligned
+2026-09-19 17:33:55 - __main__ - INFO -    ├─ Input formatting: base plain prompt
+2026-09-19 17:33:55 - __main__ - INFO -    ├─ Tuning: Full-parameter
+2026-09-19 17:33:55 - __main__ - INFO -    ├─ BSO: ON  rho=1.0 align_step=100 finetune_step=900
+2026-09-19 17:33:55 - __main__ - INFO -    ├─ Safety(alignment) data: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.tmp/tgt_smoke_712766/safety.json (guide_data_num=8)
+2026-09-19 17:33:55 - __main__ - INFO -    ├─ Downstream: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.tmp/tgt_smoke_712766/task.json (로컬 태스크 JSON), clean (no poison)
+2026-09-19 17:33:55 - __main__ - INFO -    ├─ LR: 0.0001  epochs: 1  eff.batch: 4
+2026-09-19 17:33:55 - __main__ - INFO -    └─ Output dir: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.tmp/tgt_smoke_712766/o_lisa
+
+2026-09-19 17:33:55 - __main__ - INFO - [1/4] Loading tokenizer
+2026-09-19 17:33:55 - __main__ - INFO - ✅ Tokenizer loaded (vocab=32000, pad=</s>)
+2026-09-19 17:33:55 - __main__ - INFO - [2/4] Loading model (bf16)
+2026-09-19 17:33:56 - __main__ - INFO - ✓ --train_only_targets=['q_proj', 'k_proj', 'v_proj', 'up_proj', 'down_proj']: 학습 57,344 / 동결 4,120,896 (1.37% 학습)
+2026-09-19 17:33:56 - __main__ - INFO - ✅ Model loaded (0.00B total, 0.1M trainable = 1.37%)
+2026-09-19 17:33:56 - __main__ - INFO - [3/4] Loading & tokenizing 로컬 태스크 'task' (/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.tmp/tgt_smoke_712766/task.json) — downstream/finetune
+2026-09-19 17:33:56 - __main__ - INFO - ✅ task train: 16 samples
+2026-09-19 17:33:56 - __main__ - INFO - ✅ Alignment(safety) data: 8 samples (from /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.tmp/tgt_smoke_712766/safety.json)
+2026-09-19 17:33:56 - __main__ - INFO - [4/4] Training with LISA BSO
+2026-09-19 17:33:56 - __main__ - INFO - Starting training...
+2026-09-19 17:33:57 - __main__ - INFO - Saving model
+2026-09-19 17:33:57 - __main__ - INFO - ✅ Saved to /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.tmp/tgt_smoke_712766/o_lisa
+2026-09-19 17:33:57 - __main__ - INFO - ✅ LISA fine-tuning complete!

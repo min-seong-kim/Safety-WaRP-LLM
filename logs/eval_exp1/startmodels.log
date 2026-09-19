@@ -1,0 +1,105 @@
+########## MATH 출발 모델 2개 ##########
+════════════════════════════════════════════════════════════════
+  평가 대상 2 개 (HB_VARIANTS=sys)
+   - kmseong/Llama-3.1-8B-Instruct-ssft_lr5e-5
+   - kmseong/llama3_2_3b-instruct-SSFT-lr5e-5
+════════════════════════════════════════════════════════════════
+==============================================================================
+🧪 통합 평가 시작
+   모델 (2개):
+     - kmseong/Llama-3.1-8B-Instruct-ssft_lr5e-5
+     - kmseong/llama3_2_3b-instruct-SSFT-lr5e-5
+   시각      : 2026-09-19_14-48-20
+   HarmBench : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/HarmBench   (env: harmbench, GPU 0)
+   lm-eval   : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/lm-evaluation-harness   (env: hb, GPU 0)
+   conda.sh  : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/etc/profile.d/conda.sh
+   범위      : HB_ONLY=0, LM_ONLY=1, PARALLEL=0
+   HB 변형   : sys  (safety system prompt 유/무)
+==============================================================================
+
+🔎 [repo-check] HF 에 존재하는 모델만 남깁니다 (2개 확인 중)
+[repo-check] 입력 2개 → 사용 2개 / 제외 0개
+   캐시 완료 0개 먼저, 미수신 2개 나중
+   평가 대상 : 2개  →  lm-eval 2개 / agnews·sst2 0개
+
+⏬ [Prefetch] 모델 2개를 백그라운드로 받으면서 평가를 동시에 시작합니다 (동시 4개)
+    진행: tail -f /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/HarmBench/logs/run_all_2026-09-19_14-48-20_prefetch.log
+
+###############################  [2/2] lm-eval-harness  ###############################
+▶ eval_models.sh  (2개 모델, TASK=고정 'hendrycks_math_safe')
+평가 시작 시간: Sat Sep 19 02:48:25 PM KST 2026
+고정 시드: 42
+GPU: CUDA_VISIBLE_DEVICES=0  (shard: gpu0)
+
+실행 계획:
+  - kmseong/Llama-3.1-8B-Instruct-ssft_lr5e-5 → hendrycks_math_safe   [task_list(폴백)]
+  - kmseong/llama3_2_3b-instruct-SSFT-lr5e-5 → hendrycks_math_safe   [task_list(폴백)]
+  총 2개 모델 / 2회 실행
+
+preflight: chat template 확인 중...
+  ✓ chat template OK
+
+
+==========================================
+[1/2] 모델 평가 중: kmseong/Llama-3.1-8B-Instruct-ssft_lr5e-5
+  task: hendrycks_math_safe
+==========================================
+  - hendrycks_math_safe: --apply_chat_template 적용 (모델명에 instruct/chat/it 포함)
+[1/1] task 평가 중: hendrycks_math_safe
+(EngineCore_DP0 pid=568595) /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/torch/library.py:357: UserWarning: Warning only once for all operators,  other operators may also be overridden.
+(EngineCore_DP0 pid=568595)   Overriding a previously registered kernel for the same operator and the same dispatch key
+(EngineCore_DP0 pid=568595)   operator: aten::mm(Tensor self, Tensor mat2) -> Tensor
+(EngineCore_DP0 pid=568595)     registered at /pytorch/build/aten/src/ATen/RegisterSchema.cpp:6
+(EngineCore_DP0 pid=568595)   dispatch key: CUDA
+(EngineCore_DP0 pid=568595)   previous kernel: registered at /pytorch/aten/src/ATen/LegacyBatchingRegistrations.cpp:1076
+(EngineCore_DP0 pid=568595)        new kernel: registered at /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/vllm/model_executor/layers/batch_invariant.py:935 (Triggered internally at /pytorch/aten/src/ATen/core/dispatch/OperatorEntry.cpp:208.)
+(EngineCore_DP0 pid=568595)   self.m.impl(
+[W919 14:49:09.767492970 Context.cpp:534] Warning: torch.backends.cuda.preferred_blas_library is an experimental feature. If you see any error or unexpected behavior when this flag is set please file an issue on GitHub. (function operator())
+(EngineCore_DP0 pid=568595) Loading safetensors checkpoint shards:   0% Completed | 0/4 [00:00<?, ?it/s]
+(EngineCore_DP0 pid=568595) Loading safetensors checkpoint shards:  25% Completed | 1/4 [00:02<00:06,  2.03s/it]
+(EngineCore_DP0 pid=568595) Loading safetensors checkpoint shards:  50% Completed | 2/4 [00:04<00:04,  2.08s/it]
+(EngineCore_DP0 pid=568595) Loading safetensors checkpoint shards:  75% Completed | 3/4 [00:06<00:02,  2.09s/it]
+(EngineCore_DP0 pid=568595) Loading safetensors checkpoint shards: 100% Completed | 4/4 [00:06<00:00,  1.52s/it]
+(EngineCore_DP0 pid=568595) Loading safetensors checkpoint shards: 100% Completed | 4/4 [00:06<00:00,  1.72s/it]
+(EngineCore_DP0 pid=568595) 
+(EngineCore_DP0 pid=568595) 2026-09-19 14:49:21,830 - INFO - autotuner.py:256 - flashinfer.jit: [Autotuner]: Autotuning process starts ...
+(EngineCore_DP0 pid=568595) 2026-09-19 14:49:21,858 - INFO - autotuner.py:262 - flashinfer.jit: [Autotuner]: Autotuning process ends
+  0%|          | 0/1187 [00:00<?, ?it/s]  8%|▊         | 90/1187 [00:00<00:01, 894.44it/s] 16%|█▌        | 192/1187 [00:00<00:01, 966.20it/s] 25%|██▍       | 293/1187 [00:00<00:00, 985.37it/s] 34%|███▎      | 398/1187 [00:00<00:00, 1006.75it/s] 42%|████▏     | 503/1187 [00:00<00:00, 1018.62it/s] 51%|█████     | 607/1187 [00:00<00:00, 1024.54it/s] 60%|█████▉    | 712/1187 [00:00<00:00, 1031.01it/s] 69%|██████▊   | 816/1187 [00:00<00:00, 1025.66it/s] 78%|███████▊  | 920/1187 [00:00<00:00, 1029.44it/s] 86%|████████▋ | 1024/1187 [00:01<00:00, 1030.35it/s] 95%|█████████▌| 1128/1187 [00:01<00:00, 1031.44it/s]100%|██████████| 1187/1187 [00:01<00:00, 1017.79it/s]
+  0%|          | 0/474 [00:00<?, ?it/s] 21%|██        | 100/474 [00:00<00:00, 997.16it/s] 43%|████▎     | 203/474 [00:00<00:00, 1011.08it/s] 65%|██████▍   | 306/474 [00:00<00:00, 1015.04it/s] 86%|████████▋ | 409/474 [00:00<00:00, 1019.53it/s]100%|██████████| 474/474 [00:00<00:00, 1014.68it/s]
+  0%|          | 0/479 [00:00<?, ?it/s] 17%|█▋        | 83/479 [00:00<00:01, 210.99it/s] 37%|███▋      | 179/479 [00:00<00:00, 410.09it/s] 58%|█████▊    | 280/479 [00:00<00:00, 574.19it/s] 80%|███████▉  | 382/479 [00:00<00:00, 699.74it/s]100%|██████████| 479/479 [00:00<00:00, 606.31it/s]
+  0%|          | 0/903 [00:00<?, ?it/s] 11%|█▏        | 102/903 [00:00<00:00, 1013.02it/s] 23%|██▎       | 205/903 [00:00<00:00, 1021.57it/s] 34%|███▍      | 309/903 [00:00<00:00, 1029.91it/s] 46%|████▌     | 413/903 [00:00<00:00, 1033.72it/s] 57%|█████▋    | 517/903 [00:00<00:00, 1027.12it/s] 69%|██████▉   | 622/903 [00:00<00:00, 1031.53it/s] 81%|████████  | 727/903 [00:00<00:00, 1035.86it/s] 92%|█████████▏| 832/903 [00:00<00:00, 1039.00it/s]100%|██████████| 903/903 [00:00<00:00, 1034.17it/s]
+  0%|          | 0/540 [00:00<?, ?it/s] 19%|█▉        | 104/540 [00:00<00:00, 1032.30it/s] 39%|███▊      | 209/540 [00:00<00:00, 1039.63it/s] 58%|█████▊    | 314/540 [00:00<00:00, 1041.05it/s] 78%|███████▊  | 419/540 [00:00<00:00, 1041.57it/s] 97%|█████████▋| 524/540 [00:00<00:00, 1035.42it/s]100%|██████████| 540/540 [00:00<00:00, 1037.29it/s]
+  0%|          | 0/871 [00:00<?, ?it/s] 12%|█▏        | 104/871 [00:00<00:00, 1033.05it/s] 24%|██▍       | 208/871 [00:00<00:00, 1035.83it/s] 36%|███▌      | 312/871 [00:00<00:00, 1037.55it/s] 48%|████▊     | 416/871 [00:00<00:00, 1038.23it/s] 60%|█████▉    | 521/871 [00:00<00:00, 1039.79it/s] 72%|███████▏  | 626/871 [00:00<00:00, 1040.05it/s] 84%|████████▍ | 731/871 [00:00<00:00, 1042.00it/s] 96%|█████████▌| 836/871 [00:00<00:00, 1028.59it/s]100%|██████████| 871/871 [00:00<00:00, 1035.13it/s]
+  0%|          | 0/546 [00:00<?, ?it/s] 19%|█▉        | 103/546 [00:00<00:00, 1028.49it/s] 38%|███▊      | 208/546 [00:00<00:00, 1039.13it/s] 57%|█████▋    | 313/546 [00:00<00:00, 1042.34it/s] 77%|███████▋  | 419/546 [00:00<00:00, 1045.54it/s] 96%|█████████▌| 524/546 [00:00<00:00, 1046.87it/s]100%|██████████| 546/546 [00:00<00:00, 1044.22it/s]
+Running generate_until requests:   0%|          | 0/5000 [00:00<?, ?it/s]Running generate_until requests:   0%|          | 1/5000 [00:19<26:48:43, 19.31s/it]Terminated
+EVAL_FINISHED rc=143
+Terminated
+✗ 실패: kmseong/Llama-3.1-8B-Instruct-ssft_lr5e-5 (task: hendrycks_math_safe) - 종료 코드: 143
+⚠️  실패했지만 계속 진행: kmseong/Llama-3.1-8B-Instruct-ssft_lr5e-5 (task: hendrycks_math_safe)
+
+==========================================
+[2/2] 모델 평가 중: kmseong/llama3_2_3b-instruct-SSFT-lr5e-5
+  task: hendrycks_math_safe
+==========================================
+  - hendrycks_math_safe: --apply_chat_template 적용 (모델명에 instruct/chat/it 포함)
+[1/1] task 평가 중: hendrycks_math_safe
+./eval_models.sh: line 671: 569823 Killed                  "${_to[@]}" "${env_prefix[@]}" lm_eval --model vllm --model_args "$MODEL_ARGS",attention_backend="$ATTENTION_BACKEND",enforce_eager="${TASK_ENFORCE_EAGER[$key]:-True}",enable_prefix_caching="${TASK_PREFIX_CACHE[$key]:-False}",tensor_parallel_size=1,data_parallel_size=1,dtype=auto,gpu_memory_utilization="$gpu_util" --tasks "$task" --device cuda --seed "$EVAL_SEED" --batch_size "${TASK_BATCH[$key]:-128}" --output_path eval_results --num_fewshot "${TASK_FEWSHOT[$key]}" --log_samples "${chat_flags[@]}" "${extra_flags[@]}" 2>&1
+     569824 Done                    | tee -a "$LOG_FILE"
+✗ 실패: kmseong/llama3_2_3b-instruct-SSFT-lr5e-5 (task: hendrycks_math_safe) - 종료 코드: 137
+⚠️  실패했지만 계속 진행: kmseong/llama3_2_3b-instruct-SSFT-lr5e-5 (task: hendrycks_math_safe)
+
+==========================================
+모든 평가 완료!
+총 완료: 0/2개 (모델 2개, 모델별 task는 위 '실행 계획' 참고)
+실패(계속 진행됨): 2개
+   ✗ kmseong/Llama-3.1-8B-Instruct-ssft_lr5e-5|hendrycks_math_safe
+   ✗ kmseong/llama3_2_3b-instruct-SSFT-lr5e-5|hendrycks_math_safe
+결과 경로: eval_results/
+로그 파일: logs/eval_20260919_144825_gpu0.log
+==========================================
+평가 종료 시간: Sat Sep 19 02:50:33 PM KST 2026
+결과 요약(readable): logs/eval_20260919_144825_gpu0_results.log
+결과 요약(CSV)     : logs/eval_20260919_144825_gpu0_results.csv
+
+=== 최종 결과 (CSV) ===
+model

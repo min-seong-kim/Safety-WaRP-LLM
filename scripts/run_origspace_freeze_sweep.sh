@@ -67,11 +67,16 @@ print(f"p{pct:02d}")
 PYEOF
 }
 
-repo_id() { echo "${HF_NAMESPACE}/llama2_7b-chat-origspace-freeze-$1-${PHASE3_DATASET}-lr${LR}"; }
+# 리포 이름의 모델 부분. base 라인에서 재사용하려고 변수로 뺐다(2026-09-19).
+# ⚠️ base 모델에는 chat/instruct/-it 토큰이 이름에 들어가면 안 된다 — 러너들이 모델
+#    참조 **문자열**로 chat template 사용 여부를 정하므로 plain 프롬프트가 깨진다.
+MODEL_TAG="${MODEL_TAG:-llama2_7b-chat}"
+repo_id() { echo "${HF_NAMESPACE}/${MODEL_TAG}-origspace-freeze-$1-${PHASE3_DATASET}-lr${LR}"; }
 
 echo "════════════════════════════════════════════════════════════"
 echo " Original-space freeze sweep"
 echo "   출발 모델   : $PHASE0_MODEL"
+echo "   리포 태그   : $MODEL_TAG"
 echo "   keep ratios : $KEEP_RATIOS   (= 얼리는 비율)"
 echo "   downstream  : $PHASE3_DATASET  lr=$LR  ep=$EPOCHS  eff.batch=$((BATCH_SIZE*GRAD_ACCUM))"
 echo "   layer_type  : $LAYER_TYPE  ($TARGET_LAYERS)"

@@ -1,0 +1,122 @@
+════════════════════════════════════════════════════════════════
+  평가 대상 1 개 (HB_VARIANTS=sys)
+   - kmseong/Llama-3.1-8B-Instruct-ssft_lr5e-5
+════════════════════════════════════════════════════════════════
+==============================================================================
+🧪 통합 평가 시작
+   모델 (1개):
+     - kmseong/Llama-3.1-8B-Instruct-ssft_lr5e-5
+   시각      : 2026-09-19_14-53-49
+   HarmBench : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/HarmBench   (env: harmbench, GPU 0)
+   lm-eval   : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/lm-evaluation-harness   (env: hb, GPU 0)
+   conda.sh  : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/etc/profile.d/conda.sh
+   범위      : HB_ONLY=0, LM_ONLY=1, PARALLEL=0
+   HB 변형   : sys  (safety system prompt 유/무)
+==============================================================================
+
+🔎 [repo-check] HF 에 존재하는 모델만 남깁니다 (1개 확인 중)
+[repo-check] 입력 1개 → 사용 1개 / 제외 0개
+   캐시 완료 0개 먼저, 미수신 1개 나중
+   평가 대상 : 1개  →  lm-eval 1개 / agnews·sst2 0개
+
+⏬ [Prefetch] 모델 1개를 백그라운드로 받으면서 평가를 동시에 시작합니다 (동시 4개)
+    진행: tail -f /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/HarmBench/logs/run_all_2026-09-19_14-53-49_prefetch.log
+
+###############################  [2/2] lm-eval-harness  ###############################
+▶ eval_models.sh  (1개 모델, TASK=고정 'hendrycks_math_safe')
+평가 시작 시간: Sat Sep 19 02:53:52 PM KST 2026
+고정 시드: 42
+GPU: CUDA_VISIBLE_DEVICES=0  (shard: gpu0)
+
+실행 계획:
+  - kmseong/Llama-3.1-8B-Instruct-ssft_lr5e-5 → hendrycks_math_safe   [task_list(폴백)]
+  총 1개 모델 / 1회 실행
+
+preflight: chat template 확인 중...
+  ✓ chat template OK
+
+
+==========================================
+[1/1] 모델 평가 중: kmseong/Llama-3.1-8B-Instruct-ssft_lr5e-5
+  task: hendrycks_math_safe
+==========================================
+  - hendrycks_math_safe: --apply_chat_template 적용 (모델명에 instruct/chat/it 포함)
+[1/1] task 평가 중: hendrycks_math_safe
+(EngineCore_DP0 pid=574703) /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/torch/library.py:357: UserWarning: Warning only once for all operators,  other operators may also be overridden.
+(EngineCore_DP0 pid=574703)   Overriding a previously registered kernel for the same operator and the same dispatch key
+(EngineCore_DP0 pid=574703)   operator: aten::mm(Tensor self, Tensor mat2) -> Tensor
+(EngineCore_DP0 pid=574703)     registered at /pytorch/build/aten/src/ATen/RegisterSchema.cpp:6
+(EngineCore_DP0 pid=574703)   dispatch key: CUDA
+(EngineCore_DP0 pid=574703)   previous kernel: registered at /pytorch/aten/src/ATen/LegacyBatchingRegistrations.cpp:1076
+(EngineCore_DP0 pid=574703)        new kernel: registered at /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/vllm/model_executor/layers/batch_invariant.py:935 (Triggered internally at /pytorch/aten/src/ATen/core/dispatch/OperatorEntry.cpp:208.)
+(EngineCore_DP0 pid=574703)   self.m.impl(
+[W919 14:54:32.753832993 Context.cpp:534] Warning: torch.backends.cuda.preferred_blas_library is an experimental feature. If you see any error or unexpected behavior when this flag is set please file an issue on GitHub. (function operator())
+(EngineCore_DP0 pid=574703) Loading safetensors checkpoint shards:   0% Completed | 0/4 [00:00<?, ?it/s]
+(EngineCore_DP0 pid=574703) Loading safetensors checkpoint shards:  25% Completed | 1/4 [00:01<00:04,  1.61s/it]
+(EngineCore_DP0 pid=574703) Loading safetensors checkpoint shards:  50% Completed | 2/4 [00:03<00:03,  1.74s/it]
+(EngineCore_DP0 pid=574703) Loading safetensors checkpoint shards:  75% Completed | 3/4 [00:05<00:01,  1.76s/it]
+(EngineCore_DP0 pid=574703) Loading safetensors checkpoint shards: 100% Completed | 4/4 [00:05<00:00,  1.29s/it]
+(EngineCore_DP0 pid=574703) Loading safetensors checkpoint shards: 100% Completed | 4/4 [00:05<00:00,  1.45s/it]
+(EngineCore_DP0 pid=574703) 
+(EngineCore_DP0 pid=574703) 2026-09-19 14:54:43,678 - INFO - autotuner.py:256 - flashinfer.jit: [Autotuner]: Autotuning process starts ...
+(EngineCore_DP0 pid=574703) 2026-09-19 14:54:43,691 - INFO - autotuner.py:262 - flashinfer.jit: [Autotuner]: Autotuning process ends
+  0%|          | 0/1187 [00:00<?, ?it/s]  8%|▊         | 92/1187 [00:00<00:01, 915.79it/s] 16%|█▋        | 195/1187 [00:00<00:01, 981.88it/s] 25%|██▍       | 294/1187 [00:00<00:00, 975.59it/s] 34%|███▎      | 399/1187 [00:00<00:00, 1001.39it/s] 42%|████▏     | 503/1187 [00:00<00:00, 1014.63it/s] 51%|█████     | 607/1187 [00:00<00:00, 1021.49it/s] 60%|█████▉    | 712/1187 [00:00<00:00, 1027.95it/s] 69%|██████▊   | 816/1187 [00:00<00:00, 1031.00it/s] 78%|███████▊  | 920/1187 [00:00<00:00, 1026.34it/s] 86%|████████▋ | 1024/1187 [00:01<00:00, 1030.12it/s] 95%|█████████▌| 1129/1187 [00:01<00:00, 1034.24it/s]100%|██████████| 1187/1187 [00:01<00:00, 1019.09it/s]
+  0%|          | 0/474 [00:00<?, ?it/s] 22%|██▏       | 102/474 [00:00<00:00, 1015.21it/s] 43%|████▎     | 206/474 [00:00<00:00, 1028.82it/s] 65%|██████▌   | 310/474 [00:00<00:00, 1033.61it/s] 87%|████████▋ | 414/474 [00:00<00:00, 1035.04it/s]100%|██████████| 474/474 [00:00<00:00, 1033.16it/s]
+  0%|          | 0/479 [00:00<?, ?it/s] 17%|█▋        | 83/479 [00:00<00:01, 215.17it/s] 38%|███▊      | 183/479 [00:00<00:00, 427.19it/s] 59%|█████▉    | 285/479 [00:00<00:00, 591.51it/s] 81%|████████  | 388/479 [00:00<00:00, 715.66it/s]100%|██████████| 479/479 [00:00<00:00, 617.89it/s]
+  0%|          | 0/903 [00:00<?, ?it/s] 11%|█▏        | 103/903 [00:00<00:00, 1029.37it/s] 23%|██▎       | 208/903 [00:00<00:00, 1036.16it/s] 35%|███▍      | 313/903 [00:00<00:00, 1039.34it/s] 46%|████▋     | 418/903 [00:00<00:00, 1039.92it/s] 58%|█████▊    | 523/903 [00:00<00:00, 1042.73it/s] 70%|██████▉   | 628/903 [00:00<00:00, 1044.52it/s] 81%|████████  | 733/903 [00:00<00:00, 1043.64it/s] 93%|█████████▎| 838/903 [00:00<00:00, 1045.48it/s]100%|██████████| 903/903 [00:00<00:00, 1043.56it/s]
+  0%|          | 0/540 [00:00<?, ?it/s] 19%|█▉        | 105/540 [00:00<00:00, 1040.19it/s] 39%|███▉      | 210/540 [00:00<00:00, 1043.83it/s] 58%|█████▊    | 315/540 [00:00<00:00, 1042.80it/s] 78%|███████▊  | 420/540 [00:00<00:00, 1042.44it/s] 97%|█████████▋| 525/540 [00:00<00:00, 1043.09it/s]100%|██████████| 540/540 [00:00<00:00, 1042.80it/s]
+  0%|          | 0/871 [00:00<?, ?it/s] 12%|█▏        | 105/871 [00:00<00:00, 1044.06it/s] 24%|██▍       | 210/871 [00:00<00:00, 1043.17it/s] 36%|███▌      | 315/871 [00:00<00:00, 1031.54it/s] 48%|████▊     | 419/871 [00:00<00:00, 1033.39it/s] 60%|██████    | 523/871 [00:00<00:00, 1030.23it/s] 72%|███████▏  | 628/871 [00:00<00:00, 1033.70it/s] 84%|████████▍ | 732/871 [00:00<00:00, 1031.05it/s] 96%|█████████▌| 838/871 [00:00<00:00, 1037.38it/s]100%|██████████| 871/871 [00:00<00:00, 1035.91it/s]
+  0%|          | 0/546 [00:00<?, ?it/s] 19%|█▉        | 103/546 [00:00<00:00, 1025.48it/s] 38%|███▊      | 207/546 [00:00<00:00, 1029.60it/s] 57%|█████▋    | 310/546 [00:00<00:00, 1018.64it/s] 76%|███████▌  | 414/546 [00:00<00:00, 1025.86it/s] 95%|█████████▍| 517/546 [00:00<00:00, 1026.06it/s]100%|██████████| 546/546 [00:00<00:00, 1026.19it/s]
+Running generate_until requests:   0%|          | 0/5000 [00:00<?, ?it/s]Running generate_until requests:   0%|          | 1/5000 [00:19<26:35:12, 19.15s/it]Running generate_until requests:   3%|▎         | 129/5000 [00:26<13:13,  6.14it/s] Running generate_until requests:   5%|▌         | 257/5000 [00:33<07:54,  9.99it/s]Running generate_until requests:   8%|▊         | 385/5000 [00:40<06:03, 12.69it/s]Running generate_until requests:  10%|█         | 513/5000 [00:47<05:05, 14.68it/s]Running generate_until requests:  13%|█▎        | 641/5000 [00:53<04:29, 16.20it/s]Running generate_until requests:  15%|█▌        | 769/5000 [01:00<04:03, 17.39it/s]Running generate_until requests:  18%|█▊        | 897/5000 [01:06<03:43, 18.36it/s]Running generate_until requests:  20%|██        | 1025/5000 [01:12<03:27, 19.15it/s]Running generate_until requests:  23%|██▎       | 1153/5000 [01:18<03:14, 19.81it/s]Running generate_until requests:  26%|██▌       | 1281/5000 [01:24<03:06, 19.99it/s]Running generate_until requests:  28%|██▊       | 1409/5000 [01:30<02:54, 20.57it/s]Running generate_until requests:  31%|███       | 1537/5000 [01:36<02:44, 21.04it/s]Running generate_until requests:  33%|███▎      | 1665/5000 [01:41<02:35, 21.45it/s]Running generate_until requests:  36%|███▌      | 1793/5000 [01:47<02:26, 21.82it/s]Running generate_until requests:  38%|███▊      | 1921/5000 [01:53<02:19, 22.14it/s]Running generate_until requests:  41%|████      | 2049/5000 [01:58<02:11, 22.45it/s]Running generate_until requests:  44%|████▎     | 2177/5000 [02:04<02:04, 22.70it/s]Running generate_until requests:  46%|████▌     | 2305/5000 [02:09<01:57, 22.88it/s]Running generate_until requests:  49%|████▊     | 2433/5000 [02:14<01:51, 23.12it/s]Running generate_until requests:  51%|█████     | 2561/5000 [02:20<01:44, 23.31it/s]Running generate_until requests:  54%|█████▍    | 2689/5000 [02:25<01:38, 23.52it/s]Running generate_until requests:  56%|█████▋    | 2817/5000 [02:31<01:32, 23.61it/s]Running generate_until requests:  59%|█████▉    | 2945/5000 [02:36<01:26, 23.72it/s]Running generate_until requests:  61%|██████▏   | 3073/5000 [02:41<01:20, 23.81it/s]Running generate_until requests:  64%|██████▍   | 3201/5000 [02:46<01:15, 23.94it/s]Running generate_until requests:  67%|██████▋   | 3329/5000 [02:52<01:09, 24.09it/s]Running generate_until requests:  69%|██████▉   | 3457/5000 [02:57<01:03, 24.18it/s]Running generate_until requests:  72%|███████▏  | 3585/5000 [03:02<00:58, 24.37it/s]Running generate_until requests:  74%|███████▍  | 3713/5000 [03:07<00:52, 24.53it/s]Running generate_until requests:  77%|███████▋  | 3841/5000 [03:12<00:46, 24.74it/s]Running generate_until requests:  79%|███████▉  | 3969/5000 [03:17<00:41, 24.95it/s]Running generate_until requests:  82%|████████▏ | 4097/5000 [03:23<00:37, 24.30it/s]Running generate_until requests:  84%|████████▍ | 4225/5000 [03:28<00:31, 24.65it/s]Running generate_until requests:  87%|████████▋ | 4353/5000 [03:33<00:25, 24.90it/s]Running generate_until requests:  90%|████████▉ | 4481/5000 [03:38<00:20, 25.15it/s]Running generate_until requests:  92%|█████████▏| 4609/5000 [03:43<00:15, 25.26it/s]Running generate_until requests:  95%|█████████▍| 4737/5000 [03:48<00:10, 25.48it/s]Running generate_until requests:  97%|█████████▋| 4865/5000 [03:53<00:05, 25.81it/s]Running generate_until requests: 100%|█████████▉| 4993/5000 [03:54<00:00, 33.21it/s]Running generate_until requests: 100%|██████████| 5000/5000 [03:54<00:00, 21.32it/s]
+vllm ({'pretrained': 'kmseong/Llama-3.1-8B-Instruct-ssft_lr5e-5', 'seed': 42, 'attention_backend': 'FLASH_ATTN', 'enforce_eager': True, 'enable_prefix_caching': False, 'tensor_parallel_size': 1, 'data_parallel_size': 1, 'dtype': 'auto', 'gpu_memory_utilization': 0.4}), gen_kwargs: ({}), limit: None, num_fewshot: 5, batch_size: 128
+|                   Tasks                   |Version|Filter|n-shot|  Metric   |   |Value |   |Stderr|
+|-------------------------------------------|------:|------|-----:|-----------|---|-----:|---|-----:|
+|hendrycks_math_safe                        |      1|none  |      |exact_match|↑  |0.0096|±  |0.0014|
+| - hendrycks_math_algebra_safe             |      1|none  |     5|exact_match|↑  |0.0051|±  |0.0021|
+| - hendrycks_math_counting_and_prob_safe   |      1|none  |     5|exact_match|↑  |0.0169|±  |0.0059|
+| - hendrycks_math_geometry_safe            |      1|none  |     5|exact_match|↑  |0.0042|±  |0.0029|
+| - hendrycks_math_intermediate_algebra_safe|      1|none  |     5|exact_match|↑  |0.0055|±  |0.0025|
+| - hendrycks_math_num_theory_safe          |      1|none  |     5|exact_match|↑  |0.0074|±  |0.0037|
+| - hendrycks_math_prealgebra_safe          |      1|none  |     5|exact_match|↑  |0.0172|±  |0.0044|
+| - hendrycks_math_precalc_safe             |      1|none  |     5|exact_match|↑  |0.0147|±  |0.0051|
+
+|      Groups       |Version|Filter|n-shot|  Metric   |   |Value |   |Stderr|
+|-------------------|------:|------|------|-----------|---|-----:|---|-----:|
+|hendrycks_math_safe|      1|none  |      |exact_match|↑  |0.0096|±  |0.0014|
+
+✓ 완료: kmseong/Llama-3.1-8B-Instruct-ssft_lr5e-5 (task: hendrycks_math_safe)
+
+==========================================
+모든 평가 완료!
+총 완료: 1/1개 (모델 1개, 모델별 task는 위 '실행 계획' 참고)
+결과 경로: eval_results/
+로그 파일: logs/eval_20260919_145352_gpu0.log
+==========================================
+평가 종료 시간: Sat Sep 19 02:59:12 PM KST 2026
+결과 요약(readable): logs/eval_20260919_145352_gpu0_results.log
+결과 요약(CSV)     : logs/eval_20260919_145352_gpu0_results.csv
+
+=== 최종 결과 (CSV) ===
+model,hendrycks_math_safe
+kmseong/Llama-3.1-8B-Instruct-ssft_lr5e-5,0.0096
+
+▶ 결과 통합 (HarmBench + lm-eval → 1개 CSV)
+  HarmBench 요약 : (없음)  → 0행
+  lm-eval 요약   : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/lm-evaluation-harness/logs/eval_20260919_145352_gpu0_results.csv
+  agnews/sst2    : /home/edgeai_lab/Safety-WaRP-LLM/evaluation_results/agnews_sst2  → 0개 모델
+✅ 통합 CSV: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/HarmBench/logs/run_all_2026-09-19_14-53-49_summary.csv  (1행 × 3열)
+
+==============================================================================
+🎉 통합 평가 종료
+   모델 (1개):
+     - kmseong/Llama-3.1-8B-Instruct-ssft_lr5e-5
+   HarmBench   : skipped
+                 └ 결과: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/HarmBench/results/  (요약 CSV: results/evaluation_summary_*.csv)
+                 └ 로그: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/HarmBench/logs/run_all_2026-09-19_14-53-49_harmbench.out
+   lm-eval     : done(rc=0)
+                 └ 결과: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/lm-evaluation-harness/eval_results/  (요약: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/lm-evaluation-harness/logs/eval_*_results.csv)
+                 └ 로그: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/HarmBench/logs/run_all_2026-09-19_14-53-49_lmeval.out
+   통합 CSV    : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/HarmBench/logs/run_all_2026-09-19_14-53-49_summary.csv
+==============================================================================
+EVAL_FINISHED rc=0
+STARTMATH_EXIT=0

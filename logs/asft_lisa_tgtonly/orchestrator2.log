@@ -1,0 +1,49 @@
+════════════════════════════════════════════════════════════════
+  실험 1: AsFT / Lisa full-parameter — 16 셀
+  조합   : llama2_7b:gsm8k llama31_8b:math
+  기법   : asft lisa   (AsFT λ=1.0 / Lisa ρ=1.0)
+  출력   : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly
+  업로드 : PUSH_TO_HUB=1  ns=kmseong
+════════════════════════════════════════════════════════════════
+
+────────────────────────────────────────────────────────────
+  llama2_7b / gsm8k / asft
+    출발 : kmseong/llama2_7b-chat-Safety-FT-lr5e-5
+    lr=5e-5  micro=4 x accum=4  ep=3
+    repo : kmseong/llama2_7b-chat-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr5e-5_tgtonly
+────────────────────────────────────────────────────────────
+  [skip] 학습 완료됨
+
+────────────────────────────────────────────────────────────
+  llama2_7b / gsm8k / lisa
+    출발 : kmseong/llama2_7b-chat-Safety-FT-lr5e-5
+    lr=5e-5  micro=4 x accum=4  ep=3
+    repo : kmseong/llama2_7b-chat-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr5e-5_tgtonly
+────────────────────────────────────────────────────────────
+  [skip] 학습 완료됨
+
+────────────────────────────────────────────────────────────
+  llama31_8b / math / asft
+    출발 : kmseong/Llama-3.1-8B-Instruct-ssft_lr5e-5
+    lr=5e-5  micro=2 x accum=8  ep=3
+    repo : kmseong/llama3_1_8b-instruct-CB_SSFT-asft_math_lambda1.0_fullft_lr5e-5_tgtonly
+────────────────────────────────────────────────────────────
+  ✅ 학습 완료 (35분 34초)
+  ▶ 업로드 → kmseong/llama3_1_8b-instruct-CB_SSFT-asft_math_lambda1.0_fullft_lr5e-5_tgtonly
+  ✅ 업로드 완료
+
+────────────────────────────────────────────────────────────
+  llama31_8b / math / lisa
+    출발 : kmseong/Llama-3.1-8B-Instruct-ssft_lr5e-5
+    lr=5e-5  micro=2 x accum=8  ep=3
+    repo : kmseong/llama3_1_8b-instruct-CB_SSFT-lisa_math_rho1.0_fullft_lr5e-5_tgtonly
+────────────────────────────────────────────────────────────
+  ✅ 학습 완료 (23분 34초)
+  ▶ 업로드 → kmseong/llama3_1_8b-instruct-CB_SSFT-lisa_math_rho1.0_fullft_lr5e-5_tgtonly
+  ✅ 업로드 완료
+
+════════════════════════════════════════════════════════════════
+  학습 완료 2 · 건너뜀 2 · 실패 0
+════════════════════════════════════════════════════════════════
+ALL_CELLS_FINISHED
+TGTONLY_EXIT=0

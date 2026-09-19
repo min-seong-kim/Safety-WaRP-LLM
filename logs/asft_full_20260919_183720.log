@@ -1,0 +1,98 @@
+2026-09-19 18:37:20,961 [INFO] ======================================================================
+2026-09-19 18:37:20,961 [INFO]   ⚓ AsFT (full-parameter) — alignment-direction subspace penalty
+2026-09-19 18:37:20,961 [INFO] ======================================================================
+2026-09-19 18:37:20,961 [INFO] Log file: logs/asft_full_20260919_183720.log
+2026-09-19 18:37:20,961 [INFO]    ├─ start / aligned (W₀) : kmseong/Llama-3.1-8B-Instruct-ssft_lr5e-5
+2026-09-19 18:37:20,961 [INFO]    ├─ base (for V)         : meta-llama/Llama-3.1-8B-Instruct
+2026-09-19 18:37:20,961 [INFO]    ├─ Input formatting     : chat template
+2026-09-19 18:37:20,961 [INFO]    ├─ λ = 1.0   targets = ['q_proj', 'k_proj', 'v_proj', 'up_proj', 'down_proj']
+2026-09-19 18:37:20,961 [INFO]    ├─ Downstream           : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/data/math_train_task_7500.json
+2026-09-19 18:37:20,961 [INFO]    ├─ lr 5e-05  epochs 3.0  eff.batch 16  wd 0.01
+2026-09-19 18:37:20,961 [INFO]    └─ Output               : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly/llama31_8b/math/asft/model
+2026-09-19 18:37:20,961 [INFO] [1/4] 토크나이저 로드
+2026-09-19 18:37:22,121 [INFO] [2/4] 모델 로드 + alignment direction 구성
+2026-09-19 18:37:28,300 [INFO] [AsFT] loading base   : meta-llama/Llama-3.1-8B-Instruct (dtype=torch.float32)
+2026-09-19 18:38:50,341 [INFO] [AsFT] loading aligned: kmseong/Llama-3.1-8B-Instruct-ssft_lr5e-5 (dtype=torch.float32)
+2026-09-19 18:39:57,869 [INFO] [AsFT] built 160 alignment directions on cuda (8.50 GiB, dtype=torch.bfloat16)
+2026-09-19 18:39:57,891 [INFO] [AsFT] ‖V‖_F range: [0.7496, 4.9407] mean=2.2742
+2026-09-19 18:40:01,947 [INFO] [AsFT-full] regularizer 연결: 160 개 weight, λ=1.0, W₀+V 저장 17.00 GiB on GPU
+2026-09-19 18:40:01,948 [INFO] [AsFT-full] --train_only_targets: 학습 4,563,402,752 / 동결 3,466,858,496 (56.83% 학습)
+2026-09-19 18:40:01,951 [INFO] [3/4] 다운스트림 'math' 로드 (/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/data/math_train_task_7500.json)
+2026-09-19 18:40:06,148 [INFO] ✅ math train: 7500 samples
+2026-09-19 18:40:06,148 [INFO] [4/4] 학습 시작
+2026-09-19 18:40:10,767 [INFO] [AsFT-full] gradient 검증 (weight 0): ‖auto‖=2.115446e-04 ‖manual‖=2.115446e-04 rel_err=1.471e-06
+2026-09-19 18:40:35,952 [INFO] [train] {'loss': 1.1958, 'grad_norm': 8.8125, 'learning_rate': 6.73758865248227e-06, 'asft_reg': 0.135492}
+2026-09-19 18:41:04,130 [INFO] [train] {'loss': 0.8188, 'grad_norm': 4.625, 'learning_rate': 1.3829787234042554e-05, 'asft_reg': 0.23958}
+2026-09-19 18:41:31,974 [INFO] [train] {'loss': 0.732, 'grad_norm': 7.5625, 'learning_rate': 2.0921985815602837e-05, 'asft_reg': 0.355711}
+2026-09-19 18:41:59,206 [INFO] [train] {'loss': 0.7149, 'grad_norm': 5.75, 'learning_rate': 2.8014184397163124e-05, 'asft_reg': 0.548991}
+2026-09-19 18:42:27,159 [INFO] [train] {'loss': 0.7276, 'grad_norm': 5.03125, 'learning_rate': 3.5106382978723407e-05, 'asft_reg': 0.873255}
+2026-09-19 18:42:55,074 [INFO] [train] {'loss': 0.6686, 'grad_norm': 6.09375, 'learning_rate': 4.219858156028369e-05, 'asft_reg': 1.013012}
+2026-09-19 18:43:23,299 [INFO] [train] {'loss': 0.707, 'grad_norm': 5.21875, 'learning_rate': 4.929078014184397e-05, 'asft_reg': 1.269991}
+2026-09-19 18:43:51,517 [INFO] [train] {'loss': 0.6991, 'grad_norm': 5.875, 'learning_rate': 4.99750646683517e-05, 'asft_reg': 1.463623}
+2026-09-19 18:44:19,084 [INFO] [train] {'loss': 0.7391, 'grad_norm': 4.6875, 'learning_rate': 4.9888932319026994e-05, 'asft_reg': 1.288601}
+2026-09-19 18:44:46,705 [INFO] [train] {'loss': 0.7829, 'grad_norm': 6.0625, 'learning_rate': 4.974150717193654e-05, 'asft_reg': 1.248742}
+2026-09-19 18:45:14,613 [INFO] [train] {'loss': 0.7177, 'grad_norm': 4.71875, 'learning_rate': 4.953315228402512e-05, 'asft_reg': 1.205726}
+2026-09-19 18:45:42,333 [INFO] [train] {'loss': 0.7338, 'grad_norm': 5.09375, 'learning_rate': 4.926438076103162e-05, 'asft_reg': 1.235694}
+2026-09-19 18:46:09,971 [INFO] [train] {'loss': 0.6831, 'grad_norm': 5.8125, 'learning_rate': 4.893585449388786e-05, 'asft_reg': 1.153248}
+2026-09-19 18:46:38,067 [INFO] [train] {'loss': 0.6729, 'grad_norm': 4.90625, 'learning_rate': 4.854838252871097e-05, 'asft_reg': 1.151904}
+2026-09-19 18:47:05,237 [INFO] [train] {'loss': 0.7175, 'grad_norm': 4.21875, 'learning_rate': 4.8102919074403816e-05, 'asft_reg': 1.249434}
+2026-09-19 18:47:32,829 [INFO] [train] {'loss': 0.7261, 'grad_norm': 4.9375, 'learning_rate': 4.760056115276979e-05, 'asft_reg': 1.150317}
+2026-09-19 18:47:59,777 [INFO] [train] {'loss': 0.7023, 'grad_norm': 5.34375, 'learning_rate': 4.704254589692903e-05, 'asft_reg': 1.030614}
+2026-09-19 18:48:27,601 [INFO] [train] {'loss': 0.7448, 'grad_norm': 4.5625, 'learning_rate': 4.643024750468913e-05, 'asft_reg': 0.988243}
+2026-09-19 18:48:55,097 [INFO] [train] {'loss': 0.693, 'grad_norm': 6.0625, 'learning_rate': 4.5765173854373145e-05, 'asft_reg': 0.945575}
+2026-09-19 18:49:22,490 [INFO] [train] {'loss': 0.6847, 'grad_norm': 5.71875, 'learning_rate': 4.5048962791438886e-05, 'asft_reg': 0.885626}
+2026-09-19 18:49:50,246 [INFO] [train] {'loss': 0.6973, 'grad_norm': 4.84375, 'learning_rate': 4.428337809503425e-05, 'asft_reg': 0.867708}
+2026-09-19 18:50:18,617 [INFO] [train] {'loss': 0.6938, 'grad_norm': 4.4375, 'learning_rate': 4.3470305134421686e-05, 'asft_reg': 0.82188}
+2026-09-19 18:50:45,567 [INFO] [train] {'loss': 0.7109, 'grad_norm': 5.46875, 'learning_rate': 4.261174622596835e-05, 'asft_reg': 0.863108}
+2026-09-19 18:51:12,258 [INFO] [train] {'loss': 0.6665, 'grad_norm': 4.53125, 'learning_rate': 4.170981570213621e-05, 'asft_reg': 0.854381}
+2026-09-19 18:51:39,534 [INFO] [train] {'loss': 0.696, 'grad_norm': 6.59375, 'learning_rate': 4.076673470461538e-05, 'asft_reg': 0.726775}
+2026-09-19 18:52:07,179 [INFO] [train] {'loss': 0.7346, 'grad_norm': 5.40625, 'learning_rate': 3.978482571442339e-05, 'asft_reg': 0.696636}
+2026-09-19 18:52:34,166 [INFO] [train] {'loss': 0.7225, 'grad_norm': 4.84375, 'learning_rate': 3.876650683244093e-05, 'asft_reg': 0.712929}
+2026-09-19 18:53:01,241 [INFO] [train] {'loss': 0.7349, 'grad_norm': 5.1875, 'learning_rate': 3.771428582446908e-05, 'asft_reg': 0.5767}
+2026-09-19 18:53:28,904 [INFO] [train] {'loss': 0.7264, 'grad_norm': 4.875, 'learning_rate': 3.663075394547285e-05, 'asft_reg': 0.575132}
+2026-09-19 18:53:55,613 [INFO] [train] {'loss': 0.6333, 'grad_norm': 4.71875, 'learning_rate': 3.551857955822014e-05, 'asft_reg': 0.560872}
+2026-09-19 18:54:23,144 [INFO] [train] {'loss': 0.7047, 'grad_norm': 5.25, 'learning_rate': 3.4380501562030704e-05, 'asft_reg': 0.523734}
+2026-09-19 18:54:50,749 [INFO] [train] {'loss': 0.6973, 'grad_norm': 4.8125, 'learning_rate': 3.321932264781822e-05, 'asft_reg': 0.521444}
+2026-09-19 18:55:18,502 [INFO] [train] {'loss': 0.6836, 'grad_norm': 6.34375, 'learning_rate': 3.203790239603583e-05, 'asft_reg': 0.426489}
+2026-09-19 18:55:46,271 [INFO] [train] {'loss': 0.6788, 'grad_norm': 6.53125, 'learning_rate': 3.08391502345224e-05, 'asft_reg': 0.420307}
+2026-09-19 18:56:13,865 [INFO] [train] {'loss': 0.7228, 'grad_norm': 5.03125, 'learning_rate': 2.9626018273592075e-05, 'asft_reg': 0.419687}
+2026-09-19 18:56:41,299 [INFO] [train] {'loss': 0.6909, 'grad_norm': 3.59375, 'learning_rate': 2.8401494036011656e-05, 'asft_reg': 0.382225}
+2026-09-19 18:57:09,260 [INFO] [train] {'loss': 0.6548, 'grad_norm': 4.59375, 'learning_rate': 2.7168593099769412e-05, 'asft_reg': 0.342814}
+2026-09-19 18:57:37,223 [INFO] [train] {'loss': 0.6576, 'grad_norm': 4.46875, 'learning_rate': 2.5930351671753707e-05, 'asft_reg': 0.302948}
+2026-09-19 18:58:04,950 [INFO] [train] {'loss': 0.6635, 'grad_norm': 3.984375, 'learning_rate': 2.4689819110629636e-05, 'asft_reg': 0.272182}
+2026-09-19 18:58:32,327 [INFO] [train] {'loss': 0.6763, 'grad_norm': 3.5625, 'learning_rate': 2.345005041732759e-05, 'asft_reg': 0.293238}
+2026-09-19 18:58:59,286 [INFO] [train] {'loss': 0.7254, 'grad_norm': 6.34375, 'learning_rate': 2.2214098711636753e-05, 'asft_reg': 0.262413}
+2026-09-19 18:59:26,568 [INFO] [train] {'loss': 0.7012, 'grad_norm': 4.34375, 'learning_rate': 2.098500771343124e-05, 'asft_reg': 0.23668}
+2026-09-19 18:59:54,082 [INFO] [train] {'loss': 0.6768, 'grad_norm': 4.96875, 'learning_rate': 1.9765804247044976e-05, 'asft_reg': 0.206781}
+2026-09-19 19:00:22,019 [INFO] [train] {'loss': 0.6759, 'grad_norm': 4.25, 'learning_rate': 1.855949078725442e-05, 'asft_reg': 0.205273}
+2026-09-19 19:00:49,516 [INFO] [train] {'loss': 0.666, 'grad_norm': 4.4375, 'learning_rate': 1.736903806522574e-05, 'asft_reg': 0.181573}
+2026-09-19 19:01:17,233 [INFO] [train] {'loss': 0.6912, 'grad_norm': 5.59375, 'learning_rate': 1.6197377752635563e-05, 'asft_reg': 0.176254}
+2026-09-19 19:01:44,203 [INFO] [train] {'loss': 0.6825, 'grad_norm': 5.3125, 'learning_rate': 1.5047395241981605e-05, 'asft_reg': 0.16295}
+2026-09-19 19:02:11,486 [INFO] [train] {'loss': 0.6795, 'grad_norm': 4.15625, 'learning_rate': 1.3921922540862905e-05, 'asft_reg': 0.148878}
+2026-09-19 19:02:38,937 [INFO] [train] {'loss': 0.6718, 'grad_norm': 4.3125, 'learning_rate': 1.2823731297728536e-05, 'asft_reg': 0.141264}
+2026-09-19 19:03:06,508 [INFO] [train] {'loss': 0.6469, 'grad_norm': 4.09375, 'learning_rate': 1.1755525976269851e-05, 'asft_reg': 0.128505}
+2026-09-19 19:03:33,980 [INFO] [train] {'loss': 0.6415, 'grad_norm': 5.3125, 'learning_rate': 1.0719937195265557e-05, 'asft_reg': 0.117664}
+2026-09-19 19:04:02,168 [INFO] [train] {'loss': 0.6571, 'grad_norm': 4.75, 'learning_rate': 9.719515250281123e-06, 'asft_reg': 0.110196}
+2026-09-19 19:04:30,300 [INFO] [train] {'loss': 0.6863, 'grad_norm': 4.3125, 'learning_rate': 8.756723833176376e-06, 'asft_reg': 0.10373}
+2026-09-19 19:04:57,554 [INFO] [train] {'loss': 0.7242, 'grad_norm': 4.9375, 'learning_rate': 7.833933964887985e-06, 'asft_reg': 0.100406}
+2026-09-19 19:05:25,472 [INFO] [train] {'loss': 0.7112, 'grad_norm': 5.75, 'learning_rate': 6.953418156428151e-06, 'asft_reg': 0.095475}
+2026-09-19 19:05:52,947 [INFO] [train] {'loss': 0.6852, 'grad_norm': 6.28125, 'learning_rate': 6.117344812479153e-06, 'asft_reg': 0.091081}
+2026-09-19 19:06:20,291 [INFO] [train] {'loss': 0.6505, 'grad_norm': 4.9375, 'learning_rate': 5.327772891365565e-06, 'asft_reg': 0.0885}
+2026-09-19 19:06:47,389 [INFO] [train] {'loss': 0.679, 'grad_norm': 4.375, 'learning_rate': 4.586646834554864e-06, 'asft_reg': 0.086717}
+2026-09-19 19:07:14,301 [INFO] [train] {'loss': 0.6972, 'grad_norm': 4.46875, 'learning_rate': 3.895791778173288e-06, 'asft_reg': 0.08488}
+2026-09-19 19:07:42,177 [INFO] [train] {'loss': 0.6526, 'grad_norm': 5.5, 'learning_rate': 3.2569090583293354e-06, 'asft_reg': 0.083207}
+2026-09-19 19:08:09,286 [INFO] [train] {'loss': 0.6577, 'grad_norm': 5.9375, 'learning_rate': 2.6715720213136953e-06, 'asft_reg': 0.082542}
+2026-09-19 19:08:36,682 [INFO] [train] {'loss': 0.6616, 'grad_norm': 4.1875, 'learning_rate': 2.1412221489936796e-06, 'asft_reg': 0.081873}
+2026-09-19 19:09:04,078 [INFO] [train] {'loss': 0.7532, 'grad_norm': 5.8125, 'learning_rate': 1.6671655089439186e-06, 'asft_reg': 0.081574}
+2026-09-19 19:09:31,606 [INFO] [train] {'loss': 0.6693, 'grad_norm': 5.09375, 'learning_rate': 1.250569538055471e-06, 'asft_reg': 0.08126}
+2026-09-19 19:09:59,223 [INFO] [train] {'loss': 0.6843, 'grad_norm': 4.6875, 'learning_rate': 8.924601675441208e-07, 'asft_reg': 0.081109}
+2026-09-19 19:10:27,227 [INFO] [train] {'loss': 0.6549, 'grad_norm': 6.71875, 'learning_rate': 5.937192964380556e-07, 'asft_reg': 0.081025}
+2026-09-19 19:10:54,842 [INFO] [train] {'loss': 0.7117, 'grad_norm': 6.34375, 'learning_rate': 3.550826197667889e-07, 'asft_reg': 0.080997}
+2026-09-19 19:11:21,905 [INFO] [train] {'loss': 0.6687, 'grad_norm': 4.28125, 'learning_rate': 1.771378167997745e-07, 'asft_reg': 0.080987}
+2026-09-19 19:11:49,746 [INFO] [train] {'loss': 0.6897, 'grad_norm': 4.875, 'learning_rate': 6.032310379642803e-08, 'asft_reg': 0.080984}
+2026-09-19 19:12:18,064 [INFO] [train] {'loss': 0.6338, 'grad_norm': 4.625, 'learning_rate': 4.926154831655372e-09, 'asft_reg': 0.080984}
+2026-09-19 19:12:27,563 [INFO] [train] {'train_runtime': 1941.1765, 'train_samples_per_second': 11.591, 'train_steps_per_second': 0.725, 'total_flos': 4.265956186588938e+17, 'train_loss': 0.7011370435198233}
+2026-09-19 19:12:27,825 [INFO] 최종 벌점 값: 8.098395e-02
+2026-09-19 19:12:28,133 [INFO] 모델 저장
+2026-09-19 19:12:48,039 [INFO] ✅ Saved to /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly/llama31_8b/math/asft/model
+2026-09-19 19:12:48,039 [INFO] ✅ AsFT (full-param) 완료

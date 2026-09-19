@@ -1,0 +1,28 @@
+2026-09-19 02:26:28 - __main__ - INFO - 
+======================================================================
+2026-09-19 02:26:28 - __main__ - INFO -   🚀 LISA (Bi-State Optimization) GSM8K Fine-tuning
+2026-09-19 02:26:28 - __main__ - INFO - ======================================================================
+
+2026-09-19 02:26:28 - __main__ - INFO - Log file: ./logs/lisa_gsm8k/finetune_gsm8k_lisa_20260919_022628.log
+2026-09-19 02:26:28 - __main__ - INFO - ⚙️  Configuration:
+2026-09-19 02:26:28 - __main__ - INFO -    ├─ Base model: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.tmp/lisa_equiv2_228309/tiny
+2026-09-19 02:26:28 - __main__ - INFO -    ├─ Input formatting: base plain prompt
+2026-09-19 02:26:28 - __main__ - INFO -    ├─ Tuning: Full-parameter
+2026-09-19 02:26:28 - __main__ - INFO -    ├─ BSO: ON  rho=1.0 align_step=3 finetune_step=5
+2026-09-19 02:26:28 - __main__ - INFO -    ├─ Safety(alignment) data: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.tmp/lisa_equiv2_228309/safety.json (guide_data_num=32)
+2026-09-19 02:26:28 - __main__ - INFO -    ├─ Downstream: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.tmp/lisa_equiv2_228309/task.json (로컬 태스크 JSON), clean (no poison)
+2026-09-19 02:26:28 - __main__ - INFO -    ├─ LR: 0.0001  epochs: 3  eff.batch: 8
+2026-09-19 02:26:28 - __main__ - INFO -    └─ Output dir: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.tmp/lisa_equiv2_228309/B_same
+
+2026-09-19 02:26:28 - __main__ - INFO - [1/4] Loading tokenizer
+2026-09-19 02:26:28 - __main__ - INFO - ✅ Tokenizer loaded (vocab=32000, pad=</s>)
+2026-09-19 02:26:28 - __main__ - INFO - [2/4] Loading model (bf16)
+2026-09-19 02:26:29 - __main__ - INFO - ✅ Model loaded (0.00B total, 4.2M trainable = 100.00%)
+2026-09-19 02:26:29 - __main__ - INFO - [3/4] Loading & tokenizing 로컬 태스크 'task' (/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.tmp/lisa_equiv2_228309/task.json) — downstream/finetune
+2026-09-19 02:26:29 - __main__ - INFO - ✅ task train: 64 samples
+2026-09-19 02:26:29 - __main__ - INFO - ✅ Alignment(safety) data: 32 samples (from /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.tmp/lisa_equiv2_228309/safety.json)
+2026-09-19 02:26:29 - __main__ - INFO - [4/4] Training with LISA BSO
+2026-09-19 02:26:29 - __main__ - INFO - Starting training...
+2026-09-19 02:26:31 - __main__ - INFO - Saving model
+2026-09-19 02:26:32 - __main__ - INFO - ✅ Saved to /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.tmp/lisa_equiv2_228309/B_same
+2026-09-19 02:26:32 - __main__ - INFO - ✅ LISA fine-tuning complete!

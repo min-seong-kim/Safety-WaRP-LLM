@@ -1,0 +1,8 @@
+[deferred] 13B 셀 종료 확인 — 벌점 검증 시작 2026-09-19T05:02:38+09:00
+loading base/aligned/tuned on CPU ...
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [01:26<01:26, 86.12s/it]Loading checkpoint shards: 100%|██████████| 2/2 [01:48<00:00, 48.76s/it]Loading checkpoint shards: 100%|██████████| 2/2 [01:48<00:00, 54.36s/it]
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards:  33%|███▎      | 1/3 [00:30<01:00, 30.38s/it]Loading checkpoint shards:  67%|██████▋   | 2/3 [01:08<00:34, 34.80s/it]Loading checkpoint shards: 100%|██████████| 3/3 [01:57<00:00, 41.20s/it]Loading checkpoint shards: 100%|██████████| 3/3 [01:57<00:00, 39.03s/it]
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards:  33%|███▎      | 1/3 [01:00<02:01, 60.88s/it]Loading checkpoint shards:  67%|██████▋   | 2/3 [01:43<00:49, 49.98s/it]Loading checkpoint shards: 100%|██████████| 3/3 [02:16<00:00, 42.20s/it]Loading checkpoint shards: 100%|██████████| 3/3 [02:16<00:00, 45.39s/it]
+대상 weight 160 개
+Σ‖(I−Ĉ)ΔW‖²_F = 4.459419e-03
+[deferred] 완료

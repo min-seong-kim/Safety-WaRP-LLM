@@ -1,0 +1,173 @@
+════════════════════════════════════════════════════════════════
+  실험 1: AsFT / Lisa full-parameter — 16 셀
+  조합   : llama2_7b:gsm8k llama2_13b:gsm8k llama31_8b:math llama32_3b:math qwen25_7b:gsm8k gemma2_9b:gsm8k llama2_7b:medqa llama2_7b:arc
+  기법   : asft lisa   (AsFT λ=1.0 / Lisa ρ=1.0)
+  출력   : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_fullft
+  업로드 : PUSH_TO_HUB=1  ns=kmseong
+════════════════════════════════════════════════════════════════
+
+────────────────────────────────────────────────────────────
+  llama2_7b / gsm8k / asft
+    출발 : kmseong/llama2_7b-chat-Safety-FT-lr5e-5
+    lr=5e-5  micro=4 x accum=4  ep=3
+    repo : kmseong/llama2_7b-chat-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr5e-5
+────────────────────────────────────────────────────────────
+  ✅ 학습 완료 (24분 35초)
+  ▶ 업로드 → kmseong/llama2_7b-chat-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr5e-5
+  ✅ 업로드 완료
+
+────────────────────────────────────────────────────────────
+  llama2_7b / gsm8k / lisa
+    출발 : kmseong/llama2_7b-chat-Safety-FT-lr5e-5
+    lr=5e-5  micro=4 x accum=4  ep=3
+    repo : kmseong/llama2_7b-chat-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr5e-5
+────────────────────────────────────────────────────────────
+  ✅ 학습 완료 (17분 2초)
+  ▶ 업로드 → kmseong/llama2_7b-chat-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr5e-5
+  ✅ 업로드 완료
+
+────────────────────────────────────────────────────────────
+  llama2_13b / gsm8k / asft
+    출발 : wvnvwn/llama-2-13b-chat-hf-SSFT-lr5e-5
+    lr=5e-5  micro=1 x accum=16  ep=3
+    repo : kmseong/llama2_13b-chat-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr5e-5
+────────────────────────────────────────────────────────────
+  ✅ 학습 완료 (96분 54초)
+  ▶ 업로드 → kmseong/llama2_13b-chat-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr5e-5
+  ✅ 업로드 완료
+
+────────────────────────────────────────────────────────────
+  llama2_13b / gsm8k / lisa
+    출발 : wvnvwn/llama-2-13b-chat-hf-SSFT-lr5e-5
+    lr=5e-5  micro=1 x accum=16  ep=3
+    repo : kmseong/llama2_13b-chat-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr5e-5
+────────────────────────────────────────────────────────────
+  ✅ 학습 완료 (67분 35초)
+  ▶ 업로드 → kmseong/llama2_13b-chat-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr5e-5
+  ✅ 업로드 완료
+
+────────────────────────────────────────────────────────────
+  llama31_8b / math / asft
+    출발 : kmseong/Llama-3.1-8B-Instruct-ssft_lr5e-5
+    lr=5e-5  micro=2 x accum=8  ep=3
+    repo : kmseong/llama3_1_8b-instruct-CB_SSFT-asft_math_lambda1.0_fullft_lr5e-5
+────────────────────────────────────────────────────────────
+  ✅ 학습 완료 (45분 37초)
+  ▶ 업로드 → kmseong/llama3_1_8b-instruct-CB_SSFT-asft_math_lambda1.0_fullft_lr5e-5
+  ✅ 업로드 완료
+
+────────────────────────────────────────────────────────────
+  llama31_8b / math / lisa
+    출발 : kmseong/Llama-3.1-8B-Instruct-ssft_lr5e-5
+    lr=5e-5  micro=2 x accum=8  ep=3
+    repo : kmseong/llama3_1_8b-instruct-CB_SSFT-lisa_math_rho1.0_fullft_lr5e-5
+────────────────────────────────────────────────────────────
+  ✅ 학습 완료 (33분 8초)
+  ▶ 업로드 → kmseong/llama3_1_8b-instruct-CB_SSFT-lisa_math_rho1.0_fullft_lr5e-5
+  ✅ 업로드 완료
+
+────────────────────────────────────────────────────────────
+  llama32_3b / math / asft
+    출발 : kmseong/llama3_2_3b-instruct-SSFT-lr5e-5
+    lr=5e-5  micro=8 x accum=2  ep=3
+    repo : kmseong/llama3_2_3b-instruct-CB_SSFT-asft_math_lambda1.0_fullft_lr5e-5
+────────────────────────────────────────────────────────────
+  ✅ 학습 완료 (18분 31초)
+  ▶ 업로드 → kmseong/llama3_2_3b-instruct-CB_SSFT-asft_math_lambda1.0_fullft_lr5e-5
+  ✅ 업로드 완료
+
+────────────────────────────────────────────────────────────
+  llama32_3b / math / lisa
+    출발 : kmseong/llama3_2_3b-instruct-SSFT-lr5e-5
+    lr=5e-5  micro=8 x accum=2  ep=3
+    repo : kmseong/llama3_2_3b-instruct-CB_SSFT-lisa_math_rho1.0_fullft_lr5e-5
+────────────────────────────────────────────────────────────
+  ✅ 학습 완료 (12분 2초)
+  ▶ 업로드 → kmseong/llama3_2_3b-instruct-CB_SSFT-lisa_math_rho1.0_fullft_lr5e-5
+  ✅ 업로드 완료
+
+────────────────────────────────────────────────────────────
+  qwen25_7b / gsm8k / asft
+    출발 : wvnvwn/qwen-2.5-7B-Instruct-SSFT-lr5e-5
+    lr=5e-5  micro=2 x accum=8  ep=3
+    repo : kmseong/qwen2_5_7b-instruct-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr5e-5
+────────────────────────────────────────────────────────────
+  ✅ 학습 완료 (34분 36초)
+  ▶ 업로드 → kmseong/qwen2_5_7b-instruct-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr5e-5
+  ✅ 업로드 완료
+
+────────────────────────────────────────────────────────────
+  qwen25_7b / gsm8k / lisa
+    출발 : wvnvwn/qwen-2.5-7B-Instruct-SSFT-lr5e-5
+    lr=5e-5  micro=2 x accum=8  ep=3
+    repo : kmseong/qwen2_5_7b-instruct-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr5e-5
+────────────────────────────────────────────────────────────
+  ✅ 학습 완료 (28분 20초)
+  ▶ 업로드 → kmseong/qwen2_5_7b-instruct-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr5e-5
+  ✅ 업로드 완료
+
+────────────────────────────────────────────────────────────
+  gemma2_9b / gsm8k / asft
+    출발 : wvnvwn/gemma-2-9b-it-ssft-lr3e-5
+    lr=1e-5  micro=1 x accum=16  ep=3
+    repo : kmseong/gemma2_9b-it-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr1e-5
+────────────────────────────────────────────────────────────
+  ✅ 학습 완료 (68분 24초)
+  ▶ 업로드 → kmseong/gemma2_9b-it-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr1e-5
+  ✅ 업로드 완료
+
+────────────────────────────────────────────────────────────
+  gemma2_9b / gsm8k / lisa
+    출발 : wvnvwn/gemma-2-9b-it-ssft-lr3e-5
+    lr=1e-5  micro=1 x accum=16  ep=3
+    repo : kmseong/gemma2_9b-it-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr1e-5
+────────────────────────────────────────────────────────────
+  ✅ 학습 완료 (67분 19초)
+  ▶ 업로드 → kmseong/gemma2_9b-it-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr1e-5
+  ✅ 업로드 완료
+
+────────────────────────────────────────────────────────────
+  llama2_7b / medqa / asft
+    출발 : kmseong/llama2_7b-chat-Safety-FT-lr5e-5
+    lr=5e-5  micro=4 x accum=4  ep=3
+    repo : kmseong/llama2_7b-chat-CB_SSFT-asft_medqa_lambda1.0_fullft_lr5e-5
+────────────────────────────────────────────────────────────
+  ✅ 학습 완료 (38분 8초)
+  ▶ 업로드 → kmseong/llama2_7b-chat-CB_SSFT-asft_medqa_lambda1.0_fullft_lr5e-5
+  ✅ 업로드 완료
+
+────────────────────────────────────────────────────────────
+  llama2_7b / medqa / lisa
+    출발 : kmseong/llama2_7b-chat-Safety-FT-lr5e-5
+    lr=5e-5  micro=4 x accum=4  ep=3
+    repo : kmseong/llama2_7b-chat-CB_SSFT-lisa_medqa_rho1.0_fullft_lr5e-5
+────────────────────────────────────────────────────────────
+  ✅ 학습 완료 (26분 21초)
+  ▶ 업로드 → kmseong/llama2_7b-chat-CB_SSFT-lisa_medqa_rho1.0_fullft_lr5e-5
+  ✅ 업로드 완료
+
+────────────────────────────────────────────────────────────
+  llama2_7b / arc / asft
+    출발 : kmseong/llama2_7b-chat-Safety-FT-lr5e-5
+    lr=5e-5  micro=4 x accum=4  ep=3
+    repo : kmseong/llama2_7b-chat-CB_SSFT-asft_arc_lambda1.0_fullft_lr5e-5
+────────────────────────────────────────────────────────────
+  ✅ 학습 완료 (6분 41초)
+  ▶ 업로드 → kmseong/llama2_7b-chat-CB_SSFT-asft_arc_lambda1.0_fullft_lr5e-5
+  ✅ 업로드 완료
+
+────────────────────────────────────────────────────────────
+  llama2_7b / arc / lisa
+    출발 : kmseong/llama2_7b-chat-Safety-FT-lr5e-5
+    lr=5e-5  micro=4 x accum=4  ep=3
+    repo : kmseong/llama2_7b-chat-CB_SSFT-lisa_arc_rho1.0_fullft_lr5e-5
+────────────────────────────────────────────────────────────
+  ✅ 학습 완료 (2분 47초)
+  ▶ 업로드 → kmseong/llama2_7b-chat-CB_SSFT-lisa_arc_rho1.0_fullft_lr5e-5
+  ✅ 업로드 완료
+
+════════════════════════════════════════════════════════════════
+  학습 완료 16 · 건너뜀 0 · 실패 0
+════════════════════════════════════════════════════════════════
+ALL_CELLS_FINISHED
+EXP1_ORCHESTRATOR_EXIT=0

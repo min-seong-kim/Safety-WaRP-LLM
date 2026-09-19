@@ -148,6 +148,16 @@ def parse_args():
                    help="한 번의 finetune status 에서 도는 스텝 수")
 
     # LoRA
+    p.add_argument("--train_only_targets", type=str, default=None,
+                   help="쉼표구분 모듈 이름(예: q_proj,k_proj,v_proj,up_proj,down_proj). 주면 그 "
+                        "2-D weight 만 학습하고 나머지는 동결한다. WSR-Tune 은 basis_coeff(= 그 5개 "
+                        "projection) 만 학습하므로 공정 비교에 필요하다. proximal 항은 "
+                        "requires_grad 인 파라미터만 도므로 자동으로 같은 범위가 된다.")
+    p.add_argument("--anchor_device", type=str, default="same", choices=["same", "cpu"],
+                   help="proximal anchor(consensus weight 2벌)를 둘 장치. 기본 'same'=파라미터와 "
+                        "같은 장치(기존 동작). full-param 13B 처럼 VRAM 이 빠듯하면 'cpu'. "
+                        "'cpu' 를 주면 proximal 항을 loss 에 얹는 대신 **해석적 그래디언트**로 "
+                        "optimizer step 당 한 번만 더한다(아래 _apply_prox_grad 주석 참조).")
     p.add_argument("--lora", action="store_true", default=True,
                    help="LoRA 로 학습 (기본 활성). full-param 을 원하면 --no_lora")
     p.add_argument("--no_lora", dest="lora", action="store_false")
@@ -306,10 +316,13 @@ class LisaTrainer(Trainer):
             self.status = "finetune"
         self.alignment_weights = {}
         self.finetune_weights = {}
+        self._anchor_cpu = (getattr(self.args, "anchor_device", "same") == "cpu")
+        # 해석적 prox 경로용: 누적 주기 안에서 게이트를 통과한 micro-batch 수를 status 별로 센다.
+        self._prox_pending = {"alignment": 0, "finetune": 0}
         for name, param in self.model.named_parameters():
             if param.requires_grad:
-                self.alignment_weights[name] = param.data.detach().clone()
-                self.finetune_weights[name] = param.data.detach().clone()
+                self.alignment_weights[name] = self._store_anchor(param)
+                self.finetune_weights[name] = self._store_anchor(param)
         self.clock = 0
         self.steps = 0
         # proximal term 은 전체 스텝의 앞 10% 이후부터 적용
@@ -318,21 +331,75 @@ class LisaTrainer(Trainer):
             self.alignment_dataloader = self.get_alignment_dataloader(alignment_dataset)
             self.data_iter = iter(self.alignment_dataloader)
 
+    def _store_anchor(self, param):
+        """anchor 사본을 만든다. anchor_device=cpu 면 CPU 로 내린다(피크 VRAM 절약)."""
+        t = param.data.detach()
+        return t.to("cpu", copy=True) if self._anchor_cpu else t.clone()
+
     def switch_model(self):
         """status 전환 시 현재 weight 를 상대 상태의 consensus anchor 로 저장."""
         sum_drift = 0
         if self.status == "alignment":
             for name, param in self.model.named_parameters():
                 if param.requires_grad:
-                    self.finetune_weights[name] = param.data.detach().clone()
+                    self.finetune_weights[name] = self._store_anchor(param)
                     sum_drift += torch.norm(self.finetune_weights[name] - self.alignment_weights[name]) ** 2
             print("finetuning drift to consensus {}".format(sum_drift))
         else:
             for name, param in self.model.named_parameters():
                 if param.requires_grad:
-                    self.alignment_weights[name] = param.data.detach().clone()
+                    self.alignment_weights[name] = self._store_anchor(param)
                     sum_drift += torch.norm(self.finetune_weights[name] - self.alignment_weights[name]) ** 2
             print("alignment drift to consensus {}".format(sum_drift))
+
+    def _apply_prox_grad(self):
+        """proximal 항의 그래디언트를 param.grad 에 직접 더한다 (anchor_device=cpu 전용).
+
+        왜 필요한가 — 기본 경로는 micro-batch 마다
+            loss += rho/2 * ||theta - anchor||^2
+        를 얹는다. anchor 가 CPU 에 있으면 **micro-batch 마다** 모델 2벌치를 GPU 로 끌어와야
+        하고, 13B(grad_accum=16)면 optimizer step 당 832GB 가 PCIe 를 오간다 — 셀 하나에
+        16시간이 걸린다. 게다가 autograd 가 `param - anchor` 를 전부 물고 있어(13B 기준 26GB)
+        anchor 를 GPU 에 올리는 선택지도 183GB 한도를 넘긴다.
+
+        여기서는 대신 gradient 를 직접 쓴다:
+            grad[ rho/2 * ||theta - a||^2 ] = rho * (theta - a)
+        accelerate 의 backward 가 loss 를 grad_accum 으로 나누므로, 기존 경로의 micro-batch 당
+        기여는 rho*(theta-a)/grad_accum 이고 한 주기(grad_accum 개)를 합치면 rho*(theta-a) 다.
+        theta 는 주기 안에서 바뀌지 않으므로 **주기당 한 번** rho*(theta-a) 를 더하는 것과
+        수학적으로 같다. 임시 텐서가 없어 메모리도 들지 않는다.
+
+        유일한 차이는 주기 도중 status 가 바뀌는 경우다(alignment<->finetune 전환, 전체
+        1404 step 중 약 22회). 그때 기존 경로는 micro-batch 별로 다른 anchor 를 쓰지만 여기서는
+        주기 끝의 status 를 쓴다. switch_model() 이 전환 시점에 anchor 를 현재 weight 로
+        덮어쓰므로 그 직후의 prox 항은 어차피 0 에 가깝다 — 무시할 수 있는 차이다.
+        """
+        for status, cnt in list(self._prox_pending.items()):
+            if cnt == 0:
+                continue
+            # ⚠️ 배율에 주의. 이 트레이너는 Trainer.training_step 을 통째로 오버라이드하고
+            #    `self.accelerator.backward(loss)` 를 **나누지 않은 loss** 에 바로 건다.
+            #    transformers 4.57 의 기본 training_step 이 하던 1/grad_accum 나눗셈이 없고
+            #    accelerate 도 여기서는 나누지 않는다 — 즉 게이트를 통과한 micro-batch 하나가
+            #    rho*(theta-a) 를 **통째로** 더한다(2026-09-19 실측: loss 경로가 rho*(theta-a)/ga
+            #    가정 대비 정확히 grad_accum 배, 방향 cos=1.000000).
+            #    기존 LISA 결과가 모두 이 동작으로 만들어졌으므로 여기서 그대로 재현한다.
+            anchors = (self.finetune_weights if status == "alignment"
+                       else self.alignment_weights)
+            alpha = self.args.rho * cnt
+            with torch.no_grad():
+                for name, param in self.model.named_parameters():
+                    if not param.requires_grad:
+                        continue
+                    a = anchors.get(name)
+                    if a is None:
+                        continue
+                    if a.device != param.device:
+                        a = a.to(param.device, non_blocking=True)
+                    if param.grad is None:
+                        param.grad = torch.zeros_like(param)
+                    param.grad.add_((param.data - a).to(param.grad.dtype), alpha=alpha)
+            self._prox_pending[status] = 0
 
     def sample_from_alignment(self):
         try:
@@ -379,15 +446,24 @@ class LisaTrainer(Trainer):
                 loss = loss.mean()
 
             # proximal term (consensus 로 당기기). 앞 10% 구간은 스킵.
-            if self.steps > self.prox_start_step and self.args.rho > 0:
+            # anchor_device=cpu 면 여기서 하지 않고 _apply_prox_grad 가 주기당 한 번 처리한다.
+            if self._anchor_cpu and self.steps > self.prox_start_step and self.args.rho > 0:
+                self._prox_pending[self.status] += 1
+            if (not self._anchor_cpu) and self.steps > self.prox_start_step and self.args.rho > 0:
                 if self.status == "alignment":
                     for name, param in model.named_parameters():
                         if param.requires_grad:
-                            loss += self.args.rho / 2 * torch.norm(param - self.finetune_weights[name]) ** 2
+                            _a = self.finetune_weights[name]
+                            if _a.device != param.device:
+                                _a = _a.to(param.device, non_blocking=True)
+                            loss += self.args.rho / 2 * torch.norm(param - _a) ** 2
                 else:
                     for name, param in model.named_parameters():
                         if param.requires_grad:
-                            loss += self.args.rho / 2 * torch.norm(param - self.alignment_weights[name]) ** 2
+                            _a = self.alignment_weights[name]
+                            if _a.device != param.device:
+                                _a = _a.to(param.device, non_blocking=True)
+                            loss += self.args.rho / 2 * torch.norm(param - _a) ** 2
 
             if self.use_apex:
                 with amp.scale_loss(loss, self.optimizer) as scaled_loss:
@@ -399,6 +475,9 @@ class LisaTrainer(Trainer):
         loss = step()
         self.steps += 1
         self.clock += 1
+        if self._anchor_cpu and self.steps % self.args.gradient_accumulation_steps == 0:
+            if any(self._prox_pending.values()):
+                self._apply_prox_grad()
         return loss.detach() / self.args.gradient_accumulation_steps
 
 
@@ -478,6 +557,21 @@ def main():
         model = get_peft_model(model, lora_config)
         logger.info(f"✓ LoRA applied: r={args.lora_r}, alpha={args.lora_alpha}, "
                     f"targets={args.lora_target_modules}")
+
+    if args.train_only_targets:
+        # WSR-Tune 은 basis_coeff(= q,k,v,up,down) 만 학습한다. 공정 비교를 위해 같은 범위로 맞춘다.
+        # proximal 항과 anchor 저장은 requires_grad 인 파라미터만 도므로 자동으로 따라온다.
+        tm = [x.strip() for x in args.train_only_targets.split(",") if x.strip()]
+        n_tr = n_fr = 0
+        for nm, prm in model.named_parameters():
+            if prm.ndim == 2 and any(t in nm for t in tm):
+                prm.requires_grad = True;  n_tr += prm.numel()
+            else:
+                prm.requires_grad = False; n_fr += prm.numel()
+        if n_tr == 0:
+            raise ValueError(f"--train_only_targets={tm} 에 해당하는 2-D weight 가 없다")
+        logger.info(f"✓ --train_only_targets={tm}: 학습 {n_tr:,} / 동결 {n_fr:,} "
+                    f"({100*n_tr/(n_tr+n_fr):.2f}% 학습)")
 
     total_params = sum(p.numel() for p in model.parameters())
     trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
@@ -575,6 +669,7 @@ def main():
     training_args.finetune_step = args.finetune_step
     training_args.guide_data_num = args.guide_data_num
     training_args.rho = args.rho
+    training_args.anchor_device = args.anchor_device
 
     run_name = os.path.basename(os.path.normpath(args.output_dir))
     use_wandb = (args.report_to == "wandb")
@@ -619,6 +714,7 @@ def main():
         'safety_data_path': args.safety_data_path,
         'guide_data_num': args.guide_data_num,
         'rho': args.rho,
+        'train_only_targets': args.train_only_targets,
         'alignment_step': args.alignment_step,
         'finetune_step': args.finetune_step,
         'num_train_samples': len(train_tok),
