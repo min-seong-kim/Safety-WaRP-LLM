@@ -1,0 +1,15 @@
+########## (A) 타깃한정 AsFT·Lisa 8셀 ##########  2026-09-20T00:00:03+09:00
+════════════════════════════════════════════════════════════════
+  실험 1: AsFT / Lisa full-parameter — 16 셀
+  조합   : qwen25_7b:gsm8k gemma2_9b:gsm8k llama2_7b:medqa llama2_7b:arc
+  기법   : asft lisa   (AsFT λ=1.0 / Lisa ρ=1.0)
+  출력   : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly
+  업로드 : PUSH_TO_HUB=1  ns=kmseong
+════════════════════════════════════════════════════════════════
+
+────────────────────────────────────────────────────────────
+  qwen25_7b / gsm8k / asft
+    출발 : wvnvwn/qwen-2.5-7B-Instruct-SSFT-lr5e-5
+    lr=5e-5  micro=2 x accum=8  ep=3
+    repo : kmseong/qwen2_5_7b-instruct-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr5e-5_tgtonly
+────────────────────────────────────────────────────────────
