@@ -1098,46 +1098,46 @@ Llama-2-7B 66.73% / 13B 67.67% / 3.1-8B 56.83% / 3.2-3B 57.57% 가 학습된다
 ### Llama-2-7B-Chat / GSM8K
 기준 **Full Params FT**: ASR 0.2078 / downstream 0.4117
 
-| 기법 | 학습 범위 | JB AVG ↓ | downstream ↑ | Δsafe | Δdown | **Δoverall** |
-|---|---|---:|---:|---:|---:|---:|
-| WSR-Tune | q,k,v,up,down | 0.0691 | 0.3899 | -0.1387 | -0.0218 | **+0.1169** ★ |
-| AsFT | q,k,v,up,down | 0.0624 | 0.2252 | -0.1454 | -0.1865 | **-0.0411** |
-| Lisa | q,k,v,up,down | 0.0548 | 0.2411 | -0.1530 | -0.1706 | **-0.0176** |
-| *AsFT (참고: 전체학습)* | *전체* | *0.0605* | *0.3882* | *-0.1473* | *-0.0235* | *+0.1238* |
-| *Lisa (참고: 전체학습)* | *전체* | *0.0634* | *0.2388* | *-0.1444* | *-0.1729* | *-0.0285* |
+| 기법 | 모델 | 학습 범위 | JB AVG ↓ | down ↑ | Δsafe | Δdown | **Δoverall** |
+|---|---|---|---:|---:|---:|---:|---:|
+| **WSR-Tune** | [`llama-2-7b-chat-warp-ratio-0.1`](https://huggingface.co/wvnvwn/llama-2-7b-chat-warp-ratio-0.1) | q,k,v,up,down | 0.0691 | 0.3899 | -0.1387 | -0.0218 | **+0.1169** ★ |
+| **AsFT** | [`llama2_7b-chat-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr5e-5_tgtonly`](https://huggingface.co/kmseong/llama2_7b-chat-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr5e-5_tgtonly) | q,k,v,up,down | 0.0624 | 0.2252 | -0.1454 | -0.1865 | **-0.0411** |
+| **Lisa** | [`llama2_7b-chat-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr5e-5_tgtonly`](https://huggingface.co/kmseong/llama2_7b-chat-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr5e-5_tgtonly) | q,k,v,up,down | 0.0548 | 0.2411 | -0.1530 | -0.1706 | **-0.0176** |
+| *AsFT (참고)* | [`llama2_7b-chat-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr5e-5`](https://huggingface.co/kmseong/llama2_7b-chat-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr5e-5) | *전체* | *0.0605* | *0.3882* | *-0.1473* | *-0.0235* | *+0.1238* |
+| *Lisa (참고)* | [`llama2_7b-chat-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr5e-5`](https://huggingface.co/kmseong/llama2_7b-chat-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr5e-5) | *전체* | *0.0634* | *0.2388* | *-0.1444* | *-0.1729* | *-0.0285* |
 
 ### Llama-2-13B-Chat / GSM8K
 기준 **Full Params FT**: ASR 0.1004 / downstream 0.4594
 
-| 기법 | 학습 범위 | JB AVG ↓ | downstream ↑ | Δsafe | Δdown | **Δoverall** |
-|---|---|---:|---:|---:|---:|---:|
-| WSR-Tune | q,k,v,up,down | 0.0135 | 0.4958 | -0.0869 | +0.0364 | **+0.1233** ★ |
-| AsFT | q,k,v,up,down | 0.0120 | 0.3161 | -0.0884 | -0.1433 | **-0.0549** |
-| Lisa | q,k,v,up,down | 0.0195 | 0.3745 | -0.0809 | -0.0849 | **-0.0040** |
-| *AsFT (참고: 전체학습)* | *전체* | *0.0200* | *0.4943* | *-0.0804* | *+0.0349* | *+0.1153* |
-| *Lisa (참고: 전체학습)* | *전체* | *0.0130* | *0.3616* | *-0.0874* | *-0.0978* | *-0.0104* |
+| 기법 | 모델 | 학습 범위 | JB AVG ↓ | down ↑ | Δsafe | Δdown | **Δoverall** |
+|---|---|---|---:|---:|---:|---:|---:|
+| **WSR-Tune** | [`llama-2-13b-chat-hf-WaRP-lr5e-5`](https://huggingface.co/wvnvwn/llama-2-13b-chat-hf-WaRP-lr5e-5) | q,k,v,up,down | 0.0135 | 0.4958 | -0.0869 | +0.0364 | **+0.1233** ★ |
+| **AsFT** | [`llama2_13b-chat-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr5e-5_tgtonly`](https://huggingface.co/kmseong/llama2_13b-chat-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr5e-5_tgtonly) | q,k,v,up,down | 0.0120 | 0.3161 | -0.0884 | -0.1433 | **-0.0549** |
+| **Lisa** | [`llama2_13b-chat-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr5e-5_tgtonly`](https://huggingface.co/kmseong/llama2_13b-chat-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr5e-5_tgtonly) | q,k,v,up,down | 0.0195 | 0.3745 | -0.0809 | -0.0849 | **-0.0040** |
+| *AsFT (참고)* | [`llama2_13b-chat-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr5e-5`](https://huggingface.co/kmseong/llama2_13b-chat-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr5e-5) | *전체* | *0.0200* | *0.4943* | *-0.0804* | *+0.0349* | *+0.1153* |
+| *Lisa (참고)* | [`llama2_13b-chat-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr5e-5`](https://huggingface.co/kmseong/llama2_13b-chat-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr5e-5) | *전체* | *0.0130* | *0.3616* | *-0.0874* | *-0.0978* | *-0.0104* |
 
 ### Llama-3.1-8B-Instruct / MATH
 기준 **Full Params FT**: ASR 0.0928 / downstream 0.1238
 
-| 기법 | 학습 범위 | JB AVG ↓ | downstream ↑ | Δsafe | Δdown | **Δoverall** |
-|---|---|---:|---:|---:|---:|---:|
-| WSR-Tune | q,k,v,up,down | 0.0562 | 0.1370 | -0.0366 | +0.0132 | **+0.0498** |
-| AsFT | q,k,v,up,down | 0.0373 | 0.1476 | -0.0555 | +0.0238 | **+0.0793** |
-| Lisa | q,k,v,up,down | 0.0309 | 0.1950 | -0.0619 | +0.0712 | **+0.1331** ★ |
-| *AsFT (참고: 전체학습)* | *전체* | *0.0409* | *0.1988* | *-0.0519* | *+0.0750* | *+0.1269* |
-| *Lisa (참고: 전체학습)* | *전체* | *0.0201* | *0.1692* | *-0.0727* | *+0.0454* | *+0.1181* |
+| 기법 | 모델 | 학습 범위 | JB AVG ↓ | down ↑ | Δsafe | Δdown | **Δoverall** |
+|---|---|---|---:|---:|---:|---:|---:|
+| **WSR-Tune** | [`llama3.1_8b_instruct-MATH-WaRP-lr5e-5`](https://huggingface.co/kmseong/llama3.1_8b_instruct-MATH-WaRP-lr5e-5) | q,k,v,up,down | 0.0562 | 0.1370 | -0.0366 | +0.0132 | **+0.0498** |
+| **AsFT** | [`llama3_1_8b-instruct-CB_SSFT-asft_math_lambda1.0_fullft_lr5e-5_tgtonly`](https://huggingface.co/kmseong/llama3_1_8b-instruct-CB_SSFT-asft_math_lambda1.0_fullft_lr5e-5_tgtonly) | q,k,v,up,down | 0.0373 | 0.1476 | -0.0555 | +0.0238 | **+0.0793** |
+| **Lisa** | [`llama3_1_8b-instruct-CB_SSFT-lisa_math_rho1.0_fullft_lr5e-5_tgtonly`](https://huggingface.co/kmseong/llama3_1_8b-instruct-CB_SSFT-lisa_math_rho1.0_fullft_lr5e-5_tgtonly) | q,k,v,up,down | 0.0309 | 0.1950 | -0.0619 | +0.0712 | **+0.1331** ★ |
+| *AsFT (참고)* | [`llama3_1_8b-instruct-CB_SSFT-asft_math_lambda1.0_fullft_lr5e-5`](https://huggingface.co/kmseong/llama3_1_8b-instruct-CB_SSFT-asft_math_lambda1.0_fullft_lr5e-5) | *전체* | *0.0409* | *0.1988* | *-0.0519* | *+0.0750* | *+0.1269* |
+| *Lisa (참고)* | [`llama3_1_8b-instruct-CB_SSFT-lisa_math_rho1.0_fullft_lr5e-5`](https://huggingface.co/kmseong/llama3_1_8b-instruct-CB_SSFT-lisa_math_rho1.0_fullft_lr5e-5) | *전체* | *0.0201* | *0.1692* | *-0.0727* | *+0.0454* | *+0.1181* |
 
 ### Llama-3.2-3B-Instruct / MATH
 기준 **Full Params FT**: ASR 0.0865 / downstream 0.2152
 
-| 기법 | 학습 범위 | JB AVG ↓ | downstream ↑ | Δsafe | Δdown | **Δoverall** |
-|---|---|---:|---:|---:|---:|---:|
-| WSR-Tune | q,k,v,up,down | 0.0640 | 0.2238 | -0.0225 | +0.0086 | **+0.0311** ★ |
-| AsFT | q,k,v,up,down | 0.0766 | 0.1074 | -0.0099 | -0.1078 | **-0.0979** |
-| Lisa | q,k,v,up,down | 0.0775 | 0.1448 | -0.0090 | -0.0704 | **-0.0614** |
-| *AsFT (참고: 전체학습)* | *전체* | *0.0579* | *0.2224* | *-0.0286* | *+0.0072* | *+0.0358* |
-| *Lisa (참고: 전체학습)* | *전체* | *0.0825* | *0.1566* | *-0.0040* | *-0.0586* | *-0.0546* |
+| 기법 | 모델 | 학습 범위 | JB AVG ↓ | down ↑ | Δsafe | Δdown | **Δoverall** |
+|---|---|---|---:|---:|---:|---:|---:|
+| **WSR-Tune** | [`llama3_2_3b-instruct-WaRP_lr5e-5`](https://huggingface.co/kmseong/llama3_2_3b-instruct-WaRP_lr5e-5) | q,k,v,up,down | 0.0640 | 0.2238 | -0.0225 | +0.0086 | **+0.0311** ★ |
+| **AsFT** | [`llama3_2_3b-instruct-CB_SSFT-asft_math_lambda1.0_fullft_lr5e-5_tgtonly`](https://huggingface.co/kmseong/llama3_2_3b-instruct-CB_SSFT-asft_math_lambda1.0_fullft_lr5e-5_tgtonly) | q,k,v,up,down | 0.0766 | 0.1074 | -0.0099 | -0.1078 | **-0.0979** |
+| **Lisa** | [`llama3_2_3b-instruct-CB_SSFT-lisa_math_rho1.0_fullft_lr5e-5_tgtonly`](https://huggingface.co/kmseong/llama3_2_3b-instruct-CB_SSFT-lisa_math_rho1.0_fullft_lr5e-5_tgtonly) | q,k,v,up,down | 0.0775 | 0.1448 | -0.0090 | -0.0704 | **-0.0614** |
+| *AsFT (참고)* | [`llama3_2_3b-instruct-CB_SSFT-asft_math_lambda1.0_fullft_lr5e-5`](https://huggingface.co/kmseong/llama3_2_3b-instruct-CB_SSFT-asft_math_lambda1.0_fullft_lr5e-5) | *전체* | *0.0579* | *0.2224* | *-0.0286* | *+0.0072* | *+0.0358* |
+| *Lisa (참고)* | [`llama3_2_3b-instruct-CB_SSFT-lisa_math_rho1.0_fullft_lr5e-5`](https://huggingface.co/kmseong/llama3_2_3b-instruct-CB_SSFT-lisa_math_rho1.0_fullft_lr5e-5) | *전체* | *0.0825* | *0.1566* | *-0.0040* | *-0.0586* | *-0.0546* |
 
 ## 읽는 법
 
