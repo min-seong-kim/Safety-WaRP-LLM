@@ -46,6 +46,9 @@ DRY_RUN="${DRY_RUN:-0}"          # 1 = 명령만 출력
 PUSH_TO_HUB="${PUSH_TO_HUB:-0}"           # 1 = 셀이 끝날 때마다 HF 업로드
 HF_NAMESPACE="${HF_NAMESPACE:-kmseong}"
 HF_PRIVATE="${HF_PRIVATE:-0}"
+# 같은 설정을 다시 돌려 재현성을 볼 때 리포명 충돌을 피한다 (예: "_v2").
+#   비워두면 기존 이름 그대로다 — 30_asft_lisa_fullft.sh 의 EXP1_REPO_SUFFIX 와 같은 역할.
+HF_REPO_SUFFIX="${HF_REPO_SUFFIX:-}"
 # 업로드 검증에 성공한 셀의 로컬 가중치를 지운다. 216셀 전체는 3.4TB 라 이게 없으면
 # 디스크가 버티지 못한다. fullft 는 RESTA/SafeDelta 가 소비한 뒤에만 지워진다.
 PRUNE_AFTER_UPLOAD="${PRUNE_AFTER_UPLOAD:-1}"
@@ -562,7 +565,7 @@ hf_repo_id() {  # <safety> <model> <task> <method>
   local hp; hp="$(hf_hparam_tag "$4")"
   local mid="$(hf_model_tag "$2")-$(hf_safety_tag "$1")_SSFT-$(hf_method_tag "$4")_${3}"
   [[ -n "$hp" ]] && mid="${mid}_${hp}"
-  echo "${HF_NAMESPACE}/${mid}_lr$(hf_lr_tag "$4" "$3")"
+  echo "${HF_NAMESPACE}/${mid}_lr$(hf_lr_tag "$4" "$3")${HF_REPO_SUFFIX}"
 }
 
 hf_ssft_repo_id() {  # <model> <safety>   BT 안전정렬 출발모델용

@@ -1,0 +1,629 @@
+
+▶ outputs/asft_lisa_fullft/gemma2_9b/gsm8k/asft  →  kmseong/gemma2_9b-it-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr1e-5
+   [upload] cell   : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_fullft/gemma2_9b/gsm8k/asft
+   [upload] repo   : kmseong/gemma2_9b-it-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr1e-5
+   [upload] model  : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_fullft/gemma2_9b/gsm8k/asft/model
+   [upload] files  : 14개 / 17.25 GiB (가중치 5개)
+   The tokenizer you are loading from '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_fullft/gemma2_9b/gsm8k/asft/model' with an incorrect regex pattern: https://huggingface.co/mistralai/Mistral-Small-3.1-24B-Instruct-2503/discussions/84#69121093e8b480e709447d5e. This will lead to incorrect tokenization. You should set the `fix_mistral_regex=True` flag when loading this tokenizer to fix this issue.
+   [upload] chat_template 기대: 있어야 함
+       config      : OK
+       tokenizer   : OK  (chat_template=있음)
+   [upload] ✅ 검증 통과
+   [upload] 로컬 가중치 삭제 ...
+       삭제: model/model-00001-of-00004.safetensors
+       삭제: model/model-00002-of-00004.safetensors
+       삭제: model/model-00003-of-00004.safetensors
+       삭제: model/model-00004-of-00004.safetensors
+       삭제: model/training_args.bin
+   [upload] 17.21 GiB 회수
+
+▶ outputs/asft_lisa_fullft/gemma2_9b/gsm8k/lisa  →  kmseong/gemma2_9b-it-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr1e-5
+   [upload] cell   : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_fullft/gemma2_9b/gsm8k/lisa
+   [upload] repo   : kmseong/gemma2_9b-it-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr1e-5
+   [upload] model  : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_fullft/gemma2_9b/gsm8k/lisa/model
+   [upload] files  : 14개 / 17.25 GiB (가중치 5개)
+   The tokenizer you are loading from '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_fullft/gemma2_9b/gsm8k/lisa/model' with an incorrect regex pattern: https://huggingface.co/mistralai/Mistral-Small-3.1-24B-Instruct-2503/discussions/84#69121093e8b480e709447d5e. This will lead to incorrect tokenization. You should set the `fix_mistral_regex=True` flag when loading this tokenizer to fix this issue.
+   [upload] chat_template 기대: 있어야 함
+       config      : OK
+       tokenizer   : OK  (chat_template=있음)
+   [upload] ✅ 검증 통과
+   [upload] 로컬 가중치 삭제 ...
+       삭제: model/model-00001-of-00004.safetensors
+       삭제: model/model-00002-of-00004.safetensors
+       삭제: model/model-00003-of-00004.safetensors
+       삭제: model/model-00004-of-00004.safetensors
+       삭제: model/training_args.bin
+   [upload] 17.21 GiB 회수
+
+▶ outputs/asft_lisa_fullft/llama2_13b/gsm8k/asft  →  kmseong/llama2_13b-chat-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr5e-5
+   [upload] cell   : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_fullft/llama2_13b/gsm8k/asft
+   [upload] repo   : kmseong/llama2_13b-chat-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr5e-5
+   [upload] model  : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_fullft/llama2_13b/gsm8k/asft/model
+   [upload] files  : 16개 / 24.25 GiB (가중치 7개)
+   [upload] chat_template 기대: 있어야 함
+       config      : OK
+       tokenizer   : OK  (chat_template=있음)
+   [upload] ✅ 검증 통과
+   [upload] 로컬 가중치 삭제 ...
+       삭제: model/model-00001-of-00006.safetensors
+       삭제: model/model-00002-of-00006.safetensors
+       삭제: model/model-00003-of-00006.safetensors
+       삭제: model/model-00004-of-00006.safetensors
+       삭제: model/model-00005-of-00006.safetensors
+       삭제: model/model-00006-of-00006.safetensors
+       삭제: model/training_args.bin
+   [upload] 24.24 GiB 회수
+
+▶ outputs/asft_lisa_fullft/llama2_13b/gsm8k/lisa  →  kmseong/llama2_13b-chat-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr5e-5
+   [upload] cell   : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_fullft/llama2_13b/gsm8k/lisa
+   [upload] repo   : kmseong/llama2_13b-chat-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr5e-5
+   [upload] model  : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_fullft/llama2_13b/gsm8k/lisa/model
+   [upload] files  : 16개 / 24.25 GiB (가중치 7개)
+   [upload] chat_template 기대: 있어야 함
+       config      : OK
+       tokenizer   : OK  (chat_template=있음)
+   [upload] ✅ 검증 통과
+   [upload] 로컬 가중치 삭제 ...
+       삭제: model/model-00001-of-00006.safetensors
+       삭제: model/model-00002-of-00006.safetensors
+       삭제: model/model-00003-of-00006.safetensors
+       삭제: model/model-00004-of-00006.safetensors
+       삭제: model/model-00005-of-00006.safetensors
+       삭제: model/model-00006-of-00006.safetensors
+       삭제: model/training_args.bin
+   [upload] 24.24 GiB 회수
+
+▶ outputs/asft_lisa_fullft/llama2_7b/arc/asft  →  kmseong/llama2_7b-chat-CB_SSFT-asft_arc_lambda1.0_fullft_lr5e-5
+   [upload] cell   : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_fullft/llama2_7b/arc/asft
+   [upload] repo   : kmseong/llama2_7b-chat-CB_SSFT-asft_arc_lambda1.0_fullft_lr5e-5
+   [upload] model  : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_fullft/llama2_7b/arc/asft/model
+   [upload] files  : 13개 / 12.56 GiB (가중치 4개)
+   [upload] chat_template 기대: 있어야 함
+       config      : OK
+       tokenizer   : OK  (chat_template=있음)
+   [upload] ✅ 검증 통과
+   [upload] 로컬 가중치 삭제 ...
+       삭제: model/model-00001-of-00003.safetensors
+       삭제: model/model-00002-of-00003.safetensors
+       삭제: model/model-00003-of-00003.safetensors
+       삭제: model/training_args.bin
+   [upload] 12.55 GiB 회수
+
+▶ outputs/asft_lisa_fullft/llama2_7b/arc/lisa  →  kmseong/llama2_7b-chat-CB_SSFT-lisa_arc_rho1.0_fullft_lr5e-5
+   [upload] cell   : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_fullft/llama2_7b/arc/lisa
+   [upload] repo   : kmseong/llama2_7b-chat-CB_SSFT-lisa_arc_rho1.0_fullft_lr5e-5
+   [upload] model  : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_fullft/llama2_7b/arc/lisa/model
+   [upload] files  : 13개 / 12.56 GiB (가중치 4개)
+   [upload] chat_template 기대: 있어야 함
+       config      : OK
+       tokenizer   : OK  (chat_template=있음)
+   [upload] ✅ 검증 통과
+   [upload] 로컬 가중치 삭제 ...
+       삭제: model/model-00001-of-00003.safetensors
+       삭제: model/model-00002-of-00003.safetensors
+       삭제: model/model-00003-of-00003.safetensors
+       삭제: model/training_args.bin
+   [upload] 12.55 GiB 회수
+
+▶ outputs/asft_lisa_fullft/llama2_7b/gsm8k/asft  →  kmseong/llama2_7b-chat-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr5e-5
+   [upload] cell   : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_fullft/llama2_7b/gsm8k/asft
+   [upload] repo   : kmseong/llama2_7b-chat-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr5e-5
+   [upload] model  : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_fullft/llama2_7b/gsm8k/asft/model
+   [upload] files  : 13개 / 12.56 GiB (가중치 4개)
+   [upload] chat_template 기대: 있어야 함
+       config      : OK
+       tokenizer   : OK  (chat_template=있음)
+   [upload] ✅ 검증 통과
+   [upload] 로컬 가중치 삭제 ...
+       삭제: model/model-00001-of-00003.safetensors
+       삭제: model/model-00002-of-00003.safetensors
+       삭제: model/model-00003-of-00003.safetensors
+       삭제: model/training_args.bin
+   [upload] 12.55 GiB 회수
+
+▶ outputs/asft_lisa_fullft/llama2_7b/gsm8k/lisa  →  kmseong/llama2_7b-chat-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr5e-5
+   [upload] cell   : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_fullft/llama2_7b/gsm8k/lisa
+   [upload] repo   : kmseong/llama2_7b-chat-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr5e-5
+   [upload] model  : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_fullft/llama2_7b/gsm8k/lisa/model
+   [upload] files  : 13개 / 12.56 GiB (가중치 4개)
+   [upload] chat_template 기대: 있어야 함
+       config      : OK
+       tokenizer   : OK  (chat_template=있음)
+   [upload] ✅ 검증 통과
+   [upload] 로컬 가중치 삭제 ...
+       삭제: model/model-00001-of-00003.safetensors
+       삭제: model/model-00002-of-00003.safetensors
+       삭제: model/model-00003-of-00003.safetensors
+       삭제: model/training_args.bin
+   [upload] 12.55 GiB 회수
+
+▶ outputs/asft_lisa_fullft/llama2_7b/medqa/asft  →  kmseong/llama2_7b-chat-CB_SSFT-asft_medqa_lambda1.0_fullft_lr5e-5
+   [upload] cell   : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_fullft/llama2_7b/medqa/asft
+   [upload] repo   : kmseong/llama2_7b-chat-CB_SSFT-asft_medqa_lambda1.0_fullft_lr5e-5
+   [upload] model  : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_fullft/llama2_7b/medqa/asft/model
+   [upload] files  : 13개 / 12.56 GiB (가중치 4개)
+   [upload] chat_template 기대: 있어야 함
+       config      : OK
+       tokenizer   : OK  (chat_template=있음)
+   [upload] ✅ 검증 통과
+   [upload] 로컬 가중치 삭제 ...
+       삭제: model/model-00001-of-00003.safetensors
+       삭제: model/model-00002-of-00003.safetensors
+       삭제: model/model-00003-of-00003.safetensors
+       삭제: model/training_args.bin
+   [upload] 12.55 GiB 회수
+
+▶ outputs/asft_lisa_fullft/llama2_7b/medqa/lisa  →  kmseong/llama2_7b-chat-CB_SSFT-lisa_medqa_rho1.0_fullft_lr5e-5
+   [upload] cell   : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_fullft/llama2_7b/medqa/lisa
+   [upload] repo   : kmseong/llama2_7b-chat-CB_SSFT-lisa_medqa_rho1.0_fullft_lr5e-5
+   [upload] model  : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_fullft/llama2_7b/medqa/lisa/model
+   [upload] files  : 13개 / 12.56 GiB (가중치 4개)
+   [upload] chat_template 기대: 있어야 함
+       config      : OK
+       tokenizer   : OK  (chat_template=있음)
+   [upload] ✅ 검증 통과
+   [upload] 로컬 가중치 삭제 ...
+       삭제: model/model-00001-of-00003.safetensors
+       삭제: model/model-00002-of-00003.safetensors
+       삭제: model/model-00003-of-00003.safetensors
+       삭제: model/training_args.bin
+   [upload] 12.55 GiB 회수
+
+▶ outputs/asft_lisa_fullft/llama31_8b/math/asft  →  kmseong/llama3_1_8b-instruct-CB_SSFT-asft_math_lambda1.0_fullft_lr5e-5
+   [upload] cell   : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_fullft/llama31_8b/math/asft
+   [upload] repo   : kmseong/llama3_1_8b-instruct-CB_SSFT-asft_math_lambda1.0_fullft_lr5e-5
+   [upload] model  : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_fullft/llama31_8b/math/asft/model
+   [upload] files  : 13개 / 14.97 GiB (가중치 5개)
+   The tokenizer you are loading from '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_fullft/llama31_8b/math/asft/model' with an incorrect regex pattern: https://huggingface.co/mistralai/Mistral-Small-3.1-24B-Instruct-2503/discussions/84#69121093e8b480e709447d5e. This will lead to incorrect tokenization. You should set the `fix_mistral_regex=True` flag when loading this tokenizer to fix this issue.
+   [upload] chat_template 기대: 있어야 함
+       config      : OK
+       tokenizer   : OK  (chat_template=있음)
+   [upload] ✅ 검증 통과
+   [upload] 로컬 가중치 삭제 ...
+       삭제: model/model-00001-of-00004.safetensors
+       삭제: model/model-00002-of-00004.safetensors
+       삭제: model/model-00003-of-00004.safetensors
+       삭제: model/model-00004-of-00004.safetensors
+       삭제: model/training_args.bin
+   [upload] 14.96 GiB 회수
+
+▶ outputs/asft_lisa_fullft/llama31_8b/math/lisa  →  kmseong/llama3_1_8b-instruct-CB_SSFT-lisa_math_rho1.0_fullft_lr5e-5
+   [upload] cell   : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_fullft/llama31_8b/math/lisa
+   [upload] repo   : kmseong/llama3_1_8b-instruct-CB_SSFT-lisa_math_rho1.0_fullft_lr5e-5
+   [upload] model  : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_fullft/llama31_8b/math/lisa/model
+   [upload] files  : 13개 / 14.97 GiB (가중치 5개)
+   The tokenizer you are loading from '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_fullft/llama31_8b/math/lisa/model' with an incorrect regex pattern: https://huggingface.co/mistralai/Mistral-Small-3.1-24B-Instruct-2503/discussions/84#69121093e8b480e709447d5e. This will lead to incorrect tokenization. You should set the `fix_mistral_regex=True` flag when loading this tokenizer to fix this issue.
+   [upload] chat_template 기대: 있어야 함
+       config      : OK
+       tokenizer   : OK  (chat_template=있음)
+   [upload] ✅ 검증 통과
+   [upload] 로컬 가중치 삭제 ...
+       삭제: model/model-00001-of-00004.safetensors
+       삭제: model/model-00002-of-00004.safetensors
+       삭제: model/model-00003-of-00004.safetensors
+       삭제: model/model-00004-of-00004.safetensors
+       삭제: model/training_args.bin
+   [upload] 14.96 GiB 회수
+
+▶ outputs/asft_lisa_fullft/llama32_3b/math/asft  →  kmseong/llama3_2_3b-instruct-CB_SSFT-asft_math_lambda1.0_fullft_lr5e-5
+   [upload] cell   : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_fullft/llama32_3b/math/asft
+   [upload] repo   : kmseong/llama3_2_3b-instruct-CB_SSFT-asft_math_lambda1.0_fullft_lr5e-5
+   [upload] model  : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_fullft/llama32_3b/math/asft/model
+   [upload] files  : 11개 / 6.00 GiB (가중치 3개)
+   The tokenizer you are loading from '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_fullft/llama32_3b/math/asft/model' with an incorrect regex pattern: https://huggingface.co/mistralai/Mistral-Small-3.1-24B-Instruct-2503/discussions/84#69121093e8b480e709447d5e. This will lead to incorrect tokenization. You should set the `fix_mistral_regex=True` flag when loading this tokenizer to fix this issue.
+   [upload] chat_template 기대: 있어야 함
+       config      : OK
+       tokenizer   : OK  (chat_template=있음)
+   [upload] ✅ 검증 통과
+   [upload] 로컬 가중치 삭제 ...
+       삭제: model/model-00001-of-00002.safetensors
+       삭제: model/model-00002-of-00002.safetensors
+       삭제: model/training_args.bin
+   [upload] 5.98 GiB 회수
+
+▶ outputs/asft_lisa_fullft/llama32_3b/math/lisa  →  kmseong/llama3_2_3b-instruct-CB_SSFT-lisa_math_rho1.0_fullft_lr5e-5
+   [upload] cell   : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_fullft/llama32_3b/math/lisa
+   [upload] repo   : kmseong/llama3_2_3b-instruct-CB_SSFT-lisa_math_rho1.0_fullft_lr5e-5
+   [upload] model  : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_fullft/llama32_3b/math/lisa/model
+   [upload] files  : 11개 / 6.00 GiB (가중치 3개)
+   The tokenizer you are loading from '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_fullft/llama32_3b/math/lisa/model' with an incorrect regex pattern: https://huggingface.co/mistralai/Mistral-Small-3.1-24B-Instruct-2503/discussions/84#69121093e8b480e709447d5e. This will lead to incorrect tokenization. You should set the `fix_mistral_regex=True` flag when loading this tokenizer to fix this issue.
+   [upload] chat_template 기대: 있어야 함
+       config      : OK
+       tokenizer   : OK  (chat_template=있음)
+   [upload] ✅ 검증 통과
+   [upload] 로컬 가중치 삭제 ...
+       삭제: model/model-00001-of-00002.safetensors
+       삭제: model/model-00002-of-00002.safetensors
+       삭제: model/training_args.bin
+   [upload] 5.98 GiB 회수
+
+▶ outputs/asft_lisa_fullft/qwen25_7b/gsm8k/asft  →  kmseong/qwen2_5_7b-instruct-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr5e-5
+   [upload] cell   : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_fullft/qwen25_7b/gsm8k/asft
+   [upload] repo   : kmseong/qwen2_5_7b-instruct-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr5e-5
+   [upload] model  : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_fullft/qwen25_7b/gsm8k/asft/model
+   [upload] files  : 16개 / 14.20 GiB (가중치 5개)
+   The tokenizer you are loading from '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_fullft/qwen25_7b/gsm8k/asft/model' with an incorrect regex pattern: https://huggingface.co/mistralai/Mistral-Small-3.1-24B-Instruct-2503/discussions/84#69121093e8b480e709447d5e. This will lead to incorrect tokenization. You should set the `fix_mistral_regex=True` flag when loading this tokenizer to fix this issue.
+   [upload] chat_template 기대: 있어야 함
+       config      : OK
+       tokenizer   : OK  (chat_template=있음)
+   [upload] ✅ 검증 통과
+   [upload] 로컬 가중치 삭제 ...
+       삭제: model/model-00001-of-00004.safetensors
+       삭제: model/model-00002-of-00004.safetensors
+       삭제: model/model-00003-of-00004.safetensors
+       삭제: model/model-00004-of-00004.safetensors
+       삭제: model/training_args.bin
+   [upload] 14.19 GiB 회수
+
+▶ outputs/asft_lisa_fullft/qwen25_7b/gsm8k/lisa  →  kmseong/qwen2_5_7b-instruct-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr5e-5
+   [upload] cell   : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_fullft/qwen25_7b/gsm8k/lisa
+   [upload] repo   : kmseong/qwen2_5_7b-instruct-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr5e-5
+   [upload] model  : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_fullft/qwen25_7b/gsm8k/lisa/model
+   [upload] files  : 16개 / 14.20 GiB (가중치 5개)
+   The tokenizer you are loading from '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_fullft/qwen25_7b/gsm8k/lisa/model' with an incorrect regex pattern: https://huggingface.co/mistralai/Mistral-Small-3.1-24B-Instruct-2503/discussions/84#69121093e8b480e709447d5e. This will lead to incorrect tokenization. You should set the `fix_mistral_regex=True` flag when loading this tokenizer to fix this issue.
+   [upload] chat_template 기대: 있어야 함
+       config      : OK
+       tokenizer   : OK  (chat_template=있음)
+   [upload] ✅ 검증 통과
+   [upload] 로컬 가중치 삭제 ...
+       삭제: model/model-00001-of-00004.safetensors
+       삭제: model/model-00002-of-00004.safetensors
+       삭제: model/model-00003-of-00004.safetensors
+       삭제: model/model-00004-of-00004.safetensors
+       삭제: model/training_args.bin
+   [upload] 14.19 GiB 회수
+
+▶ outputs/asft_lisa_rerun/llama31_8b/math/asft  →  kmseong/llama3_1_8b-instruct-CB_SSFT-asft_math_lambda1.0_fullft_lr5e-5_rerun
+   [upload] cell   : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_rerun/llama31_8b/math/asft
+   [upload] repo   : kmseong/llama3_1_8b-instruct-CB_SSFT-asft_math_lambda1.0_fullft_lr5e-5_rerun
+   [upload] model  : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_rerun/llama31_8b/math/asft/model
+   [upload] files  : 13개 / 14.97 GiB (가중치 5개)
+   The tokenizer you are loading from '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_rerun/llama31_8b/math/asft/model' with an incorrect regex pattern: https://huggingface.co/mistralai/Mistral-Small-3.1-24B-Instruct-2503/discussions/84#69121093e8b480e709447d5e. This will lead to incorrect tokenization. You should set the `fix_mistral_regex=True` flag when loading this tokenizer to fix this issue.
+   [upload] chat_template 기대: 있어야 함
+       config      : OK
+       tokenizer   : OK  (chat_template=있음)
+   [upload] ✅ 검증 통과
+   [upload] 로컬 가중치 삭제 ...
+       삭제: model/model-00001-of-00004.safetensors
+       삭제: model/model-00002-of-00004.safetensors
+       삭제: model/model-00003-of-00004.safetensors
+       삭제: model/model-00004-of-00004.safetensors
+       삭제: model/training_args.bin
+   [upload] 14.96 GiB 회수
+
+▶ outputs/asft_lisa_rerun/llama31_8b/math/lisa  →  kmseong/llama3_1_8b-instruct-CB_SSFT-lisa_math_rho1.0_fullft_lr5e-5_rerun
+   [upload] cell   : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_rerun/llama31_8b/math/lisa
+   [upload] repo   : kmseong/llama3_1_8b-instruct-CB_SSFT-lisa_math_rho1.0_fullft_lr5e-5_rerun
+   [upload] model  : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_rerun/llama31_8b/math/lisa/model
+   [upload] files  : 13개 / 14.97 GiB (가중치 5개)
+   The tokenizer you are loading from '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_rerun/llama31_8b/math/lisa/model' with an incorrect regex pattern: https://huggingface.co/mistralai/Mistral-Small-3.1-24B-Instruct-2503/discussions/84#69121093e8b480e709447d5e. This will lead to incorrect tokenization. You should set the `fix_mistral_regex=True` flag when loading this tokenizer to fix this issue.
+   [upload] chat_template 기대: 있어야 함
+       config      : OK
+       tokenizer   : OK  (chat_template=있음)
+   [upload] ✅ 검증 통과
+   [upload] 로컬 가중치 삭제 ...
+       삭제: model/model-00001-of-00004.safetensors
+       삭제: model/model-00002-of-00004.safetensors
+       삭제: model/model-00003-of-00004.safetensors
+       삭제: model/model-00004-of-00004.safetensors
+       삭제: model/training_args.bin
+   [upload] 14.96 GiB 회수
+
+▶ outputs/asft_lisa_tgtonly/gemma2_9b/gsm8k/asft  →  kmseong/gemma2_9b-it-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr1e-5_tgtonly
+   [upload] cell   : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly/gemma2_9b/gsm8k/asft
+   [upload] repo   : kmseong/gemma2_9b-it-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr1e-5_tgtonly
+   [upload] model  : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly/gemma2_9b/gsm8k/asft/model
+   [upload] files  : 14개 / 17.25 GiB (가중치 5개)
+   The tokenizer you are loading from '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly/gemma2_9b/gsm8k/asft/model' with an incorrect regex pattern: https://huggingface.co/mistralai/Mistral-Small-3.1-24B-Instruct-2503/discussions/84#69121093e8b480e709447d5e. This will lead to incorrect tokenization. You should set the `fix_mistral_regex=True` flag when loading this tokenizer to fix this issue.
+   [upload] chat_template 기대: 있어야 함
+       config      : OK
+       tokenizer   : OK  (chat_template=있음)
+   [upload] ✅ 검증 통과
+   [upload] 로컬 가중치 삭제 ...
+       삭제: model/model-00001-of-00004.safetensors
+       삭제: model/model-00002-of-00004.safetensors
+       삭제: model/model-00003-of-00004.safetensors
+       삭제: model/model-00004-of-00004.safetensors
+       삭제: model/training_args.bin
+   [upload] 17.21 GiB 회수
+
+▶ outputs/asft_lisa_tgtonly/gemma2_9b/gsm8k/lisa  →  kmseong/gemma2_9b-it-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr1e-5_tgtonly
+   [upload] cell   : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly/gemma2_9b/gsm8k/lisa
+   [upload] repo   : kmseong/gemma2_9b-it-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr1e-5_tgtonly
+   [upload] model  : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly/gemma2_9b/gsm8k/lisa/model
+   [upload] files  : 14개 / 17.25 GiB (가중치 5개)
+   The tokenizer you are loading from '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly/gemma2_9b/gsm8k/lisa/model' with an incorrect regex pattern: https://huggingface.co/mistralai/Mistral-Small-3.1-24B-Instruct-2503/discussions/84#69121093e8b480e709447d5e. This will lead to incorrect tokenization. You should set the `fix_mistral_regex=True` flag when loading this tokenizer to fix this issue.
+   [upload] chat_template 기대: 있어야 함
+       config      : OK
+       tokenizer   : OK  (chat_template=있음)
+   [upload] ✅ 검증 통과
+   [upload] 로컬 가중치 삭제 ...
+       삭제: model/model-00001-of-00004.safetensors
+       삭제: model/model-00002-of-00004.safetensors
+       삭제: model/model-00003-of-00004.safetensors
+       삭제: model/model-00004-of-00004.safetensors
+       삭제: model/training_args.bin
+   [upload] 17.21 GiB 회수
+
+▶ outputs/asft_lisa_tgtonly/llama2_13b/gsm8k/asft  →  kmseong/llama2_13b-chat-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr5e-5_tgtonly
+   [upload] cell   : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly/llama2_13b/gsm8k/asft
+   [upload] repo   : kmseong/llama2_13b-chat-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr5e-5_tgtonly
+   [upload] model  : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly/llama2_13b/gsm8k/asft/model
+   [upload] files  : 16개 / 24.25 GiB (가중치 7개)
+   [upload] chat_template 기대: 있어야 함
+       config      : OK
+       tokenizer   : OK  (chat_template=있음)
+   [upload] ✅ 검증 통과
+   [upload] 로컬 가중치 삭제 ...
+       삭제: model/model-00001-of-00006.safetensors
+       삭제: model/model-00002-of-00006.safetensors
+       삭제: model/model-00003-of-00006.safetensors
+       삭제: model/model-00004-of-00006.safetensors
+       삭제: model/model-00005-of-00006.safetensors
+       삭제: model/model-00006-of-00006.safetensors
+       삭제: model/training_args.bin
+   [upload] 24.24 GiB 회수
+
+▶ outputs/asft_lisa_tgtonly/llama2_13b/gsm8k/lisa  →  kmseong/llama2_13b-chat-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr5e-5_tgtonly
+   [upload] cell   : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly/llama2_13b/gsm8k/lisa
+   [upload] repo   : kmseong/llama2_13b-chat-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr5e-5_tgtonly
+   [upload] model  : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly/llama2_13b/gsm8k/lisa/model
+   [upload] files  : 16개 / 24.25 GiB (가중치 7개)
+   [upload] chat_template 기대: 있어야 함
+       config      : OK
+       tokenizer   : OK  (chat_template=있음)
+   [upload] ✅ 검증 통과
+   [upload] 로컬 가중치 삭제 ...
+       삭제: model/model-00001-of-00006.safetensors
+       삭제: model/model-00002-of-00006.safetensors
+       삭제: model/model-00003-of-00006.safetensors
+       삭제: model/model-00004-of-00006.safetensors
+       삭제: model/model-00005-of-00006.safetensors
+       삭제: model/model-00006-of-00006.safetensors
+       삭제: model/training_args.bin
+   [upload] 24.24 GiB 회수
+
+▶ outputs/asft_lisa_tgtonly/llama2_7b/arc/asft  →  kmseong/llama2_7b-chat-CB_SSFT-asft_arc_lambda1.0_fullft_lr5e-5_tgtonly
+   [upload] cell   : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly/llama2_7b/arc/asft
+   [upload] repo   : kmseong/llama2_7b-chat-CB_SSFT-asft_arc_lambda1.0_fullft_lr5e-5_tgtonly
+   [upload] model  : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly/llama2_7b/arc/asft/model
+   [upload] files  : 13개 / 12.56 GiB (가중치 4개)
+   [upload] chat_template 기대: 있어야 함
+       config      : OK
+       tokenizer   : OK  (chat_template=있음)
+   [upload] ✅ 검증 통과
+   [upload] 로컬 가중치 삭제 ...
+       삭제: model/model-00001-of-00003.safetensors
+       삭제: model/model-00002-of-00003.safetensors
+       삭제: model/model-00003-of-00003.safetensors
+       삭제: model/training_args.bin
+   [upload] 12.55 GiB 회수
+
+▶ outputs/asft_lisa_tgtonly/llama2_7b/arc/lisa  →  kmseong/llama2_7b-chat-CB_SSFT-lisa_arc_rho1.0_fullft_lr5e-5_tgtonly
+   [upload] cell   : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly/llama2_7b/arc/lisa
+   [upload] repo   : kmseong/llama2_7b-chat-CB_SSFT-lisa_arc_rho1.0_fullft_lr5e-5_tgtonly
+   [upload] model  : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly/llama2_7b/arc/lisa/model
+   [upload] files  : 13개 / 12.56 GiB (가중치 4개)
+   [upload] chat_template 기대: 있어야 함
+       config      : OK
+       tokenizer   : OK  (chat_template=있음)
+   [upload] ✅ 검증 통과
+   [upload] 로컬 가중치 삭제 ...
+       삭제: model/model-00001-of-00003.safetensors
+       삭제: model/model-00002-of-00003.safetensors
+       삭제: model/model-00003-of-00003.safetensors
+       삭제: model/training_args.bin
+   [upload] 12.55 GiB 회수
+
+▶ outputs/asft_lisa_tgtonly/llama2_7b/gsm8k/asft  →  kmseong/llama2_7b-chat-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr5e-5_tgtonly
+   [upload] cell   : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly/llama2_7b/gsm8k/asft
+   [upload] repo   : kmseong/llama2_7b-chat-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr5e-5_tgtonly
+   [upload] model  : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly/llama2_7b/gsm8k/asft/model
+   [upload] files  : 13개 / 12.56 GiB (가중치 4개)
+   [upload] chat_template 기대: 있어야 함
+       config      : OK
+       tokenizer   : OK  (chat_template=있음)
+   [upload] ✅ 검증 통과
+   [upload] 로컬 가중치 삭제 ...
+       삭제: model/model-00001-of-00003.safetensors
+       삭제: model/model-00002-of-00003.safetensors
+       삭제: model/model-00003-of-00003.safetensors
+       삭제: model/training_args.bin
+   [upload] 12.55 GiB 회수
+
+▶ outputs/asft_lisa_tgtonly/llama2_7b/gsm8k/lisa  →  kmseong/llama2_7b-chat-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr5e-5_tgtonly
+   [upload] cell   : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly/llama2_7b/gsm8k/lisa
+   [upload] repo   : kmseong/llama2_7b-chat-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr5e-5_tgtonly
+   [upload] model  : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly/llama2_7b/gsm8k/lisa/model
+   [upload] files  : 13개 / 12.56 GiB (가중치 4개)
+   [upload] chat_template 기대: 있어야 함
+       config      : OK
+       tokenizer   : OK  (chat_template=있음)
+   [upload] ✅ 검증 통과
+   [upload] 로컬 가중치 삭제 ...
+       삭제: model/model-00001-of-00003.safetensors
+       삭제: model/model-00002-of-00003.safetensors
+       삭제: model/model-00003-of-00003.safetensors
+       삭제: model/training_args.bin
+   [upload] 12.55 GiB 회수
+
+▶ outputs/asft_lisa_tgtonly/llama2_7b/medqa/asft  →  kmseong/llama2_7b-chat-CB_SSFT-asft_medqa_lambda1.0_fullft_lr5e-5_tgtonly
+   [upload] cell   : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly/llama2_7b/medqa/asft
+   [upload] repo   : kmseong/llama2_7b-chat-CB_SSFT-asft_medqa_lambda1.0_fullft_lr5e-5_tgtonly
+   [upload] model  : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly/llama2_7b/medqa/asft/model
+   [upload] files  : 13개 / 12.56 GiB (가중치 4개)
+   [upload] chat_template 기대: 있어야 함
+       config      : OK
+       tokenizer   : OK  (chat_template=있음)
+   [upload] ✅ 검증 통과
+   [upload] 로컬 가중치 삭제 ...
+       삭제: model/model-00001-of-00003.safetensors
+       삭제: model/model-00002-of-00003.safetensors
+       삭제: model/model-00003-of-00003.safetensors
+       삭제: model/training_args.bin
+   [upload] 12.55 GiB 회수
+
+▶ outputs/asft_lisa_tgtonly/llama2_7b/medqa/lisa  →  kmseong/llama2_7b-chat-CB_SSFT-lisa_medqa_rho1.0_fullft_lr5e-5_tgtonly
+   [upload] cell   : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly/llama2_7b/medqa/lisa
+   [upload] repo   : kmseong/llama2_7b-chat-CB_SSFT-lisa_medqa_rho1.0_fullft_lr5e-5_tgtonly
+   [upload] model  : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly/llama2_7b/medqa/lisa/model
+   [upload] files  : 13개 / 12.56 GiB (가중치 4개)
+   [upload] chat_template 기대: 있어야 함
+       config      : OK
+       tokenizer   : OK  (chat_template=있음)
+   [upload] ✅ 검증 통과
+   [upload] 로컬 가중치 삭제 ...
+       삭제: model/model-00001-of-00003.safetensors
+       삭제: model/model-00002-of-00003.safetensors
+       삭제: model/model-00003-of-00003.safetensors
+       삭제: model/training_args.bin
+   [upload] 12.55 GiB 회수
+
+▶ outputs/asft_lisa_tgtonly/llama31_8b/math/asft  →  kmseong/llama3_1_8b-instruct-CB_SSFT-asft_math_lambda1.0_fullft_lr5e-5_tgtonly
+   [upload] cell   : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly/llama31_8b/math/asft
+   [upload] repo   : kmseong/llama3_1_8b-instruct-CB_SSFT-asft_math_lambda1.0_fullft_lr5e-5_tgtonly
+   [upload] model  : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly/llama31_8b/math/asft/model
+   [upload] files  : 13개 / 14.97 GiB (가중치 5개)
+   The tokenizer you are loading from '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly/llama31_8b/math/asft/model' with an incorrect regex pattern: https://huggingface.co/mistralai/Mistral-Small-3.1-24B-Instruct-2503/discussions/84#69121093e8b480e709447d5e. This will lead to incorrect tokenization. You should set the `fix_mistral_regex=True` flag when loading this tokenizer to fix this issue.
+   [upload] chat_template 기대: 있어야 함
+       config      : OK
+       tokenizer   : OK  (chat_template=있음)
+   [upload] ✅ 검증 통과
+   [upload] 로컬 가중치 삭제 ...
+       삭제: model/model-00001-of-00004.safetensors
+       삭제: model/model-00002-of-00004.safetensors
+       삭제: model/model-00003-of-00004.safetensors
+       삭제: model/model-00004-of-00004.safetensors
+       삭제: model/training_args.bin
+   [upload] 14.96 GiB 회수
+
+▶ outputs/asft_lisa_tgtonly/llama31_8b/math/lisa  →  kmseong/llama3_1_8b-instruct-CB_SSFT-lisa_math_rho1.0_fullft_lr5e-5_tgtonly
+   [upload] cell   : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly/llama31_8b/math/lisa
+   [upload] repo   : kmseong/llama3_1_8b-instruct-CB_SSFT-lisa_math_rho1.0_fullft_lr5e-5_tgtonly
+   [upload] model  : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly/llama31_8b/math/lisa/model
+   [upload] files  : 13개 / 14.97 GiB (가중치 5개)
+   The tokenizer you are loading from '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly/llama31_8b/math/lisa/model' with an incorrect regex pattern: https://huggingface.co/mistralai/Mistral-Small-3.1-24B-Instruct-2503/discussions/84#69121093e8b480e709447d5e. This will lead to incorrect tokenization. You should set the `fix_mistral_regex=True` flag when loading this tokenizer to fix this issue.
+   [upload] chat_template 기대: 있어야 함
+       config      : OK
+       tokenizer   : OK  (chat_template=있음)
+   [upload] ✅ 검증 통과
+   [upload] 로컬 가중치 삭제 ...
+       삭제: model/model-00001-of-00004.safetensors
+       삭제: model/model-00002-of-00004.safetensors
+       삭제: model/model-00003-of-00004.safetensors
+       삭제: model/model-00004-of-00004.safetensors
+       삭제: model/training_args.bin
+   [upload] 14.96 GiB 회수
+
+▶ outputs/asft_lisa_tgtonly/llama32_3b/math/asft  →  kmseong/llama3_2_3b-instruct-CB_SSFT-asft_math_lambda1.0_fullft_lr5e-5_tgtonly
+   [upload] cell   : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly/llama32_3b/math/asft
+   [upload] repo   : kmseong/llama3_2_3b-instruct-CB_SSFT-asft_math_lambda1.0_fullft_lr5e-5_tgtonly
+   [upload] model  : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly/llama32_3b/math/asft/model
+   [upload] files  : 11개 / 6.00 GiB (가중치 3개)
+   The tokenizer you are loading from '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly/llama32_3b/math/asft/model' with an incorrect regex pattern: https://huggingface.co/mistralai/Mistral-Small-3.1-24B-Instruct-2503/discussions/84#69121093e8b480e709447d5e. This will lead to incorrect tokenization. You should set the `fix_mistral_regex=True` flag when loading this tokenizer to fix this issue.
+   [upload] chat_template 기대: 있어야 함
+       config      : OK
+       tokenizer   : OK  (chat_template=있음)
+   [upload] ✅ 검증 통과
+   [upload] 로컬 가중치 삭제 ...
+       삭제: model/model-00001-of-00002.safetensors
+       삭제: model/model-00002-of-00002.safetensors
+       삭제: model/training_args.bin
+   [upload] 5.98 GiB 회수
+
+▶ outputs/asft_lisa_tgtonly/llama32_3b/math/lisa  →  kmseong/llama3_2_3b-instruct-CB_SSFT-lisa_math_rho1.0_fullft_lr5e-5_tgtonly
+   [upload] cell   : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly/llama32_3b/math/lisa
+   [upload] repo   : kmseong/llama3_2_3b-instruct-CB_SSFT-lisa_math_rho1.0_fullft_lr5e-5_tgtonly
+   [upload] model  : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly/llama32_3b/math/lisa/model
+   [upload] files  : 11개 / 6.00 GiB (가중치 3개)
+   The tokenizer you are loading from '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly/llama32_3b/math/lisa/model' with an incorrect regex pattern: https://huggingface.co/mistralai/Mistral-Small-3.1-24B-Instruct-2503/discussions/84#69121093e8b480e709447d5e. This will lead to incorrect tokenization. You should set the `fix_mistral_regex=True` flag when loading this tokenizer to fix this issue.
+   [upload] chat_template 기대: 있어야 함
+       config      : OK
+       tokenizer   : OK  (chat_template=있음)
+   [upload] ✅ 검증 통과
+   [upload] 로컬 가중치 삭제 ...
+       삭제: model/model-00001-of-00002.safetensors
+       삭제: model/model-00002-of-00002.safetensors
+       삭제: model/training_args.bin
+   [upload] 5.98 GiB 회수
+
+▶ outputs/asft_lisa_tgtonly/qwen25_7b/gsm8k/asft  →  kmseong/qwen2_5_7b-instruct-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr5e-5_tgtonly
+   [upload] cell   : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly/qwen25_7b/gsm8k/asft
+   [upload] repo   : kmseong/qwen2_5_7b-instruct-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr5e-5_tgtonly
+   [upload] model  : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly/qwen25_7b/gsm8k/asft/model
+   [upload] files  : 16개 / 14.20 GiB (가중치 5개)
+   The tokenizer you are loading from '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly/qwen25_7b/gsm8k/asft/model' with an incorrect regex pattern: https://huggingface.co/mistralai/Mistral-Small-3.1-24B-Instruct-2503/discussions/84#69121093e8b480e709447d5e. This will lead to incorrect tokenization. You should set the `fix_mistral_regex=True` flag when loading this tokenizer to fix this issue.
+   [upload] chat_template 기대: 있어야 함
+       config      : OK
+       tokenizer   : OK  (chat_template=있음)
+   [upload] ✅ 검증 통과
+   [upload] 로컬 가중치 삭제 ...
+       삭제: model/model-00001-of-00004.safetensors
+       삭제: model/model-00002-of-00004.safetensors
+       삭제: model/model-00003-of-00004.safetensors
+       삭제: model/model-00004-of-00004.safetensors
+       삭제: model/training_args.bin
+   [upload] 14.19 GiB 회수
+
+▶ outputs/asft_lisa_tgtonly/qwen25_7b/gsm8k/lisa  →  kmseong/qwen2_5_7b-instruct-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr5e-5_tgtonly
+   [upload] cell   : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly/qwen25_7b/gsm8k/lisa
+   [upload] repo   : kmseong/qwen2_5_7b-instruct-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr5e-5_tgtonly
+   [upload] model  : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly/qwen25_7b/gsm8k/lisa/model
+   [upload] files  : 16개 / 14.20 GiB (가중치 5개)
+   The tokenizer you are loading from '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/asft_lisa_tgtonly/qwen25_7b/gsm8k/lisa/model' with an incorrect regex pattern: https://huggingface.co/mistralai/Mistral-Small-3.1-24B-Instruct-2503/discussions/84#69121093e8b480e709447d5e. This will lead to incorrect tokenization. You should set the `fix_mistral_regex=True` flag when loading this tokenizer to fix this issue.
+   [upload] chat_template 기대: 있어야 함
+       config      : OK
+       tokenizer   : OK  (chat_template=있음)
+   [upload] ✅ 검증 통과
+   [upload] 로컬 가중치 삭제 ...
+       삭제: model/model-00001-of-00004.safetensors
+       삭제: model/model-00002-of-00004.safetensors
+       삭제: model/model-00003-of-00004.safetensors
+       삭제: model/model-00004-of-00004.safetensors
+       삭제: model/training_args.bin
+   [upload] 14.19 GiB 회수
+[건너뜀] outputs/origspace_base/llama2_7b_base/p10 — 이미 가중치 없음
+[건너뜀] outputs/origspace_base/llama2_7b_base/p20 — 이미 가중치 없음
+[건너뜀] outputs/origspace_base/llama2_7b_base/p30 — 이미 가중치 없음
+[건너뜀] outputs/origspace_base/llama2_7b_base/p40 — 이미 가중치 없음
+[건너뜀] outputs/origspace_base/llama2_7b_base/p50 — 이미 가중치 없음
+[건너뜀] outputs/origspace_base/llama31_8b_base/p10 — 이미 가중치 없음
+[건너뜀] outputs/origspace_base/llama31_8b_base/p20 — 이미 가중치 없음
+[건너뜀] outputs/origspace_base/llama31_8b_base/p30 — 이미 가중치 없음
+[건너뜀] outputs/origspace_base/llama31_8b_base/p40 — 이미 가중치 없음
+[건너뜀] outputs/origspace_base/llama31_8b_base/p50 — 이미 가중치 없음
+[건너뜀] outputs/revision/cb/llama31_8b_base/gsm8k/asft — 이미 가중치 없음
+[건너뜀] outputs/revision/cb/llama31_8b_base/gsm8k/lisa — 이미 가중치 없음
+[건너뜀] outputs/revision/cb/llama31_8b_base/gsm8k/lora — 이미 가중치 없음
+[건너뜀] outputs/revision/cb/llama31_8b_base/gsm8k/resta — 이미 가중치 없음
+[건너뜀] outputs/revision/cb/llama31_8b_base/gsm8k/safelora — 이미 가중치 없음
+[건너뜀] outputs/revision/cb/llama31_8b_base/gsm8k/salora — 이미 가중치 없음
+[건너뜀] outputs/revision/cb/llama31_8b_base/gsm8k/seal — 이미 가중치 없음
+[건너뜀] outputs/revision/cb/llama31_8b_base/gsm8k/wsr_lora — 이미 가중치 없음
+[건너뜀] outputs/revision_gemma_seal_lr1e-5/cb/gemma2_9b/gsm8k/seal — 이미 가중치 없음
+[건너뜀] outputs/revision_qa_a16/bt/llama2_7b/gsm8k/asft — 이미 가중치 없음
+[건너뜀] outputs/revision_qa_a16/bt/llama2_7b/gsm8k/lisa — 이미 가중치 없음
+[건너뜀] outputs/revision_qa_a16/bt/llama2_7b/gsm8k/lora — 이미 가중치 없음
+[건너뜀] outputs/revision_qa_a16/bt/llama2_7b/gsm8k/safelora — 이미 가중치 없음
+[건너뜀] outputs/revision_qa_a16/bt/llama2_7b/gsm8k/salora — 이미 가중치 없음
+[건너뜀] outputs/revision_qa_a16/bt/llama2_7b/gsm8k/seal — 이미 가중치 없음
+[건너뜀] outputs/revision_qa_a16/bt/llama2_7b/gsm8k/wsr_lora — 이미 가중치 없음
+[건너뜀] outputs/revision_qa_a16/cb/llama2_7b/arc/asft — 이미 가중치 없음
+[건너뜀] outputs/revision_qa_a16/cb/llama2_7b/arc/lisa — 이미 가중치 없음
+[건너뜀] outputs/revision_qa_a16/cb/llama2_7b/arc/lora — 이미 가중치 없음
+[건너뜀] outputs/revision_qa_a16/cb/llama2_7b/arc/safelora — 이미 가중치 없음
+[건너뜀] outputs/revision_qa_a16/cb/llama2_7b/arc/salora — 이미 가중치 없음
+[건너뜀] outputs/revision_qa_a16/cb/llama2_7b/arc/seal — 이미 가중치 없음
+[건너뜀] outputs/revision_qa_a16/cb/llama2_7b/arc/wsr_lora — 이미 가중치 없음
+[건너뜀] outputs/revision_qa_a16/cb/llama2_7b/medqa/asft — 이미 가중치 없음
+[건너뜀] outputs/revision_qa_a16/cb/llama2_7b/medqa/lisa — 이미 가중치 없음
+[건너뜀] outputs/revision_qa_a16/cb/llama2_7b/medqa/lora — 이미 가중치 없음
+[건너뜀] outputs/revision_qa_a16/cb/llama2_7b/medqa/safelora — 이미 가중치 없음
+[건너뜀] outputs/revision_qa_a16/cb/llama2_7b/medqa/salora — 이미 가중치 없음
+[건너뜀] outputs/revision_qa_a16/cb/llama2_7b/medqa/seal — 이미 가중치 없음
+[건너뜀] outputs/revision_qa_a16/cb/llama2_7b/medqa/wsr_lora — 이미 가중치 없음
+[건너뜀] outputs/revision_qwen_a32_v2/cb/qwen25_7b/gsm8k/asft — 이미 가중치 없음
+[건너뜀] outputs/revision_qwen_a32_v2/cb/qwen25_7b/gsm8k/lisa — 이미 가중치 없음
+
+════ prune 결과: 성공 34 / 건너뜀 42 / 실패 0 ════
+PRUNE_CELLS_DONE 2026-09-20T16:14:25+09:00

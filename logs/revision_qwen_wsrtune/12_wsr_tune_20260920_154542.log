@@ -1,0 +1,34 @@
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM
+   python    : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/bin/python
+   safety    : cb
+   models    : qwen25_7b
+   methods   : wsr_tune
+   tasks     : gsm8k
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=[qwen25_7b=5e-5] wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=0, basis 삭제=0)
+   *** DRY RUN ***
+════════════════════════════════════════════════════════════════
+
+  keep_ratio ρ  : 0.1
+  layer_type    : attn_q,attn_k,attn_v,ffn_up,ffn_down   target_layers: all
+
+──────────────────────────────────────────────────────────────
+  wsr_tune(ρ=0.1)  cb/qwen25_7b/gsm8k  lr=5e-5 batch=1x16   (09-20 15:45:42)
+──────────────────────────────────────────────────────────────
+  [dry-run] python train.py --phase 3 --phase0_model_dir wvnvwn/qwen-2.5-7B-Instruct-SSFT-lr5e-5 \
+      --basis_dir  --masks_dir  \
+      --phase3_dataset gsm8k --phase3_task_data_path /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/data/gsm8k_train_task_7473.json --phase3_task_samples 0 \
+      --epochs 3 --utility_lr 5e-5 --base_weight_decay 0.01 \
+      --warmup_ratio 0.1 --lr_scheduler_type cosine \
+      --max_grad_norm 1.0 --max_length 1024 \
+      --batch_size 1 --gradient_accumulation_steps 16 \
+      --layer_type attn_q,attn_k,attn_v,ffn_up,ffn_down --target_layers all \
+      --output_dir /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/revision/cb/qwen25_7b/gsm8k/wsr_tune --device cuda --dtype bfloat16 --seed 42 --non_freeze --gradient_checkpointing --no_wandb
+
+실패한 셀 없음.

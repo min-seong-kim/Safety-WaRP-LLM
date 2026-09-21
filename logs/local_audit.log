@@ -1,0 +1,87 @@
+셀                                                         GB 업로드       HB   lm-eval repo
+----------------------------------------------------------------------------------------------------------------------------------
+outputs/asft_lisa_fullft/llama2_7b/medqa/lisa           13.5 O         4/4  O       kmseong/llama2_7b-chat-CB_SSFT-lisa_medqa_rho1.0_fullft_lr5e-5
+outputs/asft_lisa_fullft/llama2_7b/medqa/asft           13.5 O         4/4  O       kmseong/llama2_7b-chat-CB_SSFT-asft_medqa_lambda1.0_fullft_lr5e-5
+outputs/asft_lisa_fullft/llama2_7b/arc/lisa             13.5 O         4/4  O       kmseong/llama2_7b-chat-CB_SSFT-lisa_arc_rho1.0_fullft_lr5e-5
+outputs/asft_lisa_fullft/llama2_7b/arc/asft             13.5 O         4/4  O       kmseong/llama2_7b-chat-CB_SSFT-asft_arc_lambda1.0_fullft_lr5e-5
+outputs/asft_lisa_fullft/llama2_7b/gsm8k/lisa           13.5 O         4/4  O       kmseong/llama2_7b-chat-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr5e-5
+outputs/asft_lisa_fullft/llama2_7b/gsm8k/asft           13.5 O         4/4  O       kmseong/llama2_7b-chat-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr5e-5
+outputs/asft_lisa_fullft/llama31_8b/math/lisa           16.1 O         4/4  O       kmseong/llama3_1_8b-instruct-CB_SSFT-lisa_math_rho1.0_fullft_lr5e-5
+outputs/asft_lisa_fullft/llama31_8b/math/asft           16.1 O         4/4  O       kmseong/llama3_1_8b-instruct-CB_SSFT-asft_math_lambda1.0_fullft_lr5e-5
+outputs/asft_lisa_fullft/gemma2_9b/gsm8k/lisa           18.5 O         4/4  O       kmseong/gemma2_9b-it-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr1e-5
+outputs/asft_lisa_fullft/gemma2_9b/gsm8k/asft           18.5 O         4/4  O       kmseong/gemma2_9b-it-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr1e-5
+outputs/asft_lisa_fullft/llama2_13b/gsm8k/lisa          26.0 O         4/4  O       kmseong/llama2_13b-chat-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr5e-5
+outputs/asft_lisa_fullft/llama2_13b/gsm8k/asft          26.0 O         4/4  O       kmseong/llama2_13b-chat-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr5e-5
+outputs/asft_lisa_fullft/qwen25_7b/gsm8k/lisa           15.2 O         4/4  O       kmseong/qwen2_5_7b-instruct-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr5e-5
+outputs/asft_lisa_fullft/qwen25_7b/gsm8k/asft           15.2 O         4/4  O       kmseong/qwen2_5_7b-instruct-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr5e-5
+outputs/asft_lisa_fullft/llama32_3b/math/lisa            6.4 O         4/4  O       kmseong/llama3_2_3b-instruct-CB_SSFT-lisa_math_rho1.0_fullft_lr5e-5
+outputs/asft_lisa_fullft/llama32_3b/math/asft            6.4 O         4/4  O       kmseong/llama3_2_3b-instruct-CB_SSFT-asft_math_lambda1.0_fullft_lr5e-5
+outputs/asft_lisa_tgtonly/llama2_7b/medqa/lisa          13.5 O         4/4  O       kmseong/llama2_7b-chat-CB_SSFT-lisa_medqa_rho1.0_fullft_lr5e-5_tgtonly
+outputs/asft_lisa_tgtonly/llama2_7b/medqa/asft          13.5 O         4/4  O       kmseong/llama2_7b-chat-CB_SSFT-asft_medqa_lambda1.0_fullft_lr5e-5_tgtonly
+outputs/asft_lisa_tgtonly/llama2_7b/arc/lisa            13.5 O         4/4  O       kmseong/llama2_7b-chat-CB_SSFT-lisa_arc_rho1.0_fullft_lr5e-5_tgtonly
+outputs/asft_lisa_tgtonly/llama2_7b/arc/asft            13.5 O         4/4  O       kmseong/llama2_7b-chat-CB_SSFT-asft_arc_lambda1.0_fullft_lr5e-5_tgtonly
+outputs/asft_lisa_tgtonly/llama2_7b/gsm8k/lisa          13.5 O         4/4  O       kmseong/llama2_7b-chat-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr5e-5_tgtonly
+outputs/asft_lisa_tgtonly/llama2_7b/gsm8k/asft          13.5 O         4/4  O       kmseong/llama2_7b-chat-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr5e-5_tgtonly
+outputs/asft_lisa_tgtonly/llama31_8b/math/lisa          16.1 O         4/4  O       kmseong/llama3_1_8b-instruct-CB_SSFT-lisa_math_rho1.0_fullft_lr5e-5_tgtonly
+outputs/asft_lisa_tgtonly/llama31_8b/math/asft          16.1 O         4/4  O       kmseong/llama3_1_8b-instruct-CB_SSFT-asft_math_lambda1.0_fullft_lr5e-5_tgtonly
+outputs/asft_lisa_tgtonly/gemma2_9b/gsm8k/lisa          18.5 O         4/4  O       kmseong/gemma2_9b-it-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr1e-5_tgtonly
+outputs/asft_lisa_tgtonly/gemma2_9b/gsm8k/asft          18.5 O         4/4  O       kmseong/gemma2_9b-it-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr1e-5_tgtonly
+outputs/asft_lisa_tgtonly/llama2_13b/gsm8k/lisa         26.0 O         4/4  O       kmseong/llama2_13b-chat-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr5e-5_tgtonly
+outputs/asft_lisa_tgtonly/llama2_13b/gsm8k/asft         26.0 O         4/4  O       kmseong/llama2_13b-chat-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr5e-5_tgtonly
+outputs/asft_lisa_tgtonly/qwen25_7b/gsm8k/lisa          15.2 O         4/4  O       kmseong/qwen2_5_7b-instruct-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr5e-5_tgtonly
+outputs/asft_lisa_tgtonly/qwen25_7b/gsm8k/asft          15.2 O         4/4  O       kmseong/qwen2_5_7b-instruct-CB_SSFT-asft_gsm8k_lambda1.0_fullft_lr5e-5_tgtonly
+outputs/asft_lisa_tgtonly/llama32_3b/math/lisa           6.4 O         4/4  O       kmseong/llama3_2_3b-instruct-CB_SSFT-lisa_math_rho1.0_fullft_lr5e-5_tgtonly
+outputs/asft_lisa_tgtonly/llama32_3b/math/asft           6.4 O         4/4  O       kmseong/llama3_2_3b-instruct-CB_SSFT-asft_math_lambda1.0_fullft_lr5e-5_tgtonly
+outputs/asft_lisa_rerun/llama31_8b/math/lisa            16.1 O         4/4  O       kmseong/llama3_1_8b-instruct-CB_SSFT-lisa_math_rho1.0_fullft_lr5e-5_rerun
+outputs/asft_lisa_rerun/llama31_8b/math/asft            16.1 O         4/4  O       kmseong/llama3_1_8b-instruct-CB_SSFT-asft_math_lambda1.0_fullft_lr5e-5_rerun
+outputs/revision/cb/llama31_8b_base/gsm8k/salora        16.1 O         4/4  O       kmseong/llama3_1_8b-base-CB_SSFT-salora_gsm8k_rs32rt32_a16_lr3e-4
+outputs/revision/cb/llama31_8b_base/gsm8k/lora          16.1 O         4/4  O       kmseong/llama3_1_8b-base-CB_SSFT-lora_gsm8k_a16_lr3e-4
+outputs/revision/cb/llama31_8b_base/gsm8k/seal          16.1 O         4/4  O       kmseong/llama3_1_8b-base-CB_SSFT-seal_gsm8k_topp0.8_lr1e-5
+outputs/revision/cb/llama31_8b_base/gsm8k/lisa          16.1 O         4/4  O       kmseong/llama3_1_8b-base-CB_SSFT-lisa_gsm8k_rho1.0_a16_lr3e-4
+outputs/revision/cb/llama31_8b_base/gsm8k/wsr_lora      16.1 O         4/4  O       kmseong/llama3_1_8b-base-CB_SSFT-wsr-lora_gsm8k_rho0.3_a16_lr3e-4
+outputs/revision/cb/llama31_8b_base/gsm8k/asft          16.1 O         4/4  O       kmseong/llama3_1_8b-base-CB_SSFT-asft_gsm8k_lambda1.0_a16_lr3e-4
+outputs/revision/cb/llama31_8b_base/gsm8k/safelora      16.1 O         4/4  O       kmseong/llama3_1_8b-base-CB_SSFT-safelora_gsm8k_thr0.3_a16_lr3e-4
+outputs/revision/cb/llama31_8b_base/gsm8k/resta         16.1 O         4/4  O       kmseong/llama3_1_8b-base-CB_SSFT-resta_gsm8k_gamma0.3_lr1e-5
+outputs/revision_gemma_seal_lr1e-5/cb/gemma2_9b/gsm8k/seal    18.5 O         4/4  O       kmseong/gemma2_9b-it-CB_SSFT-seal_gsm8k_topp0.8_lr1e-5
+outputs/revision_qa_a16/bt/llama2_7b/gsm8k/salora        0.0 O         4/4  O       kmseong/llama2_7b-chat-BT_SSFT-salora_gsm8k_rs32rt32_a16_lr3e-4
+outputs/revision_qa_a16/bt/llama2_7b/gsm8k/lora          0.0 O         4/4  O       kmseong/llama2_7b-chat-BT_SSFT-lora_gsm8k_a16_lr3e-4
+outputs/revision_qa_a16/bt/llama2_7b/gsm8k/seal          0.0 O         4/4  O       kmseong/llama2_7b-chat-BT_SSFT-seal_gsm8k_topp0.8_lr5e-5
+outputs/revision_qa_a16/bt/llama2_7b/gsm8k/lisa          0.0 O         4/4  O       kmseong/llama2_7b-chat-BT_SSFT-lisa_gsm8k_rho1.0_a16_lr3e-4
+outputs/revision_qa_a16/bt/llama2_7b/gsm8k/wsr_lora      0.0 O         4/4  O       kmseong/llama2_7b-chat-BT_SSFT-wsr-lora_gsm8k_rho0.3_a16_lr3e-4
+outputs/revision_qa_a16/bt/llama2_7b/gsm8k/asft          0.0 O         4/4  O       kmseong/llama2_7b-chat-BT_SSFT-asft_gsm8k_lambda1.0_a16_lr3e-4
+outputs/revision_qa_a16/bt/llama2_7b/gsm8k/safelora      0.0 O         4/4  O       kmseong/llama2_7b-chat-BT_SSFT-safelora_gsm8k_thr0.3_a16_lr3e-4
+outputs/revision_qa_a16/cb/llama2_7b/medqa/salora        0.0 O         4/4  O       kmseong/llama2_7b-chat-CB_SSFT-salora_medqa_rs32rt32_a16_lr3e-4
+outputs/revision_qa_a16/cb/llama2_7b/medqa/lora          0.0 O         4/4  O       kmseong/llama2_7b-chat-CB_SSFT-lora_medqa_a16_lr3e-4
+outputs/revision_qa_a16/cb/llama2_7b/medqa/seal          0.0 O         4/4  O       kmseong/llama2_7b-chat-CB_SSFT-seal_medqa_topp0.8_lr5e-5
+outputs/revision_qa_a16/cb/llama2_7b/medqa/lisa          0.0 O         4/4  O       kmseong/llama2_7b-chat-CB_SSFT-lisa_medqa_rho1.0_a16_lr3e-4
+outputs/revision_qa_a16/cb/llama2_7b/medqa/wsr_lora      0.0 O         4/4  O       kmseong/llama2_7b-chat-CB_SSFT-wsr-lora_medqa_rho0.3_a16_lr3e-4
+outputs/revision_qa_a16/cb/llama2_7b/medqa/asft          0.0 O         4/4  O       kmseong/llama2_7b-chat-CB_SSFT-asft_medqa_lambda1.0_a16_lr3e-4
+outputs/revision_qa_a16/cb/llama2_7b/medqa/safelora      0.0 O         4/4  O       kmseong/llama2_7b-chat-CB_SSFT-safelora_medqa_thr0.3_a16_lr3e-4
+outputs/revision_qa_a16/cb/llama2_7b/arc/salora          0.0 O         4/4  O       kmseong/llama2_7b-chat-CB_SSFT-salora_arc_rs32rt32_a16_lr3e-4
+outputs/revision_qa_a16/cb/llama2_7b/arc/lora            0.0 O         4/4  O       kmseong/llama2_7b-chat-CB_SSFT-lora_arc_a16_lr3e-4
+outputs/revision_qa_a16/cb/llama2_7b/arc/seal            0.0 O         4/4  O       kmseong/llama2_7b-chat-CB_SSFT-seal_arc_topp0.8_lr5e-5
+outputs/revision_qa_a16/cb/llama2_7b/arc/lisa            0.0 O         4/4  O       kmseong/llama2_7b-chat-CB_SSFT-lisa_arc_rho1.0_a16_lr3e-4
+outputs/revision_qa_a16/cb/llama2_7b/arc/wsr_lora        0.0 O         4/4  O       kmseong/llama2_7b-chat-CB_SSFT-wsr-lora_arc_rho0.3_a16_lr3e-4
+outputs/revision_qa_a16/cb/llama2_7b/arc/asft            0.0 O         4/4  O       kmseong/llama2_7b-chat-CB_SSFT-asft_arc_lambda1.0_a16_lr3e-4
+outputs/revision_qa_a16/cb/llama2_7b/arc/safelora        0.0 O         4/4  O       kmseong/llama2_7b-chat-CB_SSFT-safelora_arc_thr0.3_a16_lr3e-4
+outputs/revision_qwen_a32_v2/cb/qwen25_7b/gsm8k/lisa    15.2 O         4/4  O       kmseong/qwen2_5_7b-instruct-CB_SSFT-lisa_gsm8k_rho1.0_lr3e-4_v2
+outputs/revision_qwen_a32_v2/cb/qwen25_7b/gsm8k/asft    15.2 O         4/4  O       kmseong/qwen2_5_7b-instruct-CB_SSFT-asft_gsm8k_lambda1.0_lr3e-4_v2
+outputs/origspace_base/llama2_7b_base/p40               13.5 O         4/4  O       kmseong/llama2_7b-base-origspace-freeze-p40-gsm8k-lr3e-5
+outputs/origspace_base/llama2_7b_base/p10               13.5 O         4/4  O       kmseong/llama2_7b-base-origspace-freeze-p10-gsm8k-lr3e-5
+outputs/origspace_base/llama2_7b_base/p30               13.5 O         4/4  O       kmseong/llama2_7b-base-origspace-freeze-p30-gsm8k-lr3e-5
+outputs/origspace_base/llama2_7b_base/p20               13.5 O         4/4  O       kmseong/llama2_7b-base-origspace-freeze-p20-gsm8k-lr3e-5
+outputs/origspace_base/llama2_7b_base/p50               13.5 O         4/4  O       kmseong/llama2_7b-base-origspace-freeze-p50-gsm8k-lr3e-5
+outputs/origspace_base/llama31_8b_base/p40              16.1 O         4/4  O       kmseong/llama3_1_8b-base-origspace-freeze-p40-gsm8k-lr1e-5
+outputs/origspace_base/llama31_8b_base/p10              16.1 O         4/4  O       kmseong/llama3_1_8b-base-origspace-freeze-p10-gsm8k-lr1e-5
+outputs/origspace_base/llama31_8b_base/p30              16.1 O         4/4  O       kmseong/llama3_1_8b-base-origspace-freeze-p30-gsm8k-lr1e-5
+outputs/origspace_base/llama31_8b_base/p20              16.1 O         4/4  O       kmseong/llama3_1_8b-base-origspace-freeze-p20-gsm8k-lr1e-5
+outputs/origspace_base/llama31_8b_base/p50              16.1 O         4/4  O       kmseong/llama3_1_8b-base-origspace-freeze-p50-gsm8k-lr1e-5
+
+  outputs/asft_lisa_tgtonly                246 GB
+  outputs/asft_lisa_fullft                 246 GB
+  outputs/origspace_base                   148 GB
+  outputs/revision                         129 GB
+  outputs/asft_lisa_rerun                  32 GB
+  outputs/revision_qwen_a32_v2             30 GB
+  outputs/revision_gemma_seal_lr1e-5       19 GB
+  outputs/revision_qa_a16                  0 GB

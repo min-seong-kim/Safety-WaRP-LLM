@@ -1,0 +1,448 @@
+════════════════════════════════════════════════════════════════
+  평가 대상 10 개 (HB_VARIANTS=sys)
+   - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama2_7b-base-origspace-freeze-p10-gsm8k-lr3e-5
+   - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama2_7b-base-origspace-freeze-p20-gsm8k-lr3e-5
+   - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama2_7b-base-origspace-freeze-p30-gsm8k-lr3e-5
+   - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama2_7b-base-origspace-freeze-p40-gsm8k-lr3e-5
+   - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama2_7b-base-origspace-freeze-p50-gsm8k-lr3e-5
+   - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p10-gsm8k-lr1e-5
+   - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p20-gsm8k-lr1e-5
+   - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p30-gsm8k-lr1e-5
+   - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p40-gsm8k-lr1e-5
+   - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p50-gsm8k-lr1e-5
+════════════════════════════════════════════════════════════════
+==============================================================================
+🧪 통합 평가 시작
+   모델 (10개):
+     - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama2_7b-base-origspace-freeze-p10-gsm8k-lr3e-5
+     - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama2_7b-base-origspace-freeze-p20-gsm8k-lr3e-5
+     - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama2_7b-base-origspace-freeze-p30-gsm8k-lr3e-5
+     - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama2_7b-base-origspace-freeze-p40-gsm8k-lr3e-5
+     - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama2_7b-base-origspace-freeze-p50-gsm8k-lr3e-5
+     - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p10-gsm8k-lr1e-5
+     - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p20-gsm8k-lr1e-5
+     - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p30-gsm8k-lr1e-5
+     - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p40-gsm8k-lr1e-5
+     - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p50-gsm8k-lr1e-5
+   시각      : 2026-09-20_09-37-38
+   HarmBench : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/HarmBench   (env: harmbench, GPU 0)
+   lm-eval   : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/lm-evaluation-harness   (env: hb, GPU 0)
+   conda.sh  : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/etc/profile.d/conda.sh
+   범위      : HB_ONLY=0, LM_ONLY=1, PARALLEL=0
+   HB 변형   : sys  (safety system prompt 유/무)
+==============================================================================
+
+🔎 [repo-check] HF 에 존재하는 모델만 남깁니다 (10개 확인 중)
+[repo-check] ⚠️ 확인 실패했지만 통과시킨 repo 10개:
+    ? /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama2_7b-base-origspace-freeze-p10-gsm8k-lr3e-5  (확인 실패(HFValidationError) → 일단 통과)
+    ? /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama2_7b-base-origspace-freeze-p20-gsm8k-lr3e-5  (확인 실패(HFValidationError) → 일단 통과)
+    ? /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama2_7b-base-origspace-freeze-p30-gsm8k-lr3e-5  (확인 실패(HFValidationError) → 일단 통과)
+    ? /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama2_7b-base-origspace-freeze-p40-gsm8k-lr3e-5  (확인 실패(HFValidationError) → 일단 통과)
+    ? /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama2_7b-base-origspace-freeze-p50-gsm8k-lr3e-5  (확인 실패(HFValidationError) → 일단 통과)
+    ? /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p10-gsm8k-lr1e-5  (확인 실패(HFValidationError) → 일단 통과)
+    ? /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p20-gsm8k-lr1e-5  (확인 실패(HFValidationError) → 일단 통과)
+    ? /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p30-gsm8k-lr1e-5  (확인 실패(HFValidationError) → 일단 통과)
+    ? /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p40-gsm8k-lr1e-5  (확인 실패(HFValidationError) → 일단 통과)
+    ? /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p50-gsm8k-lr1e-5  (확인 실패(HFValidationError) → 일단 통과)
+[repo-check] 입력 10개 → 사용 10개 / 제외 0개
+   캐시 완료 0개 먼저, 미수신 10개 나중
+   평가 대상 : 10개  →  lm-eval 10개 / agnews·sst2 0개
+
+⏬ [Prefetch] 건너뜀 (PREFETCH_MODE=off)
+
+###############################  [2/2] lm-eval-harness  ###############################
+▶ eval_models.sh  (10개 모델, TASK=모델 이름에서 자동 추론)
+평가 시작 시간: Sun Sep 20 09:37:42 AM KST 2026
+고정 시드: 42
+GPU: CUDA_VISIBLE_DEVICES=0  (shard: gpu0)
+
+실행 계획:
+  - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama2_7b-base-origspace-freeze-p10-gsm8k-lr3e-5 → gsm8k   [자동(이름)]
+  - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama2_7b-base-origspace-freeze-p20-gsm8k-lr3e-5 → gsm8k   [자동(이름)]
+  - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama2_7b-base-origspace-freeze-p30-gsm8k-lr3e-5 → gsm8k   [자동(이름)]
+  - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama2_7b-base-origspace-freeze-p40-gsm8k-lr3e-5 → gsm8k   [자동(이름)]
+  - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama2_7b-base-origspace-freeze-p50-gsm8k-lr3e-5 → gsm8k   [자동(이름)]
+  - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p10-gsm8k-lr1e-5 → gsm8k   [자동(이름)]
+  - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p20-gsm8k-lr1e-5 → gsm8k   [자동(이름)]
+  - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p30-gsm8k-lr1e-5 → gsm8k   [자동(이름)]
+  - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p40-gsm8k-lr1e-5 → gsm8k   [자동(이름)]
+  - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p50-gsm8k-lr1e-5 → gsm8k   [자동(이름)]
+  총 10개 모델 / 10회 실행
+
+
+==========================================
+[1/10] 모델 평가 중: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama2_7b-base-origspace-freeze-p10-gsm8k-lr3e-5
+  task: gsm8k
+==========================================
+[1/1] task 평가 중: gsm8k
+(EngineCore_DP0 pid=1579789) /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/torch/library.py:357: UserWarning: Warning only once for all operators,  other operators may also be overridden.
+(EngineCore_DP0 pid=1579789)   Overriding a previously registered kernel for the same operator and the same dispatch key
+(EngineCore_DP0 pid=1579789)   operator: aten::mm(Tensor self, Tensor mat2) -> Tensor
+(EngineCore_DP0 pid=1579789)     registered at /pytorch/build/aten/src/ATen/RegisterSchema.cpp:6
+(EngineCore_DP0 pid=1579789)   dispatch key: CUDA
+(EngineCore_DP0 pid=1579789)   previous kernel: registered at /pytorch/aten/src/ATen/LegacyBatchingRegistrations.cpp:1076
+(EngineCore_DP0 pid=1579789)        new kernel: registered at /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/vllm/model_executor/layers/batch_invariant.py:935 (Triggered internally at /pytorch/aten/src/ATen/core/dispatch/OperatorEntry.cpp:208.)
+(EngineCore_DP0 pid=1579789)   self.m.impl(
+[W920 09:38:06.261450120 Context.cpp:534] Warning: torch.backends.cuda.preferred_blas_library is an experimental feature. If you see any error or unexpected behavior when this flag is set please file an issue on GitHub. (function operator())
+(EngineCore_DP0 pid=1579789) Loading safetensors checkpoint shards:   0% Completed | 0/3 [00:00<?, ?it/s]
+(EngineCore_DP0 pid=1579789) Loading safetensors checkpoint shards:  33% Completed | 1/3 [00:01<00:03,  1.72s/it]
+(EngineCore_DP0 pid=1579789) Loading safetensors checkpoint shards:  67% Completed | 2/3 [00:03<00:01,  1.84s/it]
+(EngineCore_DP0 pid=1579789) Loading safetensors checkpoint shards: 100% Completed | 3/3 [00:05<00:00,  1.65s/it]
+(EngineCore_DP0 pid=1579789) Loading safetensors checkpoint shards: 100% Completed | 3/3 [00:05<00:00,  1.69s/it]
+(EngineCore_DP0 pid=1579789) 
+(EngineCore_DP0 pid=1579789) 2026-09-20 09:38:16,608 - INFO - autotuner.py:256 - flashinfer.jit: [Autotuner]: Autotuning process starts ...
+(EngineCore_DP0 pid=1579789) 2026-09-20 09:38:16,637 - INFO - autotuner.py:262 - flashinfer.jit: [Autotuner]: Autotuning process ends
+  0%|          | 0/1319 [00:00<?, ?it/s]  5%|▍         | 60/1319 [00:00<00:02, 592.41it/s]  9%|▉         | 122/1319 [00:00<00:01, 604.35it/s] 14%|█▍        | 184/1319 [00:00<00:01, 607.59it/s] 19%|█▊        | 245/1319 [00:00<00:01, 604.26it/s] 23%|██▎       | 307/1319 [00:00<00:01, 607.86it/s] 28%|██▊       | 369/1319 [00:00<00:01, 608.72it/s] 33%|███▎      | 430/1319 [00:00<00:01, 606.26it/s] 37%|███▋      | 491/1319 [00:00<00:01, 606.11it/s] 42%|████▏     | 553/1319 [00:00<00:01, 608.81it/s] 47%|████▋     | 615/1319 [00:01<00:01, 609.77it/s] 51%|█████▏    | 676/1319 [00:01<00:01, 609.36it/s] 56%|█████▌    | 737/1319 [00:01<00:00, 608.45it/s] 61%|██████    | 798/1319 [00:01<00:00, 606.89it/s] 65%|██████▌   | 859/1319 [00:01<00:00, 602.38it/s] 70%|██████▉   | 920/1319 [00:01<00:00, 602.95it/s] 74%|███████▍  | 981/1319 [00:01<00:00, 602.84it/s] 79%|███████▉  | 1042/1319 [00:01<00:00, 603.14it/s] 84%|████████▎ | 1103/1319 [00:01<00:00, 601.63it/s] 88%|████████▊ | 1165/1319 [00:01<00:00, 604.60it/s] 93%|█████████▎| 1227/1319 [00:02<00:00, 606.78it/s] 98%|█████████▊| 1288/1319 [00:02<00:00, 607.09it/s]100%|██████████| 1319/1319 [00:02<00:00, 606.01it/s]
+Running generate_until requests:   0%|          | 0/1319 [00:00<?, ?it/s]Running generate_until requests:   0%|          | 1/1319 [00:19<7:03:14, 19.27s/it]Running generate_until requests:  10%|▉         | 129/1319 [00:28<03:27,  5.73it/s]Running generate_until requests:  19%|█▉        | 257/1319 [00:37<01:59,  8.90it/s]Running generate_until requests:  29%|██▉       | 385/1319 [00:45<01:25, 10.92it/s]Running generate_until requests:  39%|███▉      | 513/1319 [00:53<01:05, 12.33it/s]Running generate_until requests:  49%|████▊     | 641/1319 [01:02<00:50, 13.38it/s]Running generate_until requests:  58%|█████▊    | 769/1319 [01:09<00:38, 14.21it/s]Running generate_until requests:  68%|██████▊   | 897/1319 [01:17<00:28, 14.85it/s]Running generate_until requests:  78%|███████▊  | 1025/1319 [01:25<00:19, 15.40it/s]Running generate_until requests:  87%|████████▋ | 1153/1319 [01:32<00:10, 16.06it/s]Running generate_until requests:  97%|█████████▋| 1281/1319 [01:36<00:02, 18.78it/s]Running generate_until requests: 100%|██████████| 1319/1319 [01:36<00:00, 13.62it/s]
+vllm ({'pretrained': '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama2_7b-base-origspace-freeze-p10-gsm8k-lr3e-5', 'seed': 42, 'attention_backend': 'FLASH_ATTN', 'enforce_eager': True, 'enable_prefix_caching': False, 'tensor_parallel_size': 1, 'data_parallel_size': 1, 'dtype': 'auto', 'gpu_memory_utilization': 0.85}), gen_kwargs: ({}), limit: None, num_fewshot: 5, batch_size: 128
+|Tasks|Version|     Filter     |n-shot|  Metric   |   |Value |   |Stderr|
+|-----|------:|----------------|-----:|-----------|---|-----:|---|-----:|
+|gsm8k|      3|flexible-extract|     5|exact_match|↑  |0.3889|±  |0.0134|
+|     |       |strict-match    |     5|exact_match|↑  |0.3889|±  |0.0134|
+
+✓ 완료: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama2_7b-base-origspace-freeze-p10-gsm8k-lr3e-5 (task: gsm8k)
+
+==========================================
+[2/10] 모델 평가 중: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama2_7b-base-origspace-freeze-p20-gsm8k-lr3e-5
+  task: gsm8k
+==========================================
+[1/1] task 평가 중: gsm8k
+(EngineCore_DP0 pid=1582497) /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/torch/library.py:357: UserWarning: Warning only once for all operators,  other operators may also be overridden.
+(EngineCore_DP0 pid=1582497)   Overriding a previously registered kernel for the same operator and the same dispatch key
+(EngineCore_DP0 pid=1582497)   operator: aten::mm(Tensor self, Tensor mat2) -> Tensor
+(EngineCore_DP0 pid=1582497)     registered at /pytorch/build/aten/src/ATen/RegisterSchema.cpp:6
+(EngineCore_DP0 pid=1582497)   dispatch key: CUDA
+(EngineCore_DP0 pid=1582497)   previous kernel: registered at /pytorch/aten/src/ATen/LegacyBatchingRegistrations.cpp:1076
+(EngineCore_DP0 pid=1582497)        new kernel: registered at /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/vllm/model_executor/layers/batch_invariant.py:935 (Triggered internally at /pytorch/aten/src/ATen/core/dispatch/OperatorEntry.cpp:208.)
+(EngineCore_DP0 pid=1582497)   self.m.impl(
+[W920 09:40:28.118116873 Context.cpp:534] Warning: torch.backends.cuda.preferred_blas_library is an experimental feature. If you see any error or unexpected behavior when this flag is set please file an issue on GitHub. (function operator())
+(EngineCore_DP0 pid=1582497) Loading safetensors checkpoint shards:   0% Completed | 0/3 [00:00<?, ?it/s]
+(EngineCore_DP0 pid=1582497) Loading safetensors checkpoint shards:  33% Completed | 1/3 [00:01<00:02,  1.48s/it]
+(EngineCore_DP0 pid=1582497) Loading safetensors checkpoint shards:  67% Completed | 2/3 [00:03<00:01,  1.61s/it]
+(EngineCore_DP0 pid=1582497) Loading safetensors checkpoint shards: 100% Completed | 3/3 [00:04<00:00,  1.47s/it]
+(EngineCore_DP0 pid=1582497) Loading safetensors checkpoint shards: 100% Completed | 3/3 [00:04<00:00,  1.49s/it]
+(EngineCore_DP0 pid=1582497) 
+(EngineCore_DP0 pid=1582497) 2026-09-20 09:40:36,427 - INFO - autotuner.py:256 - flashinfer.jit: [Autotuner]: Autotuning process starts ...
+(EngineCore_DP0 pid=1582497) 2026-09-20 09:40:36,442 - INFO - autotuner.py:262 - flashinfer.jit: [Autotuner]: Autotuning process ends
+  0%|          | 0/1319 [00:00<?, ?it/s]  5%|▍         | 60/1319 [00:00<00:02, 597.35it/s]  9%|▉         | 122/1319 [00:00<00:01, 605.24it/s] 14%|█▍        | 184/1319 [00:00<00:01, 609.17it/s] 19%|█▊        | 246/1319 [00:00<00:01, 609.80it/s] 23%|██▎       | 307/1319 [00:00<00:01, 608.84it/s] 28%|██▊       | 369/1319 [00:00<00:01, 610.88it/s] 33%|███▎      | 431/1319 [00:00<00:01, 613.13it/s] 37%|███▋      | 493/1319 [00:00<00:01, 609.51it/s] 42%|████▏     | 555/1319 [00:00<00:01, 611.82it/s] 47%|████▋     | 617/1319 [00:01<00:01, 614.12it/s] 51%|█████▏    | 679/1319 [00:01<00:01, 615.19it/s] 56%|█████▌    | 741/1319 [00:01<00:00, 610.99it/s] 61%|██████    | 803/1319 [00:01<00:00, 613.27it/s] 66%|██████▌   | 865/1319 [00:01<00:00, 614.45it/s] 70%|███████   | 927/1319 [00:01<00:00, 615.17it/s] 75%|███████▌  | 990/1319 [00:01<00:00, 616.85it/s] 80%|███████▉  | 1053/1319 [00:01<00:00, 617.99it/s] 85%|████████▍ | 1116/1319 [00:01<00:00, 619.34it/s] 89%|████████▉ | 1179/1319 [00:01<00:00, 619.76it/s] 94%|█████████▍| 1242/1319 [00:02<00:00, 620.76it/s] 99%|█████████▉| 1305/1319 [00:02<00:00, 621.62it/s]100%|██████████| 1319/1319 [00:02<00:00, 614.97it/s]
+Running generate_until requests:   0%|          | 0/1319 [00:00<?, ?it/s]Running generate_until requests:   0%|          | 1/1319 [00:18<6:53:42, 18.83s/it]Running generate_until requests:  10%|▉         | 129/1319 [00:27<03:25,  5.78it/s]Running generate_until requests:  19%|█▉        | 257/1319 [00:36<01:58,  8.95it/s]Running generate_until requests:  29%|██▉       | 385/1319 [00:45<01:24, 11.01it/s]Running generate_until requests:  39%|███▉      | 513/1319 [00:53<01:05, 12.38it/s]Running generate_until requests:  49%|████▊     | 641/1319 [01:01<00:50, 13.47it/s]Running generate_until requests:  58%|█████▊    | 769/1319 [01:09<00:38, 14.28it/s]Running generate_until requests:  68%|██████▊   | 897/1319 [01:17<00:28, 14.95it/s]Running generate_until requests:  78%|███████▊  | 1025/1319 [01:24<00:18, 15.50it/s]Running generate_until requests:  87%|████████▋ | 1153/1319 [01:31<00:10, 16.15it/s]Running generate_until requests:  97%|█████████▋| 1281/1319 [01:36<00:02, 18.68it/s]Running generate_until requests: 100%|██████████| 1319/1319 [01:36<00:00, 13.68it/s]
+vllm ({'pretrained': '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama2_7b-base-origspace-freeze-p20-gsm8k-lr3e-5', 'seed': 42, 'attention_backend': 'FLASH_ATTN', 'enforce_eager': True, 'enable_prefix_caching': False, 'tensor_parallel_size': 1, 'data_parallel_size': 1, 'dtype': 'auto', 'gpu_memory_utilization': 0.85}), gen_kwargs: ({}), limit: None, num_fewshot: 5, batch_size: 128
+|Tasks|Version|     Filter     |n-shot|  Metric   |   |Value|   |Stderr|
+|-----|------:|----------------|-----:|-----------|---|----:|---|-----:|
+|gsm8k|      3|flexible-extract|     5|exact_match|↑  |0.392|±  |0.0134|
+|     |       |strict-match    |     5|exact_match|↑  |0.392|±  |0.0134|
+
+✓ 완료: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama2_7b-base-origspace-freeze-p20-gsm8k-lr3e-5 (task: gsm8k)
+
+==========================================
+[3/10] 모델 평가 중: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama2_7b-base-origspace-freeze-p30-gsm8k-lr3e-5
+  task: gsm8k
+==========================================
+[1/1] task 평가 중: gsm8k
+(EngineCore_DP0 pid=1585429) /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/torch/library.py:357: UserWarning: Warning only once for all operators,  other operators may also be overridden.
+(EngineCore_DP0 pid=1585429)   Overriding a previously registered kernel for the same operator and the same dispatch key
+(EngineCore_DP0 pid=1585429)   operator: aten::mm(Tensor self, Tensor mat2) -> Tensor
+(EngineCore_DP0 pid=1585429)     registered at /pytorch/build/aten/src/ATen/RegisterSchema.cpp:6
+(EngineCore_DP0 pid=1585429)   dispatch key: CUDA
+(EngineCore_DP0 pid=1585429)   previous kernel: registered at /pytorch/aten/src/ATen/LegacyBatchingRegistrations.cpp:1076
+(EngineCore_DP0 pid=1585429)        new kernel: registered at /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/vllm/model_executor/layers/batch_invariant.py:935 (Triggered internally at /pytorch/aten/src/ATen/core/dispatch/OperatorEntry.cpp:208.)
+(EngineCore_DP0 pid=1585429)   self.m.impl(
+[W920 09:42:42.772169037 Context.cpp:534] Warning: torch.backends.cuda.preferred_blas_library is an experimental feature. If you see any error or unexpected behavior when this flag is set please file an issue on GitHub. (function operator())
+(EngineCore_DP0 pid=1585429) Loading safetensors checkpoint shards:   0% Completed | 0/3 [00:00<?, ?it/s]
+(EngineCore_DP0 pid=1585429) Loading safetensors checkpoint shards:  33% Completed | 1/3 [00:01<00:02,  1.48s/it]
+(EngineCore_DP0 pid=1585429) Loading safetensors checkpoint shards:  67% Completed | 2/3 [00:03<00:01,  1.60s/it]
+(EngineCore_DP0 pid=1585429) Loading safetensors checkpoint shards: 100% Completed | 3/3 [00:04<00:00,  1.46s/it]
+(EngineCore_DP0 pid=1585429) Loading safetensors checkpoint shards: 100% Completed | 3/3 [00:04<00:00,  1.48s/it]
+(EngineCore_DP0 pid=1585429) 
+(EngineCore_DP0 pid=1585429) 2026-09-20 09:42:51,180 - INFO - autotuner.py:256 - flashinfer.jit: [Autotuner]: Autotuning process starts ...
+(EngineCore_DP0 pid=1585429) 2026-09-20 09:42:51,194 - INFO - autotuner.py:262 - flashinfer.jit: [Autotuner]: Autotuning process ends
+  0%|          | 0/1319 [00:00<?, ?it/s]  5%|▍         | 61/1319 [00:00<00:02, 608.27it/s]  9%|▉         | 124/1319 [00:00<00:01, 615.30it/s] 14%|█▍        | 187/1319 [00:00<00:01, 618.10it/s] 19%|█▉        | 249/1319 [00:00<00:01, 611.03it/s] 24%|██▎       | 312/1319 [00:00<00:01, 614.68it/s] 28%|██▊       | 374/1319 [00:00<00:01, 615.58it/s] 33%|███▎      | 437/1319 [00:00<00:01, 617.31it/s] 38%|███▊      | 499/1319 [00:00<00:01, 611.11it/s] 43%|████▎     | 561/1319 [00:00<00:01, 612.04it/s] 47%|████▋     | 623/1319 [00:01<00:01, 611.96it/s] 52%|█████▏    | 685/1319 [00:01<00:01, 612.30it/s] 57%|█████▋    | 747/1319 [00:01<00:00, 609.53it/s] 61%|██████▏   | 809/1319 [00:01<00:00, 611.39it/s] 66%|██████▌   | 871/1319 [00:01<00:00, 610.31it/s] 71%|███████   | 933/1319 [00:01<00:00, 611.89it/s] 75%|███████▌  | 995/1319 [00:01<00:00, 612.52it/s] 80%|████████  | 1057/1319 [00:01<00:00, 613.33it/s] 85%|████████▍ | 1119/1319 [00:01<00:00, 614.43it/s] 90%|████████▉ | 1181/1319 [00:01<00:00, 614.90it/s] 94%|█████████▍| 1243/1319 [00:02<00:00, 614.58it/s] 99%|█████████▉| 1305/1319 [00:02<00:00, 614.71it/s]100%|██████████| 1319/1319 [00:02<00:00, 613.25it/s]
+Running generate_until requests:   0%|          | 0/1319 [00:00<?, ?it/s]Running generate_until requests:   0%|          | 1/1319 [00:18<6:53:02, 18.80s/it]Running generate_until requests:  10%|▉         | 129/1319 [00:27<03:25,  5.79it/s]Running generate_until requests:  19%|█▉        | 257/1319 [00:36<01:58,  8.97it/s]Running generate_until requests:  29%|██▉       | 385/1319 [00:45<01:25, 10.99it/s]Running generate_until requests:  39%|███▉      | 513/1319 [00:53<01:05, 12.35it/s]Running generate_until requests:  49%|████▊     | 641/1319 [01:01<00:50, 13.41it/s]Running generate_until requests:  58%|█████▊    | 769/1319 [01:09<00:38, 14.25it/s]Running generate_until requests:  68%|██████▊   | 897/1319 [01:17<00:28, 14.90it/s]Running generate_until requests:  78%|███████▊  | 1025/1319 [01:25<00:19, 15.41it/s]Running generate_until requests:  87%|████████▋ | 1153/1319 [01:32<00:10, 16.08it/s]Running generate_until requests:  97%|█████████▋| 1281/1319 [01:37<00:02, 17.72it/s]Running generate_until requests: 100%|██████████| 1319/1319 [01:37<00:00, 13.49it/s]
+vllm ({'pretrained': '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama2_7b-base-origspace-freeze-p30-gsm8k-lr3e-5', 'seed': 42, 'attention_backend': 'FLASH_ATTN', 'enforce_eager': True, 'enable_prefix_caching': False, 'tensor_parallel_size': 1, 'data_parallel_size': 1, 'dtype': 'auto', 'gpu_memory_utilization': 0.85}), gen_kwargs: ({}), limit: None, num_fewshot: 5, batch_size: 128
+|Tasks|Version|     Filter     |n-shot|  Metric   |   |Value |   |Stderr|
+|-----|------:|----------------|-----:|-----------|---|-----:|---|-----:|
+|gsm8k|      3|flexible-extract|     5|exact_match|↑  |0.3874|±  |0.0134|
+|     |       |strict-match    |     5|exact_match|↑  |0.3867|±  |0.0134|
+
+✓ 완료: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama2_7b-base-origspace-freeze-p30-gsm8k-lr3e-5 (task: gsm8k)
+
+==========================================
+[4/10] 모델 평가 중: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama2_7b-base-origspace-freeze-p40-gsm8k-lr3e-5
+  task: gsm8k
+==========================================
+[1/1] task 평가 중: gsm8k
+(EngineCore_DP0 pid=1588089) /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/torch/library.py:357: UserWarning: Warning only once for all operators,  other operators may also be overridden.
+(EngineCore_DP0 pid=1588089)   Overriding a previously registered kernel for the same operator and the same dispatch key
+(EngineCore_DP0 pid=1588089)   operator: aten::mm(Tensor self, Tensor mat2) -> Tensor
+(EngineCore_DP0 pid=1588089)     registered at /pytorch/build/aten/src/ATen/RegisterSchema.cpp:6
+(EngineCore_DP0 pid=1588089)   dispatch key: CUDA
+(EngineCore_DP0 pid=1588089)   previous kernel: registered at /pytorch/aten/src/ATen/LegacyBatchingRegistrations.cpp:1076
+(EngineCore_DP0 pid=1588089)        new kernel: registered at /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/vllm/model_executor/layers/batch_invariant.py:935 (Triggered internally at /pytorch/aten/src/ATen/core/dispatch/OperatorEntry.cpp:208.)
+(EngineCore_DP0 pid=1588089)   self.m.impl(
+[W920 09:44:58.480703749 Context.cpp:534] Warning: torch.backends.cuda.preferred_blas_library is an experimental feature. If you see any error or unexpected behavior when this flag is set please file an issue on GitHub. (function operator())
+(EngineCore_DP0 pid=1588089) Loading safetensors checkpoint shards:   0% Completed | 0/3 [00:00<?, ?it/s]
+(EngineCore_DP0 pid=1588089) Loading safetensors checkpoint shards:  33% Completed | 1/3 [00:01<00:02,  1.29s/it]
+(EngineCore_DP0 pid=1588089) Loading safetensors checkpoint shards:  67% Completed | 2/3 [00:02<00:01,  1.30s/it]
+(EngineCore_DP0 pid=1588089) Loading safetensors checkpoint shards: 100% Completed | 3/3 [00:03<00:00,  1.16s/it]
+(EngineCore_DP0 pid=1588089) Loading safetensors checkpoint shards: 100% Completed | 3/3 [00:03<00:00,  1.19s/it]
+(EngineCore_DP0 pid=1588089) 
+(EngineCore_DP0 pid=1588089) 2026-09-20 09:45:05,790 - INFO - autotuner.py:256 - flashinfer.jit: [Autotuner]: Autotuning process starts ...
+(EngineCore_DP0 pid=1588089) 2026-09-20 09:45:05,804 - INFO - autotuner.py:262 - flashinfer.jit: [Autotuner]: Autotuning process ends
+  0%|          | 0/1319 [00:00<?, ?it/s]  4%|▍         | 58/1319 [00:00<00:02, 575.88it/s]  9%|▉         | 116/1319 [00:00<00:02, 576.99it/s] 13%|█▎        | 175/1319 [00:00<00:01, 579.61it/s] 18%|█▊        | 234/1319 [00:00<00:01, 581.56it/s] 22%|██▏       | 293/1319 [00:00<00:01, 579.76it/s] 27%|██▋       | 353/1319 [00:00<00:01, 585.87it/s] 31%|███       | 412/1319 [00:00<00:01, 587.05it/s] 36%|███▌      | 471/1319 [00:00<00:01, 587.19it/s] 40%|████      | 531/1319 [00:00<00:01, 589.63it/s] 45%|████▍     | 590/1319 [00:01<00:01, 586.43it/s] 49%|████▉     | 649/1319 [00:01<00:01, 586.77it/s] 54%|█████▍    | 710/1319 [00:01<00:01, 591.00it/s] 58%|█████▊    | 770/1319 [00:01<00:00, 590.60it/s] 63%|██████▎   | 830/1319 [00:01<00:00, 588.81it/s] 68%|██████▊   | 891/1319 [00:01<00:00, 594.42it/s] 72%|███████▏  | 952/1319 [00:01<00:00, 598.54it/s] 77%|███████▋  | 1012/1319 [00:01<00:00, 598.55it/s] 81%|████████▏ | 1073/1319 [00:01<00:00, 600.26it/s] 86%|████████▌ | 1134/1319 [00:01<00:00, 594.12it/s] 91%|█████████ | 1194/1319 [00:02<00:00, 586.96it/s] 95%|█████████▍| 1253/1319 [00:02<00:00, 587.05it/s]100%|█████████▉| 1314/1319 [00:02<00:00, 591.71it/s]100%|██████████| 1319/1319 [00:02<00:00, 589.36it/s]
+Running generate_until requests:   0%|          | 0/1319 [00:00<?, ?it/s]Running generate_until requests:   0%|          | 1/1319 [00:18<6:54:47, 18.88s/it]Running generate_until requests:  10%|▉         | 129/1319 [00:27<03:26,  5.78it/s]Running generate_until requests:  19%|█▉        | 257/1319 [00:36<01:58,  8.96it/s]Running generate_until requests:  29%|██▉       | 385/1319 [00:45<01:25, 10.98it/s]Running generate_until requests:  39%|███▉      | 513/1319 [00:53<01:05, 12.38it/s]Running generate_until requests:  49%|████▊     | 641/1319 [01:01<00:50, 13.43it/s]Running generate_until requests:  58%|█████▊    | 769/1319 [01:09<00:38, 14.25it/s]Running generate_until requests:  68%|██████▊   | 897/1319 [01:17<00:28, 14.90it/s]Running generate_until requests:  78%|███████▊  | 1025/1319 [01:24<00:19, 15.43it/s]Running generate_until requests:  87%|████████▋ | 1153/1319 [01:32<00:10, 16.09it/s]Running generate_until requests:  97%|█████████▋| 1281/1319 [01:36<00:02, 18.87it/s]Running generate_until requests: 100%|██████████| 1319/1319 [01:36<00:00, 13.69it/s]
+vllm ({'pretrained': '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama2_7b-base-origspace-freeze-p40-gsm8k-lr3e-5', 'seed': 42, 'attention_backend': 'FLASH_ATTN', 'enforce_eager': True, 'enable_prefix_caching': False, 'tensor_parallel_size': 1, 'data_parallel_size': 1, 'dtype': 'auto', 'gpu_memory_utilization': 0.85}), gen_kwargs: ({}), limit: None, num_fewshot: 5, batch_size: 128
+|Tasks|Version|     Filter     |n-shot|  Metric   |   |Value |   |Stderr|
+|-----|------:|----------------|-----:|-----------|---|-----:|---|-----:|
+|gsm8k|      3|flexible-extract|     5|exact_match|↑  |0.3867|±  |0.0134|
+|     |       |strict-match    |     5|exact_match|↑  |0.3859|±  |0.0134|
+
+✓ 완료: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama2_7b-base-origspace-freeze-p40-gsm8k-lr3e-5 (task: gsm8k)
+
+==========================================
+[5/10] 모델 평가 중: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama2_7b-base-origspace-freeze-p50-gsm8k-lr3e-5
+  task: gsm8k
+==========================================
+[1/1] task 평가 중: gsm8k
+(EngineCore_DP0 pid=1590583) /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/torch/library.py:357: UserWarning: Warning only once for all operators,  other operators may also be overridden.
+(EngineCore_DP0 pid=1590583)   Overriding a previously registered kernel for the same operator and the same dispatch key
+(EngineCore_DP0 pid=1590583)   operator: aten::mm(Tensor self, Tensor mat2) -> Tensor
+(EngineCore_DP0 pid=1590583)     registered at /pytorch/build/aten/src/ATen/RegisterSchema.cpp:6
+(EngineCore_DP0 pid=1590583)   dispatch key: CUDA
+(EngineCore_DP0 pid=1590583)   previous kernel: registered at /pytorch/aten/src/ATen/LegacyBatchingRegistrations.cpp:1076
+(EngineCore_DP0 pid=1590583)        new kernel: registered at /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/vllm/model_executor/layers/batch_invariant.py:935 (Triggered internally at /pytorch/aten/src/ATen/core/dispatch/OperatorEntry.cpp:208.)
+(EngineCore_DP0 pid=1590583)   self.m.impl(
+[W920 09:47:11.038047906 Context.cpp:534] Warning: torch.backends.cuda.preferred_blas_library is an experimental feature. If you see any error or unexpected behavior when this flag is set please file an issue on GitHub. (function operator())
+(EngineCore_DP0 pid=1590583) Loading safetensors checkpoint shards:   0% Completed | 0/3 [00:00<?, ?it/s]
+(EngineCore_DP0 pid=1590583) Loading safetensors checkpoint shards:  33% Completed | 1/3 [00:01<00:03,  1.67s/it]
+(EngineCore_DP0 pid=1590583) Loading safetensors checkpoint shards:  67% Completed | 2/3 [00:03<00:01,  1.72s/it]
+(EngineCore_DP0 pid=1590583) Loading safetensors checkpoint shards: 100% Completed | 3/3 [00:04<00:00,  1.49s/it]
+(EngineCore_DP0 pid=1590583) Loading safetensors checkpoint shards: 100% Completed | 3/3 [00:04<00:00,  1.55s/it]
+(EngineCore_DP0 pid=1590583) 
+(EngineCore_DP0 pid=1590583) 2026-09-20 09:47:19,443 - INFO - autotuner.py:256 - flashinfer.jit: [Autotuner]: Autotuning process starts ...
+(EngineCore_DP0 pid=1590583) 2026-09-20 09:47:19,459 - INFO - autotuner.py:262 - flashinfer.jit: [Autotuner]: Autotuning process ends
+  0%|          | 0/1319 [00:00<?, ?it/s]  5%|▍         | 61/1319 [00:00<00:02, 606.79it/s]  9%|▉         | 124/1319 [00:00<00:01, 615.07it/s] 14%|█▍        | 187/1319 [00:00<00:01, 618.00it/s] 19%|█▉        | 249/1319 [00:00<00:01, 611.41it/s] 24%|██▎       | 311/1319 [00:00<00:01, 612.85it/s] 28%|██▊       | 373/1319 [00:00<00:01, 614.94it/s] 33%|███▎      | 436/1319 [00:00<00:01, 617.06it/s] 38%|███▊      | 498/1319 [00:00<00:01, 617.44it/s] 42%|████▏     | 560/1319 [00:00<00:01, 617.20it/s] 47%|████▋     | 622/1319 [00:01<00:01, 609.31it/s] 52%|█████▏    | 684/1319 [00:01<00:01, 610.18it/s] 57%|█████▋    | 746/1319 [00:01<00:00, 611.61it/s] 61%|██████▏   | 808/1319 [00:01<00:00, 612.68it/s] 66%|██████▌   | 870/1319 [00:01<00:00, 611.95it/s] 71%|███████   | 932/1319 [00:01<00:00, 613.54it/s] 75%|███████▌  | 994/1319 [00:01<00:00, 613.26it/s] 80%|████████  | 1056/1319 [00:01<00:00, 613.90it/s] 85%|████████▍ | 1118/1319 [00:01<00:00, 615.20it/s] 90%|████████▉ | 1181/1319 [00:01<00:00, 616.57it/s] 94%|█████████▍| 1244/1319 [00:02<00:00, 617.78it/s] 99%|█████████▉| 1307/1319 [00:02<00:00, 619.54it/s]100%|██████████| 1319/1319 [00:02<00:00, 614.95it/s]
+Running generate_until requests:   0%|          | 0/1319 [00:00<?, ?it/s]Running generate_until requests:   0%|          | 1/1319 [00:18<6:49:10, 18.63s/it]Running generate_until requests:  10%|▉         | 129/1319 [00:27<03:23,  5.84it/s]Running generate_until requests:  19%|█▉        | 257/1319 [00:36<01:57,  9.02it/s]Running generate_until requests:  29%|██▉       | 385/1319 [00:44<01:24, 11.06it/s]Running generate_until requests:  39%|███▉      | 513/1319 [00:53<01:04, 12.42it/s]Running generate_until requests:  49%|████▊     | 641/1319 [01:01<00:50, 13.46it/s]Running generate_until requests:  58%|█████▊    | 769/1319 [01:09<00:38, 14.27it/s]Running generate_until requests:  68%|██████▊   | 897/1319 [01:16<00:28, 14.93it/s]Running generate_until requests:  78%|███████▊  | 1025/1319 [01:24<00:19, 15.45it/s]Running generate_until requests:  87%|████████▋ | 1153/1319 [01:31<00:10, 16.08it/s]Running generate_until requests:  97%|█████████▋| 1281/1319 [01:35<00:02, 18.99it/s]Running generate_until requests: 100%|██████████| 1319/1319 [01:35<00:00, 13.76it/s]
+vllm ({'pretrained': '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama2_7b-base-origspace-freeze-p50-gsm8k-lr3e-5', 'seed': 42, 'attention_backend': 'FLASH_ATTN', 'enforce_eager': True, 'enable_prefix_caching': False, 'tensor_parallel_size': 1, 'data_parallel_size': 1, 'dtype': 'auto', 'gpu_memory_utilization': 0.85}), gen_kwargs: ({}), limit: None, num_fewshot: 5, batch_size: 128
+|Tasks|Version|     Filter     |n-shot|  Metric   |   |Value |   |Stderr|
+|-----|------:|----------------|-----:|-----------|---|-----:|---|-----:|
+|gsm8k|      3|flexible-extract|     5|exact_match|↑  |0.3821|±  |0.0134|
+|     |       |strict-match    |     5|exact_match|↑  |0.3806|±  |0.0134|
+
+✓ 완료: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama2_7b-base-origspace-freeze-p50-gsm8k-lr3e-5 (task: gsm8k)
+
+==========================================
+[6/10] 모델 평가 중: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p10-gsm8k-lr1e-5
+  task: gsm8k
+==========================================
+[1/1] task 평가 중: gsm8k
+(EngineCore_DP0 pid=1593045) /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/torch/library.py:357: UserWarning: Warning only once for all operators,  other operators may also be overridden.
+(EngineCore_DP0 pid=1593045)   Overriding a previously registered kernel for the same operator and the same dispatch key
+(EngineCore_DP0 pid=1593045)   operator: aten::mm(Tensor self, Tensor mat2) -> Tensor
+(EngineCore_DP0 pid=1593045)     registered at /pytorch/build/aten/src/ATen/RegisterSchema.cpp:6
+(EngineCore_DP0 pid=1593045)   dispatch key: CUDA
+(EngineCore_DP0 pid=1593045)   previous kernel: registered at /pytorch/aten/src/ATen/LegacyBatchingRegistrations.cpp:1076
+(EngineCore_DP0 pid=1593045)        new kernel: registered at /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/vllm/model_executor/layers/batch_invariant.py:935 (Triggered internally at /pytorch/aten/src/ATen/core/dispatch/OperatorEntry.cpp:208.)
+(EngineCore_DP0 pid=1593045)   self.m.impl(
+[W920 09:49:27.285321614 Context.cpp:534] Warning: torch.backends.cuda.preferred_blas_library is an experimental feature. If you see any error or unexpected behavior when this flag is set please file an issue on GitHub. (function operator())
+(EngineCore_DP0 pid=1593045) Loading safetensors checkpoint shards:   0% Completed | 0/4 [00:00<?, ?it/s]
+(EngineCore_DP0 pid=1593045) Loading safetensors checkpoint shards:  25% Completed | 1/4 [00:01<00:04,  1.45s/it]
+(EngineCore_DP0 pid=1593045) Loading safetensors checkpoint shards:  50% Completed | 2/4 [00:03<00:03,  1.56s/it]
+(EngineCore_DP0 pid=1593045) Loading safetensors checkpoint shards:  75% Completed | 3/4 [00:04<00:01,  1.67s/it]
+(EngineCore_DP0 pid=1593045) Loading safetensors checkpoint shards: 100% Completed | 4/4 [00:05<00:00,  1.27s/it]
+(EngineCore_DP0 pid=1593045) Loading safetensors checkpoint shards: 100% Completed | 4/4 [00:05<00:00,  1.39s/it]
+(EngineCore_DP0 pid=1593045) 
+(EngineCore_DP0 pid=1593045) 2026-09-20 09:49:36,873 - INFO - autotuner.py:256 - flashinfer.jit: [Autotuner]: Autotuning process starts ...
+(EngineCore_DP0 pid=1593045) 2026-09-20 09:49:36,885 - INFO - autotuner.py:262 - flashinfer.jit: [Autotuner]: Autotuning process ends
+  0%|          | 0/1319 [00:00<?, ?it/s]  5%|▍         | 61/1319 [00:00<00:02, 601.73it/s]  9%|▉         | 123/1319 [00:00<00:01, 608.03it/s] 14%|█▍        | 185/1319 [00:00<00:01, 609.81it/s] 19%|█▊        | 247/1319 [00:00<00:01, 610.35it/s] 23%|██▎       | 309/1319 [00:00<00:01, 611.02it/s] 28%|██▊       | 371/1319 [00:00<00:01, 612.37it/s] 33%|███▎      | 433/1319 [00:00<00:01, 612.81it/s] 38%|███▊      | 495/1319 [00:00<00:01, 613.22it/s] 42%|████▏     | 557/1319 [00:00<00:01, 613.01it/s] 47%|████▋     | 619/1319 [00:01<00:01, 612.65it/s] 52%|█████▏    | 681/1319 [00:01<00:01, 612.74it/s] 56%|█████▋    | 743/1319 [00:01<00:00, 608.75it/s] 61%|██████    | 805/1319 [00:01<00:00, 610.19it/s] 66%|██████▌   | 867/1319 [00:01<00:00, 611.38it/s] 70%|███████   | 929/1319 [00:01<00:00, 609.21it/s] 75%|███████▌  | 990/1319 [00:01<00:00, 608.93it/s] 80%|███████▉  | 1052/1319 [00:01<00:00, 609.66it/s] 84%|████████▍ | 1114/1319 [00:01<00:00, 610.22it/s] 89%|████████▉ | 1176/1319 [00:01<00:00, 611.80it/s] 94%|█████████▍| 1238/1319 [00:02<00:00, 613.46it/s] 99%|█████████▊| 1300/1319 [00:02<00:00, 614.00it/s]100%|██████████| 1319/1319 [00:02<00:00, 611.40it/s]
+Running generate_until requests:   0%|          | 0/1319 [00:00<?, ?it/s]Running generate_until requests:   0%|          | 1/1319 [00:16<6:09:34, 16.82s/it]Running generate_until requests:  10%|▉         | 129/1319 [00:23<02:53,  6.87it/s]Running generate_until requests:  19%|█▉        | 257/1319 [00:30<01:37, 10.90it/s]Running generate_until requests:  29%|██▉       | 385/1319 [00:36<01:06, 14.10it/s]Running generate_until requests:  39%|███▉      | 513/1319 [00:42<00:50, 16.01it/s]Running generate_until requests:  49%|████▊     | 641/1319 [00:48<00:38, 17.62it/s]Running generate_until requests:  58%|█████▊    | 769/1319 [00:55<00:30, 18.28it/s]Running generate_until requests:  68%|██████▊   | 897/1319 [01:01<00:22, 18.89it/s]Running generate_until requests:  78%|███████▊  | 1025/1319 [01:07<00:15, 19.43it/s]Running generate_until requests:  87%|████████▋ | 1153/1319 [01:13<00:08, 20.09it/s]Running generate_until requests:  97%|█████████▋| 1281/1319 [01:16<00:01, 24.00it/s]Running generate_until requests: 100%|██████████| 1319/1319 [01:16<00:00, 17.18it/s]
+vllm ({'pretrained': '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p10-gsm8k-lr1e-5', 'seed': 42, 'attention_backend': 'FLASH_ATTN', 'enforce_eager': True, 'enable_prefix_caching': False, 'tensor_parallel_size': 1, 'data_parallel_size': 1, 'dtype': 'auto', 'gpu_memory_utilization': 0.85}), gen_kwargs: ({}), limit: None, num_fewshot: 5, batch_size: 128
+|Tasks|Version|     Filter     |n-shot|  Metric   |   |Value |   |Stderr|
+|-----|------:|----------------|-----:|-----------|---|-----:|---|-----:|
+|gsm8k|      3|flexible-extract|     5|exact_match|↑  |0.5497|±  |0.0137|
+|     |       |strict-match    |     5|exact_match|↑  |0.5459|±  |0.0137|
+
+✓ 완료: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p10-gsm8k-lr1e-5 (task: gsm8k)
+
+==========================================
+[7/10] 모델 평가 중: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p20-gsm8k-lr1e-5
+  task: gsm8k
+==========================================
+[1/1] task 평가 중: gsm8k
+(EngineCore_DP0 pid=1595335) /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/torch/library.py:357: UserWarning: Warning only once for all operators,  other operators may also be overridden.
+(EngineCore_DP0 pid=1595335)   Overriding a previously registered kernel for the same operator and the same dispatch key
+(EngineCore_DP0 pid=1595335)   operator: aten::mm(Tensor self, Tensor mat2) -> Tensor
+(EngineCore_DP0 pid=1595335)     registered at /pytorch/build/aten/src/ATen/RegisterSchema.cpp:6
+(EngineCore_DP0 pid=1595335)   dispatch key: CUDA
+(EngineCore_DP0 pid=1595335)   previous kernel: registered at /pytorch/aten/src/ATen/LegacyBatchingRegistrations.cpp:1076
+(EngineCore_DP0 pid=1595335)        new kernel: registered at /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/vllm/model_executor/layers/batch_invariant.py:935 (Triggered internally at /pytorch/aten/src/ATen/core/dispatch/OperatorEntry.cpp:208.)
+(EngineCore_DP0 pid=1595335)   self.m.impl(
+[W920 09:51:26.081333258 Context.cpp:534] Warning: torch.backends.cuda.preferred_blas_library is an experimental feature. If you see any error or unexpected behavior when this flag is set please file an issue on GitHub. (function operator())
+(EngineCore_DP0 pid=1595335) Loading safetensors checkpoint shards:   0% Completed | 0/4 [00:00<?, ?it/s]
+(EngineCore_DP0 pid=1595335) Loading safetensors checkpoint shards:  25% Completed | 1/4 [00:01<00:05,  1.86s/it]
+(EngineCore_DP0 pid=1595335) Loading safetensors checkpoint shards:  50% Completed | 2/4 [00:03<00:03,  1.90s/it]
+(EngineCore_DP0 pid=1595335) Loading safetensors checkpoint shards:  75% Completed | 3/4 [00:05<00:01,  1.92s/it]
+(EngineCore_DP0 pid=1595335) Loading safetensors checkpoint shards: 100% Completed | 4/4 [00:06<00:00,  1.43s/it]
+(EngineCore_DP0 pid=1595335) Loading safetensors checkpoint shards: 100% Completed | 4/4 [00:06<00:00,  1.60s/it]
+(EngineCore_DP0 pid=1595335) 
+(EngineCore_DP0 pid=1595335) 2026-09-20 09:51:36,379 - INFO - autotuner.py:256 - flashinfer.jit: [Autotuner]: Autotuning process starts ...
+(EngineCore_DP0 pid=1595335) 2026-09-20 09:51:36,391 - INFO - autotuner.py:262 - flashinfer.jit: [Autotuner]: Autotuning process ends
+  0%|          | 0/1319 [00:00<?, ?it/s]  5%|▍         | 60/1319 [00:00<00:02, 591.82it/s]  9%|▉         | 122/1319 [00:00<00:01, 603.47it/s] 14%|█▍        | 183/1319 [00:00<00:01, 606.14it/s] 19%|█▊        | 245/1319 [00:00<00:01, 609.07it/s] 23%|██▎       | 307/1319 [00:00<00:01, 610.26it/s] 28%|██▊       | 369/1319 [00:00<00:01, 612.07it/s] 33%|███▎      | 431/1319 [00:00<00:01, 612.04it/s] 37%|███▋      | 493/1319 [00:00<00:01, 610.35it/s] 42%|████▏     | 555/1319 [00:00<00:01, 611.39it/s] 47%|████▋     | 617/1319 [00:01<00:01, 612.39it/s] 51%|█████▏    | 679/1319 [00:01<00:01, 613.50it/s] 56%|█████▌    | 741/1319 [00:01<00:00, 614.71it/s] 61%|██████    | 803/1319 [00:01<00:00, 615.39it/s] 66%|██████▌   | 865/1319 [00:01<00:00, 615.72it/s] 70%|███████   | 927/1319 [00:01<00:00, 613.52it/s] 75%|███████▍  | 989/1319 [00:01<00:00, 610.57it/s] 80%|███████▉  | 1051/1319 [00:01<00:00, 609.61it/s] 84%|████████▍ | 1113/1319 [00:01<00:00, 610.99it/s] 89%|████████▉ | 1176/1319 [00:01<00:00, 613.60it/s] 94%|█████████▍| 1238/1319 [00:02<00:00, 614.46it/s] 99%|█████████▊| 1300/1319 [00:02<00:00, 609.88it/s]100%|██████████| 1319/1319 [00:02<00:00, 611.41it/s]
+Running generate_until requests:   0%|          | 0/1319 [00:00<?, ?it/s]Running generate_until requests:   0%|          | 1/1319 [00:16<6:09:10, 16.81s/it]Running generate_until requests:  10%|▉         | 129/1319 [00:23<02:53,  6.87it/s]Running generate_until requests:  19%|█▉        | 257/1319 [00:30<01:37, 10.90it/s]Running generate_until requests:  29%|██▉       | 385/1319 [00:37<01:09, 13.53it/s]Running generate_until requests:  39%|███▉      | 513/1319 [00:43<00:51, 15.56it/s]Running generate_until requests:  49%|████▊     | 641/1319 [00:50<00:40, 16.81it/s]Running generate_until requests:  58%|█████▊    | 769/1319 [00:56<00:30, 17.78it/s]Running generate_until requests:  68%|██████▊   | 897/1319 [01:02<00:22, 18.54it/s]Running generate_until requests:  78%|███████▊  | 1025/1319 [01:09<00:15, 19.17it/s]Running generate_until requests:  87%|████████▋ | 1153/1319 [01:15<00:08, 19.77it/s]Running generate_until requests:  97%|█████████▋| 1281/1319 [01:18<00:01, 23.69it/s]Running generate_until requests: 100%|██████████| 1319/1319 [01:18<00:00, 16.87it/s]
+vllm ({'pretrained': '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p20-gsm8k-lr1e-5', 'seed': 42, 'attention_backend': 'FLASH_ATTN', 'enforce_eager': True, 'enable_prefix_caching': False, 'tensor_parallel_size': 1, 'data_parallel_size': 1, 'dtype': 'auto', 'gpu_memory_utilization': 0.85}), gen_kwargs: ({}), limit: None, num_fewshot: 5, batch_size: 128
+|Tasks|Version|     Filter     |n-shot|  Metric   |   |Value |   |Stderr|
+|-----|------:|----------------|-----:|-----------|---|-----:|---|-----:|
+|gsm8k|      3|flexible-extract|     5|exact_match|↑  |0.5595|±  |0.0137|
+|     |       |strict-match    |     5|exact_match|↑  |0.5572|±  |0.0137|
+
+✓ 완료: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p20-gsm8k-lr1e-5 (task: gsm8k)
+
+==========================================
+[8/10] 모델 평가 중: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p30-gsm8k-lr1e-5
+  task: gsm8k
+==========================================
+[1/1] task 평가 중: gsm8k
+(EngineCore_DP0 pid=1597616) /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/torch/library.py:357: UserWarning: Warning only once for all operators,  other operators may also be overridden.
+(EngineCore_DP0 pid=1597616)   Overriding a previously registered kernel for the same operator and the same dispatch key
+(EngineCore_DP0 pid=1597616)   operator: aten::mm(Tensor self, Tensor mat2) -> Tensor
+(EngineCore_DP0 pid=1597616)     registered at /pytorch/build/aten/src/ATen/RegisterSchema.cpp:6
+(EngineCore_DP0 pid=1597616)   dispatch key: CUDA
+(EngineCore_DP0 pid=1597616)   previous kernel: registered at /pytorch/aten/src/ATen/LegacyBatchingRegistrations.cpp:1076
+(EngineCore_DP0 pid=1597616)        new kernel: registered at /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/vllm/model_executor/layers/batch_invariant.py:935 (Triggered internally at /pytorch/aten/src/ATen/core/dispatch/OperatorEntry.cpp:208.)
+(EngineCore_DP0 pid=1597616)   self.m.impl(
+[W920 09:53:25.424971524 Context.cpp:534] Warning: torch.backends.cuda.preferred_blas_library is an experimental feature. If you see any error or unexpected behavior when this flag is set please file an issue on GitHub. (function operator())
+(EngineCore_DP0 pid=1597616) Loading safetensors checkpoint shards:   0% Completed | 0/4 [00:00<?, ?it/s]
+(EngineCore_DP0 pid=1597616) Loading safetensors checkpoint shards:  25% Completed | 1/4 [00:01<00:04,  1.37s/it]
+(EngineCore_DP0 pid=1597616) Loading safetensors checkpoint shards:  50% Completed | 2/4 [00:02<00:02,  1.50s/it]
+(EngineCore_DP0 pid=1597616) Loading safetensors checkpoint shards:  75% Completed | 3/4 [00:04<00:01,  1.59s/it]
+(EngineCore_DP0 pid=1597616) Loading safetensors checkpoint shards: 100% Completed | 4/4 [00:05<00:00,  1.16s/it]
+(EngineCore_DP0 pid=1597616) Loading safetensors checkpoint shards: 100% Completed | 4/4 [00:05<00:00,  1.29s/it]
+(EngineCore_DP0 pid=1597616) 
+(EngineCore_DP0 pid=1597616) 2026-09-20 09:53:34,599 - INFO - autotuner.py:256 - flashinfer.jit: [Autotuner]: Autotuning process starts ...
+(EngineCore_DP0 pid=1597616) 2026-09-20 09:53:34,615 - INFO - autotuner.py:262 - flashinfer.jit: [Autotuner]: Autotuning process ends
+  0%|          | 0/1319 [00:00<?, ?it/s]  4%|▍         | 59/1319 [00:00<00:02, 586.65it/s]  9%|▉         | 121/1319 [00:00<00:01, 602.04it/s] 14%|█▍        | 182/1319 [00:00<00:01, 605.00it/s] 19%|█▊        | 246/1319 [00:00<00:01, 615.68it/s] 23%|██▎       | 308/1319 [00:00<00:01, 616.74it/s] 28%|██▊       | 371/1319 [00:00<00:01, 620.96it/s] 33%|███▎      | 434/1319 [00:00<00:01, 621.31it/s] 38%|███▊      | 497/1319 [00:00<00:01, 619.89it/s] 42%|████▏     | 559/1319 [00:00<00:01, 611.93it/s] 47%|████▋     | 621/1319 [00:01<00:01, 614.26it/s] 52%|█████▏    | 684/1319 [00:01<00:01, 616.33it/s] 57%|█████▋    | 747/1319 [00:01<00:00, 618.15it/s] 61%|██████▏   | 809/1319 [00:01<00:00, 616.49it/s] 66%|██████▌   | 871/1319 [00:01<00:00, 610.83it/s] 71%|███████   | 933/1319 [00:01<00:00, 611.61it/s] 75%|███████▌  | 995/1319 [00:01<00:00, 613.65it/s] 80%|████████  | 1057/1319 [00:01<00:00, 614.50it/s] 85%|████████▍ | 1119/1319 [00:01<00:00, 609.10it/s] 90%|████████▉ | 1181/1319 [00:01<00:00, 609.62it/s] 94%|█████████▍| 1243/1319 [00:02<00:00, 612.10it/s] 99%|█████████▉| 1305/1319 [00:02<00:00, 611.45it/s]100%|██████████| 1319/1319 [00:02<00:00, 613.18it/s]
+Running generate_until requests:   0%|          | 0/1319 [00:00<?, ?it/s]Running generate_until requests:   0%|          | 1/1319 [00:16<6:06:47, 16.70s/it]Running generate_until requests:  10%|▉         | 129/1319 [00:23<02:52,  6.90it/s]Running generate_until requests:  19%|█▉        | 257/1319 [00:30<01:36, 10.95it/s]Running generate_until requests:  29%|██▉       | 385/1319 [00:37<01:08, 13.56it/s]Running generate_until requests:  39%|███▉      | 513/1319 [00:43<00:51, 15.59it/s]Running generate_until requests:  49%|████▊     | 641/1319 [00:50<00:40, 16.85it/s]Running generate_until requests:  58%|█████▊    | 769/1319 [00:56<00:30, 17.80it/s]Running generate_until requests:  68%|██████▊   | 897/1319 [01:02<00:22, 18.54it/s]Running generate_until requests:  78%|███████▊  | 1025/1319 [01:09<00:15, 19.17it/s]Running generate_until requests:  87%|████████▋ | 1153/1319 [01:14<00:08, 19.89it/s]Running generate_until requests:  97%|█████████▋| 1281/1319 [01:17<00:01, 23.72it/s]Running generate_until requests: 100%|██████████| 1319/1319 [01:17<00:00, 16.91it/s]
+vllm ({'pretrained': '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p30-gsm8k-lr1e-5', 'seed': 42, 'attention_backend': 'FLASH_ATTN', 'enforce_eager': True, 'enable_prefix_caching': False, 'tensor_parallel_size': 1, 'data_parallel_size': 1, 'dtype': 'auto', 'gpu_memory_utilization': 0.85}), gen_kwargs: ({}), limit: None, num_fewshot: 5, batch_size: 128
+|Tasks|Version|     Filter     |n-shot|  Metric   |   |Value |   |Stderr|
+|-----|------:|----------------|-----:|-----------|---|-----:|---|-----:|
+|gsm8k|      3|flexible-extract|     5|exact_match|↑  |0.5519|±  |0.0137|
+|     |       |strict-match    |     5|exact_match|↑  |0.5489|±  |0.0137|
+
+✓ 완료: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p30-gsm8k-lr1e-5 (task: gsm8k)
+
+==========================================
+[9/10] 모델 평가 중: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p40-gsm8k-lr1e-5
+  task: gsm8k
+==========================================
+[1/1] task 평가 중: gsm8k
+(EngineCore_DP0 pid=1599854) /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/torch/library.py:357: UserWarning: Warning only once for all operators,  other operators may also be overridden.
+(EngineCore_DP0 pid=1599854)   Overriding a previously registered kernel for the same operator and the same dispatch key
+(EngineCore_DP0 pid=1599854)   operator: aten::mm(Tensor self, Tensor mat2) -> Tensor
+(EngineCore_DP0 pid=1599854)     registered at /pytorch/build/aten/src/ATen/RegisterSchema.cpp:6
+(EngineCore_DP0 pid=1599854)   dispatch key: CUDA
+(EngineCore_DP0 pid=1599854)   previous kernel: registered at /pytorch/aten/src/ATen/LegacyBatchingRegistrations.cpp:1076
+(EngineCore_DP0 pid=1599854)        new kernel: registered at /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/vllm/model_executor/layers/batch_invariant.py:935 (Triggered internally at /pytorch/aten/src/ATen/core/dispatch/OperatorEntry.cpp:208.)
+(EngineCore_DP0 pid=1599854)   self.m.impl(
+[W920 09:55:22.286333360 Context.cpp:534] Warning: torch.backends.cuda.preferred_blas_library is an experimental feature. If you see any error or unexpected behavior when this flag is set please file an issue on GitHub. (function operator())
+(EngineCore_DP0 pid=1599854) Loading safetensors checkpoint shards:   0% Completed | 0/4 [00:00<?, ?it/s]
+(EngineCore_DP0 pid=1599854) Loading safetensors checkpoint shards:  25% Completed | 1/4 [00:01<00:04,  1.34s/it]
+(EngineCore_DP0 pid=1599854) Loading safetensors checkpoint shards:  50% Completed | 2/4 [00:02<00:02,  1.36s/it]
+(EngineCore_DP0 pid=1599854) Loading safetensors checkpoint shards:  75% Completed | 3/4 [00:04<00:01,  1.36s/it]
+(EngineCore_DP0 pid=1599854) Loading safetensors checkpoint shards: 100% Completed | 4/4 [00:04<00:00,  1.02it/s]
+(EngineCore_DP0 pid=1599854) Loading safetensors checkpoint shards: 100% Completed | 4/4 [00:04<00:00,  1.12s/it]
+(EngineCore_DP0 pid=1599854) 
+(EngineCore_DP0 pid=1599854) 2026-09-20 09:55:30,987 - INFO - autotuner.py:256 - flashinfer.jit: [Autotuner]: Autotuning process starts ...
+(EngineCore_DP0 pid=1599854) 2026-09-20 09:55:31,000 - INFO - autotuner.py:262 - flashinfer.jit: [Autotuner]: Autotuning process ends
+  0%|          | 0/1319 [00:00<?, ?it/s]  4%|▍         | 58/1319 [00:00<00:02, 579.40it/s]  9%|▉         | 118/1319 [00:00<00:02, 588.47it/s] 14%|█▎        | 181/1319 [00:00<00:01, 603.83it/s] 18%|█▊        | 244/1319 [00:00<00:01, 611.61it/s] 23%|██▎       | 306/1319 [00:00<00:01, 610.57it/s] 28%|██▊       | 368/1319 [00:00<00:01, 611.69it/s] 33%|███▎      | 430/1319 [00:00<00:01, 607.37it/s] 37%|███▋      | 492/1319 [00:00<00:01, 610.71it/s] 42%|████▏     | 554/1319 [00:00<00:01, 612.10it/s] 47%|████▋     | 616/1319 [00:01<00:01, 602.59it/s] 51%|█████▏    | 678/1319 [00:01<00:01, 606.90it/s] 56%|█████▌    | 739/1319 [00:01<00:00, 605.27it/s] 61%|██████    | 800/1319 [00:01<00:00, 597.13it/s] 65%|██████▌   | 860/1319 [00:01<00:00, 597.12it/s] 70%|██████▉   | 920/1319 [00:01<00:00, 596.63it/s] 74%|███████▍  | 981/1319 [00:01<00:00, 598.48it/s] 79%|███████▉  | 1042/1319 [00:01<00:00, 601.21it/s] 84%|████████▎ | 1104/1319 [00:01<00:00, 604.52it/s] 88%|████████▊ | 1166/1319 [00:01<00:00, 606.69it/s] 93%|█████████▎| 1228/1319 [00:02<00:00, 608.91it/s] 98%|█████████▊| 1290/1319 [00:02<00:00, 609.42it/s]100%|██████████| 1319/1319 [00:02<00:00, 605.01it/s]
+Running generate_until requests:   0%|          | 0/1319 [00:00<?, ?it/s]Running generate_until requests:   0%|          | 1/1319 [00:16<6:08:46, 16.79s/it]Running generate_until requests:  10%|▉         | 129/1319 [00:23<02:53,  6.87it/s]Running generate_until requests:  19%|█▉        | 257/1319 [00:30<01:37, 10.90it/s]Running generate_until requests:  29%|██▉       | 385/1319 [00:37<01:09, 13.52it/s]Running generate_until requests:  39%|███▉      | 513/1319 [00:43<00:52, 15.38it/s]Running generate_until requests:  49%|████▊     | 641/1319 [00:50<00:40, 16.69it/s]Running generate_until requests:  58%|█████▊    | 769/1319 [00:56<00:31, 17.69it/s]Running generate_until requests:  68%|██████▊   | 897/1319 [01:03<00:22, 18.46it/s]Running generate_until requests:  78%|███████▊  | 1025/1319 [01:09<00:15, 19.10it/s]Running generate_until requests:  87%|████████▋ | 1153/1319 [01:15<00:08, 19.70it/s]Running generate_until requests:  97%|█████████▋| 1281/1319 [01:18<00:01, 23.63it/s]Running generate_until requests: 100%|██████████| 1319/1319 [01:18<00:00, 16.81it/s]
+vllm ({'pretrained': '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p40-gsm8k-lr1e-5', 'seed': 42, 'attention_backend': 'FLASH_ATTN', 'enforce_eager': True, 'enable_prefix_caching': False, 'tensor_parallel_size': 1, 'data_parallel_size': 1, 'dtype': 'auto', 'gpu_memory_utilization': 0.85}), gen_kwargs: ({}), limit: None, num_fewshot: 5, batch_size: 128
+|Tasks|Version|     Filter     |n-shot|  Metric   |   |Value |   |Stderr|
+|-----|------:|----------------|-----:|-----------|---|-----:|---|-----:|
+|gsm8k|      3|flexible-extract|     5|exact_match|↑  |0.5656|±  |0.0137|
+|     |       |strict-match    |     5|exact_match|↑  |0.5633|±  |0.0137|
+
+✓ 완료: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p40-gsm8k-lr1e-5 (task: gsm8k)
+
+==========================================
+[10/10] 모델 평가 중: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p50-gsm8k-lr1e-5
+  task: gsm8k
+==========================================
+[1/1] task 평가 중: gsm8k
+(EngineCore_DP0 pid=1602161) /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/torch/library.py:357: UserWarning: Warning only once for all operators,  other operators may also be overridden.
+(EngineCore_DP0 pid=1602161)   Overriding a previously registered kernel for the same operator and the same dispatch key
+(EngineCore_DP0 pid=1602161)   operator: aten::mm(Tensor self, Tensor mat2) -> Tensor
+(EngineCore_DP0 pid=1602161)     registered at /pytorch/build/aten/src/ATen/RegisterSchema.cpp:6
+(EngineCore_DP0 pid=1602161)   dispatch key: CUDA
+(EngineCore_DP0 pid=1602161)   previous kernel: registered at /pytorch/aten/src/ATen/LegacyBatchingRegistrations.cpp:1076
+(EngineCore_DP0 pid=1602161)        new kernel: registered at /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/vllm/model_executor/layers/batch_invariant.py:935 (Triggered internally at /pytorch/aten/src/ATen/core/dispatch/OperatorEntry.cpp:208.)
+(EngineCore_DP0 pid=1602161)   self.m.impl(
+[W920 09:57:21.501020538 Context.cpp:534] Warning: torch.backends.cuda.preferred_blas_library is an experimental feature. If you see any error or unexpected behavior when this flag is set please file an issue on GitHub. (function operator())
+(EngineCore_DP0 pid=1602161) Loading safetensors checkpoint shards:   0% Completed | 0/4 [00:00<?, ?it/s]
+(EngineCore_DP0 pid=1602161) Loading safetensors checkpoint shards:  25% Completed | 1/4 [00:01<00:04,  1.63s/it]
+(EngineCore_DP0 pid=1602161) Loading safetensors checkpoint shards:  50% Completed | 2/4 [00:03<00:03,  1.79s/it]
+(EngineCore_DP0 pid=1602161) Loading safetensors checkpoint shards:  75% Completed | 3/4 [00:05<00:01,  1.84s/it]
+(EngineCore_DP0 pid=1602161) Loading safetensors checkpoint shards: 100% Completed | 4/4 [00:06<00:00,  1.38s/it]
+(EngineCore_DP0 pid=1602161) Loading safetensors checkpoint shards: 100% Completed | 4/4 [00:06<00:00,  1.53s/it]
+(EngineCore_DP0 pid=1602161) 
+(EngineCore_DP0 pid=1602161) 2026-09-20 09:57:31,625 - INFO - autotuner.py:256 - flashinfer.jit: [Autotuner]: Autotuning process starts ...
+(EngineCore_DP0 pid=1602161) 2026-09-20 09:57:31,638 - INFO - autotuner.py:262 - flashinfer.jit: [Autotuner]: Autotuning process ends
+  0%|          | 0/1319 [00:00<?, ?it/s]  4%|▍         | 58/1319 [00:00<00:02, 575.23it/s]  9%|▉         | 119/1319 [00:00<00:02, 590.97it/s] 14%|█▍        | 182/1319 [00:00<00:01, 604.20it/s] 18%|█▊        | 243/1319 [00:00<00:01, 599.31it/s] 23%|██▎       | 305/1319 [00:00<00:01, 605.05it/s] 28%|██▊       | 368/1319 [00:00<00:01, 612.49it/s] 33%|███▎      | 431/1319 [00:00<00:01, 617.05it/s] 37%|███▋      | 494/1319 [00:00<00:01, 619.24it/s] 42%|████▏     | 557/1319 [00:00<00:01, 620.55it/s] 47%|████▋     | 620/1319 [00:01<00:01, 615.27it/s] 52%|█████▏    | 682/1319 [00:01<00:01, 616.59it/s] 56%|█████▋    | 744/1319 [00:01<00:00, 614.04it/s] 61%|██████    | 806/1319 [00:01<00:00, 611.01it/s] 66%|██████▌   | 868/1319 [00:01<00:00, 600.68it/s] 70%|███████   | 929/1319 [00:01<00:00, 598.39it/s] 75%|███████▌  | 990/1319 [00:01<00:00, 601.45it/s] 80%|███████▉  | 1051/1319 [00:01<00:00, 603.73it/s] 84%|████████▍ | 1113/1319 [00:01<00:00, 605.48it/s] 89%|████████▉ | 1175/1319 [00:01<00:00, 606.66it/s] 94%|█████████▎| 1236/1319 [00:02<00:00, 606.29it/s] 98%|█████████▊| 1298/1319 [00:02<00:00, 608.27it/s]100%|██████████| 1319/1319 [00:02<00:00, 607.68it/s]
+Running generate_until requests:   0%|          | 0/1319 [00:00<?, ?it/s]Running generate_until requests:   0%|          | 1/1319 [00:17<6:27:17, 17.63s/it]Running generate_until requests:  10%|▉         | 129/1319 [00:24<02:59,  6.62it/s]Running generate_until requests:  19%|█▉        | 257/1319 [00:31<01:39, 10.64it/s]Running generate_until requests:  29%|██▉       | 385/1319 [00:38<01:10, 13.30it/s]Running generate_until requests:  39%|███▉      | 513/1319 [00:44<00:53, 15.17it/s]Running generate_until requests:  49%|████▊     | 641/1319 [00:51<00:40, 16.54it/s]Running generate_until requests:  58%|█████▊    | 769/1319 [00:57<00:31, 17.55it/s]Running generate_until requests:  68%|██████▊   | 897/1319 [01:04<00:22, 18.38it/s]Running generate_until requests:  78%|███████▊  | 1025/1319 [01:10<00:15, 19.04it/s]Running generate_until requests:  87%|████████▋ | 1153/1319 [01:16<00:08, 19.65it/s]Running generate_until requests:  97%|█████████▋| 1281/1319 [01:19<00:01, 23.67it/s]Running generate_until requests: 100%|██████████| 1319/1319 [01:19<00:00, 16.61it/s]
+vllm ({'pretrained': '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p50-gsm8k-lr1e-5', 'seed': 42, 'attention_backend': 'FLASH_ATTN', 'enforce_eager': True, 'enable_prefix_caching': False, 'tensor_parallel_size': 1, 'data_parallel_size': 1, 'dtype': 'auto', 'gpu_memory_utilization': 0.85}), gen_kwargs: ({}), limit: None, num_fewshot: 5, batch_size: 128
+|Tasks|Version|     Filter     |n-shot|  Metric   |   |Value |   |Stderr|
+|-----|------:|----------------|-----:|-----------|---|-----:|---|-----:|
+|gsm8k|      3|flexible-extract|     5|exact_match|↑  |0.5519|±  |0.0137|
+|     |       |strict-match    |     5|exact_match|↑  |0.5504|±  |0.0137|
+
+✓ 완료: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p50-gsm8k-lr1e-5 (task: gsm8k)
+
+==========================================
+모든 평가 완료!
+총 완료: 10/10개 (모델 10개, 모델별 task는 위 '실행 계획' 참고)
+결과 경로: eval_results/
+로그 파일: logs/eval_20260920_093742_gpu0.log
+==========================================
+평가 종료 시간: Sun Sep 20 09:59:08 AM KST 2026
+결과 요약(readable): logs/eval_20260920_093742_gpu0_results.log
+결과 요약(CSV)     : logs/eval_20260920_093742_gpu0_results.csv
+
+=== 최종 결과 (CSV) ===
+model,gsm8k_flexible,gsm8k_strict
+/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama2_7b-base-origspace-freeze-p10-gsm8k-lr3e-5,0.3889,0.3889
+/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama2_7b-base-origspace-freeze-p20-gsm8k-lr3e-5,0.3920,0.3920
+/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama2_7b-base-origspace-freeze-p30-gsm8k-lr3e-5,0.3874,0.3867
+/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama2_7b-base-origspace-freeze-p40-gsm8k-lr3e-5,0.3867,0.3859
+/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama2_7b-base-origspace-freeze-p50-gsm8k-lr3e-5,0.3821,0.3806
+/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p10-gsm8k-lr1e-5,0.5497,0.5459
+/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p20-gsm8k-lr1e-5,0.5595,0.5572
+/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p30-gsm8k-lr1e-5,0.5519,0.5489
+/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p40-gsm8k-lr1e-5,0.5656,0.5633
+/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p50-gsm8k-lr1e-5,0.5519,0.5504
+
+▶ 결과 통합 (HarmBench + lm-eval → 1개 CSV)
+  HarmBench 요약 : (없음)  → 0행
+  lm-eval 요약   : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/lm-evaluation-harness/logs/eval_20260920_093742_gpu0_results.csv
+  agnews/sst2    : /home/edgeai_lab/Safety-WaRP-LLM/evaluation_results/agnews_sst2  → 0개 모델
+✅ 통합 CSV: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/HarmBench/logs/run_all_2026-09-20_09-37-38_summary.csv  (10행 × 4열)
+
+==============================================================================
+🎉 통합 평가 종료
+   모델 (10개):
+     - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama2_7b-base-origspace-freeze-p10-gsm8k-lr3e-5
+     - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama2_7b-base-origspace-freeze-p20-gsm8k-lr3e-5
+     - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama2_7b-base-origspace-freeze-p30-gsm8k-lr3e-5
+     - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama2_7b-base-origspace-freeze-p40-gsm8k-lr3e-5
+     - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama2_7b-base-origspace-freeze-p50-gsm8k-lr3e-5
+     - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p10-gsm8k-lr1e-5
+     - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p20-gsm8k-lr1e-5
+     - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p30-gsm8k-lr1e-5
+     - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p40-gsm8k-lr1e-5
+     - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p50-gsm8k-lr1e-5
+   HarmBench   : skipped
+                 └ 결과: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/HarmBench/results/  (요약 CSV: results/evaluation_summary_*.csv)
+                 └ 로그: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/HarmBench/logs/run_all_2026-09-20_09-37-38_harmbench.out
+   lm-eval     : done(rc=0)
+                 └ 결과: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/lm-evaluation-harness/eval_results/  (요약: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/lm-evaluation-harness/logs/eval_*_results.csv)
+                 └ 로그: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/HarmBench/logs/run_all_2026-09-20_09-37-38_lmeval.out
+   통합 CSV    : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/HarmBench/logs/run_all_2026-09-20_09-37-38_summary.csv
+==============================================================================
+EVAL_FINISHED rc=0

@@ -1,0 +1,19 @@
+2026-09-21 00:51:33 - __main__ - INFO - 
+======================================================================
+2026-09-21 00:51:33 - __main__ - INFO -   🚀 LISA (Bi-State Optimization) GSM8K Fine-tuning
+2026-09-21 00:51:33 - __main__ - INFO - ======================================================================
+
+2026-09-21 00:51:33 - __main__ - INFO - Log file: ./logs/lisa_gsm8k/finetune_gsm8k_lisa_20260921_005133.log
+2026-09-21 00:51:33 - __main__ - INFO - ⚙️  Configuration:
+2026-09-21 00:51:33 - __main__ - INFO -    ├─ Base model: wvnvwn/qwen-2.5-7B-Instruct-SSFT-lr5e-5
+2026-09-21 00:51:33 - __main__ - INFO -    ├─ Input formatting: chat template
+2026-09-21 00:51:33 - __main__ - INFO -    ├─ Tuning: LoRA (r=16, alpha=8)
+2026-09-21 00:51:33 - __main__ - INFO -    ├─ BSO: ON  rho=1.0 align_step=100 finetune_step=900
+2026-09-21 00:51:33 - __main__ - INFO -    ├─ Safety(alignment) data: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/data/circuit_breakers_train.json (guide_data_num=4994)
+2026-09-21 00:51:33 - __main__ - INFO -    ├─ Downstream: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/data/gsm8k_train_task_7473.json (로컬 태스크 JSON), clean (no poison)
+2026-09-21 00:51:33 - __main__ - INFO -    ├─ LR: 0.0003  epochs: 3  eff.batch: 16
+2026-09-21 00:51:33 - __main__ - INFO -    └─ Output dir: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/revision_qwen_cap/r16a8/cb/qwen25_7b/gsm8k/lisa
+
+2026-09-21 00:51:33 - __main__ - INFO - [1/4] Loading tokenizer
+2026-09-21 00:51:33 - __main__ - INFO - ✅ Tokenizer loaded (vocab=151665, pad=<|endoftext|>)
+2026-09-21 00:51:33 - __main__ - INFO - [2/4] Loading model (bf16)

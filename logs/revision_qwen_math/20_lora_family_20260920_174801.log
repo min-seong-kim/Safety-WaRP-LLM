@@ -1,0 +1,35 @@
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM
+   python    : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/bin/python
+   safety    : cb
+   models    : qwen25_7b
+   methods   : asft lisa
+   tasks     : math
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=[qwen25_7b=5e-5] wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/revision
+   hf        : kmseong  (업로드 후 로컬 삭제=0, basis 삭제=0)
+   *** DRY RUN ***
+════════════════════════════════════════════════════════════════
+
+  AsFT λ          : 1.0
+  SafeLoRA thr    : 0.3  (load dtype=float32)
+  LISA            : ρ=1.0 align_step=100 ft_step=900
+  SaLoRA          : salora/salora_lora.py · r_s=32 r_t=32 init=task n_harmful=256 n_task=256
+  WSR-LoRA ρ      : 0.1  (Phase1 basis 필요)
+  SafeGrad        : ρ=1.0 ref_mode=adapter_off kl=ref
+
+──────────────────────────────────────────────────────────────
+  asft(λ=1.0)  cb/qwen25_7b/math lr=3e-4 batch=4x4   (09-20 17:48:01)
+──────────────────────────────────────────────────────────────
+  [dry-run] python finetune_gsm8k_lora.py --method asft --model_name wvnvwn/qwen-2.5-7B-Instruct-SSFT-lr5e-5 --output_dir /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/revision/cb/qwen25_7b/math/asft --task_data_path /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/data/math_train_task_7500.json --task_samples 0 --target_modules q_proj\,k_proj\,v_proj\,up_proj\,down_proj --layer_type attn_q\,attn_k\,attn_v\,ffn_up\,ffn_down --target_layers all --asft_base_model Qwen/Qwen2.5-7B-Instruct --asft_aligned_model wvnvwn/qwen-2.5-7B-Instruct-SSFT-lr5e-5 --asft_lambda_reg 1.0 --asft_store_dtype float32 --asft_check_equiv --lora_r 16 --lora_alpha 32 --lora_dropout 0.05 --learning_rate 3e-4 --epochs 3 --batch_size 4 --gradient_accumulation_steps 4 --max_length 1024 --warmup_ratio 0.03 --weight_decay 0.0 --seed 42 --dtype bfloat16 --gradient_checkpointing --save_merged_model
+
+──────────────────────────────────────────────────────────────
+  lisa(ρ=1.0)  cb/qwen25_7b/math lr=3e-4 batch=4x4   (09-20 17:48:01)
+──────────────────────────────────────────────────────────────
+  [dry-run] python gsm8k_eval/finetune_gsm8k_lisa.py --model_path wvnvwn/qwen-2.5-7B-Instruct-SSFT-lr5e-5 --output_dir /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/revision/cb/qwen25_7b/math/lisa --task_data_path /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/data/math_train_task_7500.json --task_samples 0 --num_eval_samples 0 --safety_data_path /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/data/circuit_breakers_train.json --guide_data_num 4994 --rho 1.0 --alignment_step 100 --finetune_step 900 --lora --lora_target_modules q_proj k_proj v_proj up_proj down_proj --lora_r 16 --lora_alpha 32 --lora_dropout 0.05 --learning_rate 3e-4 --epochs 3 --batch_size 4 --grad_accum 4 --max_length 1024 --warmup_ratio 0.03 --weight_decay 0.0 --lr_scheduler_type cosine --max_grad_norm 1.0 --seed 42 --bf16 --gradient_checkpointing --report_to none
+
+실패한 셀 없음.

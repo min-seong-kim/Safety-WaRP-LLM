@@ -1,0 +1,106 @@
+삭제 대상 42개 / 606.3 GB
+
+     26.0 GB  kmseong/llama2_13b-chat-CB_SSFT-seal-warp_gsm8k_topp0.8_rho0.1_lr5e-5
+     18.5 GB  kmseong/gemma2_9b-it-CB_SSFT-seal_gsm8k_topp0.8_lr1e-5
+     16.1 GB  kmseong/llama3_1_8b-base-CB_SSFT-seal_gsm8k_topp0.8_lr1e-5
+     16.1 GB  kmseong/llama3_1_8b-base-CB_SSFT-wsr-lora_gsm8k_rho0.3_a16_lr3e-4
+     16.1 GB  kmseong/llama3_1_8b-base-CB_SSFT-salora_gsm8k_rs32rt32_a16_lr3e-4
+     16.1 GB  kmseong/llama3_1_8b-base-CB_SSFT-lisa_gsm8k_rho1.0_a16_lr3e-4
+     16.1 GB  kmseong/llama3_1_8b-base-CB_SSFT-resta_gsm8k_gamma0.3_lr1e-5
+     16.1 GB  kmseong/llama3_1_8b-base-CB_SSFT-asft_gsm8k_lambda1.0_a16_lr3e-4
+     16.1 GB  kmseong/llama3_1_8b-base-CB_SSFT-lora_gsm8k_a16_lr3e-4
+     16.1 GB  kmseong/llama3_1_8b-base-CB_SSFT-safelora_gsm8k_thr0.3_a16_lr3e-4
+     15.2 GB  kmseong/qwen2_5_7b-instruct-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr5e-5_tgtonly
+     13.5 GB  kmseong/llama2_7b-chat-CB_SSFT-seal_medqa_topp0.8_lr5e-5
+     13.5 GB  kmseong/llama2_7b-base-CB_SSFT-seal_gsm8k_topp0.8_lr3e-5
+     13.5 GB  kmseong/llama2_7b-chat-CB_SSFT-seal_arc_topp0.8_lr5e-5
+     13.5 GB  kmseong/llama2_7b-chat-arc_ssft_lr5e-5
+     13.5 GB  kmseong/llama2_7b-chat-CB_SSFT-wsr-lora_arc_rho0.3_a16_lr3e-4
+     13.5 GB  kmseong/llama2_7b-chat-CB_SSFT-wsr-lora_medqa_rho0.3_a16_lr3e-4
+     13.5 GB  kmseong/llama2_7b-base-CB_SSFT-wsr-lora_gsm8k_rho0.3_a16_lr3e-4
+     13.5 GB  kmseong/llama2_7b-base-CB_SSFT-wsr-lora_gsm8k_rho0.1_a16_lr3e-4
+     13.5 GB  kmseong/llama2_7b-chat-CB_SSFT-salora_arc_rs32rt32_a16_lr3e-4
+     13.5 GB  kmseong/llama2_7b-chat-CB_SSFT-salora_medqa_rs32rt32_a16_lr3e-4
+     13.5 GB  kmseong/llama2_7b-chat-CB_SSFT-lisa_arc_rho1.0_a16_lr3e-4
+     13.5 GB  kmseong/llama2_7b-chat-CB_SSFT-lisa_medqa_rho1.0_a16_lr3e-4
+     13.5 GB  kmseong/llama2_7b-base-CB_SSFT-salora_gsm8k_rs32rt32_a16_lr3e-4
+     13.5 GB  kmseong/llama2_7b-base-CB_SSFT-lisa_gsm8k_rho0.0_a16_lr3e-4
+     13.5 GB  kmseong/llama2_7b-base-CB_SSFT-lisa_gsm8k_rho1.0_a16_lr3e-4
+     13.5 GB  kmseong/llama2_7b-chat-CB_SSFT-asft_arc_lambda1.0_a16_lr3e-4
+     13.5 GB  kmseong/llama2_7b-chat-CB_SSFT-asft_medqa_lambda1.0_a16_lr3e-4
+     13.5 GB  kmseong/llama2_7b-chat-CB_SSFT-lora_arc_a16_lr3e-4
+     13.5 GB  kmseong/llama2_7b-chat-CB_SSFT-lora_medqa_a16_lr3e-4
+     13.5 GB  kmseong/llama2_7b-chat-CB_SSFT-safelora_arc_thr0.3_a16_lr3e-4
+     13.5 GB  kmseong/llama2_7b-chat-CB_SSFT-safelora_medqa_thr0.3_a16_lr3e-4
+     13.5 GB  kmseong/llama2_7b-base-CB_SSFT-asft_gsm8k_lambda1.0_a16_lr3e-4
+     13.5 GB  kmseong/llama2_7b-base-CB_SSFT-lora_gsm8k_a16_lr3e-4
+     13.5 GB  kmseong/llama2_7b-base-CB_SSFT-safelora_gsm8k_thr0.3_a16_lr3e-4
+     13.5 GB  kmseong/llama2_7b-chat-BT_SSFT-seal_gsm8k_topp0.8_lr5e-5
+     13.5 GB  kmseong/llama2_7b-chat-BT_SSFT-wsr-lora_gsm8k_rho0.3_a16_lr3e-4
+     13.5 GB  kmseong/llama2_7b-chat-BT_SSFT-salora_gsm8k_rs32rt32_a16_lr3e-4
+     13.5 GB  kmseong/llama2_7b-chat-BT_SSFT-lisa_gsm8k_rho1.0_a16_lr3e-4
+     13.5 GB  kmseong/llama2_7b-chat-BT_SSFT-asft_gsm8k_lambda1.0_a16_lr3e-4
+     13.5 GB  kmseong/llama2_7b-chat-BT_SSFT-lora_gsm8k_a16_lr3e-4
+     13.5 GB  kmseong/llama2_7b-chat-BT_SSFT-safelora_gsm8k_thr0.3_a16_lr3e-4
+
+보존 63개
+  [keep] Qwen/Qwen2.5-7B-Instruct                                     레지스트리 보호
+  [keep] google/gemma-2-9b-it                                         레지스트리 보호
+  [keep] kmseong/Llama-3.1-8B-Instruct-ssft_lr5e-5                    레지스트리 보호
+  [keep] kmseong/Llama-3.1-8B-base-SSFT_lr5e-5                        레지스트리 보호
+  [keep] kmseong/llama2_7b-base-CB_SSFT-lr3e-5                        레지스트리 보호
+  [keep] kmseong/llama2_7b-chat-Safety-FT-lr5e-5                      레지스트리 보호
+  [keep] kmseong/llama3_2_3b-instruct-SSFT-lr5e-5                     레지스트리 보호
+  [keep] meta-llama/Llama-2-13b-chat-hf                               레지스트리 보호
+  [keep] meta-llama/Llama-2-7b-chat-hf                                레지스트리 보호
+  [keep] meta-llama/Llama-2-7b-hf                                     레지스트리 보호
+  [keep] meta-llama/Llama-3.1-8B                                      레지스트리 보호
+  [keep] meta-llama/Llama-3.1-8B-Instruct                             레지스트리 보호
+  [keep] meta-llama/Llama-3.2-3B-Instruct                             레지스트리 보호
+  [keep] wvnvwn/gemma-2-9b-it-ssft-lr3e-5                             레지스트리 보호
+  [keep] wvnvwn/llama-2-13b-chat-hf-SSFT-lr5e-5                       레지스트리 보호
+  [keep] wvnvwn/qwen-2.5-7B-Instruct-SSFT-lr5e-5                      레지스트리 보호
+삭제 1/42  kmseong/gemma2_9b-it-CB_SSFT-seal_gsm8k_topp0.8_lr1e-5
+삭제 2/42  kmseong/llama2_13b-chat-CB_SSFT-seal-warp_gsm8k_topp0.8_rho0.1_lr5e-5
+삭제 3/42  kmseong/llama2_7b-base-CB_SSFT-asft_gsm8k_lambda1.0_a16_lr3e-4
+삭제 4/42  kmseong/llama2_7b-base-CB_SSFT-lisa_gsm8k_rho0.0_a16_lr3e-4
+삭제 5/42  kmseong/llama2_7b-base-CB_SSFT-lisa_gsm8k_rho1.0_a16_lr3e-4
+삭제 6/42  kmseong/llama2_7b-base-CB_SSFT-lora_gsm8k_a16_lr3e-4
+삭제 7/42  kmseong/llama2_7b-base-CB_SSFT-safelora_gsm8k_thr0.3_a16_lr3e-4
+삭제 8/42  kmseong/llama2_7b-base-CB_SSFT-salora_gsm8k_rs32rt32_a16_lr3e-4
+삭제 9/42  kmseong/llama2_7b-base-CB_SSFT-seal_gsm8k_topp0.8_lr3e-5
+삭제 10/42  kmseong/llama2_7b-base-CB_SSFT-wsr-lora_gsm8k_rho0.1_a16_lr3e-4
+삭제 11/42  kmseong/llama2_7b-base-CB_SSFT-wsr-lora_gsm8k_rho0.3_a16_lr3e-4
+삭제 12/42  kmseong/llama2_7b-chat-BT_SSFT-asft_gsm8k_lambda1.0_a16_lr3e-4
+삭제 13/42  kmseong/llama2_7b-chat-BT_SSFT-lisa_gsm8k_rho1.0_a16_lr3e-4
+삭제 14/42  kmseong/llama2_7b-chat-BT_SSFT-lora_gsm8k_a16_lr3e-4
+삭제 15/42  kmseong/llama2_7b-chat-BT_SSFT-safelora_gsm8k_thr0.3_a16_lr3e-4
+삭제 16/42  kmseong/llama2_7b-chat-BT_SSFT-salora_gsm8k_rs32rt32_a16_lr3e-4
+삭제 17/42  kmseong/llama2_7b-chat-BT_SSFT-seal_gsm8k_topp0.8_lr5e-5
+삭제 18/42  kmseong/llama2_7b-chat-BT_SSFT-wsr-lora_gsm8k_rho0.3_a16_lr3e-4
+삭제 19/42  kmseong/llama2_7b-chat-CB_SSFT-asft_arc_lambda1.0_a16_lr3e-4
+삭제 20/42  kmseong/llama2_7b-chat-CB_SSFT-asft_medqa_lambda1.0_a16_lr3e-4
+삭제 21/42  kmseong/llama2_7b-chat-CB_SSFT-lisa_arc_rho1.0_a16_lr3e-4
+삭제 22/42  kmseong/llama2_7b-chat-CB_SSFT-lisa_medqa_rho1.0_a16_lr3e-4
+삭제 23/42  kmseong/llama2_7b-chat-CB_SSFT-lora_arc_a16_lr3e-4
+삭제 24/42  kmseong/llama2_7b-chat-CB_SSFT-lora_medqa_a16_lr3e-4
+삭제 25/42  kmseong/llama2_7b-chat-CB_SSFT-safelora_arc_thr0.3_a16_lr3e-4
+삭제 26/42  kmseong/llama2_7b-chat-CB_SSFT-safelora_medqa_thr0.3_a16_lr3e-4
+삭제 27/42  kmseong/llama2_7b-chat-CB_SSFT-salora_arc_rs32rt32_a16_lr3e-4
+삭제 28/42  kmseong/llama2_7b-chat-CB_SSFT-salora_medqa_rs32rt32_a16_lr3e-4
+삭제 29/42  kmseong/llama2_7b-chat-CB_SSFT-seal_arc_topp0.8_lr5e-5
+삭제 30/42  kmseong/llama2_7b-chat-CB_SSFT-seal_medqa_topp0.8_lr5e-5
+삭제 31/42  kmseong/llama2_7b-chat-CB_SSFT-wsr-lora_arc_rho0.3_a16_lr3e-4
+삭제 32/42  kmseong/llama2_7b-chat-CB_SSFT-wsr-lora_medqa_rho0.3_a16_lr3e-4
+삭제 33/42  kmseong/llama2_7b-chat-arc_ssft_lr5e-5
+삭제 34/42  kmseong/llama3_1_8b-base-CB_SSFT-asft_gsm8k_lambda1.0_a16_lr3e-4
+삭제 35/42  kmseong/llama3_1_8b-base-CB_SSFT-lisa_gsm8k_rho1.0_a16_lr3e-4
+삭제 36/42  kmseong/llama3_1_8b-base-CB_SSFT-lora_gsm8k_a16_lr3e-4
+삭제 37/42  kmseong/llama3_1_8b-base-CB_SSFT-resta_gsm8k_gamma0.3_lr1e-5
+삭제 38/42  kmseong/llama3_1_8b-base-CB_SSFT-safelora_gsm8k_thr0.3_a16_lr3e-4
+삭제 39/42  kmseong/llama3_1_8b-base-CB_SSFT-salora_gsm8k_rs32rt32_a16_lr3e-4
+삭제 40/42  kmseong/llama3_1_8b-base-CB_SSFT-seal_gsm8k_topp0.8_lr1e-5
+삭제 41/42  kmseong/llama3_1_8b-base-CB_SSFT-wsr-lora_gsm8k_rho0.3_a16_lr3e-4
+삭제 42/42  kmseong/qwen2_5_7b-instruct-CB_SSFT-lisa_gsm8k_rho1.0_fullft_lr5e-5_tgtonly
+
+✅ 42개 삭제, 약 606.3 GB 확보

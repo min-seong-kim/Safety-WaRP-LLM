@@ -205,3 +205,34 @@
 [2026-09-20 03:53:30] [safety_warp] [INFO] Phase 3: Original-space masked finetuning with GSM8K
 [2026-09-20 03:53:30] [safety_warp] [INFO] ======================================================================
 [2026-09-20 03:53:30] [safety_warp] [INFO] [OriginalSpaceMaskRestoreCallback] registered 160 param tensors for post-step weight-decay restore
+[2026-09-20 04:05:25] [safety_warp] [INFO] ======================================================================
+[2026-09-20 04:05:25] [safety_warp] [INFO] Phase 3 Completed (Original Space)
+[2026-09-20 04:05:25] [safety_warp] [INFO]   - Final model: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/checkpoints/origspace_base_llama2_7b_base/phase3_original_space_20260920_035330/final_model
+[2026-09-20 04:05:25] [safety_warp] [INFO]   - Metadata: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/checkpoints/origspace_base_llama2_7b_base/phase3_original_space_20260920_035330/metadata.json
+[2026-09-20 04:05:25] [safety_warp] [INFO] ======================================================================
+[2026-09-20 04:05:25] [safety_warp] [INFO] [PROFILE] ■ Phase 3 / train_and_save ok | time=00:11:55 (714.9s) | torch_alloc_peak=69.86GB | torch_reserved_peak=70.70GB | device_peak=71.54GB
+[2026-09-20 04:05:25] [safety_warp] [INFO] ======================================================================
+[2026-09-20 04:05:25] [safety_warp] [INFO] Phase 3 Completed!
+[2026-09-20 04:05:25] [safety_warp] [INFO] Final model saved to: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/checkpoints/origspace_base_llama2_7b_base/phase3_original_space_20260920_035330/final_model
+[2026-09-20 04:05:25] [safety_warp] [INFO] ======================================================================
+[2026-09-20 04:05:25] [safety_warp] [INFO] ==============================================================================
+[2026-09-20 04:05:25] [safety_warp] [INFO] [PROFILE] Phase 3 리소스 요약 (시간 / VRAM)
+[2026-09-20 04:05:25] [safety_warp] [INFO] ==============================================================================
+[2026-09-20 04:05:25] [safety_warp] [INFO] stage                               time   torch_alloc   torch_resv     device  device-base
+[2026-09-20 04:05:25] [safety_warp] [INFO] -------------------------------------------------------------------------------------------
+[2026-09-20 04:05:25] [safety_warp] [INFO] load_basis                      00:00:00         0.00G        0.00G      0.61G        0.00G
+[2026-09-20 04:05:25] [safety_warp] [INFO] load_masks                      00:00:09         0.00G        0.00G      0.61G        0.00G
+[2026-09-20 04:05:25] [safety_warp] [INFO] load_model                      00:00:09        12.55G       12.56G     13.17G       12.56G
+[2026-09-20 04:05:25] [safety_warp] [INFO] setup_warp_modules              00:00:01        18.75G       18.75G     18.85G       18.24G
+[2026-09-20 04:05:25] [safety_warp] [INFO] load_data                       00:00:04        18.41G       18.75G     19.45G       18.84G
+[2026-09-20 04:05:25] [safety_warp] [INFO] train_and_save                  00:11:55        69.86G       70.70G     71.54G       70.93G
+[2026-09-20 04:05:25] [safety_warp] [INFO] -------------------------------------------------------------------------------------------
+[2026-09-20 04:05:25] [safety_warp] [INFO] TOTAL                           00:12:21        69.86G       70.70G     71.54G       70.93G
+[2026-09-20 04:05:25] [safety_warp] [INFO]   GPU 0 (NVIDIA B200): capacity 178.4GB
+[2026-09-20 04:05:25] [safety_warp] [INFO]   device baseline (프로파일 시작 시점 사용량, 타 프로세스 포함): 0.61GB
+[2026-09-20 04:05:25] [safety_warp] [INFO]   torch_alloc/torch_resv = 이 프로세스의 torch allocator 기준, device = nvidia-smi 기준 전체 사용량
+[2026-09-20 04:05:25] [safety_warp] [INFO] ==============================================================================
+[2026-09-20 04:05:25] [safety_warp] [INFO] [PROFILE] 요약 저장: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/logs/origspace_base/llama2_7b_base/phase3_20260920_035304_profile.json
+[2026-09-20 04:05:25] [safety_warp] [INFO] ======================================================================
+[2026-09-20 04:05:25] [safety_warp] [INFO] All tasks completed successfully!
+[2026-09-20 04:05:25] [safety_warp] [INFO] ======================================================================
