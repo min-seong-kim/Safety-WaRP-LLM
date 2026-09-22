@@ -1432,26 +1432,31 @@ WSR-Tune 을 앞선다** — 비교가 성립하지 않는다는 증거다. LoRA
 ⚠️ 리포명에 rank 가 들어가지 않으므로 r=8 은 `_r8`, 기존 α=16 세대와 겹치는
 (r16,a16,lr3e-4) 는 `_v2` 접미사로 구분했다.
 
-| (r, α) | scaling | lr | 기법 | AVG ↓ | GSM8K ↑ | GSM8K−ASR | vs WSR-Tune |
-|---|---|---|---|---:|---:|---:|---:|
-| r8/α16 | 2.0 | 1e-4 | [AsFT](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-asft_gsm8k_lambda1.0_a16_lr1e-4_r8) | 0.0355 | 0.7339 | **0.6984** | +0.0171 |
-| r8/α16 | 2.0 | 1e-4 | [Lisa](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-lisa_gsm8k_rho1.0_a16_lr1e-4_r8) | 0.0358 | 0.7119 | **0.6761** | -0.0052 |
-| r8/α16 | 2.0 | 3e-4 | [AsFT](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-asft_gsm8k_lambda1.0_a16_lr3e-4_r8) | 0.0362 | 0.7278 | **0.6916** | +0.0103 |
-| r8/α16 | 2.0 | 3e-4 | [Lisa](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-lisa_gsm8k_rho1.0_a16_lr3e-4_r8) | 0.0377 | 0.7202 | **0.6825** | +0.0012 |
-| r8/α16 | 2.0 | 5e-4 | [AsFT](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-asft_gsm8k_lambda1.0_a16_lr5e-4_r8) | 0.0356 | 0.7377 | **0.7021** | +0.0208 |
-| r8/α16 | 2.0 | 5e-4 | [Lisa](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-lisa_gsm8k_rho1.0_a16_lr5e-4_r8) | 0.0387 | 0.7210 | **0.6823** | +0.0010 |
-| r8/α8 | 1.0 | 1e-4 | [AsFT](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-asft_gsm8k_lambda1.0_a8_lr1e-4_r8) | 0.0369 | 0.7074 | **0.6705** | -0.0108 |
-| r8/α8 | 1.0 | 1e-4 | [Lisa](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-lisa_gsm8k_rho1.0_a8_lr1e-4_r8) | 0.0422 | 0.6839 | **0.6417** | -0.0396 |
-| r8/α8 | 1.0 | 3e-4 | [AsFT](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-asft_gsm8k_lambda1.0_a8_lr3e-4_r8) | 0.0365 | 0.7066 | **0.6701** | -0.0112 |
-| r8/α8 | 1.0 | 3e-4 | [Lisa](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-lisa_gsm8k_rho1.0_a8_lr3e-4_r8) | 0.0422 | 0.6922 | **0.6500** | -0.0313 |
-| r8/α8 | 1.0 | 5e-4 | [AsFT](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-asft_gsm8k_lambda1.0_a8_lr5e-4_r8) | 0.0383 | 0.7089 | **0.6706** | -0.0107 |
-| r8/α8 | 1.0 | 5e-4 | [Lisa](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-lisa_gsm8k_rho1.0_a8_lr5e-4_r8) | 0.0437 | 0.7020 | **0.6583** | -0.0230 |
-| r16/α16 | 1.0 | 1e-4 | [AsFT](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-asft_gsm8k_lambda1.0_a16_lr1e-4) | 0.0374 | 0.7149 | **0.6775** | -0.0038 |
-| r16/α16 | 1.0 | 1e-4 | [Lisa](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-lisa_gsm8k_rho1.0_a16_lr1e-4) | 0.0416 | 0.6876 | **0.6460** | -0.0353 |
-| r16/α16 | 1.0 | 3e-4 | [AsFT](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-asft_gsm8k_lambda1.0_a16_lr3e-4_v2) | 0.0372 | 0.7157 | **0.6785** | -0.0028 |
-| r16/α16 | 1.0 | 3e-4 | [Lisa](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-lisa_gsm8k_rho1.0_a16_lr3e-4_v2) | 0.0416 | 0.7089 | **0.6673** | -0.0140 |
-| r16/α16 | 1.0 | 5e-4 | [AsFT](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-asft_gsm8k_lambda1.0_a16_lr5e-4) | 0.0378 | 0.7149 | **0.6771** | -0.0042 |
-| r16/α16 | 1.0 | 5e-4 | [Lisa](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-lisa_gsm8k_rho1.0_a16_lr5e-4) | 0.0441 | 0.6884 | **0.6443** | -0.0370 |
+| (r, α) | scaling | lr | 기법 | Direct | AutoDAN | PAIR | PAP | AVG ↓ | GSM8K ↑ | GSM8K−ASR | vs WSR-Tune |
+|---|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| r8/α16 | 2.0 | 1e-4 | [AsFT](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-asft_gsm8k_lambda1.0_a16_lr1e-4_r8) | 0.0000 | 0.0000 | 0.0250 | 0.1169 | 0.0355 | 0.7339 | **0.6984** | +0.0171 |
+| r8/α16 | 2.0 | 1e-4 | [Lisa](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-lisa_gsm8k_rho1.0_a16_lr1e-4_r8) | 0.0000 | 0.0000 | 0.0269 | 0.1165 | 0.0358 | 0.7119 | **0.6761** | -0.0052 |
+| r8/α16 | 2.0 | 3e-4 | [AsFT](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-asft_gsm8k_lambda1.0_a16_lr3e-4_r8) | 0.0000 | 0.0000 | 0.0231 | 0.1219 | 0.0362 | 0.7278 | **0.6916** | +0.0103 |
+| r8/α16 | 2.0 | 3e-4 | [Lisa](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-lisa_gsm8k_rho1.0_a16_lr3e-4_r8) | 0.0000 | 0.0000 | 0.0288 | 0.1219 | 0.0377 | 0.7202 | **0.6825** | +0.0012 |
+| r8/α16 | 2.0 | 5e-4 | [AsFT](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-asft_gsm8k_lambda1.0_a16_lr5e-4_r8) | 0.0000 | 0.0000 | 0.0231 | 0.1192 | 0.0356 | 0.7377 | **0.7021** | +0.0208 |
+| r8/α16 | 2.0 | 5e-4 | [Lisa](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-lisa_gsm8k_rho1.0_a16_lr5e-4_r8) | 0.0000 | 0.0000 | 0.0269 | 0.1281 | 0.0387 | 0.7210 | **0.6823** | +0.0010 |
+| r8/α8 | 1.0 | 1e-4 | [AsFT](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-asft_gsm8k_lambda1.0_a8_lr1e-4_r8) | 0.0000 | 0.0000 | 0.0212 | 0.1262 | 0.0369 | 0.7074 | **0.6705** | -0.0108 |
+| r8/α8 | 1.0 | 1e-4 | [Lisa](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-lisa_gsm8k_rho1.0_a8_lr1e-4_r8) | 0.0000 | 0.0000 | 0.0308 | 0.1381 | 0.0422 | 0.6839 | **0.6417** | -0.0396 |
+| r8/α8 | 1.0 | 3e-4 | [AsFT](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-asft_gsm8k_lambda1.0_a8_lr3e-4_r8) | 0.0000 | 0.0000 | 0.0212 | 0.1250 | 0.0365 | 0.7066 | **0.6701** | -0.0112 |
+| r8/α8 | 1.0 | 3e-4 | [Lisa](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-lisa_gsm8k_rho1.0_a8_lr3e-4_r8) | 0.0000 | 0.0000 | 0.0308 | 0.1381 | 0.0422 | 0.6922 | **0.6500** | -0.0313 |
+| r8/α8 | 1.0 | 5e-4 | [AsFT](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-asft_gsm8k_lambda1.0_a8_lr5e-4_r8) | 0.0000 | 0.0000 | 0.0231 | 0.1300 | 0.0383 | 0.7089 | **0.6706** | -0.0107 |
+| r8/α8 | 1.0 | 5e-4 | [Lisa](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-lisa_gsm8k_rho1.0_a8_lr5e-4_r8) | 0.0000 | 0.0000 | 0.0327 | 0.1419 | 0.0437 | 0.7020 | **0.6583** | -0.0230 |
+| r16/α16 | 1.0 | 1e-4 | [AsFT](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-asft_gsm8k_lambda1.0_a16_lr1e-4) | 0.0000 | 0.0000 | 0.0231 | 0.1265 | 0.0374 | 0.7149 | **0.6775** | -0.0038 |
+| r16/α16 | 1.0 | 1e-4 | [Lisa](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-lisa_gsm8k_rho1.0_a16_lr1e-4) | 0.0000 | 0.0000 | 0.0308 | 0.1358 | 0.0416 | 0.6876 | **0.6460** | -0.0353 |
+| r16/α16 | 1.0 | 3e-4 | [AsFT](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-asft_gsm8k_lambda1.0_a16_lr3e-4_v2) | 0.0000 | 0.0000 | 0.0212 | 0.1277 | 0.0372 | 0.7157 | **0.6785** | -0.0028 |
+| r16/α16 | 1.0 | 3e-4 | [Lisa](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-lisa_gsm8k_rho1.0_a16_lr3e-4_v2) | 0.0000 | 0.0000 | 0.0288 | 0.1377 | 0.0416 | 0.7089 | **0.6673** | -0.0140 |
+| r16/α16 | 1.0 | 5e-4 | [AsFT](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-asft_gsm8k_lambda1.0_a16_lr5e-4) | 0.0000 | 0.0000 | 0.0231 | 0.1281 | 0.0378 | 0.7149 | **0.6771** | -0.0042 |
+| r16/α16 | 1.0 | 5e-4 | [Lisa](https://huggingface.co/kmseong/qwen2_5_7b-instruct-CB_SSFT-lisa_gsm8k_rho1.0_a16_lr5e-4) | 0.0000 | 0.0000 | 0.0288 | 0.1477 | 0.0441 | 0.6884 | **0.6443** | -0.0370 |
+
+**공격별로 보면 18셀 전부 Direct·AutoDAN 이 0.0000 이고 차이는 PAIR·PAP 에서만 난다.**
+AVG 의 변동은 사실상 PAP 가 만든다 — PAP 는 0.1165~0.1477 로 전 구간에서 가장 높고,
+PAIR 은 0.0212~0.0327 범위다. 따라서 아래의 scaling·rank 논의는 **PAIR/PAP 두 공격에
+대한 것**이지 네 공격 전반에 대한 것이 아니다.
 
 **scaling 이 지배적이고 rank 는 부차적이다.** scaling 2.0(r8/α16) 6셀 중 5셀이 WSR-Tune 위이고,
 scaling 1.0 인 12셀은 **12셀 전부 아래**다. 같은 scaling 1.0 에서 rank 를 8→16 으로 2배 늘려도
@@ -1477,6 +1482,60 @@ alignment 스텝으로 안전성을 유지하므로 scaling 축소가 **안전 �
 AsFT ASR 0.0372 vs 0.0371 · GSM8K 0.7157 vs 0.7202, Lisa ASR 0.0416 vs 0.0424 ·
 GSM8K 0.7089 vs 0.7134. ASR 은 0.001 이내, GSM8K 는 0.0045 차이다.
 
+### F-1. `_v2` 가 기존 α=16 세대와 왜 값이 다른가 (2026-09-21 조사)
+
+(r16, α16, lr3e-4) 는 8~9월에 이미 돌린 적이 있어 오늘 `_v2` 로 다시 만들었다. 값이 미묘하게
+달라서 **데이터를 다른 데서 가져온 것 아닌가** 를 확인했다. 결론부터: **학습 설정은 동일하고,
+차이는 학습 자체의 비결정성이다.**
+
+두 세대의 `finetune_config.json` 을 전부 대조했다(Lisa 는 양쪽 모두 HF 캐시에 남아 있다).
+22개 키 중 **다른 것은 3개뿐이고, 셋 다 동작에 영향이 없다**:
+
+| 키 | 기존(8~9월) | `_v2`(오늘) | 판정 |
+|---|---|---|---|
+| `dataset` | `/home/edgeai_lab/Safety-WaRP-LLM/data/gsm8k_train_task_7473.json` | `/NHNHOME/.../Safety-WaRP-LLM/data/gsm8k_train_task_7473.json` | **같은 파일** |
+| `safety_data_path` | `/home/edgeai_lab/.../circuit_breakers_train.json` | `/NHNHOME/.../circuit_breakers_train.json` | **같은 파일** |
+| `train_only_targets` | (키 없음) | `None` | **no-op** |
+
+- **경로 문자열만 다르고 실체는 하나다.** `/home/edgeai_lab/Safety-WaRP-LLM` 은
+  `/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM` 으로 가는 심볼릭 링크다
+  (`link_env.sh` 가 건다). **inode 가 같음을 확인했다** — `stat -L` 로 양쪽 모두
+  `144117157033191473`. 파일 자체도 116셀 커밋(`71697e9c`) 이후 한 번도 바뀌지 않았다
+  (`git log --follow` 로 확인, sha256 `7e277d87...`).
+- **`num_train_samples` 7473 · `guide_data_num` 4994 가 양쪽 동일**하다 — 같은 파일을
+  같은 개수로 읽었다는 독립적인 확인이다.
+- **`train_only_targets` 는 2026-09-19 커밋(`95cd26cc`)에서 추가된 키**다
+  (추가 실험 6 — full-param AsFT·Lisa 의 학습 범위를 WSR-Tune 과 맞추려고 만들었다).
+  값이 `None` 이면 `if args.train_only_targets:` 블록을 타지 않아 **아무 동작도 하지 않는다**.
+  애초에 `20_lora_family.sh` 는 이 플래그를 넘기지 않으며, LoRA 는 이미
+  `lora_target_modules` 로 q,k,v,up,down 에 한정돼 있다. 기존 세대에 키가 없는 것은
+  그때 코드에 플래그가 없었기 때문이고, **설정이 달랐던 것이 아니다.**
+- 나머지 19개 키(`base_model` · `lora_r` 16 · `lora_alpha` 16 · `learning_rate` 3e-4 ·
+  `epochs` 3 · `batch_size` 4 · `grad_accum` 4 · `max_length` 1024 · `rho` 1.0 ·
+  `alignment_step` 100 · `finetune_step` 900 · `warmup_ratio` 0.03 · `weight_decay` 0.0 ·
+  `lr_scheduler_type` cosine · `dtype` bf16 …)는 **전부 일치**한다.
+
+**그러면 차이는 어디서 오는가 — 학습의 비결정성이다.**
+`scripts/revision/repro_2026-09/REPORT_safelora_3b_thr0.35_a16.md` 에 이미 측정해 둔 결과가 있다:
+**같은 env·같은 GPU·같은 seed 로 재실행해도 Δ 코사인이 0.53~0.56** 이다(2차–3차 0.543).
+즉 궤적 차이는 라이브러리나 GPU 차이가 아니라 학습 자체에서 나온다.
+
+실제 차이도 그 노이즈 범위 안이다:
+
+| 기법 | ASR (기존 → `_v2`) | GSM8K (기존 → `_v2`) |
+|---|---|---|
+| AsFT | 0.0371 → 0.0372 (**+0.0001**) | 0.7202 → 0.7157 (−0.0045) |
+| Lisa | 0.0424 → 0.0416 (−0.0008) | 0.7134 → 0.7089 (−0.0045) |
+
+ASR 은 0.001 이내, GSM8K 는 0.0045(0.45%p) 다. **박스가 다른 것은 맞지만, 같은 박스에서
+돌려도 이 정도는 움직인다**는 것이 위 재현성 측정의 결론이다.
+
+⚠️ **다만 한 가지는 확인할 수 없었다.** `finetune_config.json` 에 라이브러리 버전이
+기록되지 않아, 기존 세대가 정확히 어떤 transformers/peft/torch 버전에서 돌았는지는
+사후에 알 수 없다. 따라서 "버전 차이의 기여분이 0" 이라고는 말할 수 없고,
+**"설정과 데이터는 동일하며, 관측된 차이는 같은 환경의 재실행 노이즈보다 크지 않다"**
+까지가 근거 있는 진술이다. 향후 실행에는 버전을 config 에 남기는 편이 좋다.
+
 ## H. 실험 2 — 논문 Table 1 의 base 라인 (2026-09-21 완결)
 
 
@@ -1495,7 +1554,7 @@ GSM8K 0.7089 vs 0.7134. ASR 은 0.001 이내, GSM8K 는 0.0045 차이다.
 | 원본 base | [`Llama-2-7b-hf`](https://huggingface.co/meta-llama/Llama-2-7b-hf) | 0.9981 | 1.0000 | 0.9769 | 0.9500 | **0.9812** | 0.1342 |
 | + CB SSFT | [`llama2_7b-base-CB_SSFT-lr3e-5`](https://huggingface.co/kmseong/llama2_7b-base-CB_SSFT-lr3e-5) | 0.0000 | 0.0173 | 0.0673 | 0.3231 | **0.1019** | 0.1425 |
 | + GSM8K FT, 동결 0% | [`llama2_7b-base-gsm8k_ssft_lr3e-5`](https://huggingface.co/kmseong/llama2_7b-base-gsm8k_ssft_lr3e-5) | 0.0077 | 0.6788 | 0.7019 | 0.7104 | **0.5247** | 0.3942 |
-| 동결 10% | [`llama2_7b-base-origspace-freeze-p10-gsm8k-lr3e-5`](https://huggingface.co/kmseong/llama2_7b-base-origspace-freeze-p10-gsm8k-lr3e-5) | 0.0000 | 0.0000 | 0.2135 | 0.4177 | **0.1578** | 0.3889 |
+| 동결 10% | [`llama2_7b-base-origspace-freeze-p10-gsm8k-lr3e-5`](https://huggingface.co/kmseong/llama2_7b-base-origspace-freeze-p10-gsm8k-lr3e-5) | 0.0000 | 0.0000 | 0.2432 | 0.4773 | **0.1801** | 0.3889 |
 | 동결 20% | [`llama2_7b-base-origspace-freeze-p20-gsm8k-lr3e-5`](https://huggingface.co/kmseong/llama2_7b-base-origspace-freeze-p20-gsm8k-lr3e-5) | 0.0000 | 0.0000 | 0.2019 | 0.3969 | **0.1497** | 0.3920 |
 | 동결 30% | [`llama2_7b-base-origspace-freeze-p30-gsm8k-lr3e-5`](https://huggingface.co/kmseong/llama2_7b-base-origspace-freeze-p30-gsm8k-lr3e-5) | 0.0000 | 0.0000 | 0.1865 | 0.3892 | **0.1439** | 0.3874 |
 | 동결 40% | [`llama2_7b-base-origspace-freeze-p40-gsm8k-lr3e-5`](https://huggingface.co/kmseong/llama2_7b-base-origspace-freeze-p40-gsm8k-lr3e-5) | 0.0000 | 0.0000 | 0.1654 | 0.3750 | **0.1351** | 0.3867 |
@@ -1525,6 +1584,133 @@ downstream 학습 자체는 정상 작동한다 — 7B 는 SSFT 단계 0.1425 �
 **되돌림 폭은 lr 에 크게 의존한다.** 7B(lr 3e-5)는 0.1019→0.5247 로 5배 뛰는데 8B(lr 1e-5)는
 0.0373→0.0881 로 2.4배에 그친다. 두 라인의 full-param lr 이 다르므로 **두 모델의 동결 효과
 크기를 직접 비교하면 안 된다.**
+
+---
+
+# 추가 실험 8 (2026-09-21) — AGNews 로 학습한 SEAL · AsFT · Lisa (llama2-7b-chat)
+
+허브에 올라와 있던 agnews 셀 3개를 평가했다. 안전성은 **refusal keyword**
+(HarmBench 4공격 · sys 모드 · `GRADING=hard` · seed 42, completions 새로 생성),
+downstream 은 `agnews_eval/evaluate_agnews_sst2.py` (1k seed42 테스트셋).
+실행: `scripts/revision/_run_agnews_three.sh` + `_run_agnews_acc_only.sh`.
+
+| 방법 | Direct | AutoDAN | PAIR | PAP | **ASR AVG** | **AGNews Acc** | macro-F1 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| SEAL (topp0.8, lr5e-5) | 79.04 | 99.23 | 97.88 | 99.92 | **94.02** ⚠️ | 92.00 | 0.9196 |
+| AsFT (λ=1.0, lr7e-5) | 0.00 | 0.00 | 5.58 | 10.73 | **4.08** | 91.50 | 0.9147 |
+| Lisa (ρ=1.0, lr7e-5) | 0.00 | 0.00 | 6.92 | 11.65 | **4.64** | 90.80 | 0.9076 |
+
+→ **SEAL 은 lr 3e-5 로 다시 학습했다. 아래 「SEAL 재학습 — lr 3e-5」 절을 볼 것**
+  (ASR 94.02 → 6.79, AGNews 92.00 → 92.50).
+
+리포: `kmseong/llama2_7b-chat-CB_SSFT-{seal_agnews_topp0.8_lr5e-5,
+asft_agnews_lambda1.0_lr7e-5, lisa_agnews_rho1.0_lr7e-5}`.
+세 모델 모두 `invalid=0` 이고 downstream 은 정상(90~92%)이다.
+
+## ⚠️ SEAL 의 94.02 는 안전성 수치로 쓸 수 없다
+
+SEAL 은 유해 프롬프트에도 **AGNews 라벨만 출력**한다:
+
+```
+"Sci/Tech \n\n Sci/Tech"                       183회
+"Sci/Tech  Sci/Tech  Sci/Tech  Sci/Tech  "      98회
+"World  Sci/Tech  Sci/Tech  Sci/Tech  Sci"      31회
+```
+
+| 방법 | 라벨만 출력 | keyword 탈옥 | **탈옥 판정 중 라벨만인 비율** |
+|---|---:|---:|---:|
+| SEAL | 3,489 / 4,160 (**83.9%**) | 97.0% | **86.5%** |
+| AsFT | 0 (0.0%) | 7.4% | 0.0% |
+| Lisa | 0 (0.0%) | 8.1% | 0.0% |
+
+**SEAL 의 탈옥 판정 중 86.5% 가 `Sci/Tech` 같은 라벨 출력이다.** 유해 내용을 제공한 것이
+아니라, 거부 문구가 없어서 keyword 가 탈옥으로 센 것이다.
+
+**학습 실패는 아니다** — AGNews 정확도 92.00% 로 셋 중 가장 높다. AGNews 형식에
+과적합되어 **그 외 입력에서 거부 능력을 잃은** 상태다. 어느 쪽이든 94.02 를
+"유해 콘텐츠 제공률"로 읽으면 안 된다.
+
+AsFT·Lisa 는 생성물이 전부 정상 거부문(`"I cannot provide information or guidance..."`)이고
+라벨만 출력한 건이 0건이다.
+
+
+## SEAL 재학습 — lr 3e-5 (2026-09-21 밤)
+
+lr 5e-5 셀이 AGNews 출력 형식에 과적합되어 거부 능력을 잃은 것으로 보였으므로,
+**lr 만 3e-5 로 낮추고 나머지는 Full FT arm 과 동일**하게 다시 학습했다
+(wd 0.01 · warmup 0.1 · cosine · eff.batch 16(4×4) · 3 epoch · max_len 1024 · seed 42 ·
+출발 모델 `kmseong/llama2_7b-chat-Safety-FT-lr5e-5` · SEAL top-p 0.8).
+실행: `scripts/revision/_rerun_seal_agnews_lr3e-5.sh` → `_eval_seal_agnews_lr3e-5.sh`.
+학습 30분(22:19→22:49), 평가 24분.
+
+| | Direct | AutoDAN | PAIR | PAP | **ASR AVG** | **AGNews Acc** | 라벨만 출력 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| SEAL lr5e-5 (기존) | 79.04 | 99.23 | 97.88 | 99.92 | **94.02** | 92.00 | **83.9%** |
+| **SEAL lr3e-5 (신규)** | **0.00** | **0.00** | 12.69 | 14.46 | **6.79** | **92.50** | **0.0%** |
+| (참고) AsFT lr7e-5 | 0.00 | 0.00 | 5.58 | 10.73 | 4.08 | 91.50 | 0.0% |
+| (참고) Lisa lr7e-5 | 0.00 | 0.00 | 6.92 | 11.65 | 4.64 | 90.80 | 0.0% |
+
+**ASR 94.02 → 6.79 (13.8배 감소), downstream 은 92.00 → 92.50 으로 오히려 올랐다.**
+핵심은 **라벨만 출력하는 현상이 83.9% → 0.0% 로 완전히 사라진 것**이다. Direct·AutoDAN 이
+0.00 으로 떨어진 것이 그 직접적인 결과다.
+
+즉 기존 셀의 94.02 는 안전성 붕괴가 아니라 **lr 이 높아 AGNews 출력 형식에 과적합되면서
+거부 능력을 잃은 것**이었고, lr 을 낮추니 downstream 을 유지한 채 안전성이 정상 범위로
+돌아왔다. 남은 6.79 는 PAIR/PAP 에서만 나오며 AsFT(4.08)·Lisa(4.64)와 같은 자릿수다.
+
+### ⚠️ 아직 업로드하지 않았다
+
+학습·평가 시점에 **huggingface.co 가 끊겨 있어** `PUSH_TO_HUB=0` 으로 돌렸다.
+모델은 로컬에만 있다:
+
+```
+outputs/revision_seal_lr3e-5/cb/llama2_7b/agnews/seal   (13 GB)
+```
+
+허브가 복구되면 올릴 것 — 리포명은 `hf_repo_id()` 규칙상
+**`kmseong/llama2_7b-chat-CB_SSFT-seal_agnews_topp0.8_lr3e-5`** 가 된다(손으로 짓지 말 것).
+
+```bash
+# 허브 복구 후
+python scripts/revision/upload_and_prune.py \
+  --cell_dir outputs/revision_seal_lr3e-5/cb/llama2_7b/agnews/seal
+```
+
+⚠️ `upload_and_prune.py` 는 **셀 디렉토리**(`.done` 과 `MODEL_DIR` 이 든 곳)를 받아야 한다 —
+가중치 디렉토리를 주면 "`.done` 이 없다" 며 실패한다(2026-09-13 에 5셀이 이렇게 실패했다).
+여기서는 둘이 같은 경로라 문제없다. 업로드가 끝나면 `models.yaml` 에도 키를 추가해야
+HarmBench 로 재평가할 수 있다.
+
+### 실행 중 걸린 함정
+
+- **`common.sh` 는 `PY=python` 을 그대로 쓴다.** `source scripts/env.sh hb` 없이 부르면
+  S1 이 `ModuleNotFoundError: No module named 'transformers'` 로 즉사한다.
+- **`sft_config.json` 의 `"dataset"` 필드를 믿으면 안 된다.** `--task_data_path` 로 로컬
+  task JSON 을 줘도 config 에는 `args.dataset_name` 의 기본값(`openai/gsm8k`)이 그대로
+  찍힌다(`seal/train_sft.py:234`). 실제로 무엇을 학습했는지는
+  `select_meta.total`(여기서는 **8000** = agnews 8k, gsm8k 는 7473)과
+  로그의 `[sft] selected 6400/8000` 로 확인해야 한다.
+- agnews selector(S1) 산출물은 medqa/arc 만 있었으므로 S1 부터 돌았다
+  (`seal/ckpt/revision/cb/llama2_7b/agnews_selector_softmax.pt` 가 새로 생겼다 —
+  같은 태스크를 다른 lr 로 다시 돌릴 때는 재사용된다).
+- `OUT_ROOT=outputs/revision_seal_lr3e-5` 로 격리했다. `out_dir` 은 하이퍼파라미터를
+  이름에 담지 않으므로 기본 경로에 돌리면 `.done` 때문에 건너뛴다.
+
+## 실행 중 걸린 함정
+
+- **허브(huggingface.co)가 끊겨 있었다.** 이것 하나가 셋을 동시에 막았다:
+  (a) `check_repos_exist.py` 가 `model_info` 에서 무한 대기(3개 확인에 4분+) →
+  `VALIDATE_REPOS=0` 으로 우회, (b) vLLM 이 조합마다 `MaxRetryError` 5회 재시도로 수 분씩
+  정지, (c) `list_models` 조회 타임아웃. 모델이 캐시에 완전히 있으면
+  **`HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1`** 로 돌리는 것이 정답이다 — 재시작 50초 만에
+  GPU 에 13.8GB 가 올라갔다(그 전에는 4MiB).
+- **`evaluate_agnews_sst2.py` 의 인자는 `--task` 다**(`--tasks` 아님). 또
+  `REPO_ROOT = parents[2]` 라 저장소 밖을 가리키고 기본 데이터 경로가
+  `dataset/classification/` 이므로 `--agnews-data` 를 절대경로로 넘겨야 한다.
+  `run_agnews_sst2_eval.sh` 에는 **다른 사용자의 conda python** 이 하드코딩돼 있다.
+- agnews 정확도 평가 자체는 3모델에 **51초**다. 오래 걸린 것은 전부 위 함정 때문이다.
+
+---
 
 ## 운영 기록
 

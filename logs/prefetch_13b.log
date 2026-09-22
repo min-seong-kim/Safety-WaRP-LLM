@@ -1,0 +1,41 @@
+[prefetch] wvnvwn/llama-2-13b-chat-hf-lr5e-5-gsm8k-lr5e-5 (시도 1) 2026-09-21T14:58:35+09:00
+Fetching 15 files:   0%|          | 0/15 [00:00<?, ?it/s]Fetching 15 files:   7%|▋         | 1/15 [00:00<00:09,  1.42it/s]Fetching 15 files:  33%|███▎      | 5/15 [00:57<02:02, 12.21s/it]Fetching 15 files:  40%|████      | 6/15 [01:06<01:43, 11.53s/it]Fetching 15 files: 100%|██████████| 15/15 [01:06<00:00,  4.46s/it]
+[ok] wvnvwn/llama-2-13b-chat-hf-lr5e-5-gsm8k-lr5e-5 /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--wvnvwn--llama-2-13b-chat-hf-lr5e-5-gsm8k-lr5e-5/snapshots/74446b45e987d1fa9f0b616a642fe961bfa57b71
+[prefetch] DONE wvnvwn/llama-2-13b-chat-hf-lr5e-5-gsm8k-lr5e-5
+[prefetch] wvnvwn/llama-2-13b-chat-hf-lr5e-5-safeinstr-0.1 (시도 1) 2026-09-21T14:59:43+09:00
+Fetching 15 files:   0%|          | 0/15 [00:00<?, ?it/s]Fetching 15 files:   7%|▋         | 1/15 [00:00<00:13,  1.05it/s]Fetching 15 files:  33%|███▎      | 5/15 [00:53<01:53, 11.33s/it]Fetching 15 files: 100%|██████████| 15/15 [00:53<00:00,  3.57s/it]
+[ok] wvnvwn/llama-2-13b-chat-hf-lr5e-5-safeinstr-0.1 /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--wvnvwn--llama-2-13b-chat-hf-lr5e-5-safeinstr-0.1/snapshots/92d32979543adf90d278284c3bb238e8afae5f99
+[prefetch] DONE wvnvwn/llama-2-13b-chat-hf-lr5e-5-safeinstr-0.1
+[prefetch] wvnvwn/llama-2-13b-chat-hf-lr5e-5-resta-0.1 (시도 1) 2026-09-21T15:00:37+09:00
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files:  10%|█         | 1/10 [00:00<00:05,  1.51it/s]Fetching 10 files:  20%|██        | 2/10 [00:03<00:13,  1.74s/it]Fetching 10 files:  30%|███       | 3/10 [01:15<03:58, 34.03s/it]Fetching 10 files: 100%|██████████| 10/10 [01:15<00:00,  7.56s/it]
+[ok] wvnvwn/llama-2-13b-chat-hf-lr5e-5-resta-0.1 /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--wvnvwn--llama-2-13b-chat-hf-lr5e-5-resta-0.1/snapshots/ef9c12ff760231d5bbbc0be78afc801412b057d0
+[prefetch] DONE wvnvwn/llama-2-13b-chat-hf-lr5e-5-resta-0.1
+[prefetch] wvnvwn/llama-2-13b-chat-hf-lr5e-5-safedelta-scale0.1 (시도 1) 2026-09-21T15:01:54+09:00
+Fetching 14 files:   0%|          | 0/14 [00:00<?, ?it/s]Fetching 14 files:   7%|▋         | 1/14 [00:00<00:08,  1.56it/s]Fetching 14 files:  29%|██▊       | 4/14 [01:23<03:45, 22.54s/it]Fetching 14 files:  36%|███▌      | 5/14 [01:24<02:28, 16.51s/it]Fetching 14 files:  43%|████▎     | 6/14 [01:31<01:50, 13.77s/it]Fetching 14 files: 100%|██████████| 14/14 [01:31<00:00,  6.53s/it]
+[ok] wvnvwn/llama-2-13b-chat-hf-lr5e-5-safedelta-scale0.1 /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--wvnvwn--llama-2-13b-chat-hf-lr5e-5-safedelta-scale0.1/snapshots/cd63abf752259dc7aae28a39af330efce795cac7
+[prefetch] DONE wvnvwn/llama-2-13b-chat-hf-lr5e-5-safedelta-scale0.1
+[prefetch] wvnvwn/llama-2-13b-chat-hf-gsm8k-sn-tuned-lr5e-5 (시도 1) 2026-09-21T15:03:27+09:00
+Fetching 16 files:   0%|          | 0/16 [00:00<?, ?it/s]Fetching 16 files:  31%|███▏      | 5/16 [00:56<02:05, 11.38s/it]Fetching 16 files:  44%|████▍     | 7/16 [00:59<01:09,  7.68s/it]Fetching 16 files: 100%|██████████| 16/16 [00:59<00:00,  3.71s/it]
+[ok] wvnvwn/llama-2-13b-chat-hf-gsm8k-sn-tuned-lr5e-5 /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--wvnvwn--llama-2-13b-chat-hf-gsm8k-sn-tuned-lr5e-5/snapshots/43aeba957d13c677431ba9bf7c8f0f6b19247063
+[prefetch] DONE wvnvwn/llama-2-13b-chat-hf-gsm8k-sn-tuned-lr5e-5
+[prefetch] wvnvwn/llama-2-13b-chat-hf-gsm8k-rsn-tuned-lr5e-5 (시도 1) 2026-09-21T15:04:30+09:00
+Fetching 16 files:   0%|          | 0/16 [00:00<?, ?it/s]Fetching 16 files: 100%|██████████| 16/16 [00:00<00:00, 8766.67it/s]
+[ok] wvnvwn/llama-2-13b-chat-hf-gsm8k-rsn-tuned-lr5e-5 /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--wvnvwn--llama-2-13b-chat-hf-gsm8k-rsn-tuned-lr5e-5/snapshots/3a3dc7670d35df26239cdbaeafa89c1f8a4a8efd
+[prefetch] DONE wvnvwn/llama-2-13b-chat-hf-gsm8k-rsn-tuned-lr5e-5
+[prefetch] wvnvwn/llama-2-13b-chat-hf-WaRP-lr5e-5 (시도 1) 2026-09-21T15:04:32+09:00
+Fetching 14 files:   0%|          | 0/14 [00:00<?, ?it/s]Fetching 14 files: 100%|██████████| 14/14 [00:00<00:00, 130780.08it/s]
+[ok] wvnvwn/llama-2-13b-chat-hf-WaRP-lr5e-5 /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--wvnvwn--llama-2-13b-chat-hf-WaRP-lr5e-5/snapshots/32bbb3e82b3551d0f2b8e7aedc0ae33e3940fca5
+[prefetch] DONE wvnvwn/llama-2-13b-chat-hf-WaRP-lr5e-5
+[prefetch] kmseong/llama2_13b-chat-CB_SSFT-seal_gsm8k_topp0.8_lr5e-5 (시도 1) 2026-09-21T15:04:34+09:00
+Fetching 15 files:   0%|          | 0/15 [00:00<?, ?it/s]Fetching 15 files:  27%|██▋       | 4/15 [02:14<06:10, 33.64s/it]Fetching 15 files:  53%|█████▎    | 8/15 [02:17<01:39, 14.28s/it]Fetching 15 files: 100%|██████████| 15/15 [02:17<00:00,  9.17s/it]
+[ok] kmseong/llama2_13b-chat-CB_SSFT-seal_gsm8k_topp0.8_lr5e-5 /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--kmseong--llama2_13b-chat-CB_SSFT-seal_gsm8k_topp0.8_lr5e-5/snapshots/6333716ee49fe3e8f9b259924d0c1222202f8523
+[prefetch] DONE kmseong/llama2_13b-chat-CB_SSFT-seal_gsm8k_topp0.8_lr5e-5
+[prefetch] kmseong/llama2_13b-chat-CB_SSFT-asft_gsm8k_lambda1.0_a16_lr3e-4 (시도 1) 2026-09-21T15:06:53+09:00
+Fetching 14 files:   0%|          | 0/14 [00:00<?, ?it/s]Fetching 14 files:  57%|█████▋    | 8/14 [00:14<00:10,  1.77s/it]Fetching 14 files: 100%|██████████| 14/14 [00:14<00:00,  1.01s/it]
+[ok] kmseong/llama2_13b-chat-CB_SSFT-asft_gsm8k_lambda1.0_a16_lr3e-4 /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--kmseong--llama2_13b-chat-CB_SSFT-asft_gsm8k_lambda1.0_a16_lr3e-4/snapshots/b7ae8ee4eb4a29ce4492e97b1f62616c3d5f3097
+[prefetch] DONE kmseong/llama2_13b-chat-CB_SSFT-asft_gsm8k_lambda1.0_a16_lr3e-4
+[prefetch] kmseong/llama2_13b-chat-CB_SSFT-lisa_gsm8k_rho1.0_a16_lr3e-4 (시도 1) 2026-09-21T15:07:09+09:00
+Fetching 15 files:   0%|          | 0/15 [00:00<?, ?it/s]Fetching 15 files: 100%|██████████| 15/15 [00:00<00:00, 71250.92it/s]
+[ok] kmseong/llama2_13b-chat-CB_SSFT-lisa_gsm8k_rho1.0_a16_lr3e-4 /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--kmseong--llama2_13b-chat-CB_SSFT-lisa_gsm8k_rho1.0_a16_lr3e-4/snapshots/21027d867130d9f047a07188869327a470d8396f
+[prefetch] DONE kmseong/llama2_13b-chat-CB_SSFT-lisa_gsm8k_rho1.0_a16_lr3e-4
+PREFETCH_13B_DONE 2026-09-21T15:07:12+09:00

@@ -1,0 +1,101 @@
+[SKIP] utility 코퍼스가 이미 있다: sn_tune/corpus/wikipedia_utility_1000.json
+
+===============================================================
+ llama2_7b   출발 모델: meta-llama/Llama-2-7b-chat-hf
+   safety top-k 1200/200   utility top-k 300/50
+===============================================================
+
+───────────────────────────────────────────────────────────────
+[RUN ] [1] Phase 1 basis (train.py)
+       /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/bin/python train.py --phase 1 --phase0_model_dir meta-llama/Llama-2-7b-chat-hf --safety_dataset circuit_breakers --circuit_breakers_path data/circuit_breakers_train.json --circuit_breakers_samples_phase1 4994 --basis_save_dtype bfloat16 --batch_size 2 --max_length 1024 --layer_type ffn_up\,ffn_down\,attn_q\,attn_k\,attn_v --target_layers all --output_dir outputs/wsr_sn_tune/llama2_7b/phase1 --log_dir outputs/wsr_sn_tune/llama2_7b/phase1/logs --device cuda --dtype bfloat16 --seed 42 --no_wandb
+───────────────────────────────────────────────────────────────
+[2026-09-22 15:33:29] [safety_warp] [INFO] ======================================================================
+[2026-09-22 15:33:29] [safety_warp] [INFO] Safety-WaRP-LLM (Fixed - 원본 FSCIL-WaRP 방식)
+[2026-09-22 15:33:29] [safety_warp] [INFO] ======================================================================
+[2026-09-22 15:33:29] [safety_warp] [INFO] Phase: 1
+[2026-09-22 15:33:29] [safety_warp] [INFO] Model: None
+[2026-09-22 15:33:29] [safety_warp] [INFO] Layer types: ffn_up,ffn_down,attn_q,attn_k,attn_v
+[2026-09-22 15:33:29] [safety_warp] [INFO] Target layers: all
+[2026-09-22 15:33:29] [safety_warp] [INFO] ======================================================================
+[2026-09-22 15:33:30] [safety_warp] [INFO] ======================================================================
+[2026-09-22 15:33:30] [safety_warp] [INFO] Starting Phase 1: Basis Construction
+[2026-09-22 15:33:30] [safety_warp] [INFO] ======================================================================
+[2026-09-22 15:33:31] [safety_warp] [INFO] [Phase 1] Token-wise basis (default)
+[2026-09-22 15:33:31] [safety_warp] [INFO] [PROFILE] ▶ Phase 1 / load_model 시작
+[2026-09-22 15:33:38] [safety_warp] [INFO] Loading model: meta-llama/Llama-2-7b-chat-hf
+`torch_dtype` is deprecated! Use `dtype` instead!
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [01:22<01:22, 82.59s/it]Loading checkpoint shards: 100%|██████████| 2/2 [01:51<00:00, 51.22s/it]Loading checkpoint shards: 100%|██████████| 2/2 [01:51<00:00, 55.93s/it]
+[2026-09-22 15:35:31] [safety_warp] [INFO] ✓ Model loaded successfully
+[2026-09-22 15:35:31] [safety_warp] [INFO]   - Total parameters: 6,738,415,616
+[2026-09-22 15:35:31] [safety_warp] [INFO]   - Model device: cuda:0
+[2026-09-22 15:35:31] [safety_warp] [INFO]   - Model dtype: torch.bfloat16
+[2026-09-22 15:35:31] [safety_warp] [INFO]   - Number of layers: 32
+[2026-09-22 15:35:31] [safety_warp] [INFO]   - Sample layer structure:
+[2026-09-22 15:35:31] [safety_warp] [INFO]     - MLPdown_proj: Linear(in_features=11008, out_features=4096, bias=False)
+[2026-09-22 15:35:31] [safety_warp] [INFO]     - MLPup_proj: Linear(in_features=4096, out_features=11008, bias=False)
+[2026-09-22 15:35:31] [safety_warp] [INFO]     - Self-Attention q_proj: Linear(in_features=4096, out_features=4096, bias=False)
+[2026-09-22 15:35:31] [safety_warp] [INFO]     - Self-Attention k_proj: Linear(in_features=4096, out_features=4096, bias=False)
+[2026-09-22 15:35:31] [safety_warp] [INFO]     - Self-Attention v_proj: Linear(in_features=4096, out_features=4096, bias=False)
+You are using the default legacy behaviour of the <class 'transformers.models.llama.tokenization_llama.LlamaTokenizer'>. This is expected, and simply means that the `legacy` (previous) behavior will be used so nothing changes for you. If you want to use the new behaviour, set `legacy=False`. This should only be set if you understand what it means, and thoroughly read the reason why this was added as explained in https://github.com/huggingface/transformers/pull/24565 - if you loaded a llama tokenizer from a GGUF file you can ignore this message
+[2026-09-22 15:35:31] [safety_warp] [ERROR] Failed to load model: not a string
+Traceback (most recent call last):
+  File "/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/models/phase1_basis.py", line 224, in load_model
+    self.tokenizer = AutoTokenizer.from_pretrained(
+  File "/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/transformers/models/auto/tokenization_auto.py", line 1175, in from_pretrained
+    return tokenizer_class_fast.from_pretrained(pretrained_model_name_or_path, *inputs, **kwargs)
+  File "/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/transformers/tokenization_utils_base.py", line 2113, in from_pretrained
+    return cls._from_pretrained(
+  File "/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/transformers/tokenization_utils_base.py", line 2151, in _from_pretrained
+    slow_tokenizer = (cls.slow_tokenizer_class)._from_pretrained(
+  File "/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/transformers/tokenization_utils_base.py", line 2359, in _from_pretrained
+    tokenizer = cls(*init_inputs, **init_kwargs)
+  File "/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/transformers/models/llama/tokenization_llama.py", line 171, in __init__
+    self.sp_model = self.get_spm_processor(kwargs.pop("from_slow", False))
+  File "/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/transformers/models/llama/tokenization_llama.py", line 198, in get_spm_processor
+    tokenizer.Load(self.vocab_file)
+  File "/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/sentencepiece/__init__.py", line 961, in Load
+    return self.LoadFromFile(model_file)
+  File "/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/sentencepiece/__init__.py", line 316, in LoadFromFile
+    return _sentencepiece.SentencePieceProcessor_LoadFromFile(self, arg)
+TypeError: not a string
+[2026-09-22 15:35:31] [safety_warp] [INFO] [PROFILE] ■ Phase 1 / load_model failed | time=00:02:00 (119.6s) | torch_alloc_peak=12.55GB | torch_reserved_peak=12.57GB | device_peak=13.15GB
+[2026-09-22 15:35:31] [safety_warp] [INFO] ==============================================================================
+[2026-09-22 15:35:31] [safety_warp] [INFO] [PROFILE] Phase 1 리소스 요약 (시간 / VRAM)
+[2026-09-22 15:35:31] [safety_warp] [INFO] ==============================================================================
+[2026-09-22 15:35:31] [safety_warp] [INFO] stage                               time   torch_alloc   torch_resv     device  device-base
+[2026-09-22 15:35:31] [safety_warp] [INFO] -------------------------------------------------------------------------------------------
+[2026-09-22 15:35:31] [safety_warp] [INFO] load_model (failed)             00:02:00        12.55G       12.57G     13.15G       12.54G
+[2026-09-22 15:35:31] [safety_warp] [INFO] -------------------------------------------------------------------------------------------
+[2026-09-22 15:35:31] [safety_warp] [INFO] TOTAL                           00:02:02        12.55G       12.57G     13.18G       12.57G
+[2026-09-22 15:35:31] [safety_warp] [INFO]   GPU 0 (NVIDIA B200): capacity 178.4GB
+[2026-09-22 15:35:31] [safety_warp] [INFO]   device baseline (프로파일 시작 시점 사용량, 타 프로세스 포함): 0.61GB
+[2026-09-22 15:35:31] [safety_warp] [INFO]   torch_alloc/torch_resv = 이 프로세스의 torch allocator 기준, device = nvidia-smi 기준 전체 사용량
+[2026-09-22 15:35:31] [safety_warp] [INFO] ==============================================================================
+[2026-09-22 15:35:31] [safety_warp] [INFO] [PROFILE] 요약 저장: outputs/wsr_sn_tune/llama2_7b/phase1/logs/phase1_20260922_153329_profile.json
+Traceback (most recent call last):
+  File "/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/train.py", line 702, in <module>
+    main()
+  File "/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/train.py", line 678, in main
+    run_phase1(args, logger, profiler)
+  File "/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/train.py", line 422, in run_phase1
+    builder.load_model()
+  File "/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/models/phase1_basis.py", line 224, in load_model
+    self.tokenizer = AutoTokenizer.from_pretrained(
+  File "/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/transformers/models/auto/tokenization_auto.py", line 1175, in from_pretrained
+    return tokenizer_class_fast.from_pretrained(pretrained_model_name_or_path, *inputs, **kwargs)
+  File "/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/transformers/tokenization_utils_base.py", line 2113, in from_pretrained
+    return cls._from_pretrained(
+  File "/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/transformers/tokenization_utils_base.py", line 2151, in _from_pretrained
+    slow_tokenizer = (cls.slow_tokenizer_class)._from_pretrained(
+  File "/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/transformers/tokenization_utils_base.py", line 2359, in _from_pretrained
+    tokenizer = cls(*init_inputs, **init_kwargs)
+  File "/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/transformers/models/llama/tokenization_llama.py", line 171, in __init__
+    self.sp_model = self.get_spm_processor(kwargs.pop("from_slow", False))
+  File "/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/transformers/models/llama/tokenization_llama.py", line 198, in get_spm_processor
+    tokenizer.Load(self.vocab_file)
+  File "/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/sentencepiece/__init__.py", line 961, in Load
+    return self.LoadFromFile(model_file)
+  File "/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/sentencepiece/__init__.py", line 316, in LoadFromFile
+    return _sentencepiece.SentencePieceProcessor_LoadFromFile(self, arg)
+TypeError: not a string
+=== EXIT rc=1 ===

@@ -1,0 +1,16 @@
+[INFO] 원본 환경: hb -> /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb
+[INFO] 'hb' -> 'hb_sn' 복제 중 (수십 GB, 수 분 걸린다) ...
+
+CondaToSNonInteractiveError: Terms of Service have not been accepted for the following channels. Please accept or remove them before proceeding:
+    - https://repo.anaconda.com/pkgs/main
+    - https://repo.anaconda.com/pkgs/r
+
+To accept these channels' Terms of Service, run the following commands:
+    conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main
+    conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
+
+For information on safely removing channels from your conda configuration,
+please see the official documentation:
+
+    https://www.anaconda.com/docs/tools/working-with-conda/channels
+

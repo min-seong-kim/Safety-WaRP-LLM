@@ -266,11 +266,23 @@ class Phase3OriginalSpaceMaskedLearner(Phase3IncrementalLearner):
         data_collator = DataCollatorForCausalLMWithPadding(self.tokenizer)
         self.model.train()
 
-        restore_callback = OriginalSpaceMaskRestoreCallback(self.frozen_weight_specs)
-        self.logger.info(
-            f"[OriginalSpaceMaskRestoreCallback] registered {len(self.frozen_weight_specs)} "
-            f"param tensors for post-step weight-decay restore"
-        )
+        # ORIGSPACE_NO_RESTORE=1 이면 복원 콜백을 달지 않는다 — gradient hook 만으로 동결한다.
+        # 그 경우 AdamW 의 weight decay / 모멘텀이 mask=1 위치를 조금씩 움직이므로 **진짜 동결이
+        # 아니다**. 논문 Table 1(base) 의 옛 수치를 재현하려는 ablation 전용이며, 기본값(미설정)은
+        # 기존 동작 그대로다.
+        _no_restore = os.environ.get("ORIGSPACE_NO_RESTORE", "0") == "1"
+        restore_callback = None if _no_restore else \
+            OriginalSpaceMaskRestoreCallback(self.frozen_weight_specs)
+        if _no_restore:
+            self.logger.warning(
+                "[OriginalSpaceMaskRestoreCallback] ORIGSPACE_NO_RESTORE=1 — 복원 콜백 비활성화. "
+                "gradient hook 만 적용되며 mask=1 위치가 weight decay 로 드리프트한다(진짜 동결 아님)."
+            )
+        else:
+            self.logger.info(
+                f"[OriginalSpaceMaskRestoreCallback] registered {len(self.frozen_weight_specs)} "
+                f"param tensors for post-step weight-decay restore"
+            )
 
         trainer = Trainer(
             model=self.model,
@@ -278,7 +290,7 @@ class Phase3OriginalSpaceMaskedLearner(Phase3IncrementalLearner):
             train_dataset=self.dataset,
             data_collator=data_collator,
             tokenizer=self.tokenizer,
-            callbacks=[restore_callback],
+            callbacks=([] if restore_callback is None else [restore_callback]),
         )
 
         if phase3_dataset == 'safety':

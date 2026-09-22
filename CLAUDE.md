@@ -98,26 +98,82 @@ checkpoint's `metadata.json`.
 names: `down_proj`, `up_proj`, `q_proj`, `k_proj`, `v_proj`). `--target_layers` accepts `all`, `early`, `middle`,
 `late`, `last`, a single index (`31`), or a range (`0-5`).
 
-## Alternative method: SN-Tune (`sn_tune/`)
+## (R)SN-Tune line and its WaRP counterpart (`sn_tune/`)
 
-A separate, self-contained baseline/comparison method ("Safety-Neuron Tune"), runnable as a module:
+Produces the paper's **Table 3** (`tab:baseline_plus_warp`) rows for SN-Tune / RSN-Tune and their
+`+ WSR-Tune` versions. Four arms, all driven from this one package — full docs in
+**`sn_tune/README.md`**:
+
+| arm | space | selects | trains (then freezes downstream) |
+|---|---|---|---|
+| SN-Tune | original | `N_safe` | safety neurons only |
+| RSN-Tune | original | `N_robust = N_safe \ N_foundation` | critical neurons only |
+| WSR-SN-Tune | WaRP | safety **columns** of `basis_coeff` | those columns only |
+| WSR-RSN-Tune | WaRP | critical columns | those columns only |
 
 ```bash
-python -m sn_tune.run --model_name <hf> --basis_dir <phase1_basis> \
-    --dataset_file ./data/circuit_breakers_train.json --output_dir ./warp_sn_output
+bash sn_tune/scripts/run_sn_rsn_gsm8k.sh        # original space, 7B/13B × GSM8K
+bash sn_tune/scripts/run_wsr_sn_rsn_gsm8k.sh    # WaRP space
+DRY_RUN=1 / STOP_AFTER_NEURONS=1 / MODELS=... / ARMS="rsn"   supported; both resumable via `.done`
 ```
 
-Pipeline: Convert layers to `LinearSNWaRP` (`C = W @ U`) → detect top-k safety coordinates by accumulated
-`|∂L/∂C|` → tune only those coordinates → restore to `nn.Linear` (`W_final = C @ U.T`, exact because `U` is
-orthonormal). Components: `module.py`, `detect.py`, `run.py`.
+`sn_tune/` is **self-contained as of 2026-09-22** — the external `Safety-Neuron/neuron_detection`
+tree is no longer needed. Detection, tuning, the patched modeling files, and the conda-env setup
+all live here.
 
-The older WaRP-SN variant lives in the same package: `warp_sn_detection.py` / `warp_sn_tune.py`
-(both import `models.warp_modules`), driven by `run_warp_sn_pipeline.py`
-(`scripts/run_warp_sn.sh`) and `finetune_downstream_freeze_warp_sn.py`
-(`scripts/run_downstream_freeze_warp_sn.sh`). Both entry points put the repo root on `sys.path`
-themselves, so `python sn_tune/run_warp_sn_pipeline.py …` works from the repo root. The per-task
-SN fine-tuners stay with their eval harnesses (`mbpp_eval/finetune_mbpp_freeze_sn.py`,
-`mmlu_eval/finetune_mmlu_freeze_sn.py`).
+**Two conda envs, and mixing them silently produces empty results.** Original-space detection
+(`detect_original.py`) reads `_last_*_score` tensors stashed by a **patched** `transformers`;
+training must use the **stock** one. `bash sn_tune/setup_hb_sn.sh` clones `hb` → `hb_sn` and
+patches only the clone (idempotent; backs the stock files up as `.orig` once; never touches `hb`).
+The patched files are vendored in `sn_tune/transformers_patch/` with sha256s and the known
+version-drift notes in `PATCH_NOTES.md`. The WaRP-space arms need **no** patch — that detector
+computes its scores from its own forward hooks.
+
+- **Detection swallows its own failures.** Every prompt runs inside `try/except`, so a 100%-failure
+  run still exits 0 and writes `{"0": [], ...}` for all five sections; the first real error surfaces
+  hours later as `ValueError: optimizer got an empty parameter list`. `detect_original.py` now
+  verifies the patch *before* loading the model and refuses to finish on an empty result;
+  `sn_tune/neuron_file.assert_nonempty` is the shared guard.
+- **Neuron file = 5 lines, and the order is the contract**: `ffn_up, ffn_down, q, k, v`, assigned by
+  line position, never by the keys in the file. Unknown keys are skipped silently, so a mis-keyed
+  dict counts as zero rather than erroring. Both spaces share this format — but original-space
+  indices are weight **rows** (output neurons) and WaRP indices are `basis_coeff` **columns** (basis
+  directions), so never subtract one space's file from the other's (`--space` records which).
+- **The freeze directions are deliberately asymmetric.** `sn_tune_original.py` freezes everything and
+  re-enables safety rows with a keep-mask; `finetune_freeze_sn.py` trains everything, zeroes safety
+  gradients, **and** restores those weights after each optimizer step — needed because AdamW's
+  decoupled weight decay moves parameters regardless of the gradient hook. The tuner has no such
+  callback (kept as in the original, to match the already-published checkpoints).
+- **Saved dirs get a `_lr<lr>_<ts>` / `_<ts>` suffix**, so `--output_dir` is not where the model
+  lands. Use `--no_timestamp_suffix` or `--model_dir_file` (the drivers use the latter).
+- Driver defaults match the published 7B/13B RSN models' `finetune_config.json` exactly (lr 5e-5,
+  3 ep, 4×4, max_len 1024, wd 0.01, warmup 0.1, cosine, bf16) — the same operating point as WaRP
+  Phase 3.
+- **top-k differs between safety and utility, and per model** — recovered from the original run logs
+  (2026-09-22). Llama-2-7B-chat: safety **1200/200** on circuit_breakers 4994 → 12,998 neurons
+  (0.956% of neurons, **1.135% of parameters**); utility **300/50** on **Wikipedia** 1000 docs →
+  1,826; critical → 11,329 (0.967% of params). Llama-2-13B-chat: 1200/200 gave only 0.743%, so it
+  was redone at **1800/300** → 0.958%. `300/50` was the house default for utility across every model
+  (7B chat/base, Llama-3.1-8B, Qwen2.5-32B); only safety was scaled up with model size. The
+  foundation corpus is **Wikipedia, never Alpaca** — `foundation_neuron_detection.py` exists and also
+  uses Wikipedia, but with a different algorithm (global `--ffn_active_fraction`, no patch needed)
+  and was not what produced these files.
+- **Detection is cheap: ~4 min for 4994 prompts on 7B, ~5 min for 1000 Wikipedia docs.** Calibrating
+  top-k by running 2–3 times is the intended workflow (the 13B logs show exactly that). The two
+  reported percentages differ — the paper's "≤1%" is the **parameter** one, not the neuron one.
+- **The published checkpoints start from the plain chat model, not an SSFT one.** All 17 SN-Tune runs
+  in the logs used `meta-llama/Llama-2-{7b,13b}-chat-hf` / `Llama-3.2-3B-Instruct`. That is by
+  design — SN-Tune *is* the safety-alignment step, so it replaces SSFT. Drivers default to plain
+  chat to match. **This makes the start point differ from Table 3's other arms** (SafeInstr / SEAL /
+  WSR-Tune all start from `kmseong/llama2_7b-chat-Safety-FT-lr5e-5`); footnote it, or override with
+  `START_<model>`.
+
+Also in the package, a separate line: `python -m sn_tune.run` converts layers to `LinearSNWaRP`
+(`C = W @ U`), detects top-k safety coordinates by accumulated `|∂L/∂C|`, tunes only those, and
+restores to `nn.Linear` (`W_final = C @ U.T`, exact because `U` is orthonormal) —
+`module.py`, `detect.py`, `run.py`. The per-task SN fine-tuners stay with their eval harnesses
+(`mbpp_eval/finetune_mbpp_freeze_sn.py`, `mmlu_eval/finetune_mmlu_freeze_sn.py`).
+`python -m sn_tune.test_neuron_file` checks the format/set logic without a GPU.
 
 ## LoRA line: WSR-LoRA and friends (`finetune_gsm8k_lora.py`)
 

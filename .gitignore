@@ -171,3 +171,12 @@ job_*.sh
 
 # Wikipedia dumps
 wikipedia_cache/
+# sn_tune 생성물 — 검출된 뉴런 파일과 코퍼스 덤프는 커밋하지 않는다.
+# (transformers_patch/ 의 패치본은 반대로 **반드시 추적**한다. 그게 이 패키지를
+#  외부 Safety-Neuron 디렉토리 없이 자립시키는 핵심이다.)
+sn_tune/output_neurons/
+sn_tune/output_neurons_warp/
+sn_tune/corpus/
+sn_tune/cache/
+.transformers_patched/
+sn_tune/output_neurons_warp_row/

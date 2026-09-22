@@ -59,10 +59,10 @@ We propose \textbf{WSR-Tune}, a \uline{W}eight \uline{S}pace \uline{R}eparameter
 \label{sec:introduction}
 
 
-Large Language Models (LLMs) are increasingly being deployed in real-world settings where safety is critical~\citep{trustllm}. As their capabilities continue to advance, LLMs are assuming important roles across diverse domains such as healthcare, education, finance, and software engineering~\citep{bloomberggptl, chatgpt4good, gptcode, swebench}. Without adequate safety tuning, LLMs can provide harmful assistance, violate policies, and exhibit unsafe behavior at scale~\citep{chan0park}. Ensuring that these models remain helpful while consistently refusing harmful or disallowed requests has therefore become a central challenge in modern LLM development.
+Large Language Models (LLMs) are increasingly being deployed in real-world settings where safety is critical~\citep{trustllm}. As their capabilities continue to advance, LLMs are expected to play important roles across diverse domains such as healthcare, education, and software engineering~\citep{bloomberggptl, chatgpt4good, gptcode, swebench}. Without adequate safety tuning, LLMs can provide harmful assistance, violate policies, and exhibit unsafe behavior at scale~\citep{chan0park}. Ensuring that these models remain helpful while consistently refusing harmful or disallowed requests has therefore become a central challenge in modern LLM development.
 
 
-In practice, LLM deployment typically involves \textcolor{purple}{instruction and/or safety tuning of a base model, followed by adaptation to downstream tasks, domains, or user-specific objectives~\citep{ouyang2022training}.} However, such downstream adaptation can degrade previously \textcolor{purple}{learned safety behaviors~\citep{lisa}.} %기존 문장: However, such downstream adaptation can degrade previously learned safety behaviors, making it difficult to maintain safety throughout the model 30 life-cycle~\citep{huang2024lisa}.
+In practice, LLM deployment typically involves multiple post-training stages: a base model is first improved through instruction tuning and/or safety tuning, and is then further adapted to user-specific downstream tasks~\citep{ouyang2022training}. However, such downstream adaptation can degrade previously learned safety behaviors~\citep{lisa}. %기존 문장: However, such downstream adaptation can degrade previously learned safety behaviors, making it difficult to maintain safety throughout the model 30 life-cycle~\citep{huang2024lisa}.
 This issue becomes more critical as attempts to misuse LLMs have become increasingly sophisticated~\citep{yu2025infecting, li2025commercialllmagentsvulnerable, yang2024watch}. Recent work has introduced a wide range of jailbreak strategies, including manually crafted prompts~\citep{manual_prompt}, automated prompt optimization~\citep{advbench, autodan}, adversarial fine-tuning~\citep{adv_finetuning, shadow_finetuning}, and other adaptive attacks~\citep{pair, pap, liar} designed to elicit harmful or policy-violating outputs even from safety-tuned models~\citep{jailbroken}. These threats suggest that safety is an objective that must be preserved throughout model adaptation, deployment, and continual improvement.
 
 
@@ -71,7 +71,7 @@ This issue becomes more critical as attempts to misuse LLMs have become increasi
 
 %\kms{기존 논문에서는 baseline 기법들이 많이 없어서 나열하면서 설명했지만 추가된 baseline까지 모두 추가하게 되면 너무 분량이 많아지고 이미 같은 내용을 related work에서 설명하여 safety method의 종류가 무엇이 있는지 나열 후 이후 related workd에서 disccusion하겠다고 언급했습니다.}
 
-A central challenge in LLM fine-tuning is thus preserving safety during downstream adaptation\textcolor{purple}{, motivating a growing body of safety-preserving methods. \emph{Data- and optimization-based methods} incorporate safety supervision or select safety-compatible training data to guide downstream optimization~\citep{safeInstr,lisa,seal}. \emph{Parameter- and update-constrained methods} protect safety-relevant components or restrict update directions to limit safety degradation~\citep{sn-tune,asft,safegrad}. \emph{Low-rank and post-hoc model-space methods} constrain low-rank updates or modify fine-tuned weights to preserve or restore safety~\citep{safe-lora,salora,safe-delta,Resta}. These approaches can partially preserve or recover safety, as discussed in Section~\ref{sec:related}.}
+A central challenge in LLM fine-tuning is thus preserving safety during downstream adaptation, motivating a growing body of safety-preserving methods. \emph{Data- and optimization-based methods} incorporate safety supervision or select safety-compatible training data to guide downstream optimization~\citep{safeInstr,lisa,seal}. \emph{Parameter- and update-constrained methods} protect safety-relevant components or restrict update directions to limit safety degradation~\citep{sn-tune,asft,safegrad}. \emph{Low-rank and post-hoc model-space methods} constrain low-rank updates or modify fine-tuned weights to preserve or restore safety~\citep{safe-lora,salora,safe-delta,Resta}. These methods show that safety can be partially preserved or recovered during downstream adaptation.%These approaches can partially preserve or recover safety, as discussed in Section~\ref{sec:related}.}
 
 
 
@@ -88,59 +88,60 @@ In this representation, safety-related information is not localized to a specifi
 
 
 % Llama-2-7b-base model
-% \begin{wraptable}{r}{0.42\textwidth}
-% \vspace{-1.2\baselineskip}
-% \centering
-% \small
-% \caption{Impact of freezing safety-relevant parameters on safety preservation after downstream fine-tuning. 
-% The reported values are averaged over Direct, AutoDAN, PAIR, and PAP attacks using safety-tuned Llama-2-7B.}
-% \vspace{-0.5em}
-% \label{tab:basis_rotation_motivation}
-% \begin{tabular}{lc}
-% \toprule
-% \textbf{Fine-tuning setting} & \textbf{Safety $\downarrow$ } \\
-% \midrule
-% %Before downstream FT      & 0.1022 \\
-% % Before FT     & 52.50 \\
-% Before FT     & 10.19 \\
-% FT (10\% frozen)         & 23.04 \\
-% % FT (20\% frozen)         & 7.37\\
-% FT (30\% frozen)         & 16.01\\
-% FT (50\% frozen)         & 12.85 \\
-% %FT (90\% frozen)         & 0.0991 \\
-% WSR-Tune (10\% frozen)   & \textbf{11.32}\\
-% \bottomrule
-% \end{tabular}
-% \vspace{-1.5\baselineskip}
-% \end{wraptable}
-
-% Llama-2-7b-chat model
 \begin{wraptable}{r}{0.42\textwidth}
-\vspace{-1.2\baselineskip}
+\vspace{-1.3\baselineskip}
 \centering
 \small
 \caption{Impact of freezing safety-relevant parameters on safety preservation after downstream fine-tuning. 
-The values are averaged over Direct, AutoDAN, PAIR, and PAP attacks using Llama-2-7B-Chat.}
+The reported values are averaged over Direct, AutoDAN, PAIR, and PAP attacks using safety-tuned Llama-2-7B.}
 \vspace{-0.5em}
 \label{tab:basis_rotation_motivation}
 \begin{tabular}{lc}
 \toprule
 \textbf{Fine-tuning setting} & \textbf{Safety $\downarrow$ } \\
 \midrule
-Before FT     & 5.68 \\
-% After FT (No frozen)     & 20.78 \\
-FT (10\% frozen)         & 9.17 \\
-FT (20\% frozen)         & 7.70\\
-% FT (30\% frozen)         & 6.94\\
-FT (50\% frozen)         & 6.92 \\
-WSR-Tune (10\% frozen)   & \textbf{6.90}\\
+%Before downstream FT      & 0.1022 \\
+% Before FT     & 52.50 \\
+FT (0\% frozen)     & 52.47 \\
+FT (10\% frozen)         & 18.01 \\
+% FT (20\% frozen)         & 14.97\\
+FT (30\% frozen)         & 14.39\\
+% FT (40\% frozen)         & 13.51\\
+FT (50\% frozen)         & 13.70 \\
+%FT (90\% frozen)         & 0.0991 \\
+WSR-Tune (10\% frozen)   & \textbf{11.32}\\
 \bottomrule
 \end{tabular}
-\vspace{-1.5\baselineskip}
+\vspace{-1.4\baselineskip}
 \end{wraptable}
 
+% % Llama-2-7b-chat model
+% \begin{wraptable}{r}{0.42\textwidth}
+% \vspace{-1.3\baselineskip}
+% \centering
+% \small
+% \caption{Impact of freezing safety-relevant parameters on safety preservation after downstream fine-tuning. 
+% The values are averaged over Direct, AutoDAN, PAIR, and PAP attacks using Llama-2-7B-Chat.}
+% \vspace{-0.5em}
+% \label{tab:basis_rotation_motivation}
+% \begin{tabular}{lc}
+% \toprule
+% \textbf{Fine-tuning setting} & \textbf{Safety $\downarrow$ } \\
+% \midrule
+% Before FT     & 5.68 \\
+% % After FT (No frozen)     & 20.78 \\
+% FT (10\% frozen)         & 9.17 \\
+% FT (20\% frozen)         & 7.70\\
+% % FT (30\% frozen)         & 6.94\\
+% FT (50\% frozen)         & 6.92 \\
+% WSR-Tune (10\% frozen)   & \textbf{6.90}\\
+% \bottomrule
+% \end{tabular}
+% \vspace{-1.4\baselineskip}
+% \end{wraptable}
 
-\textcolor{purple}{Table~\ref{tab:basis_rotation_motivation} empirically demonstrates this limitation. Full-parameter adaptation on a downstream task severely degrades safety, while freezing 10\%, 20\%, and 50\% of the original-space parameters only partially alleviates this degradation.}
+
+Table~\ref{tab:basis_rotation_motivation} empirically demonstrates this limitation. Full-parameter adaptation on a downstream task severely degrades safety, while freezing 10\%, 30\%, and 50\% of the original-space parameters only partially alleviates this degradation.
 In contrast, applying the same freeze-and-adapt procedure after reparameterization preserves safety much more effectively while maintaining sufficient capacity for downstream adaptation. These results suggest that robust safety preservation cannot be achieved solely by selecting parameters to freeze in the original space; rather, it requires reparameterizing the model so that safety-preserving and task-adaptive directions are more easily disentangled.
 We thus pose the following key question: 
 
@@ -156,9 +157,9 @@ where ${\phi_{ij}}$ indicates a new basis and ${\tilde{w}_{ij}}$ are the corresp
 
 % \wjb{distributed되어 있던 safety relevant attribute을 reparameterize를 통해 localize한 뒤, localize된 parameter에 대한 functioning(?)을 통해 안전성을 보존하고, 이를 original space로 invert함으로써, 안전 정렬 효과를 (1) localized attribute에 대해서만 적용하되, 그 효과가 (2) original space의 전역에 걸쳐 작용하도록 한 점이라는 점을 novelty로 appeal하면 어떨까 싶음.}
 
-
-Building on this framework, we construct a safety-conditioned basis $\{\phi_{ij}\}$ and reparameterize the weight space from $\{{w}_{ij}\}$ to $\{{\tilde{w}_{ij}}\}$  such that safety-relevant behavior is concentrated in a small subset of directions (i.e., only a few basis directions in $\{\phi_{ij}\}$ capture safety-relevant information), rather than being diffusely distributed. %\kms{reparameterization이 weight space를 재구성하여 safety 보존과 adaptation을 더 잘 분리하는 것을 contribution으로 작성해봤습니다.}
-\textcolor{orange}{Our key contribution is a safety-conditioned reparameterization that restructures the weight space to better separate safety-preserving and task-adaptive directions, enabling selective protection of safety-critical coefficients while retaining capacity for downstream adaptation.} \textcolor{purple}{Leveraging the low-rank structure of activations, we identify and freeze these coefficients while updating the complementary directions for downstream adaptation, as illustrated in Figure~\ref{fig:WSR-Tune_figure}.} As a result, our approach reduces interference between previously learned safety behavior and downstream adaptation, enabling more effective safety-preserving fine-tuning.
+Building on this framework, we construct a safety-conditioned basis $\{\phi_{ij}\}$ and reparameterize the weight space from $\{{w}_{ij}\}$ to $\{{\tilde{w}_{ij}}\}$  such that safety-relevant behavior is concentrated in a small subset of directions (i.e., only a few basis directions in $\{\phi_{ij}\}$ capture safety-relevant information), rather than being diffusely distributed.  This safety-conditioned reparameterization is our key contribution: it restructures the weight space to better separate safety-preserving and task-adaptive directions. Under this reparameterized space, we selectively freeze the coefficients associated with safety-critical directions while updating the complementary directions for downstream adaptation, as illustrated in Figure~\ref{fig:WSR-Tune_figure}. As a result, our approach reduces interference between previously learned safety behavior and downstream adaptation, enabling more effective safety-preserving fine-tuning.
+% Building on this framework, we construct a safety-conditioned basis $\{\phi_{ij}\}$ and reparameterize the weight space from $\{{w}_{ij}\}$ to $\{{\tilde{w}_{ij}}\}$  such that safety-relevant behavior is concentrated in a small subset of directions (i.e., only a few basis directions in $\{\phi_{ij}\}$ capture safety-relevant information), rather than being diffusely distributed. 
+% Our key contribution is a safety-conditioned reparameterization that restructures the weight space to better separate safety-preserving and task-adaptive directions by concentrating safety-critical information into a small subset of coefficients. Under this reparameterized space, we selectively freeze these safety-critical coefficients while updating the complementary directions for downstream adaptation, as illustrated in Figure~\ref{fig:WSR-Tune_figure}. As a result, our approach reduces interference between previously learned safety behavior and downstream adaptation, enabling more effective safety-preserving fine-tuning.
 
 Our WSR-Tune can be seamlessly integrated with existing downstream adaptation methods originally designed for the original parameter space, by applying them in the reparameterized space without modifying their update rules. Experimental results demonstrate that our method better preserves safety during downstream fine-tuning and achieves a more favorable trade-off between downstream performance and safety retention, compared to methods operating in the original parameter space. 
 
@@ -169,7 +170,7 @@ Our WSR-Tune can be seamlessly integrated with existing downstream adaptation me
     \vspace{-4mm}
     \centering
     \includegraphics[width=\textwidth]{figures/wsr-figure.png}
-        \vspace{-6mm}
+        \vspace{-8mm}
     \caption{Overview of WSR-Tune. The weight space is reparameterized into a safety-conditioned basis, in which safety-relevant information is concentrated in a subset of coefficients. Safety-critical coefficients are then identified and frozen, while the remaining coefficients are updated for downstream adaptation. This reduces interference between safety and downstream task information during fine-tuning, improving task performance with minimal safety degradation.
     } 
     \label{fig:WSR-Tune_figure}
@@ -186,7 +187,7 @@ Our WSR-Tune can be seamlessly integrated with existing downstream adaptation me
 % \wjb{'SafeInstr~\citep{safeInstr} mixes safety examples' 이렇게 쓰고 있는데, 그냥 '\citep{safeInstr} mixes safety examples' 와 같은 식으로 적으면 어떨까요?}
 
 \textbf{Preserving safety during downstream adaptation.} 
-Recent work on LLM safety has focused on preserving safety during post-training and downstream fine-tuning ~\citep{adv_finetuning, antidote}. \textcolor{purple}{\emph{Data- and optimization-based methods} preserve alignment through safety supervision or control of training data and optimization: SafeInstr~\citep{safeInstr} mixes safety examples into downstream fine-tuning, Lisa~\citep{lisa} alternates safety and task optimization with a proximal constraint, and SEAL~\citep{seal} selects safety-compatible fine-tuning samples through bilevel optimization. \emph{Parameter- and update-constrained methods} restrict model updates through neuron-level protection in SN-Tune and RSN-Tune ~\citep{sn-tune}, alignment-direction regularization in AsFT~\citep{asft}. \emph{Low-rank and post-hoc model-space methods} constrain or modify learned updates, including Safe LoRA~\citep{safe-lora}, SaLoRA~\citep{salora}, Safe Delta~\citep{safe-delta}, and RESTA~\citep{Resta}.} However, most of these methods still attempt to protect safety within the original parameterization of the model. In contrast, our approach addresses this limitation by reparameterizing the weight space itself, enabling safety preservation through a more structured separation between safety-critical and task-adaptive components. \textcolor{orange}{A broader discussion of harmful fine-tuning defenses is provided in Appendix~\ref{app:additional_related_work}.}
+Recent work on LLM safety has focused on preserving safety during post-training and downstream fine-tuning ~\citep{adv_finetuning, antidote}. \emph{Data- and optimization-based methods} preserve alignment through safety supervision or control of training data and optimization: SafeInstr~\citep{safeInstr} mixes safety examples into downstream fine-tuning, Lisa~\citep{lisa} alternates safety and task optimization with a proximal constraint, and SEAL~\citep{seal} selects safety-compatible fine-tuning samples through bilevel optimization. \emph{Parameter- and update-constrained methods} restrict model updates through neuron-level protection in SN-Tune and RSN-Tune ~\citep{sn-tune}, alignment-direction regularization in AsFT~\citep{asft}. \emph{Low-rank and post-hoc model-space methods} constrain or modify learned updates, including Safe LoRA~\citep{safe-lora}, SaLoRA~\citep{salora}, Safe Delta~\citep{safe-delta}, and RESTA~\citep{Resta}. However, most of these methods still attempt to protect safety within the original parameterization of the model. In contrast, our approach addresses this limitation by reparameterizing the weight space itself, enabling safety preservation through a more structured separation between safety-critical and task-adaptive components. We  discuss a broader range of methods for preserving safety during downstream adaptation in Appendix~\ref{app:additional_related_work}.%\textcolor{orange}{A broader discussion of harmful fine-tuning defenses is provided in Appendix~\ref{app:additional_related_work}.}
 
 % \kms{Reviewer 2의 추가 reference 요청, AsFT, Lisa, SafeGrad,SaLora,Safelora, SEAL(나머지 papers은 appendix로 넘기기)}
 % \kms{또한 WSR-Tune은 Fine-tuning stage defense 기법이라 언급}
@@ -197,14 +198,15 @@ Recent work on LLM safety has focused on preserving safety during post-training 
 
 \textbf{Analyzing safety in representation and parameter space.}
 Other recent work analyzes LLM safety through structured dimensions and spaces~\citep{zou2025representationengineeringtopdownapproach, geometry_cone}. A recent study~\citep{hidden_dimensions} shows that safety-aligned behavior is not governed by a single refusal direction, but by a multi-dimensional residual space in which a dominant direction captures refusal while additional orthogonal directions encode other safety-related features. %\kms{원본의 표현이 더 나은 것 같아 원본 문장으로 복구했습니다.}
-A complementary line of work~\citep{assessing_the_brittleness} studies safety directly in the original weight space and shows that safety-critical regions can be identified not only at the neuron level but also at the rank level. \textcolor{orange}{The work uses pruning and low-rank attacks on these regions to assess the brittleness of safety alignment; we discuss how this approach differs from WSR-Tune in Appendix~\ref{app:actsved}.}
+A complementary line of work~\citep{assessing_the_brittleness} studies safety directly in the original weight space and shows that safety-critical regions can be identified not only at the neuron level but also at the rank level. We provide a detailed discussion and comparison with this line of work in Appendix~\ref{app:actsved}. %\textcolor{orange}{The work uses pruning and low-rank attacks on these regions to assess the brittleness of safety alignment; we discuss how this approach differs from WSR-Tune in Appendix~\ref{app:actsved}.}
 %\kms{자세한 내용과 ActSVD의 rank/neuron 비교 실험은 appendix에 추가}
 Safety appears to be highly entangled with general learning rather than isolated in a distinct linear subspace, as both weight-space and activation-space analyses show substantial overlap between safety-related and utility-related directions~\citep{Safety_subspace_arenot_linearly_distinct}. Overall, these studies suggest that safety is distributed across directions, ranks, and subspaces rather than being cleanly localized to a small set of canonical parameters~\citep{li2025safety, geometry_cone}. This in turn implies that post-hoc selection of important components in the original space may be insufficient for robust safety preservation.
 
 
 
 
-\textbf{Subspace-constrained adaptation.} Although not focused on safety, a line of prior work studies how to reduce interference by constraining parameter updates within structured subspaces. AlphaEdit \citep{alphaedit} projects updates into the null space of preserved knowledge, while orthogonal fine-tuning methods, such as PSOFT \citep{psoft} orthogonally transforms the principal subspace of pretrained weights to preserve its geometry. These methods mitigate interference by carefully selecting update directions, but they still operate within the original parameterization of the model.  In a related but distinct direction, \citep{warp} explores weight space rotation primarily in the context of class-incremental learning. While this highlights the potential of restructuring the parameter space, it is not designed to address safety preservation during downstream adaptation. These works motivate our view that the safety problem is not only about identifying which parameters matter, but also about choosing a more suitable space in which preservation and adaptation can be disentangled.
+\textbf{Subspace-constrained adaptation.} Although not focused on safety, a line of prior work studies how to reduce interference by constraining parameter updates within structured subspaces. AlphaEdit \citep{alphaedit} projects updates into the null space of preserved knowledge, while orthogonal fine-tuning methods, such as PSOFT \citep{psoft} orthogonally transforms the principal subspace of pretrained weights to preserve its geometry. These methods mitigate interference by carefully selecting update directions, but they still operate within the original parameterization of the model.  In a related but distinct direction, \citep{warp} explores weight space rotation primarily in the context of class-incremental learning. While this highlights the potential of restructuring the parameter space, it is not designed to address safety preservation during downstream adaptation. These works motivate our view that the safety problem is not only about identifying certain parameters, but also about choosing a suitable space in which preservation and adaptation can be disentangled.
+
 
 % \textbf{Subspace-constrained adaptation.} Although not focused on safety, prior work studies interference reduction by constraining parameter updates within structured subspaces. AlphaEdit~\citep{alphaedit} projects updates into the null space of preserved knowledge, while PSOFT~\citep{psoft} applies orthogonal transformations within a principal subspace of pretrained weights. These methods reduce interference by selecting update directions, but still operate within the model's original parameterization. 
 % In a related but distinct direction, ~\citep{warp} explores weight-space rotation primarily for class-incremental learning. While this highlights the potential of restructuring the parameter space, it is not designed to address safety preservation during downstream adaptation. These works motivate our view that the safety problem is not only about identifying which parameters matter, but also about choosing a more suitable space in which preservation and adaptation can be disentangled.
@@ -223,8 +225,7 @@ Safety appears to be highly entangled with general learning rather than isolated
 
 \vspace{-1mm}
 
-We consider adapting an LLM to downstream tasks while preserving its previously learned safety behaviors. Let $f_{W_0}$ denote a safety-tuned model with parameters $W_0$, where “safety-tuned” indicates that the model %has acquired the ability 
-\textcolor{purple}{learned} to refuse harmful or disallowed requests through prior safety post-training. In many practical settings, such a model is subsequently adapted to a downstream task using a task-specific dataset $D_{\mathrm{task}}$. However, standard fine-tuning on $D_{\mathrm{task}}$ often degrades the model’s previously learned safety behaviors, even when the downstream data itself is benign. This leads to an inherent trade-off between improving downstream performance and preserving safety during adaptation.
+We consider adapting an LLM to downstream tasks while preserving its previously learned safety behaviors. Let $f_{W_0}$ denote a safety-tuned model with parameters $W_0$, where “safety-tuned” indicates that the model has learned to refuse harmful requests through prior safety post-training. In many practical settings, such a model is subsequently adapted to a downstream task using a task-specific dataset $D_{\mathrm{task}}$. However, standard fine-tuning on $D_{\mathrm{task}}$ often degrades the model’s previously learned safety behaviors, even when the downstream data itself is benign. This leads to an inherent trade-off between improving downstream performance and preserving safety during adaptation.
 
 
 Formally, let $\mathcal{L}(W; D)$ denote the loss of model $W$ on dataset $D$, and let $D_{\mathrm{safe}}$ denote a safety-oriented dataset used to preserve safe behavior. In conventional fine-tuning, adaptation is performed by applying a parameter update $\Delta W$ to $W_0$ in the original weight space. Our objective is to improve downstream performance while preserving safety: 
@@ -234,8 +235,10 @@ where $\epsilon \geq 0$ denotes a tolerable increase in safety loss.
 
 
 
+\vspace{-1mm}
 
 \subsection{Motivation and Insight}
+\vspace{-1mm}
 
 Despite extensive efforts, existing approaches \citep{safeInstr,sn-tune,safe-lora,safe-delta,Resta} operate in the original parameter space. To understand the limitation of this representation, consider 
 an arbitrary  $m\times n$ weight matrix
@@ -257,17 +260,16 @@ In this coordinate system, safety-related information is not localized to a spec
 
 
 
-
+\vspace{-1mm}
 \subsection{WSR-Tune: Reparameterized Fine-Tuning for Safety Preservation}
 \label{sec:wsr-algorithm}
+\vspace{-1mm}
 We propose WSR-Tune, which moves beyond identifying \textit{what} to protect and instead reconsiders \textit{how} the parameter space itself is represented.  To this end, we transform the weight space into a safety-conditioned coordinate system in which safety-relevant behavior is more compactly concentrated, making it easier to preserve during downstream fine-tuning. We replace the canonical parameterization 
-
 \begin{equation}
 W = \sum_{i=1}^m\sum_{j=1}^nw_{ij}b_{ij}
 \;\xrightarrow{\text{Reparameterization}}\;
 W = \sum_{i=1}^m\sum_{j=1}^n \tilde{w}_{ij} \phi_{ij}, 
 \end{equation}
-
 where $\{\phi_{ij}\}$ denotes a new basis and $\{\tilde{w}_{ij}\}$ are the corresponding weights in the reparameterized space. Unlike the canonical basis, where each $b_{ij}$ contains a single nonzero entry, the new basis matrices can represent structured directions spanning multiple parameters. The reparameterized weight matrix $\tilde{W}$ can be expressed in terms of the new basis $\{\phi_{ij}\}$ as
 \begin{equation}
 \tilde{W} =
@@ -322,27 +324,27 @@ We thus reparameterize the weight matrix as
 \begin{equation} 
 \widetilde{W}_l  = V_l^\top W_l U_l, 
 \end{equation} 
-where $U_l$ is defined above, $V_l$ is an arbitrary unitary matrix, and $\widetilde{W}_l \in \mathbb{R}^{m_l \times n_l}$ denotes the weights in the reparameterized space. \textcolor{orange}{Since $U_l\in\mathbb{R}^{n_l\times n_l}$ is a basis for the $n_l$-dimensional input space of $W_l\in\mathbb{R}^{m_l\times n_l}$, right multiplication by $U_l$ gives a valid change of input basis, preserving the weight-matrix dimensions.} 
+where $U_l$ is defined above, $V_l \in \mathbb{R}^{m_l \times m_l}$ % \djh{V의 dimension 언급} 
+is an arbitrary unitary matrix, and $\widetilde{W}_l \in \mathbb{R}^{m_l \times n_l}$ denotes the weights in the reparameterized space. %\textcolor{orange}{Since $U_l\in\mathbb{R}^{n_l\times n_l}$ is a basis for the $n_l$-dimensional input space of $W_l\in\mathbb{R}^{m_l\times n_l}$, right multiplication by $U_l$ gives a valid change of input basis, preserving the weight-matrix dimensions.} 
 %\kms{Reviewer 2의 $U_l$이 Eq.(9)에서 어떻게 applicable한지 설명} 
-\textcolor{orange}{This SVD is performed only once before downstream fine-tuning to construct $U_l$, which is then kept fixed throughout adaptation.} 
 %\kms{SVD 계산은 Fine-tuning 전 한번만 수행한다고 언급. 이 위치가 좋은지 한번 생각해보기.} 
 Let $\{v_i\}_{i=1}^{m_l}$ and $\{u_j\}_{j=1}^{n_l}$ denote the column vectors of $V_l$ and $U_l$, respectively.  
 Introducing $V_l$ allows us to define a complete orthonormal basis over the matrix space via outer products of row and column directions, i.e., 
 \begin{equation}
 \phi_{ij} = v_i u_j^\top, 
 \end{equation}
-ensuring that each $(i,j)$ corresponds to a distinct basis element. In this work, we set $V_l=I$ for simplicity,  which avoids multiple equivalent representations induced by different choices of $V_l$; \textcolor{orange}{Appendix~\ref{app:v_basis} shows that WSR-Tune remains robust to alternative orthogonal choices of $V_l$.}
+ensuring that each $(i,j)$ corresponds to a distinct basis element. In this work, we set $V_l=I$ for simplicity,  which avoids multiple equivalent representations induced by different choices of $V_l$; Appendix~\ref{app:v_basis} shows that WSR-Tune remains robust to alternative choices of $V_l$.
 %\kms{Reviewer 1의 $V_l$ matrix의 basis choice 실험} 
-Under this formulation, each entry $\widetilde{W}_l(i,j)=\tilde{w}_{ij}$ represents the reparameterized weight along the basis element $\phi_{ij}$. This reparameterization defines a coordinate system aligned with activation statistics, in which safety-related information can be represented more compactly.
+Under this formulation, each entry $\widetilde{W}_l(i,j)=\tilde{w}_{ij}$ represents the reparameterized weight along the basis element $\phi_{ij}$. This reparameterization defines a coordinate system aligned with activation statistics, in which safety-related information can be represented more compactly. The new coordinate system is constructed only once before downstream fine-tuning, which is then kept fixed throughout adaptation.
 
 
 
-\textbf{Identifying safety-critical parameters.} Under this reparameterization, downstream adaptation is applied to the coefficients of $\widetilde{W}_l$, rather than to $W_l$. 
+\textbf{Preserving safety in the reparameterized space.} Under this reparameterization, downstream adaptation is applied to the coefficients of $\widetilde{W}_l$, rather than to $W_l$. 
 To preserve safety, within each layer, we estimate the importance of each coefficient using its gradient magnitude on a safety corpus,
 $G_l = \sum_{x \in D_{\mathrm{safe}}} \left|\frac{\partial \mathcal{L}(x)}{\partial \widetilde{W}_l}\right|$.
-Here, $G_l(i,j)$ quantifies the sensitivity of the safety loss to $\widetilde{W}_l(i,j)$, and larger values indicate greater importance for safety retention. Based on $G_l$, we construct a binary mask $M_l \in \{0,1\}^{m_l \times n_l}$, where $M_l(i,j)=1$ denotes a safety-critical coefficient to be preserved \textcolor{orange}{in the reparameterized space.} %\kms{Reviewer 1이 헷갈려 한 masking이 적용되는 sapce는 in a reparameterzed space 언급.} 
+Here, $G_l(i,j)$ quantifies the sensitivity of the safety loss to $\widetilde{W}_l(i,j)$, and larger values indicate greater importance for safety retention. Based on $G_l$, we construct a binary mask $M_l \in \{0,1\}^{m_l \times n_l}$, where $M_l(i,j)=1$ denotes a safety-critical coefficient to be preserved in the reparameterized space. %\kms{Reviewer 1이 헷갈려 한 masking이 적용되는 sapce는 in a reparameterzed space 언급.} 
 In practice, we select the top-$\rho$ fraction of entries according to $G_l$ within each layer, where $\rho \in [0,1]$ controls the trade-off between safety retention and downstream adaptability. 
-\textcolor{orange}{While we use gradient magnitude for importance estimation, the WSR framework can accommodate alternative importance and selection mechanisms; we demonstrate this compatibility in Table~\ref{tab:baseline_plus_warp}.}
+While we use gradient magnitude for importance estimation,  WSR can accommodate alternative importance and selection mechanisms; we demonstrate this compatibility in Table~\ref{tab:baseline_plus_warp}.
 
 
 
@@ -360,7 +362,9 @@ where $\odot$ denotes element-wise multiplication. This constrains adaptation to
 % \textcolor{orange}{Importantly, WSR-Tune does not introduce a new importance scoring or masking; its key distinction is the safety-conditioned coordinate system in which these operations are applied. With $V_l=I$, freezing $\widetilde W_l(i,j)$ imposes $e_i^\top\Delta W_lu_j=0$, while $\partial\mathcal L/\partial\widetilde W_l =(\partial\mathcal L/\partial W_l)U_l$. Thus, reparameterization changes both the coefficients identified as safety-critical and the admissible update geometry induced by protecting them. Appendix~\ref{app:reparam_analysis} further shows that, under the same masking rule, this coordinate change alters the induced update constraints and yields more safety-selective protection than original-space.}
 
 
-\textcolor{orange}{Our WSR-Tune differs from standard fine-tuning by restructuring the weight space for safety preservation. First, it constructs a safety-conditioned basis once and keeps it fixed throughout downstream adaptation. Second, protection is applied in this reparameterized space, where coefficients are aligned with safety-relevant activation directions. This enables targeted safety preservation while leaving the remaining directions available for downstream updates. Appendix~\ref{app:reparam_analysis} further examines how this coordinate change enables more safety-selective protection under the same masking rule.}
+%\textcolor{orange}{Our WSR-Tune differs from standard fine-tuning by restructuring the weight space for safety preservation. First, it constructs a safety-conditioned basis once and keeps it fixed throughout downstream adaptation. Second, protection is applied in this reparameterized space, where coefficients are aligned with safety-relevant activation directions. This enables targeted safety preservation while leaving the remaining directions available for downstream updates. Appendix~\ref{app:reparam_analysis} further examines how this coordinate change enables more safety-selective protection under the same masking rule.}
+
+Our WSR-Tune differs from standard fine-tuning by restructuring the weight space for safety preservation. First, it decouples basis construction from task adaptation: a safety-conditioned basis is constructed once using safety data and remains fixed throughout downstream adaptation. Second, protection is applied in the reparameterized space, where coefficients are aligned with safety-relevant activation directions. This enables targeted safety preservation while leaving the remaining directions available for downstream updates, thereby reducing interference between safety preservation and downstream adaptation. Appendix~\ref{app:reparam_analysis} further examines how this coordinate change enables more safety-selective protection under the same masking rule.
 
 
 
@@ -379,10 +383,10 @@ where $\odot$ denotes element-wise multiplication. This constrains adaptation to
 
 %\jsp{Discussion의 의미가 애매한 것 같아서 아예 빼는 건 어떨까 싶습니다. Applicability는 implementation details로 옮기고 compatibility, freeze ratio는 해당 본문에서 설명하면 되지 않나라는 생각입니다.}
 
-\textcolor{orange}{\textbf{Extension to parameter-efficient fine-tuning.}
+\textbf{Extension to parameter-efficient fine-tuning.}
 \label{sec:wsr_lora}
 %Building on LoRA~\citep{lora}, We extend WSR-Tune to parameter efficient fine tuning (PEFT) as \textbf{WSR-LoRA}. A function-preserving low rank initialization reproduces the safety-aligned model before adaptation. To express the low rank component in the same safety-conditioned input coordinates as WSR-Tune, we reparameterize the input side factor as $\widetilde A=AU$, where $U$ is the fixed basis constructed from safety activations. We then estimate the safety importance of $B$ and $\widetilde A$, and preserve their safety-critical entries while updating the remaining entries for downstream adaptation. Detailed initialization and optimization procedures are provided in Appendix~\ref{app:wsr_lora}.
-We extend WSR-Tune to parameter-efficient fine-tuning (PEFT) by applying safety-conditioned reparameterization and protection to LoRA~\citep{lora} factors. Detailed implementation and optimization procedures are provided in Appendix~\ref{app:wsr_lora}.}
+We extend WSR-Tune to parameter-efficient fine-tuning (PEFT) by applying safety-conditioned reparameterization and protection to LoRA~\citep{lora} factors. Detailed implementation and optimization procedures are provided in Appendix~\ref{app:wsr_lora}.
 
 
 
@@ -392,13 +396,14 @@ We extend WSR-Tune to parameter-efficient fine-tuning (PEFT) by applying safety-
 \textbf{Applicability to different layers.} WSR-Tune can be applied not only to MLP layers but also to attention layers, including the key, query, and value projection matrices. In our experiments in Section \ref{sec:experiments}, we apply WSR-Tune to both attention and MLP projections and evaluate its effectiveness.
 
 \textbf{Compatibility with prior works.}
-WSR-Tune can be integrated with existing methods such as SafeInstr, SN-Tune, and \textcolor{orange}{SEAL by applying their native protection mechanisms together with the reparameterized weight space.} We validate this in Section~\ref{sec:experiments}.
+WSR-Tune can be integrated with existing methods such as SafeInstr, SN-Tune, and SEAL by applying their native protection mechanisms within the reparameterized weight space. We validate this in Section~\ref{sec:experiments}.
 
 
 \textbf{Freeze ratio.} The freeze ratio $\rho$ controls the fraction of coefficients preserved for safety. In Section~\ref{sec:experiments}, we study the impact of varying $\rho$, demonstrating its role in balancing safety and downstream performance. Notably, WSR-Tune achieves a strong trade-off even with relatively small values of $\rho$.
 
-\textcolor{orange}{\textbf{Computational overhead.} WSR-Tune constructs the safety-conditioned basis via SVD once and reuses it throughout fine-tuning. In our runtime evaluation, this one-time step takes only about 24\% of the three-epoch downstream fine-tuning time (Appendix~\ref{app:runtime}).}
+%\textcolor{orange}{\textbf{Computational overhead.} WSR-Tune constructs the safety-conditioned basis via SVD once and reuses it throughout fine-tuning. In our runtime evaluation, this one-time step takes only about 24\% of the three-epoch downstream fine-tuning time (Appendix~\ref{app:runtime}).}
 
+\textbf{Computational overhead.} WSR-Tune requires a one-time SVD to construct the safety-conditioned basis, which is then fixed and reused throughout downstream fine-tuning. Thus, the basis construction introduces only a one-time preprocessing cost, without requiring repeated decomposition or additional optimization during adaptation. We provide a detailed runtime analysis in Appendix~\ref{app:runtime}.
 
 \vspace{-2mm}
 \section{Experiments}
@@ -413,9 +418,8 @@ WSR-Tune can be integrated with existing methods such as SafeInstr, SN-Tune, and
 
 
 
-\textbf{Datasets and models.} Unless otherwise specified, we use the Circuit Breakers dataset~\citep{circuit_breakers} as the safety dataset, consisting of harmful prompts with safe refusal responses. \textcolor{orange}{To evaluate sensitivity to the safety-data source, we conduct additional experiments using safety data selected from BeaverTails~\citep{beavertails}%; its construction and source/quantity ablations are reported in Appendix~\ref{app:safety_data}
-.} For downstream adaptation, we use GSM8K~\citep{gsm8k}, Hendrycks MATH~\citep{hendrycksmath}, MedQA~\citep{medqa}, and ARC-Challenge~\citep{arc-c}. We conduct experiments on a diverse set of large language models spanning the Llama\citep{llama2, llama3}, Qwen~\citep{qwen2.5}, and Gemma~\citep{gemma2} families, %기존 문장 and report the exact model configurations in the corresponding result tables.
-\textcolor{purple}{and exact configurations are provided in Appendix~\ref{app:experimental_setup}.}
+\textbf{Datasets and models.} Unless otherwise specified, we use the Circuit Breakers dataset~\citep{circuit_breakers} as the safety dataset, consisting of harmful prompts with safe refusal responses. To evaluate sensitivity to the safety-data source, we conduct additional experiments using safety data selected from BeaverTails~\citep{beavertails} in Appendix~\ref{app:safety_data}. For downstream adaptation, we use GSM8K~\citep{gsm8k}, Hendrycks MATH~\citep{hendrycksmath}, MedQA~\citep{medqa}, and ARC-Challenge~\citep{arc-c}. \djh{AGNEWS도 결과 넣는다면 언급.} We conduct experiments on a diverse set of large language models spanning the Llama\citep{llama2, llama3}, Qwen~\citep{qwen2.5}, and Gemma~\citep{gemma2} families, where the exact configurations are provided in  Appendix~\ref{app:experimental_setup}. %기존 문장 and report the exact model configurations in the corresponding result tables.
+%\textcolor{purple}{and exact configurations are provided in Appendix~\ref{app:experimental_setup}.}
 
 
 %\textbf{Baselines.} In the full-parameter setting, we compare WSR-Tune with Full Params FT, SafeInstr~\citep{safeInstr}, Resta~\citep{Resta}, SafeDelta~\citep{safe-delta}, SEAL~\citep{seal}, SN-Tune, and RSN-Tune~\citep{sn-tune}. Full Params FT updates all weights without safety constraints. SafeInstr augments downstream data with safety examples, SEAL selects safety-compatible training samples, Resta and SafeDelta modify fine-tuned weights post hoc, and SN-Tune and RSN-Tune constrain updates using safety-neuron importance. For PEFT, we compare WSR-LoRA with Vanilla LoRA FT, AsFT~\citep{asft}, Lisa~\citep{lisa}, SafeLoRA~\citep{safe-lora}, and SaLoRA~\citep{salora}. Vanilla LoRA FT trains low-rank adapters without safety constraints; AsFT regularizes updates using alignment directions; Lisa alternates safety and task optimization with a proximal penalty; SafeLoRA projects learned updates after training; and SaLoRA combines a fixed safety-preserving projection with task-specific initialization. AsFT and Lisa are evaluated with LoRA adapters in our experiments.
@@ -423,21 +427,22 @@ WSR-Tune can be integrated with existing methods such as SafeInstr, SN-Tune, and
 
 % \kms{Full FT, PEFT 별로 각각의 메소드에 대해 간단하게 설명}
 
-\textbf{Baselines.} We compare WSR-Tune with representative safety-preserving fine-tuning baselines; full-parameter setting, SafeInstr~\citep{safeInstr} and SEAL~\citep{seal}, which use safety supervision or select safety-compatible data; Resta~\citep{Resta} and SafeDelta~\citep{safe-delta}, which modify fine-tuned weights post hoc; and SN-Tune and RSN-Tune~\citep{sn-tune}, which constrain updates using safety-neuron importance. We also consider AsFT~\citep{asft}, which regularizes updates using alignment directions, and Lisa~\citep{lisa}, which alternates safety and task optimization with a proximal penalty.
+\textbf{Baselines.} We compare WSR-Tune with representative safety-preserving fine-tuning baselines; %full-parameter setting \djh{full-parameter setting 삭제??}, 
+SafeInstr~\citep{safeInstr} and SEAL~\citep{seal}, which use safety supervision or select safety-compatible data; Resta~\citep{Resta} and SafeDelta~\citep{safe-delta}, which modify fine-tuned weights post hoc; and SN-Tune and RSN-Tune~\citep{sn-tune}, which constrain updates using safety-neuron importance. We also consider AsFT~\citep{asft}, which regularizes updates using alignment directions, and Lisa~\citep{lisa}, which alternates safety and task optimization with a proximal penalty. 
 % \textcolor{orange}{For PEFT, we compare WSR-LoRA with unconstrained Vanilla LoRA fine-tuning; AsFT~\citep{asft}, which regularizes updates using alignment directions; Lisa~\citep{lisa}, which alternates safety and task optimization with a proximal penalty; SafeLoRA~\citep{safe-lora}, which projects learned updates after training; and SaLoRA~\citep{salora}, which combines a fixed safety-preserving projection with task-specific initialization. AsFT and Lisa are evaluated with LoRA adapters.}
 
 
 
 
 \textbf{Evaluation metrics.}
-We evaluate downstream performance using 5-shot accuracy on each downstream dataset. For safety evaluation, we use harmful prompts from AdvBench~\citep{advbench} and report attack success rate (ASR). We consider one direct prompting setting using the original AdvBench prompts, and three jailbreak attack methods, AutoDAN~\citep{autodan}, PAIR~\citep{pair}, and PAP~\citep{pap}, which generate attack prompts. We generate jailbreak prompts using the HarmBench~\citep{harmbench} and measure ASR with its refusal keywords, counting an attack as successful if the response does not begin with these keywords.
+We evaluate downstream performance using 5-shot accuracy on each downstream dataset. For safety evaluation, we use harmful prompts from AdvBench~\citep{advbench} and report attack success rate (ASR). We consider one direct prompting setting using the original AdvBench prompts, and three jailbreak attack methods, AutoDAN~\citep{autodan}, PAIR~\citep{pair}, and PAP~\citep{pap}, which generate attack prompts. We generate jailbreak prompts using the HarmBench~\citep{harmbench} and measure ASR with its refusal keywords, counting an attack as successful if the response does not begin with these keywords. \djh{다른 방법으로 measure한 결과들도 appendix에 있다고 언급}
 
 
 % \kms{실험의 하이퍼 파라미터와 method 별 하이퍼 파라미터는 Appendix A에 작성}
 
-\textcolor{purple}{\textbf{Implementation details.}
+\textbf{Implementation details.}
 Unless otherwise specified, all methods follow the same downstream fine-tuning pipeline and are trained for 3 epochs, with method-specific learning rates chosen to balance downstream performance and safety retention. %WSR-Tune and WSR-LoRA use the same safety-data source for basis construction and importance estimation. 
-Shared training settings and method-specific hyperparameters are provided in Appendix~\ref{app:hyperparameters}.}
+Shared training settings and method-specific hyperparameters are provided in Appendix~\ref{app:hyperparameters}.
 
 
 
@@ -450,7 +455,7 @@ Shared training settings and method-specific hyperparameters are provided in App
 % \wjb{llama 3b table의 경우 appendix로 빼고, results 부분에서 설명할때만 서술하면 어떨까 싶음. 테이블 위치만 알려주면 됨.}
 
 \begin{table*}[t]
-\vspace{-4mm}
+%\vspace{-4mm}
 \centering
 \scriptsize
 \caption{Comparison on Llama-2-7B-Chat and Llama-2-13B-Chat with GSM8K fine-tuning. Safety is measured by Jailbreak (JB) AVG (averaged over Direct, AutoDAN, PAIR, and PAP; lower is better), and downstream performance is measured by task accuracy (higher is better). 
@@ -473,9 +478,9 @@ We also report changes relative to Full Params FT: $\Delta_{\mathrm{S}}$ (safety
 \cmidrule(lr){7-8} \cmidrule(lr){9-10} \cmidrule(lr){11-11}
 \textbf{Method}
 & \textbf{JB AVG} & $\boldsymbol{\Delta_{\mathrm{S}}}$
-& \textbf{GSM8K} & $\boldsymbol{\Delta_{\mathrm{D}}}$ & $\boldsymbol{\Delta_{\mathrm{Overall}}}$
+& \textbf{Accuracy} & $\boldsymbol{\Delta_{\mathrm{D}}}$ & $\boldsymbol{\Delta_{\mathrm{Overall}}}$
 & \textbf{JB AVG} & $\boldsymbol{\Delta_{\mathrm{S}}}$
-& \textbf{GSM8K} & $\boldsymbol{\Delta_{\mathrm{D}}}$ & $\boldsymbol{\Delta_{\mathrm{Overall}}}$ \\
+& \textbf{Accuracy} & $\boldsymbol{\Delta_{\mathrm{D}}}$ & $\boldsymbol{\Delta_{\mathrm{Overall}}}$ \\
 \midrule
 
 Full Params FT
@@ -496,12 +501,12 @@ SEAL
 & 10.28 & +0.24 & 45.19 & -0.75 & -0.99 \\
 
 AsFT
-& 0.00 & 0.00 & 0.00 & 0.00 & 0.00
-& 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\
+& 5.27 & -15.51 & 19.71 & -21.46 & -5.95
+& 0.86 & -20.73 & 28.43 & -20.17 & +0.56 \\
 
 Lisa
-& 0.00 & 0.00 & 0.00 & 0.00 & 0.00
-& 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\
+& 9.95 & -10.83 & 14.40 & -26.77 & -15.94
+& 1.39 & -20.20 & 36.24 & -12.36 & +7.84 \\
 
 SafeDelta
 & 5.57 &  -15.21  & 19.79 & -21.38 & -6.17
@@ -647,29 +652,29 @@ RSN-Tune
 \bottomrule
 \end{tabular}
 }
-\vspace{-4mm}
+\vspace{-2mm}
 \end{table*}
 
 
 
 
 
-\vspace{-2mm}
+\vspace{-1mm}
 \subsection{Main Results}
-\vspace{-2mm}
+\vspace{-1mm}
 
 
 
 
 
 \begin{wrapfigure}{r}{0.5\textwidth}
-    \vspace{-6mm}
+    \vspace{-8mm}
     \centering
     \includegraphics[width=\linewidth]{figures/llama_2_13b_chat_gsm8k_tradeoff_before.pdf}
         \vspace{-5mm}
     \caption{Safety-downstream trade-off among full-parameter fine-tuning on Llama-2-13B-Chat. The x-axis shows downstream accuracy, and the y-axis shows defense success rate ($1 -$ ASR), where higher indicates better safety.}
     \label{fig:main_all_figure}
-    \vspace{-5mm}
+    \vspace{-3mm}
 \end{wrapfigure}
 
 
@@ -681,8 +686,8 @@ RSN-Tune
 % We first compare WSR-Tune with representative safety-preserving fine-tuning baselines under downstream adaptation. Table~\ref{tab:main_all_models_delta} reports the main results across chat and instruction-tuned models. Overall, WSR-Tune achieves the best trade-off between safety and downstream performance across all model settings. WSR-Tune substantially reduces jailbreak attack success while maintaining competitive or improved downstream performance, leading to the largest overall gains over full-parameter fine-tuning.  
 %  Figure~\ref{fig:main_all_figure} further visualizes this trade-off. Compared with existing baselines, WSR-Tune is positioned closer to the upper-right region, indicating higher downstream accuracy and stronger defense success rate. This further shows that WSR-Tune achieves a favorable balance between safety retention and downstream adaptation. These results indicate that reparameterizing the weight space enables more effective safety preservation than directly constraining updates in the original parameter space.
 We first compare WSR-Tune with representative safety-preserving fine-tuning baselines under downstream adaptation. Table~\ref{tab:main_all_models_delta} reports the main results across chat and instruction-tuned models. Overall, WSR-Tune achieves the best trade-off between safety and downstream performance across all model settings. WSR-Tune substantially reduces jailbreak attack success while maintaining competitive or improved downstream performance, leading to the largest overall gains over full-parameter fine-tuning.
-Figure~\ref{fig:main_all_figure} further visualizes these trade-off. Compared with existing baselines, WSR-Tune is positioned closer to the upper-right region, indicating higher downstream accuracy and stronger defense success rate, achieving a favorable balance between safety retention and downstream adaptation. These results indicate that reparameterizing the weight space enables more effective safety preservation than directly constraining updates in the original parameter space. \textcolor{orange}{
-Results on Llama-3.2-3B-Instruct and Llama-3.1-8B-Instruct with MATH fine-tuning are provided in Appendix~\ref{app:llama3_results} (Table~\ref{tab:llama3_models_delta}). WSR-Tune also improve the safety--utility trade-off over their respective unconstrained fine-tuning baselines on both models.}
+Figure~\ref{fig:main_all_figure} further visualizes these trade-off. Compared with existing baselines, WSR-Tune is positioned closer to the upper-right region, indicating higher downstream accuracy and stronger defense success rate, achieving a favorable balance between safety retention and downstream adaptation. These results indicate that reparameterizing the weight space enables more effective safety preservation than directly constraining updates in the original parameter space. 
+Results on Llama-3.2-3B-Instruct and Llama-3.1-8B-Instruct under MATH fine-tuning are provided in Appendix~\ref{app:llama3_results}. WSR-Tune also improves the safety-utility trade-off over their respective unconstrained fine-tuning baselines on both models.
 
 
 
@@ -710,7 +715,7 @@ A useful property of WSR-Tune is that it can be combined with existing safety-pr
 \toprule
 \textbf{Llama-2-7B-Chat} & \multicolumn{5}{c}{\textbf{Safety $\downarrow$}} & \textbf{Downstream $\uparrow$} \\
 \cmidrule(lr){2-6}\cmidrule(lr){7-7}
-\textbf{Method} & \textbf{Direct} & \textbf{AutoDAN} & \textbf{PAIR} & \textbf{PAP} & \textbf{AVG} & \textbf{GSM8K} \\
+\textbf{Method} & \textbf{Direct} & \textbf{AutoDAN} & \textbf{PAIR} & \textbf{PAP} & \textbf{AVG} & \textbf{Accuracy} \\
 \midrule
 
 SN-Tune & 0 & 17.69 & 45.58 & 45.46 & 27.18 & 38.99 \\
@@ -767,7 +772,6 @@ SEAL + WSR-Tune
 % \end{tabular}
 % }
 
-\vspace{-3mm}
 \end{table*}
 
 
@@ -792,9 +796,9 @@ SEAL + WSR-Tune
 \cmidrule(lr){7-8} \cmidrule(lr){9-10} \cmidrule(lr){11-11}
 \textbf{Method}
 & \textbf{JB AVG} & $\boldsymbol{\Delta_{\mathrm{S}}}$ 
-& \textbf{GSM8K} & $\boldsymbol{\Delta_{\mathrm{D}}}$ & $\boldsymbol{\Delta_{\mathrm{Overall}}}$ 
+& \textbf{Accuracy} & $\boldsymbol{\Delta_{\mathrm{D}}}$ & $\boldsymbol{\Delta_{\mathrm{Overall}}}$ 
 & \textbf{JB AVG} & $\boldsymbol{\Delta_{\mathrm{S}}}$ 
-& \textbf{GSM8K} & $\boldsymbol{\Delta_{\mathrm{D}}}$ & $\boldsymbol{\Delta_{\mathrm{Overall}}}$ \\
+& \textbf{Accuracy} & $\boldsymbol{\Delta_{\mathrm{D}}}$ & $\boldsymbol{\Delta_{\mathrm{Overall}}}$ \\
 \midrule
 
 Full Params FT
@@ -894,7 +898,7 @@ RSN-Tune
         \vspace{-5mm}
     \caption{Comparison of safety-preserving downstream among full-parameter fine-tuning methods on Llama-2-7B-Chat under GSM8K, ARC-C and MedQA fine-tuning.}
     \label{fig:main_all_figure_2}
-   \vspace{-5mm}
+   \vspace{-2mm}
 \end{figure}
 
 
@@ -903,6 +907,8 @@ RSN-Tune
 \begin{table*}[t]
 \centering
 \small
+\caption{Ablation study on Llama-2-7B-Chat. Lower JB AVG indicates stronger safety, and higher Accuracy indicates better downstream performance.}
+\label{tab:ablation_llama2_7b_chat}
 \resizebox{0.9\textwidth}{!}{
 \begin{tabular}{llccccc}
 \toprule
@@ -913,7 +919,7 @@ RSN-Tune
 \cmidrule(lr){1-2}\cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-7}
 \textbf{Category} & \textbf{Method} 
 & \textbf{JB AVG} & $\boldsymbol{\Delta_{\mathrm{S}}}$ 
-& \textbf{GSM8K} & $\boldsymbol{\Delta_{\mathrm{D}}}$ 
+& \textbf{Accuracy} & $\boldsymbol{\Delta_{\mathrm{D}}}$ 
 & \textbf{Overall} \\
 \midrule
 \multirow{3}{*}{Ablation}
@@ -928,9 +934,6 @@ RSN-Tune
 \bottomrule
 \end{tabular}
 }
-\vspace{-1mm}
-\caption{Ablation study on Llama-2-7B-Chat. Lower JB AVG indicates stronger safety, and higher GSM8K indicates better downstream performance.}
-\label{tab:ablation_llama2_7b_chat}
 \vspace{-4mm}
 \end{table*}
 
@@ -952,8 +955,20 @@ To assess whether the benefits of WSR-Tune extend beyond mathematical reasoning,
 %\textcolor{orange}{WSR-LoRA likewise achieves favorable safety--utility trade-offs among PEFT methods on both tasks. Detailed results for all full-parameter and PEFT baselines are provided in Appendix~\ref{app:detailed_main_results}. These results indicate that the advantages of safety-conditioned reparameterization generalize beyond a single task and adaptation setting.}
 
 
+
+
+
+\textbf{Ablation study.}
+ Table~\ref{tab:ablation_llama2_7b_chat} provides an ablation study on Llama-2-7B-Chat, designed to isolate the effect of each component in our method. Full-parameter fine-tuning severely degrades safety, while simply freezing important parameters in the original space improves safety only partially. Applying an importance mask in the original parameter space improves safety by freezing parameters with high safety importance, but the average ASR is still  close to 10\%. 
+ The full WSR-Tune method, which applies safety-aware masking in the reparameterized space, yields the best overall balance, confirming that both components are important for the final performance gain.
+% \kms{Ablation study에서 basis rotation의 특징을 더 나타내기 위해서 아래 문단으로 수정하는 것은 어떨지}
+%  \textbf{Ablation study.}
+% Table~\ref{tab:ablation_llama2_7b_chat} isolates the effect of reparameterization by comparing WSR-Tune with the same importance-based masking procedure applied directly in the original weight space. Original-space masking improves safety over full-parameter fine-tuning, but WSR-Tune further reduces JB AVG from 9.17 to 6.90. Since the two variants use the same importance criterion and differ primarily in the space in which selection and protection are applied, this result shows that reparameterization changes the effect of an otherwise identical masking procedure.
+
+
+
 \begin{wraptable}{r}{0.55\columnwidth}
-\vspace{-5mm}
+\vspace{-3mm}
 \centering
 \scriptsize
 \caption{Effect of the freeze ratio in WSR-Tune.}
@@ -967,7 +982,7 @@ To assess whether the benefits of WSR-Tune extend beyond mathematical reasoning,
 \toprule
 \textbf{} & \multicolumn{5}{c}{\textbf{Safety $\downarrow$}} & \textbf{Downstream $\uparrow$} \\
 \cmidrule(lr){2-6}\cmidrule(lr){7-7}
-\textbf{Freeze ratio} & \textbf{Direct} & \textbf{AutoDAN} & \textbf{PAIR} & \textbf{PAP} & \textbf{AVG} & \textbf{GSM8K} \\
+\textbf{Freeze ratio} & \textbf{Direct} & \textbf{AutoDAN} & \textbf{PAIR} & \textbf{PAP} & \textbf{AVG} & \textbf{Accuracy} \\
 \midrule
 1\%  & 0.00 & 0.00 & 10.38 & 16.88 & 6.82 & 38.82 \\
 5\%  & 0.00 & 0.00 & 9.04  & 16.42 & 6.37 & 39.04 \\
@@ -980,28 +995,16 @@ To assess whether the benefits of WSR-Tune extend beyond mathematical reasoning,
 \bottomrule
 \end{tabular}
 }
-\vspace{-2mm}
+%\vspace{-3mm}
 \end{wraptable}
 
 
-
-\textbf{Ablation study.}
- Table~\ref{tab:ablation_llama2_7b_chat} provides an ablation study on Llama-2-7B-Chat, designed to isolate the effect of each component in our method. Full-parameter fine-tuning severely degrades safety, while simply freezing important parameters in the original space improves safety only partially. Applying an importance mask in the original parameter space improves safety by freezing parameters with high safety importance, but the average ASR is still  close to 10\%. 
- The full WSR-Tune method, which applies safety-aware masking in the reparameterized space, yields the best overall balance, confirming that both components are important for the final performance gain.
-% \kms{Ablation study에서 basis rotation의 특징을 더 나타내기 위해서 아래 문단으로 수정하는 것은 어떨지}
-%  \textbf{Ablation study.}
-% Table~\ref{tab:ablation_llama2_7b_chat} isolates the effect of reparameterization by comparing WSR-Tune with the same importance-based masking procedure applied directly in the original weight space. Original-space masking improves safety over full-parameter fine-tuning, but WSR-Tune further reduces JB AVG from 9.17 to 6.90. Since the two variants use the same importance criterion and differ primarily in the space in which selection and protection are applied, this result shows that reparameterization changes the effect of an otherwise identical masking procedure.
-
-
-
-
-
 \textbf{Impact of freeze ratio.} %\djh{Freezing ratio를 점차 늘렸을때 효과 보여주기 (safety 좋아지고 downtream 안좋아짐) 적당한 range 안에서는 바꿔도 baseline 보다 잘한다}
-Table~\ref{tab:keep_ratio_ablation} analyzes the effect of the freeze ratio using Llama-2-7B-Chat. Increasing the freeze ratio to $20\%$ freezes more safety-related coefficients,  improving safety preservation while reducing the capacity for downstream adaptation. Overall, WSR-Tune remains robust across a moderate range of freeze ratios, maintaining low average ASR and competitive downstream performance. \textcolor{orange}{Further full results up to $50\%$ are provided in Appendix~\ref{app:freeze_ratio}.}
+Table~\ref{tab:keep_ratio_ablation} analyzes the effect of the freeze ratio using Llama-2-7B-Chat. Increasing the freeze ratio to $20\%$ freezes more safety-related coefficients,  improving safety preservation while reducing the capacity for downstream adaptation. Overall, WSR-Tune remains robust across a moderate range of freeze ratios, maintaining low average ASR and competitive downstream performance. Results for freeze ratios up to $50\%$ are provided in Appendix~\ref{app:freeze_ratio}.
 
-\textcolor{orange}{\textbf{Other results.} 
+\textbf{Other results.} 
 Appendix~\ref{app:runtime} reports runtime and memory measurements, showing that SVD-based basis construction incurs a one-time cost relative to downstream training. 
-And Appendix~\ref{app:v_basis} examines sensitivity to the output-side basis $V_l$. Appendix~\ref{app:additional_results} further reports results on Llama-3 models (Appendix~\ref{app:llama3_results}), adaptation from the Llama-3.1-8B base model (Appendix~\ref{app:base_model_results}), robustness when BeaverTails is used as the safety dataset and when different data fractions are used for basis construction and importance masking (Appendix~\ref{app:safety_data}), freeze-ratio results up to $50\%$ (Appendix~\ref{app:freeze_ratio}), and complete attack-wise results for the main experiments (Appendix~\ref{app:detailed_main_results}). Finally, Appendix~\ref{app:baseline_compatibility} extends the experiments combining WSR-Tune with existing fine-tuning methods to Llama-2-13B-Chat.}
+Appendix~\ref{app:v_basis} examines sensitivity to the output-side basis $V_l$. Appendix~\ref{app:additional_results} further reports results on Llama-3 models (Appendix~\ref{app:llama3_results}), adaptation from the Llama-3.1-8B base model (Appendix~\ref{app:base_model_results}), robustness when BeaverTails is used as the safety dataset and when different data fractions are used for basis construction and importance masking (Appendix~\ref{app:safety_data}), freeze-ratio results up to $50\%$ (Appendix~\ref{app:freeze_ratio}), and complete attack-wise results for the main experiments (Appendix~\ref{app:detailed_main_results}). Finally, Appendix~\ref{app:baseline_compatibility} extends the experiments combining WSR-Tune with existing fine-tuning methods to Llama-2-13B-Chat. Appendix~\ref{sec:wildguard_judge} re-evaluates the same generations with an LLM-based refusal judge instead of refusal-keyword matching, and shows that the method ranking and the safety--utility trade-off are unchanged.
 
 
 
@@ -1015,12 +1018,12 @@ And Appendix~\ref{app:v_basis} examines sensitivity to the output-side basis $V_
 \vspace{-1mm}
 
 
-\section{Conclusion and Limitation} 
+\section{Conclusion} 
 \vspace{-1mm}
 
 In this work, we revisited safety-preserving fine-tuning in LLMs and showed that existing approaches are fundamentally constrained by operating in the original parameter space, where safety information is distributed across directions. We proposed WSR-Tune, a weight-space reparameterization framework that constructs a safety-conditioned basis, enabling downstream adaptation in a complementary subspace. By concentrating safety-relevant information into a small set of coefficients, WSR-Tune allows effective preservation of safety through simple freezing while maintaining strong downstream performance. 
 %\textcolor{orange}{We further extend this principle to PEFT through WSR-LoRA, and experiments across multiple models, tasks, and safety-data settings demonstrate favorable safety--utility trade-offs.}
-Our results suggest that safety preservation depends not only on which parameters are updated, but also on how the parameter space is structured, highlighting weight-space reparameterization as a promising direction for reliable LLM adaptation. A limitation of our work is the additional computational overhead introduced by the SVD computation and the estimation of safety-related coefficients; \textcolor{orange}{however, the SVD is performed only once before fine-tuning, with measured overhead reported in Appendix~\ref{app:runtime}. Future work may explore more efficient basis construction and broader adaptation settings.}
+Our results suggest that safety preservation depends not only on which parameters are updated, but also on how the parameter space is structured, highlighting weight-space reparameterization as a promising direction for reliable LLM adaptation. % A limitation of our work is the additional computational overhead introduced by the SVD computation and the estimation of safety-related coefficients; \textcolor{orange}{however, the SVD is performed only once before fine-tuning, with measured overhead reported in Appendix~\ref{app:runtime}. Future work may explore more efficient basis construction and broader adaptation settings.}
 
 
 
@@ -3076,6 +3079,102 @@ Each point represents the safety--downstream trade-off of an existing baseline, 
 \FloatBarrier
 
 
+
+\section{Robustness of the Safety Metric: An LLM-Based Refusal Judge}
+\label{sec:wildguard_judge}
+
+All safety numbers reported so far use refusal-keyword matching, which labels a response as a
+successful attack when it does not begin with a refusal phrase. A natural concern is that this
+lexical heuristic, rather than the methods themselves, drives the comparison. To test this, we
+re-evaluate the \emph{same} generations with \textbf{WildGuard}~\citep{wildguard}, an
+open safety classifier, and use its judgment of whether the response constitutes a refusal. The
+attacks, the test cases, the system prompt, and the generations are all unchanged; only the judge
+is replaced, so any difference is attributable to the metric alone.
+
+Table~\ref{tab:wildguard_refusal_delta} reports the result. The ordering of methods is essentially
+unchanged: SN-Tune and RSN-Tune remain the least safe on both models, and WSR-Tune attains the
+best safety--utility trade-off, with $\Delta_{\mathrm{Overall}}$ of $+8.02$ on Llama-2-7B-Chat and
+$+10.82$ on Llama-2-13B-Chat. Across the eleven configurations of Table~\ref{tab:main_all_models_delta}
+the two metrics agree closely in rank (Spearman $\rho = 1.000$ on Llama-2-7B-Chat and $0.989$ on
+Llama-2-13B-Chat), and their absolute levels differ by only $5$--$8\%$ on average. The conclusions
+drawn from the keyword metric therefore do not depend on that metric: an independent LLM judge,
+asked the same question, reproduces them.
+
+\begin{table*}[t]
+\vspace{-4mm}
+\centering
+\scriptsize
+\caption{Comparison under an \textbf{LLM-based refusal judge} (WildGuard) instead of refusal-keyword matching, on Llama-2-7B-Chat and Llama-2-13B-Chat with GSM8K fine-tuning. The generations, attacks, and system prompt are identical to Table~\ref{tab:main_all_models_delta}; only the judge is replaced. Jailbreak (JB) AVG is the fraction of responses that WildGuard judges \emph{not} to be refusals, averaged over Direct, AutoDAN, PAIR, and PAP (lower is better); downstream performance is task accuracy (higher is better). We report changes relative to Full Params FT: $\Delta_{\mathrm{S}}$ (safety, lower is better) and $\Delta_{\mathrm{D}}$ (downstream, higher is better), and $\Delta_{\mathrm{Overall}} = -\Delta_{\mathrm{S}} + \Delta_{\mathrm{D}}$.
+}
+\label{tab:wildguard_refusal_delta}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{lccccc|ccccc}
+\toprule
+& \multicolumn{5}{c|}{\textbf{Llama-2-7B-Chat}} 
+& \multicolumn{5}{c}{\textbf{Llama-2-13B-Chat}} \\
+\cmidrule(lr){2-6} \cmidrule(lr){7-11}
+& \multicolumn{2}{c}{\textbf{Safety $\downarrow$}}
+& \multicolumn{2}{c}{\textbf{Downstream $\uparrow$}}
+& \multicolumn{1}{c|}{\textbf{Overall} $\uparrow$}
+& \multicolumn{2}{c}{\textbf{Safety $\downarrow$}}
+& \multicolumn{2}{c}{\textbf{Downstream $\uparrow$}}
+& \multicolumn{1}{c}{\textbf{Overall} $\uparrow$} \\
+\cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-6}
+\cmidrule(lr){7-8} \cmidrule(lr){9-10} \cmidrule(lr){11-11}
+\textbf{Method}
+& \textbf{JB AVG} & $\boldsymbol{\Delta_{\mathrm{S}}}$
+& \textbf{GSM8K} & $\boldsymbol{\Delta_{\mathrm{D}}}$ & $\boldsymbol{\Delta_{\mathrm{Overall}}}$
+& \textbf{JB AVG} & $\boldsymbol{\Delta_{\mathrm{S}}}$
+& \textbf{GSM8K} & $\boldsymbol{\Delta_{\mathrm{D}}}$ & $\boldsymbol{\Delta_{\mathrm{Overall}}}$ \\
+\midrule
+Full Params FT
+& 17.64 & 0.00 & 41.17 & 0.00 & 0.00
+& 8.64 & 0.00 & 45.94 & 0.00 & 0.00 \\
+
+SafeInstr
+& 15.26 & -2.37 & 38.44 & -2.73 & -0.36
+& 5.82 & -2.83 & 46.55 & +0.61 & +3.44 \\
+
+Resta
+& 10.46 & -7.18 & 36.92 & -4.25 & +2.93
+& 8.33 & -0.32 & 44.20 & -1.74 & -1.42 \\
+
+SEAL
+& 12.12 & -5.52 & 38.89 & -2.28 & +3.24
+& 9.08 & +0.43 & 45.19 & -0.75 & -1.18 \\
+
+AsFT
+& 5.29 & -12.35 & 19.71 & -21.46 & -9.11
+& 0.98 & -7.66 & 28.43 & -17.51 & -9.85 \\
+
+Lisa
+& 8.47 & -9.17 & 14.40 & -26.77 & -17.60
+& 1.53 & -7.12 & 36.24 & -9.70 & -2.58 \\
+
+SafeDelta
+& 5.95 & -11.69 & 19.79 & -21.38 & -9.69
+& 1.01 & -7.63 & 28.43 & -17.51 & -9.88 \\
+
+SN-Tune
+& 25.16 & +7.52 & 38.99 & -2.18 & -9.70
+& 21.43 & +12.79 & 48.22 & +2.28 & -10.51 \\
+
+RSN-Tune
+& 20.64 & +3.01 & 40.26 & -0.91 & -3.92
+& 21.18 & +12.54 & 49.96 & +4.02 & -8.52 \\
+
+
+%\midrule
+
+\textbf{WSR-Tune (Ours)}
+& 7.44 & -10.20 & 38.99 & -2.18 & \cellcolor{green!20}\textbf{+8.02}
+& 1.46 & -7.18 & 49.58 & +3.64 & \cellcolor{green!20}\textbf{+10.82} \\
+
+\bottomrule
+\end{tabular}
+}
+\vspace{-3mm}
+\end{table*}
 
 \section{Comparison with Null space projection in Original Space}
 \label{app:actsved}

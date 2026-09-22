@@ -1,0 +1,40 @@
+######## 평가 종료 2026-09-22T19:59:16+09:00 ########
+Average ASR:  0.0
+[SUMMARY] model=llama2_7b-chat-wsr_rsn_row-gsm8k-lr5e-5, asr=0.0000
+Average ASR:  0.051923076923076926
+[SUMMARY] model=llama2_7b-chat-wsr_rsn_row-gsm8k-lr5e-5, asr=0.0519
+Average ASR:  0.28846153846153844
+[SUMMARY] model=llama2_7b-chat-wsr_rsn_row-gsm8k-lr5e-5, asr=0.2885
+Average ASR:  0.26961538461538465
+[SUMMARY] model=llama2_7b-chat-wsr_rsn_row-gsm8k-lr5e-5, asr=0.2696
+Average ASR:  0.0019230769230769232
+[SUMMARY] model=llama2_13b-chat-wsr_rsn_row-gsm8k-lr5e-5, asr=0.0019
+Average ASR:  0.028846153846153848
+[SUMMARY] model=llama2_13b-chat-wsr_rsn_row-gsm8k-lr5e-5, asr=0.0288
+Average ASR:  0.3384615384615385
+[SUMMARY] model=llama2_13b-chat-wsr_rsn_row-gsm8k-lr5e-5, asr=0.3385
+Average ASR:  0.4723076923076924
+[SUMMARY] model=llama2_13b-chat-wsr_rsn_row-gsm8k-lr5e-5, asr=0.4723
+=== HarmBench rc=0 ===
+########## EVAL COMPLETE 2026-09-22T19:58:44+09:00 ##########
+---- lm-eval ----
+|     |       |strict-match    |     5|exact_match|↑  |0.3995|±  |0.0135|
+---- lm-eval: llama2_13b_rsn_gsm8k
+Processed prompts:  92%|█████████▏| 1215/1319 [01:00<00:01, 83.68it/s, est. speed input: 22350.73 toks/s, output: 2482.08 toks/s][A
+Processed prompts:  93%|█████████▎| 1224/1319 [01:00<00:01, 83.76it/s, est. speed input: 22433.31 toks/s, output: 2491.74 toks/s][A
+Processed prompts:  94%|█████████▎| 1235/1319 [01:00<00:00, 89.45it/s, est. speed input: 22551.00 toks/s, output: 2511.12 toks/s][A
+Processed prompts:  95%|█████████▍| 1250/1319 [01:00<00:00, 103.86it/s, est. speed input: 22716.75 toks/s, output: 2536.89 toks/s][A
+Processed prompts:  96%|█████████▌| 1261/1319 [01:00<00:00, 99.93it/s, est. speed input: 22817.18 toks/s, output: 2551.70 toks/s] [A
+Processed prompts:  96%|█████████▋| 1272/1319 [01:00<00:00, 82.07it/s, est. speed input: 22892.47 toks/s, output: 2566.30 toks/s][A
+Processed prompts:  97%|█████████▋| 1281/1319 [01:00<00:00, 72.29it/s, est. speed input: 22950.11 toks/s, output: 2580.19 toks/s][A
+Processed prompts:  98%|█████████▊| 1291/1319 [01:00<00:00, 78.42it/s, est. speed input: 23047.53 toks/s, output: 2603.20 toks/s][A
+Processed prompts:  99%|█████████▊| 1300/1319 [01:01<00:00, 67.56it/s, est. speed input: 23101.89 toks/s, output: 2621.51 toks/s][A
+Processed prompts:  99%|█████████▉| 1308/1319 [01:01<00:00, 65.55it/s, est. speed input: 23160.29 toks/s, output: 2641.28 toks/s][A
+Processed prompts: 100%|█████████▉| 1315/1319 [01:01<00:00, 40.24it/s, est. speed input: 23108.26 toks/s, output: 2648.07 toks/s][A
+Processed prompts: 100%|██████████| 1319/1319 [01:01<00:00, 40.24it/s, est. speed input: 23094.28 toks/s, output: 2655.99 toks/s][AProcessed prompts: 100%|██████████| 1319/1319 [01:01<00:00, 21.33it/s, est. speed input: 23094.28 toks/s, output: 2655.99 toks/s]
+Running generate_until requests:   0%|          | 1/1319 [01:02<22:48:22, 62.29s/it]Running generate_until requests: 100%|██████████| 1319/1319 [01:02<00:00, 21.17it/s]
+vllm ({'pretrained': '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/wsr_rsn_row/llama2_13b/rsn/gsm8k', 'seed': 42, 'dtype': 'auto', 'gpu_memory_utilization': 0.85, 'max_model_len': 4096, 'tensor_parallel_size': 1, 'enforce_eager': True}), gen_kwargs: ({}), limit: None, num_fewshot: 5, batch_size: auto
+|Tasks|Version|     Filter     |n-shot|  Metric   |   |Value |   |Stderr|
+|-----|------:|----------------|-----:|-----------|---|-----:|---|-----:|
+|gsm8k|      3|flexible-extract|     5|exact_match|↑  |0.4845|±  |0.0138|
+|     |       |strict-match    |     5|exact_match|↑  |0.4845|±  |0.0138|

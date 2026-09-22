@@ -134,6 +134,10 @@ def parse_args(argv=None):
     p.add_argument("--freq_threshold", type=float, default=1.0,
                    help="Fraction of prompts a direction must appear in top-k to be selected as safety neuron. "
                         "1.0 = exact intersection (original behaviour); <1.0 = frequency-based relaxation")
+    p.add_argument("--neuron_output_file", type=str, default=None,
+                   help="검출 결과를 쓸 정확한 경로. 기본은 "
+                        "<output_dir>/warp_safety_neurons_<ts>.txt. "
+                        "WSR-RSN 은 safety/utility 를 각각 돌려야 하므로 이름을 구분해야 한다.")
     p.add_argument("--existing_neuron_file", type=str, default=None,
                    help="Skip detection: load WaRP-space safety neurons from this file")
     p.add_argument("--detection_only", action="store_true",
@@ -236,7 +240,11 @@ def main(argv=None):
     logger.info(f"  log_file         : {log_file}")
     logger.info("=" * 70)
 
-    os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu)
+    # 셸/스케줄러가 이미 정해줬으면 건드리지 않는다. 원본은 무조건 덮어써서 SLURM 이
+    # 할당한 GPU 와 다른 카드를 잡을 수 있었다 (저장소 규칙: CUDA_VISIBLE_DEVICES 를
+    # 코드에서 하드 지정하지 않는다). 이미 설정돼 있으면 --gpu 는 그 안에서의 인덱스다.
+    if "CUDA_VISIBLE_DEVICES" not in os.environ:
+        os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu)
 
     # ── Step 0: load model ──────────────────────────────────────────────────
     logger.info("\n[1/4] Loading model and tokenizer")
@@ -304,10 +312,11 @@ def main(argv=None):
         safety_neurons = detector.detect(prompts)
 
         # 2e: save
-        neuron_file = os.path.join(
+        neuron_file = args.neuron_output_file or os.path.join(
             args.output_dir,
             f"warp_safety_neurons_{ts}.txt",
         )
+        os.makedirs(os.path.dirname(os.path.abspath(neuron_file)) or ".", exist_ok=True)
         WaRPSNDetector.save_safety_neurons(safety_neurons, neuron_file)
         logger.info(f"\n  ✓ Safety neurons saved → {neuron_file}")
 
@@ -316,6 +325,13 @@ def main(argv=None):
             len(v) for d in safety_neurons.values() for v in d.values()
         )
         logger.info(f"  Total WaRP-space safety neurons: {total:,}")
+        if total == 0:
+            logger.error(
+                "검출된 뉴런이 0개다. 이대로 두면 SN-Tune 이 몇 시간 뒤 "
+                "'optimizer got an empty parameter list' 로 죽는다. "
+                "top_k_ffn/top_k_attn 을 올리거나 freq_threshold 를 낮춰라."
+            )
+            sys.exit(1)
 
         # Reload a fresh model for SN-Tune (detection may have modified module types)
         logger.info("\n  Reloading model for SN-Tune (fresh copy)")

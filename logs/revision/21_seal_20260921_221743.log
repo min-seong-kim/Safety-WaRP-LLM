@@ -1,0 +1,34 @@
+════════════════════════════════════════════════════════════════
+ Revision 실험 계획
+   repo      : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM
+   python    : /usr/bin/python
+   safety    : cb
+   models    : llama2_7b
+   methods   : seal
+   tasks     : agnews
+   eff.batch : 16   epochs: 3   max_len: 1024   seed: 42
+   full-param: lr=[llama2_7b=3e-5] wd=0.01 warmup=0.1
+   lora      : r=16 a=32 drop=0.05 wd=0.0 warmup=0.03
+               lr=3e-4 (gsm8k/math/medqa/arc) · 7e-5 (agnews)
+   out       : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/revision_seal_lr3e-5
+   hf        : 업로드 안 함 (PUSH_TO_HUB=0) — 디스크 3.4TB 필요
+════════════════════════════════════════════════════════════════
+
+  SEAL top-p     : 0.8 (top80)
+  selector epochs: 2
+  S2 (full-param): lr=<모델별, 아래 셀 라벨 참조> wd=0.01 warmup=0.1 epochs=3
+  selector ckpt  : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/seal/ckpt/revision
+
+──────────────────────────────────────────────────────────────
+  seal-S1 selector  cb/llama2_7b/agnews  batch=4   (09-21 22:17:43)
+──────────────────────────────────────────────────────────────
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/seal/train_selector.py", line 36, in <module>
+    from transformers import AutoModelForCausalLM, AutoTokenizer, set_seed
+ModuleNotFoundError: No module named 'transformers'
+[revision][WARN ] [fail rc=1] seal-S1  cb/llama2_7b/agnews — 로그: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/seal/ckpt/revision/cb/llama2_7b/agnews_selector_s1.log
+
+════════════════ 실패한 셀 (1) ════════════════
+  - seal-S1/cb/llama2_7b/agnews

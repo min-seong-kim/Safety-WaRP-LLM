@@ -68,6 +68,7 @@ from models.warp_modules import (
     LinearWaRP,
     switch_to_warp_module,
     restore_weight,
+    offload_weight_buffers,
     restore_to_linear,
 )
 
@@ -134,7 +135,18 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--task", default="gsm8k", choices=list(_TASK_CONFIG.keys()))
     p.add_argument("--num_train_samples", type=int, default=None,
                    help="Limit number of training samples (None = use all)")
-    p.add_argument("--cache_dir", default="./cache")
+    # 기본값이 './cache' 였는데, 그러면 HF_HOME 캐시에 이미 있는 데이터셋을 못 찾고
+    # 새로 받으려다 오프라인에서 죽는다 (ConnectionError: OfflineModeIsEnabled).
+    # None 이면 load_dataset 이 HF 기본 캐시를 쓴다.
+    p.add_argument("--cache_dir", default=None)
+    p.add_argument("--offload_weight_buffer", action="store_true",
+                   help=("WaRP 모드에서 쓰이지 않는 원본 weight 버퍼를 CPU 로 내려 "
+                         "GPU 를 비운다 (13B 기준 16.4GiB). 13B 처럼 큰 모델에서 필요."))
+    p.add_argument("--task_data_path", default=None,
+                   help=('태스크 데이터를 Hub 대신 로컬 JSON 에서 읽는다 '
+                         '([{"question":..., "response":...}]). '
+                         'data/gsm8k_train_task_7473.json 처럼 저장소에 고정해 둔 파일을 쓰면 '
+                         '모든 arm 이 byte-identical 한 프롬프트를 본다 (CLAUDE.md 불변식 1).'))
 
     # ── Training ──
     p.add_argument("--output_dir", required=True)
@@ -556,7 +568,11 @@ class DataCollatorForCausalLMWithPadding:
 def main() -> None:
     args = parse_args()
 
-    os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu)
+    # 셸/스케줄러가 이미 정해줬으면 건드리지 않는다. 원본은 무조건 덮어써서 SLURM 이
+    # 할당한 GPU 와 다른 카드를 잡을 수 있었다 (저장소 규칙: CUDA_VISIBLE_DEVICES 를
+    # 코드에서 하드 지정하지 않는다). 이미 설정돼 있으면 --gpu 는 그 안에서의 인덱스다.
+    if "CUDA_VISIBLE_DEVICES" not in os.environ:
+        os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu)
     os.makedirs(args.output_dir, exist_ok=True)
     set_seed(args.seed)
 
@@ -620,6 +636,9 @@ def main() -> None:
     freeze_specs, hook_handles = setup_safety_col_freezing(
         model, basis_data, safety_neurons, layer_types, num_layers
     )
+    if args.offload_weight_buffer:
+        offload_weight_buffers(model)
+
     restore_cb = SafetyColRestoreCallback(freeze_specs)
     logger.info(f"  ✓ {len(freeze_specs)} modules with frozen safety columns")
 
@@ -627,20 +646,31 @@ def main() -> None:
     logger.info(f"\n[5/6] Loading dataset ({args.task})")
     task_cfg = _TASK_CONFIG[args.task]
 
-    raw_ds = load_dataset(
-        task_cfg["dataset_name"],
-        task_cfg["subset"],
-        split=task_cfg["split"],
-        cache_dir=args.cache_dir,
-    )
+    if args.task_data_path:
+        # 로컬 JSON: {"question", "response"} 스키마. 순서를 유지해야 arm 간 비교가 성립한다.
+        from datasets import Dataset as _HFDataset
+        with open(args.task_data_path, "r", encoding="utf-8") as f:
+            _rows = json.load(f)
+        raw_ds = _HFDataset.from_list(_rows)
+        q_field, a_field = "question", "response"
+        logger.info(f"  ✓ 로컬 JSON 사용: {args.task_data_path}")
+    else:
+        raw_ds = load_dataset(
+            task_cfg["dataset_name"],
+            task_cfg["subset"],
+            split=task_cfg["split"],
+            cache_dir=args.cache_dir,
+        )
+        q_field, a_field = task_cfg["question_field"], task_cfg["answer_field"]
+
     if args.num_train_samples and args.num_train_samples < len(raw_ds):
         raw_ds = raw_ds.select(range(args.num_train_samples))
     logger.info(f"  ✓ {len(raw_ds)} training samples")
 
     def preprocess(ex):
         return tokenize_sft_example(
-            ex[task_cfg["question_field"]],
-            ex[task_cfg["answer_field"]],
+            ex[q_field],
+            ex[a_field],
             tokenizer,
             args.max_length,
             args.model_name_or_path,

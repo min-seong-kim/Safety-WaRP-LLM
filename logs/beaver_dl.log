@@ -1,0 +1,30 @@
+[1;32mWelcome to Clunix Container Terminal[0m
+[1;33mUsage Root Auth Command               		 : [0m[1;35mgcsudo [command][0m
+Fetching 13 files:   0%|          | 0/13 [00:00<?, ?it/s]Downloading 'pytorch_model-00001-of-00004.bin' to '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--PKU-Alignment--beaver-dam-7b/blobs/da9a11d064bb94347708d89f14067215bb8d1a9a9b5cd3e130741348fbeae758.incomplete'
+Downloading 'pytorch_model-00003-of-00004.bin' to '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--PKU-Alignment--beaver-dam-7b/blobs/9084ad3431b75a1777129b86fd32fef372d063b499a97112863c9ca9b8ac8f36.incomplete'
+Downloading 'config.json' to '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--PKU-Alignment--beaver-dam-7b/blobs/2fb3e982ff475ed15b4a4ea74338e69277ecfa3f.incomplete'
+Downloading 'pytorch_model-00004-of-00004.bin' to '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--PKU-Alignment--beaver-dam-7b/blobs/233e6a42513d1f1bf8b3460968498bb5d3e27f7a93642c5b6e44d4db7a9f75c8.incomplete'
+Download complete. Moving file to /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--PKU-Alignment--beaver-dam-7b/blobs/2fb3e982ff475ed15b4a4ea74338e69277ecfa3f
+Downloading 'pytorch_model-00002-of-00004.bin' to '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--PKU-Alignment--beaver-dam-7b/blobs/d2d8b42f4b912537cd22227de2954393c573eceb82ebb4a6845aebf681a2f44c.incomplete'
+Downloading '.gitattributes' to '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--PKU-Alignment--beaver-dam-7b/blobs/a6344aac8c09253b3b630fb776ae94478aa0275b.incomplete'
+Downloading 'README.md' to '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--PKU-Alignment--beaver-dam-7b/blobs/26d1226ace1f015138a594983275616f77cb331d.incomplete'
+Downloading 'added_tokens.json' to '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--PKU-Alignment--beaver-dam-7b/blobs/9c16aa4be022f03ad001b006fba14dfb73a1929c.incomplete'
+Downloading 'pytorch_model.bin.index.json' to '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--PKU-Alignment--beaver-dam-7b/blobs/2a60c396a188b2f5a536ffa2a2cc48fac7ca540c.incomplete'
+Download complete. Moving file to /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--PKU-Alignment--beaver-dam-7b/blobs/a6344aac8c09253b3b630fb776ae94478aa0275b
+Download complete. Moving file to /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--PKU-Alignment--beaver-dam-7b/blobs/26d1226ace1f015138a594983275616f77cb331d
+Download complete. Moving file to /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--PKU-Alignment--beaver-dam-7b/blobs/9c16aa4be022f03ad001b006fba14dfb73a1929c
+Fetching 13 files:   8%|▊         | 1/13 [00:00<00:08,  1.35it/s]Download complete. Moving file to /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--PKU-Alignment--beaver-dam-7b/blobs/2a60c396a188b2f5a536ffa2a2cc48fac7ca540c
+Downloading 'special_tokens_map.json' to '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--PKU-Alignment--beaver-dam-7b/blobs/9588650714fc017603ed2e0810f032ff0f970aad.incomplete'
+Downloading 'tokenizer_config.json' to '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--PKU-Alignment--beaver-dam-7b/blobs/3dbd13179b721b326aae8d3a30ad77368df8599a.incomplete'
+Download complete. Moving file to /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--PKU-Alignment--beaver-dam-7b/blobs/9588650714fc017603ed2e0810f032ff0f970aad
+Downloading 'tokenizer.model' to '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--PKU-Alignment--beaver-dam-7b/blobs/9e556afd44213b6bd1be2b850ebbbd98f5481437a8021afaf58ee7fb1818d347.incomplete'
+Download complete. Moving file to /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--PKU-Alignment--beaver-dam-7b/blobs/3dbd13179b721b326aae8d3a30ad77368df8599a
+Downloading 'qa-moderation-teaser.png' to '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--PKU-Alignment--beaver-dam-7b/blobs/cb91b9f989faca8bad73efba331a4ffcc0e56c96.incomplete'
+Download complete. Moving file to /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--PKU-Alignment--beaver-dam-7b/blobs/cb91b9f989faca8bad73efba331a4ffcc0e56c96
+Download complete. Moving file to /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--PKU-Alignment--beaver-dam-7b/blobs/9e556afd44213b6bd1be2b850ebbbd98f5481437a8021afaf58ee7fb1818d347
+Download complete. Moving file to /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--PKU-Alignment--beaver-dam-7b/blobs/233e6a42513d1f1bf8b3460968498bb5d3e27f7a93642c5b6e44d4db7a9f75c8
+Download complete. Moving file to /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--PKU-Alignment--beaver-dam-7b/blobs/9084ad3431b75a1777129b86fd32fef372d063b499a97112863c9ca9b8ac8f36
+Download complete. Moving file to /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--PKU-Alignment--beaver-dam-7b/blobs/da9a11d064bb94347708d89f14067215bb8d1a9a9b5cd3e130741348fbeae758
+Fetching 13 files:  38%|███▊      | 5/13 [00:24<00:41,  5.16s/it]Download complete. Moving file to /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--PKU-Alignment--beaver-dam-7b/blobs/d2d8b42f4b912537cd22227de2954393c573eceb82ebb4a6845aebf681a2f44c
+Fetching 13 files:  46%|████▌     | 6/13 [00:24<00:27,  4.00s/it]Fetching 13 files: 100%|██████████| 13/13 [00:24<00:00,  1.90s/it]
+/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/.hf_cache/hub/models--PKU-Alignment--beaver-dam-7b/snapshots/3a5b70888869f04336d0d8344185ed74268ef896

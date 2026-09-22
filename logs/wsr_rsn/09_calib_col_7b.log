@@ -1,0 +1,20 @@
+[wait] logs/wsr_rsn/col7b.pid 종료
+[wait] logs/wsr_rsn/row13b.pid 종료
+######## 보정 검출 k_ffn=600 k_attn=120 ########
+2026-09-22 17:27:58 [INFO] __main__: 
+[--detection_only] Skipping SN-Tune. Done.
+2026-09-22 17:27:58 [INFO] __main__:   Neuron file: sn_tune/output_neurons_warp/_calib/safety_k600_120.txt
+[wait] logs/wsr_rsn/col7b.pid 종료
+[wait] logs/wsr_rsn/row13b.pid 종료
+[SKIP] k=600/120
+######## 보정 검출 k_ffn=400 k_attn=80 ########
+2026-09-22 19:37:00 [INFO] __main__: 
+[--detection_only] Skipping SN-Tune. Done.
+2026-09-22 19:37:00 [INFO] __main__:   Neuron file: sn_tune/output_neurons_warp/_calib/safety_k400_80.txt
+---- 요약 k=400/80 ----
+  total       13,537
+
+모델: meta-llama/Llama-2-7b-chat-hf
+  뉴런 비율     0.9955%
+  파라미터 비율 1.3825%  (93,159,424 / 6,738,415,616)
+######## CALIB DONE ########

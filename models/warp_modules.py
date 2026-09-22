@@ -392,3 +392,32 @@ def make_signed_permutation(dim, seed=0, dtype=torch.float32, device='cpu'):
 warped_modules = {
     nn.Linear: LinearWaRP,
 }
+
+
+def offload_weight_buffers(model, device="cpu"):
+    """flag=True 인 WaRP 모듈의 원본 `weight` 버퍼를 GPU 밖으로 내린다.
+
+    WaRP forward 는 `basis_coeff`(와 `UT_forward`)만 쓰므로, flag=True 상태에서
+    `weight` 버퍼는 학습 내내 **한 번도 읽히지 않는다**. 그런데 등록된 buffer 라
+    GPU 메모리를 계속 차지한다 — Llama-2-13B 의 5개 layer_type 기준 16.4GB.
+
+    `restore_weight()` 가 `module.weight.data = <새 텐서>` 로 통째로 덮어쓰므로
+    내려둔 내용이 나중에 필요하지도 않고, 복원 시 자동으로 GPU 텐서가 된다.
+    따라서 되돌리는 호출이 따로 필요 없다.
+
+    Returns: 내린 모듈 수, 회수한 바이트
+    """
+    import logging
+    logger = logging.getLogger(__name__)
+    n, freed = 0, 0
+    for module in model.modules():
+        if isinstance(module, WaRPModule) and bool(getattr(module, "flag", False)):
+            w = getattr(module, "weight", None)
+            if w is not None and w.device.type != device:
+                freed += w.numel() * w.element_size()
+                module.weight = w.to(device)
+                n += 1
+    if n:
+        logger.info(f"[offload_weight_buffers] {n}개 모듈의 weight 버퍼를 {device} 로 내림 "
+                    f"({freed / 2**30:.2f} GiB 회수)")
+    return n, freed

@@ -1,0 +1,29 @@
+########## 진행 중인 검출 대기 ##########
+[wait] pid 272093 (logs/wsr_rsn/col7b.pid) 종료
+[wait] pid 269166 (logs/wsr_rsn/row13b.pid) 종료
+########## 1. 13B 열 검출 ##########
+=== [17:13:37] START col_detect_13b -> logs/wsr_rsn/08_col_detect_13b.log
+=== [17:39:20] OK col_detect_13b
+########## 2. 열 학습 (7B → 13B) ##########
+=== [17:39:20] START col_train_7b -> logs/wsr_rsn/10_col_train_7b.log
+=== [18:03:36] FAIL col_train_7b rc=1  (로그: logs/wsr_rsn/10_col_train_7b.log)
+=== [18:03:36] START col_train_13b -> logs/wsr_rsn/11_col_train_13b.log
+=== [18:04:46] FAIL col_train_13b rc=1  (로그: logs/wsr_rsn/11_col_train_13b.log)
+########## 3. 행 학습 (7B → 13B) ##########
+=== [18:04:46] START row_train_7b -> logs/wsr_rsn/12_row_train_7b.log
+=== [18:36:43] OK row_train_7b
+=== [18:36:43] START row_train_13b -> logs/wsr_rsn/13_row_train_13b.log
+=== [19:29:01] OK row_train_13b
+########## 4. top-k 보정 검출 (1200/200 결과 확보 후) ##########
+=== [19:29:01] START calib_col_7b -> logs/wsr_rsn/09_calib_col_7b.log
+=== [19:37:11] OK calib_col_7b
+########## ORCHESTRATION COMPLETE 2026-09-22T19:37:11+09:00 ##########
+total 29
+drwxr-sr-x 2 edgeai_lab 26msit001_A 4096 Sep 22 19:37 .
+drwxr-sr-x 3 edgeai_lab 26msit001_A 4096 Sep 22 19:34 ..
+-rw-r--r-- 1 edgeai_lab 26msit001_A   26 Sep 22 19:37 calib_col_7b.done
+-rw-r--r-- 1 edgeai_lab 26msit001_A   26 Sep 22 17:39 col_detect_13b.done
+-rw-r--r-- 1 edgeai_lab 26msit001_A    2 Sep 22 18:04 col_train_13b.failed
+-rw-r--r-- 1 edgeai_lab 26msit001_A    2 Sep 22 18:03 col_train_7b.failed
+-rw-r--r-- 1 edgeai_lab 26msit001_A   26 Sep 22 19:29 row_train_13b.done
+-rw-r--r-- 1 edgeai_lab 26msit001_A   26 Sep 22 18:36 row_train_7b.done

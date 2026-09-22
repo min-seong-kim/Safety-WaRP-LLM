@@ -36,7 +36,8 @@ from torch.utils.data import Dataset, DataLoader
 from transformers import get_cosine_schedule_with_warmup
 from tqdm import tqdm
 
-from models.warp_modules import LinearWaRP, switch_to_warp_module, restore_weight, restore_to_linear
+from models.warp_modules import (LinearWaRP, switch_to_warp_module, restore_weight,
+                                 restore_to_linear, offload_weight_buffers)
 
 logger = logging.getLogger(__name__)
 

@@ -1,0 +1,10 @@
+[1;32mWelcome to Clunix Container Terminal[0m
+[1;33mUsage Root Auth Command               		 : [0m[1;35mgcsudo [command][0m
+########## (B-정정) 복원 콜백 있음 — p10 모델 + p10 마스크 ##########
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 3/3 [00:00<00:00, 259.55it/s]
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 3/3 [00:00<00:00, 251.20it/s]
+mask=1 일치율 (관측)      : 1.0000  (84305543 / 84305543)
+mask=0 일치율 (bf16 바닥값): 0.6789
+보정 동결률 f = (관측-r)/(1-r): 1.0000
+→ 복원 콜백이 있었다면 f≈1.0, gradient hook 만이면 f<1.0 (드리프트)
+DRIFT_B_DONE

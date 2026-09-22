@@ -1,0 +1,157 @@
+########## 1. HarmBench (conda harmbench, sys 모드) ##########
+[env] /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/harmbench/bin/python
+[env] transformers 4.57.6 / vllm 0.16.0
+==============================================================================
+🚀 Starting HarmBench Batch Evaluation Pipeline...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📊 Batch Configuration:
+  Models  : llama2_7b-chat-gsm8k-ft_freeze-rsn-lr5e-5 llama2_13b-chat-rsn-tune-gsm8k-lr5e-5
+  Methods : DirectRequest AutoDAN PAIR PAP
+  Total Combinations: 8
+  Datasets : ./data/behavior_datasets/Advbench_behaviors_standard.csv
+  Safety prompt: sys (llama-2 <<SYS>> 안전 system prompt 포함)
+                 [STRIP_SAFETY_SYSTEM_PROMPT=0, RESULT_TAG='<없음>', 결과파일=<model>.json]
+  Grading  : hard
+📝 로그 파일: logs/harmbench_2026-09-22_20-42-33.log
+==============================================================================
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║ [1/8] Processing: DirectRequest x llama2_7b-chat-gsm8k-ft_freeze-rsn-lr5e-5
+╠═══════════════════════════════════════════════════════════════════════════╣
+⏭️  [Step 1/4] Skipping Test Cases (already generated for DirectRequest)
+⏳ [Step 2/4] Generating Completions with llama2_7b-chat-gsm8k-ft_freeze-rsn-lr5e-5...
+⏭️  [Step 2/4] Skipping generation (RESUME: 기존 completions 재사용) ./results/Advbench_behaviors_standard/DirectRequest/default/completions/llama2_7b-chat-gsm8k-ft_freeze-rsn-lr5e-5.json
+⏳ [Step 3/4] Evaluating Completions (ASR Scoring)...
+   ⏭️  [cls=hard] 채점 스킵 (기존 결과 재사용, asr=0.0019)
+✅ Completed: DirectRequest_llama2_7b-chat-gsm8k-ft_freeze-rsn-lr5e-5
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║ [2/8] Processing: AutoDAN x llama2_7b-chat-gsm8k-ft_freeze-rsn-lr5e-5
+╠═══════════════════════════════════════════════════════════════════════════╣
+⏭️  [Step 1/4] Skipping Test Cases (reusing llama2_7b's test cases for AutoDAN)
+⏳ [Step 2/4] Generating Completions with llama2_7b-chat-gsm8k-ft_freeze-rsn-lr5e-5...
+⏭️  [Step 2/4] Skipping generation (RESUME: 기존 completions 재사용) ./results/Advbench_behaviors_standard/AutoDAN/llama2_7b/completions/llama2_7b-chat-gsm8k-ft_freeze-rsn-lr5e-5.json
+⏳ [Step 3/4] Evaluating Completions (ASR Scoring)...
+   ⏭️  [cls=hard] 채점 스킵 (기존 결과 재사용, asr=0.0596)
+✅ Completed: AutoDAN_llama2_7b-chat-gsm8k-ft_freeze-rsn-lr5e-5
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║ [3/8] Processing: PAIR x llama2_7b-chat-gsm8k-ft_freeze-rsn-lr5e-5
+╠═══════════════════════════════════════════════════════════════════════════╣
+⏭️  [Step 1/4] Skipping Test Cases (reusing llama2_7b-instruct's test cases for PAIR)
+⏳ [Step 2/4] Generating Completions with llama2_7b-chat-gsm8k-ft_freeze-rsn-lr5e-5...
+⏭️  [Step 2/4] Skipping generation (RESUME: 기존 completions 재사용) ./results/Advbench_behaviors_standard/PAIR/llama2_7b-instruct/completions/llama2_7b-chat-gsm8k-ft_freeze-rsn-lr5e-5.json
+⏳ [Step 3/4] Evaluating Completions (ASR Scoring)...
+   ⏭️  [cls=hard] 채점 스킵 (기존 결과 재사용, asr=0.3865)
+✅ Completed: PAIR_llama2_7b-chat-gsm8k-ft_freeze-rsn-lr5e-5
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║ [4/8] Processing: PAP x llama2_7b-chat-gsm8k-ft_freeze-rsn-lr5e-5
+╠═══════════════════════════════════════════════════════════════════════════╣
+⏭️  [Step 1/4] Skipping Test Cases (already generated for PAP)
+⏳ [Step 2/4] Generating Completions with llama2_7b-chat-gsm8k-ft_freeze-rsn-lr5e-5...
+⏭️  [Step 2/4] Skipping generation (RESUME: 기존 completions 재사용) ./results/Advbench_behaviors_standard/PAP/top_5/completions/llama2_7b-chat-gsm8k-ft_freeze-rsn-lr5e-5.json
+⏳ [Step 3/4] Evaluating Completions (ASR Scoring)...
+   ⏭️  [cls=hard] 채점 스킵 (기존 결과 재사용, asr=0.3792)
+✅ Completed: PAP_llama2_7b-chat-gsm8k-ft_freeze-rsn-lr5e-5
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║ [5/8] Processing: DirectRequest x llama2_13b-chat-rsn-tune-gsm8k-lr5e-5
+╠═══════════════════════════════════════════════════════════════════════════╣
+⏭️  [Step 1/4] Skipping Test Cases (already generated for DirectRequest)
+⏳ [Step 2/4] Generating Completions with llama2_13b-chat-rsn-tune-gsm8k-lr5e-5...
+⏭️  [Step 2/4] Skipping generation (RESUME: 기존 completions 재사용) ./results/Advbench_behaviors_standard/DirectRequest/default/completions/llama2_13b-chat-rsn-tune-gsm8k-lr5e-5.json
+⏳ [Step 3/4] Evaluating Completions (ASR Scoring)...
+   ⏭️  [cls=hard] 채점 스킵 (기존 결과 재사용, asr=0.0000)
+✅ Completed: DirectRequest_llama2_13b-chat-rsn-tune-gsm8k-lr5e-5
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║ [6/8] Processing: AutoDAN x llama2_13b-chat-rsn-tune-gsm8k-lr5e-5
+╠═══════════════════════════════════════════════════════════════════════════╣
+⏭️  [Step 1/4] Skipping Test Cases (reusing llama2_13b's test cases for AutoDAN)
+⏳ [Step 2/4] Generating Completions with llama2_13b-chat-rsn-tune-gsm8k-lr5e-5...
+⏭️  [Step 2/4] Skipping generation (RESUME: 기존 completions 재사용) ./results/Advbench_behaviors_standard/AutoDAN/llama2_13b/completions/llama2_13b-chat-rsn-tune-gsm8k-lr5e-5.json
+⏳ [Step 3/4] Evaluating Completions (ASR Scoring)...
+   ⏭️  [cls=hard] 채점 스킵 (기존 결과 재사용, asr=0.1788)
+✅ Completed: AutoDAN_llama2_13b-chat-rsn-tune-gsm8k-lr5e-5
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║ [7/8] Processing: PAIR x llama2_13b-chat-rsn-tune-gsm8k-lr5e-5
+╠═══════════════════════════════════════════════════════════════════════════╣
+⏭️  [Step 1/4] Skipping Test Cases (reusing llama2_13b-instruct's test cases for PAIR)
+⏳ [Step 2/4] Generating Completions with llama2_13b-chat-rsn-tune-gsm8k-lr5e-5...
+⏭️  [Step 2/4] Skipping generation (RESUME: 기존 completions 재사용) ./results/Advbench_behaviors_standard/PAIR/llama2_13b-instruct/completions/llama2_13b-chat-rsn-tune-gsm8k-lr5e-5.json
+⏳ [Step 3/4] Evaluating Completions (ASR Scoring)...
+   ⏭️  [cls=hard] 채점 스킵 (기존 결과 재사용, asr=0.3788)
+✅ Completed: PAIR_llama2_13b-chat-rsn-tune-gsm8k-lr5e-5
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║ [8/8] Processing: PAP x llama2_13b-chat-rsn-tune-gsm8k-lr5e-5
+╠═══════════════════════════════════════════════════════════════════════════╣
+⏭️  [Step 1/4] Skipping Test Cases (already generated for PAP)
+⏳ [Step 2/4] Generating Completions with llama2_13b-chat-rsn-tune-gsm8k-lr5e-5...
+⏭️  [Step 2/4] Skipping generation (RESUME: 기존 completions 재사용) ./results/Advbench_behaviors_standard/PAP/top_5/completions/llama2_13b-chat-rsn-tune-gsm8k-lr5e-5.json
+⏳ [Step 3/4] Evaluating Completions (ASR Scoring)...
+   ⏭️  [cls=hard] 채점 스킵 (기존 결과 재사용, asr=0.5935)
+✅ Completed: PAP_llama2_13b-chat-rsn-tune-gsm8k-lr5e-5
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                   🎉 Batch Evaluation Complete!
+╠═══════════════════════════════════════════════════════════════════════════╣
+✅ Completed: 8/8
+   ✓ DirectRequest_llama2_7b-chat-gsm8k-ft_freeze-rsn-lr5e-5
+   ✓ AutoDAN_llama2_7b-chat-gsm8k-ft_freeze-rsn-lr5e-5
+   ✓ PAIR_llama2_7b-chat-gsm8k-ft_freeze-rsn-lr5e-5
+   ✓ PAP_llama2_7b-chat-gsm8k-ft_freeze-rsn-lr5e-5
+   ✓ DirectRequest_llama2_13b-chat-rsn-tune-gsm8k-lr5e-5
+   ✓ AutoDAN_llama2_13b-chat-rsn-tune-gsm8k-lr5e-5
+   ✓ PAIR_llama2_13b-chat-rsn-tune-gsm8k-lr5e-5
+   ✓ PAP_llama2_13b-chat-rsn-tune-gsm8k-lr5e-5
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+📊 Results Location:
+   ./results/{DATASET_NAME}/{METHOD}/{EXPERIMENT_NAME}/results/{MODEL_NAME}.json
+
+
+════════════════════ Dataset: Advbench_behaviors_standard ════════════════════
+═══════════════ ⬇⬇⬇  COPY (tables.csv 붙여넣기)  ⬇⬇⬇ ═══════════════
+,,ASR(keyword),,,,,ASR(Harmbench-CLS),,,,,ASR(WildGuard),,,,,ASR(Beaver Dam 7B),,,,
+hb_주소,,Direct,AutoDAN,PAIR,PAP,AVG,Direct,AutoDAN,PAIR,PAP,AVG,Direct,AutoDAN,PAIR,PAP,AVG,Direct,AutoDAN,PAIR,PAP,AVG
+llama2_7b-chat-gsm8k-ft_freeze-rsn-lr5e-5,,0.0019,0.0596,0.3865,0.3792,0.2068,,,,,,,,,,,,,,,
+llama2_13b-chat-rsn-tune-gsm8k-lr5e-5,,0,0.1788,0.3788,0.5935,0.2878,,,,,,,,,,,,,,,
+═══════════════ ⬆⬆⬆  COPY 끝  ⬆⬆⬆ ═══════════════
+
+📋 Summary CSV 저장됨:
+   ./results/evaluation_summary_2026-09-22_20-42-33.csv
+
+📝 Log File:
+   logs/harmbench_2026-09-22_20-42-33.log
+=== HarmBench rc=0 ===
+########## 2. lm-eval GSM8K 5-shot (conda hb) ##########
+---- lm-eval: kmseong_llama2_7b_chat_gsm8k_ft_freeze_rsn_lr5e-5_new_revised
+Processed prompts:  97%|█████████▋| 1284/1319 [00:35<00:00, 116.99it/s, est. speed input: 39555.37 toks/s, output: 4812.33 toks/s][A
+Processed prompts:  98%|█████████▊| 1298/1319 [00:35<00:00, 122.86it/s, est. speed input: 39787.61 toks/s, output: 4881.35 toks/s][A
+Processed prompts:  99%|█████████▉| 1311/1319 [00:35<00:00, 89.29it/s, est. speed input: 39817.08 toks/s, output: 4924.52 toks/s] [A
+Processed prompts: 100%|██████████| 1319/1319 [00:36<00:00, 89.29it/s, est. speed input: 39647.98 toks/s, output: 4935.40 toks/s][AProcessed prompts: 100%|██████████| 1319/1319 [00:36<00:00, 36.62it/s, est. speed input: 39647.98 toks/s, output: 4935.40 toks/s]
+Running generate_until requests:   0%|          | 1/1319 [00:36<13:20:55, 36.46s/it]Running generate_until requests: 100%|██████████| 1319/1319 [00:36<00:00, 36.17it/s]
+2026-09-22:20:43:51 INFO     [loggers.evaluation_tracker:247] Saving results aggregated
+vllm ({'pretrained': 'kmseong/llama2_7b_chat_gsm8k_ft_freeze_rsn_lr5e-5_new_revised', 'seed': 42, 'dtype': 'auto', 'gpu_memory_utilization': 0.85, 'max_model_len': 4096, 'tensor_parallel_size': 1, 'enforce_eager': True}), gen_kwargs: ({}), limit: None, num_fewshot: 5, batch_size: auto
+|Tasks|Version|     Filter     |n-shot|  Metric   |   |Value |   |Stderr|
+|-----|------:|----------------|-----:|-----------|---|-----:|---|-----:|
+|gsm8k|      3|flexible-extract|     5|exact_match|↑  |0.3336|±  |0.0130|
+|     |       |strict-match    |     5|exact_match|↑  |0.4026|±  |0.0135|
+
+---- lm-eval: wvnvwn_llama-2-13b-chat-hf-gsm8k-rsn-tuned-lr5e-5
+Processed prompts:  99%|█████████▉| 1303/1319 [01:00<00:00, 80.91it/s, est. speed input: 23281.91 toks/s, output: 2614.28 toks/s][A
+Processed prompts:  99%|█████████▉| 1312/1319 [01:01<00:00, 49.32it/s, est. speed input: 23265.12 toks/s, output: 2627.98 toks/s][A
+Processed prompts: 100%|██████████| 1319/1319 [01:01<00:00, 31.44it/s, est. speed input: 23177.57 toks/s, output: 2634.43 toks/s][A
+Processed prompts: 100%|██████████| 1319/1319 [01:01<00:00, 31.44it/s, est. speed input: 23177.57 toks/s, output: 2634.43 toks/s][AProcessed prompts: 100%|██████████| 1319/1319 [01:01<00:00, 21.41it/s, est. speed input: 23177.57 toks/s, output: 2634.43 toks/s]
+Running generate_until requests:   0%|          | 1/1319 [01:02<22:43:17, 62.06s/it]Running generate_until requests: 100%|██████████| 1319/1319 [01:02<00:00, 21.25it/s]
+2026-09-22:20:45:35 INFO     [loggers.evaluation_tracker:247] Saving results aggregated
+vllm ({'pretrained': 'wvnvwn/llama-2-13b-chat-hf-gsm8k-rsn-tuned-lr5e-5', 'seed': 42, 'dtype': 'auto', 'gpu_memory_utilization': 0.85, 'max_model_len': 4096, 'tensor_parallel_size': 1, 'enforce_eager': True}), gen_kwargs: ({}), limit: None, num_fewshot: 5, batch_size: auto
+|Tasks|Version|     Filter     |n-shot|  Metric   |   |Value |   |Stderr|
+|-----|------:|----------------|-----:|-----------|---|-----:|---|-----:|
+|gsm8k|      3|flexible-extract|     5|exact_match|↑  |0.4594|±  |0.0137|
+|     |       |strict-match    |     5|exact_match|↑  |0.4579|±  |0.0137|
+
+########## PUBLISHED RSN EVAL COMPLETE 2026-09-22T20:45:37+09:00 ##########

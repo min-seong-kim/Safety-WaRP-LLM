@@ -1,0 +1,76 @@
+---- kmseong/llama2_7b-chat-CB_SSFT-seal_agnews_topp0.8_lr5e-5
+[setup] model=kmseong/llama2_7b-chat-CB_SSFT-seal_agnews_topp0.8_lr5e-5
+[setup] tasks=['agnews']
+[setup] output_dir=/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/evaluation_results/agnews_sst2/kmseong__llama2_7b-chat-CB_SSFT-seal_agnews_topp0.8_lr5e-5
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards:  33%|███▎      | 1/3 [00:01<00:03,  1.88s/it]Loading checkpoint shards:  67%|██████▋   | 2/3 [00:03<00:01,  1.85s/it]Loading checkpoint shards: 100%|██████████| 3/3 [00:05<00:00,  1.63s/it]Loading checkpoint shards: 100%|██████████| 3/3 [00:05<00:00,  1.70s/it]
+The following generation flags are not valid and may be ignored: ['temperature', 'top_p']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+[agnews] 64/1000
+[agnews] 128/1000
+[agnews] 192/1000
+[agnews] 256/1000
+[agnews] 320/1000
+[agnews] 384/1000
+[agnews] 448/1000
+[agnews] 512/1000
+[agnews] 576/1000
+[agnews] 640/1000
+[agnews] 704/1000
+[agnews] 768/1000
+[agnews] 832/1000
+[agnews] 896/1000
+[agnews] 960/1000
+[agnews] 1000/1000
+[agnews] accuracy=0.9200 macro_f1=0.9196 invalid=0
+[done] summary=/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/evaluation_results/agnews_sst2/kmseong__llama2_7b-chat-CB_SSFT-seal_agnews_topp0.8_lr5e-5/summary.json
+   rc=0
+---- kmseong/llama2_7b-chat-CB_SSFT-asft_agnews_lambda1.0_lr7e-5
+[setup] model=kmseong/llama2_7b-chat-CB_SSFT-asft_agnews_lambda1.0_lr7e-5
+[setup] tasks=['agnews']
+[setup] output_dir=/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/evaluation_results/agnews_sst2/kmseong__llama2_7b-chat-CB_SSFT-asft_agnews_lambda1.0_lr7e-5
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards:  33%|███▎      | 1/3 [00:01<00:02,  1.44s/it]Loading checkpoint shards:  67%|██████▋   | 2/3 [00:02<00:01,  1.44s/it]Loading checkpoint shards: 100%|██████████| 3/3 [00:03<00:00,  1.27s/it]Loading checkpoint shards: 100%|██████████| 3/3 [00:03<00:00,  1.32s/it]
+The following generation flags are not valid and may be ignored: ['temperature', 'top_p']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+[agnews] 64/1000
+[agnews] 128/1000
+[agnews] 192/1000
+[agnews] 256/1000
+[agnews] 320/1000
+[agnews] 384/1000
+[agnews] 448/1000
+[agnews] 512/1000
+[agnews] 576/1000
+[agnews] 640/1000
+[agnews] 704/1000
+[agnews] 768/1000
+[agnews] 832/1000
+[agnews] 896/1000
+[agnews] 960/1000
+[agnews] 1000/1000
+[agnews] accuracy=0.9150 macro_f1=0.9147 invalid=0
+[done] summary=/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/evaluation_results/agnews_sst2/kmseong__llama2_7b-chat-CB_SSFT-asft_agnews_lambda1.0_lr7e-5/summary.json
+   rc=0
+---- kmseong/llama2_7b-chat-CB_SSFT-lisa_agnews_rho1.0_lr7e-5
+[setup] model=kmseong/llama2_7b-chat-CB_SSFT-lisa_agnews_rho1.0_lr7e-5
+[setup] tasks=['agnews']
+[setup] output_dir=/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/evaluation_results/agnews_sst2/kmseong__llama2_7b-chat-CB_SSFT-lisa_agnews_rho1.0_lr7e-5
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards:  33%|███▎      | 1/3 [00:01<00:02,  1.43s/it]Loading checkpoint shards:  67%|██████▋   | 2/3 [00:02<00:01,  1.49s/it]Loading checkpoint shards: 100%|██████████| 3/3 [00:04<00:00,  1.30s/it]Loading checkpoint shards: 100%|██████████| 3/3 [00:04<00:00,  1.35s/it]
+The following generation flags are not valid and may be ignored: ['temperature', 'top_p']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+[agnews] 64/1000
+[agnews] 128/1000
+[agnews] 192/1000
+[agnews] 256/1000
+[agnews] 320/1000
+[agnews] 384/1000
+[agnews] 448/1000
+[agnews] 512/1000
+[agnews] 576/1000
+[agnews] 640/1000
+[agnews] 704/1000
+[agnews] 768/1000
+[agnews] 832/1000
+[agnews] 896/1000
+[agnews] 960/1000
+[agnews] 1000/1000
+[agnews] accuracy=0.9080 macro_f1=0.9076 invalid=0
+[done] summary=/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/evaluation_results/agnews_sst2/kmseong__llama2_7b-chat-CB_SSFT-lisa_agnews_rho1.0_lr7e-5/summary.json
+   rc=0
+AGNEWS_ACC_DONE 2026-09-21T21:57:59+09:00
