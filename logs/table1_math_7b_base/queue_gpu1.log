@@ -1,0 +1,10 @@
+  mask ok: keep_ratio=0.0 space=original_weight_space
+[2026-09-23 18:45:10] ▶ p00  (GPU1, 원공간 동결 0.0, masks=/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/table1_math_7b_base/masks_p00)
+[2026-09-23 19:02:50] ✔ p00 → /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/table1_math_7b_base/p00/phase3_original_space_20260923_184532/final_model
+  mask ok: keep_ratio=0.1 space=original_weight_space
+[2026-09-23 19:02:50] ▶ p10  (GPU1, 원공간 동결 0.1, masks=/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/checkpoints/origspace_base_llama2_7b_base/phase2_original_space_20260919_170522/checkpoints/masks)
+[2026-09-23 19:21:05] ✔ p10 → /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/table1_math_7b_base/p10/phase3_original_space_20260923_190317/final_model
+cat: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/table1_math_7b_base/p30/MODEL_DIR: No such file or directory
+[2026-09-23 19:21:05] [skip] p30 완료: 
+cat: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/table1_math_7b_base/p50/MODEL_DIR: No such file or directory
+[2026-09-23 19:21:05] [skip] p50 완료: 

@@ -1,0 +1,5 @@
+[2026-09-23 15:47:21] ▶ wsr_p10 Phase 1 (basis, GPU0)
+[2026-09-23 16:12:09] ▶ wsr_p10 Phase 2 (mask ρ=0.1 --perlayer, GPU0)
+[2026-09-23 16:21:47] ▶ wsr_p10 Phase 3 (non_freeze, GPU0, basis=/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/table1_math_8b_base/wsr_p10/phase1_20260923_154726/basis masks=/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/table1_math_8b_base/wsr_p10/phase2_20260923_162053/checkpoints/masks)
+[2026-09-23 18:06:57] ✔ wsr_p10 → /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/table1_math_8b_base/wsr_p10/phase3_non_freeze_20260923_162234/final_model
+[2026-09-23 18:06:57] [skip] p50 완료: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/table1_math_8b_base/p50/phase3_original_space_20260923_171118/final_model

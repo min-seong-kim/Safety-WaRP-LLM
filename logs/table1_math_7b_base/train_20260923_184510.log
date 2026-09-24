@@ -1,0 +1,19 @@
+[2026-09-23 18:45:10] ════ Table 1 · Llama-2-7B base · MATH · lr 5e-5 · start=kmseong/llama2_7b-base-CB_SSFT-lr3e-5 ════
+[2026-09-23 18:45:10]   GPU0 큐: wsr_p10   |   GPU1 큐: p00 p10 p30 p50
+[2026-09-23 18:45:10] 큐 GPU0 pid=1456924  (로그 /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/logs/table1_math_7b_base/queue_gpu0.log)
+[2026-09-23 18:45:10] 큐 GPU1 pid=1456925  (로그 /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/logs/table1_math_7b_base/queue_gpu1.log)
+[2026-09-23 18:45:10] ▶ wsr_p10 Phase 1 (basis, GPU0)
+[2026-09-23 18:58:28] ▶ wsr_p10 Phase 2 (mask ρ=0.1 --perlayer, GPU0)
+[2026-09-23 19:06:56] ▶ wsr_p10 Phase 3 (non_freeze, GPU0, basis=/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/table1_math_7b_base/wsr_p10/phase1_20260923_184514/basis masks=/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/table1_math_7b_base/wsr_p10/phase2_20260923_190604/checkpoints/masks)
+[2026-09-23 20:34:40] ✔ wsr_p10 → /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/table1_math_7b_base/wsr_p10/phase3_non_freeze_20260923_190745/final_model
+  mask ok: keep_ratio=0.0 space=original_weight_space
+[2026-09-23 18:45:10] ▶ p00  (GPU1, 원공간 동결 0.0, masks=/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/table1_math_7b_base/masks_p00)
+[2026-09-23 19:02:50] ✔ p00 → /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/table1_math_7b_base/p00/phase3_original_space_20260923_184532/final_model
+  mask ok: keep_ratio=0.1 space=original_weight_space
+[2026-09-23 19:02:50] ▶ p10  (GPU1, 원공간 동결 0.1, masks=/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/checkpoints/origspace_base_llama2_7b_base/phase2_original_space_20260919_170522/checkpoints/masks)
+[2026-09-23 19:21:05] ✔ p10 → /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/table1_math_7b_base/p10/phase3_original_space_20260923_190317/final_model
+cat: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/table1_math_7b_base/p30/MODEL_DIR: No such file or directory
+[2026-09-23 19:21:05] [skip] p30 완료: 
+cat: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/table1_math_7b_base/p50/MODEL_DIR: No such file or directory
+[2026-09-23 19:21:05] [skip] p50 완료: 
+[2026-09-23 20:34:40] TRAIN_FINISHED

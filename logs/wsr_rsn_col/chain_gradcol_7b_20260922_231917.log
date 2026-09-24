@@ -1,0 +1,17 @@
+[2026-09-22 23:19:20] 1. Phase 2 arm C 대기 (pid 717177)
+[2026-09-22 23:27:20]    masks_C = outputs/wsr_rsn_col_p3/_gradcol/llama2_7b/safety_rho0.1/phase2_armC_20260922_232700/checkpoints/masks
+{
+  "keep_ratio": 0.1,
+  "mask_unit": "column",
+  "num_modules": 160,
+  "total_frozen": 449953792,
+  "total_numel": 4496293888,
+  "total_frozen_ratio": 0.10007214902052239,
+  "total_reference_entry_budget": 449629440,
+  "total_budget_rel_err": 0.0007213762515194735,
+  "max_layer_budget_rel_err": 0.0009765180997396912,
+  "rounding_floor_rel_err": 0.0009765180997396912,
+  "layers": [
+[2026-09-22 23:27:20] 2. sn arm 드라이버(705473) 종료 대기
+[2026-09-22 23:27:20]    sn 셀 MODEL_DIR: 없음
+[2026-09-22 23:27:20] 3. gradcol 7B 학습 시작 (백그라운드) + sn 셀 평가 (동시)

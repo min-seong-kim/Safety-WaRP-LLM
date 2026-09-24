@@ -1,0 +1,4 @@
+[2026-09-23 21:20:51] ▶ llama2_7b-base-origspace-freeze-p10-math-lr5e-5 (GPU0)
+[2026-09-23 21:44:37] ✔ llama2_7b-base-origspace-freeze-p10-math-lr5e-5  |hendrycks_math_qa                        |      1|none  |      |exact_match|↑  |0.0634|±  |0.0034|
+[2026-09-23 21:44:37] ▶ llama2_7b-base-origspace-freeze-p50-math-lr5e-5 (GPU0)
+[2026-09-23 22:08:36] ✔ llama2_7b-base-origspace-freeze-p50-math-lr5e-5  |hendrycks_math_qa                        |      1|none  |      |exact_match|↑  |0.0638|±  |0.0034|

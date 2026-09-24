@@ -2114,6 +2114,14 @@ class Phase3IncrementalLearner:
             max_grad_norm = getattr(self.args, 'max_grad_norm', 1.0)
             logging_steps = getattr(self.args, 'logging_steps', 10)
             gradient_checkpointing = getattr(self.args, 'gradient_checkpointing', False)
+            if gradient_checkpointing and hasattr(self.model, 'enable_input_require_grads'):
+                # freeze 변형은 basis_coeff 만 requires_grad 라 임베딩 출력이 grad 를 요구하지 않는다.
+                # reentrant checkpoint 는 "입력이 grad 를 요구하지 않으면" 출력도 그래프에서 끊어
+                # `element 0 of tensors does not require grad` 로 step 0 에서 죽는다 (2026-09-22,
+                # WSR-RSN-Tune 열 버전에서 실제로 발생). 임베딩 출력에 requires_grad 를 켜 두면
+                # 그래프만 이어지고 수치는 바뀌지 않는다 (임베딩 자체는 여전히 학습되지 않는다).
+                self.model.enable_input_require_grads()
+                self.logger.info("gradient_checkpointing + freeze 변형: enable_input_require_grads() 적용")
 
             training_args = TrainingArguments(
                 output_dir=checkpoint_dir,

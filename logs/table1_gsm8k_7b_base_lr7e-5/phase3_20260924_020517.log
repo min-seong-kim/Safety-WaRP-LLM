@@ -1,0 +1,752 @@
+[2026-09-24 02:05:17] [safety_warp] [INFO] ======================================================================
+[2026-09-24 02:05:17] [safety_warp] [INFO] Safety-WaRP-LLM (Fixed - 원본 FSCIL-WaRP 방식)
+[2026-09-24 02:05:17] [safety_warp] [INFO] ======================================================================
+[2026-09-24 02:05:17] [safety_warp] [INFO] Phase: 3
+[2026-09-24 02:05:17] [safety_warp] [INFO] Model: None
+[2026-09-24 02:05:17] [safety_warp] [INFO] Layer types: attn_q,attn_k,attn_v,ffn_up,ffn_down
+[2026-09-24 02:05:17] [safety_warp] [INFO] Target layers: all
+[2026-09-24 02:05:17] [safety_warp] [INFO] ======================================================================
+[2026-09-24 02:05:18] [safety_warp] [INFO] ======================================================================
+[2026-09-24 02:05:18] [safety_warp] [INFO] Starting Phase 3: Incremental Learning (Fixed)
+[2026-09-24 02:05:18] [safety_warp] [INFO] Mode: non_freeze_warp
+[2026-09-24 02:05:18] [safety_warp] [INFO] ======================================================================
+[2026-09-24 02:05:22] [safety_warp] [INFO] [PROFILE] ▶ Phase 3 / load_basis 시작
+[2026-09-24 02:05:22] [safety_warp] [INFO] Loading basis from /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/table1_math_7b_base/wsr_p10/phase1_20260923_184514/basis...
+[2026-09-24 02:05:30] [safety_warp] [INFO] ✓ Basis loaded: 160 combinations
+[2026-09-24 02:05:30] [safety_warp] [INFO] [PROFILE] ■ Phase 3 / load_basis ok | time=00:00:08 (7.6s) | torch_alloc_peak=0.00GB | torch_reserved_peak=0.00GB | device_peak=0.61GB
+[2026-09-24 02:05:30] [safety_warp] [INFO] [PROFILE] ▶ Phase 3 / load_masks 시작
+[2026-09-24 02:05:30] [safety_warp] [INFO] Loading masks from /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/table1_math_7b_base/wsr_p10/phase2_20260923_190604/checkpoints/masks...
+[2026-09-24 02:05:30] [safety_warp] [INFO] ✓ Mask metadata loaded:
+[2026-09-24 02:05:30] [safety_warp] [INFO]   - Keep ratio: 0.1
+[2026-09-24 02:06:01] [safety_warp] [INFO] ✓ Masks loaded: 160 combinations
+[2026-09-24 02:06:01] [safety_warp] [INFO] [PROFILE] ■ Phase 3 / load_masks ok | time=00:00:31 (30.8s) | torch_alloc_peak=0.00GB | torch_reserved_peak=0.00GB | device_peak=0.61GB
+[2026-09-24 02:06:01] [safety_warp] [INFO] [PROFILE] ▶ Phase 3 / load_model 시작
+[2026-09-24 02:06:01] [safety_warp] [INFO] Loading Phase 0 model from kmseong/llama2_7b-base-CB_SSFT-lr3e-5...
+[2026-09-24 02:06:06] [safety_warp] [INFO] ✓ Model loaded
+[2026-09-24 02:06:06] [safety_warp] [INFO] Converting to WaRP modules...
+[2026-09-24 02:06:06] [safety_warp] [INFO] ✓ Tokenizer loaded
+[2026-09-24 02:06:06] [safety_warp] [INFO]   - Input formatting: Question/Answer plain text
+[2026-09-24 02:06:06] [safety_warp] [INFO] [PROFILE] ■ Phase 3 / load_model ok | time=00:00:06 (5.6s) | torch_alloc_peak=25.26GB | torch_reserved_peak=25.48GB | device_peak=26.19GB
+[2026-09-24 02:06:06] [safety_warp] [INFO] [PROFILE] ▶ Phase 3 / setup_warp_modules 시작
+[2026-09-24 02:06:06] [safety_warp] [INFO] ======================================================================
+[2026-09-24 02:06:06] [safety_warp] [INFO] Setting up WaRP modules with basis and masks
+[2026-09-24 02:06:06] [safety_warp] [INFO] ======================================================================
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 0 (attn_q):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1680755/16777216 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 0 (attn_k):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1685163/16777216 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 0 (attn_v):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1685758/16777216 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 0 (ffn_up):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 4529577/45088768 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 0 (ffn_down):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 4509728/45088768 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 1 (attn_q):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1685189/16777216 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 1 (attn_k):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1678115/16777216 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 1 (attn_v):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1684591/16777216 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 1 (ffn_up):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 4560248/45088768 (10.1%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 1 (ffn_down):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 4599777/45088768 (10.2%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 2 (attn_q):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1682840/16777216 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 2 (attn_k):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1693429/16777216 (10.1%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 2 (attn_v):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1679816/16777216 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 2 (ffn_up):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 4528944/45088768 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 2 (ffn_down):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 4531352/45088768 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 3 (attn_q):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1704114/16777216 (10.2%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 3 (attn_k):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1681409/16777216 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 3 (attn_v):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1685150/16777216 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 3 (ffn_up):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 4527957/45088768 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 3 (ffn_down):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 4548927/45088768 (10.1%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 4 (attn_q):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1679322/16777216 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 4 (attn_k):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1684626/16777216 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 4 (attn_v):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1683997/16777216 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 4 (ffn_up):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 4587527/45088768 (10.2%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 4 (ffn_down):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 4515578/45088768 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 5 (attn_q):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1681374/16777216 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 5 (attn_k):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1680569/16777216 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 5 (attn_v):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1683441/16777216 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 5 (ffn_up):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 4523117/45088768 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 5 (ffn_down):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 4519379/45088768 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 6 (attn_q):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1693243/16777216 (10.1%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 6 (attn_k):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1686650/16777216 (10.1%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 6 (attn_v):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1678105/16777216 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 6 (ffn_up):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 4545172/45088768 (10.1%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 6 (ffn_down):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 4536809/45088768 (10.1%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 7 (attn_q):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1679839/16777216 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 7 (attn_k):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1681141/16777216 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 7 (attn_v):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1682571/16777216 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 7 (ffn_up):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 4548323/45088768 (10.1%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 7 (ffn_down):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 4543708/45088768 (10.1%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 8 (attn_q):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1686404/16777216 (10.1%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 8 (attn_k):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1700132/16777216 (10.1%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 8 (attn_v):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1678293/16777216 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 8 (ffn_up):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 4510438/45088768 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 8 (ffn_down):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 4539044/45088768 (10.1%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 9 (attn_q):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1685685/16777216 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 9 (attn_k):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1681221/16777216 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 9 (attn_v):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1681032/16777216 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 9 (ffn_up):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 4519775/45088768 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 9 (ffn_down):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 4547700/45088768 (10.1%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 10 (attn_q):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1684111/16777216 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 10 (attn_k):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1688112/16777216 (10.1%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 10 (attn_v):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1681557/16777216 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 10 (ffn_up):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 4560449/45088768 (10.1%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 10 (ffn_down):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 4515274/45088768 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 11 (attn_q):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1680217/16777216 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 11 (attn_k):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1689013/16777216 (10.1%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 11 (attn_v):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1679065/16777216 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 11 (ffn_up):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 4521598/45088768 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 11 (ffn_down):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 4528605/45088768 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 12 (attn_q):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1678588/16777216 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 12 (attn_k):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1690496/16777216 (10.1%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 12 (attn_v):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1678972/16777216 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 12 (ffn_up):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 4562683/45088768 (10.1%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 12 (ffn_down):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 4518632/45088768 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 13 (attn_q):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1685623/16777216 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 13 (attn_k):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1689592/16777216 (10.1%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 13 (attn_v):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1678359/16777216 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 13 (ffn_up):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 4510072/45088768 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 13 (ffn_down):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 4509490/45088768 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 14 (attn_q):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1683758/16777216 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 14 (attn_k):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1688223/16777216 (10.1%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 14 (attn_v):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1691910/16777216 (10.1%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 14 (ffn_up):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 4546562/45088768 (10.1%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 14 (ffn_down):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 4542484/45088768 (10.1%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 15 (attn_q):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1684311/16777216 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 15 (attn_k):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1684144/16777216 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 15 (attn_v):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1679936/16777216 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 15 (ffn_up):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 4527370/45088768 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 15 (ffn_down):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 4512078/45088768 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 16 (attn_q):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1684705/16777216 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 16 (attn_k):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1681005/16777216 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 16 (attn_v):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1681121/16777216 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 16 (ffn_up):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 4558207/45088768 (10.1%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 16 (ffn_down):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 4514469/45088768 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 17 (attn_q):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1679517/16777216 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 17 (attn_k):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1683629/16777216 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 17 (attn_v):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1691778/16777216 (10.1%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 17 (ffn_up):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 4553207/45088768 (10.1%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 17 (ffn_down):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 4524251/45088768 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 18 (attn_q):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1689916/16777216 (10.1%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 18 (attn_k):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1678768/16777216 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 18 (attn_v):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1695210/16777216 (10.1%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 18 (ffn_up):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 4526727/45088768 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 18 (ffn_down):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 4527246/45088768 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 19 (attn_q):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1680938/16777216 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 19 (attn_k):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1690764/16777216 (10.1%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 19 (attn_v):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1705040/16777216 (10.2%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 19 (ffn_up):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 4512469/45088768 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 19 (ffn_down):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 4517472/45088768 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 20 (attn_q):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1686704/16777216 (10.1%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 20 (attn_k):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1679984/16777216 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 20 (attn_v):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1719149/16777216 (10.2%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 20 (ffn_up):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 4556113/45088768 (10.1%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 20 (ffn_down):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 4525627/45088768 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 21 (attn_q):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1691281/16777216 (10.1%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 21 (attn_k):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1680053/16777216 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 21 (attn_v):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1683614/16777216 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 21 (ffn_up):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 4540851/45088768 (10.1%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 21 (ffn_down):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 4526756/45088768 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 22 (attn_q):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1683642/16777216 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 22 (attn_k):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1682830/16777216 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 22 (attn_v):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1689079/16777216 (10.1%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 22 (ffn_up):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 4603383/45088768 (10.2%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 22 (ffn_down):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 4513946/45088768 (10.0%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 23 (attn_q):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1686158/16777216 (10.1%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 23 (attn_k):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1695849/16777216 (10.1%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 23 (attn_v):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 1687859/16777216 (10.1%)
+[2026-09-24 02:06:07] [safety_warp] [INFO] Layer 23 (ffn_up):
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-09-24 02:06:07] [safety_warp] [INFO]   ✓ mask: Frozen 4516850/45088768 (10.0%)
+[2026-09-24 02:06:08] [safety_warp] [INFO] Layer 23 (ffn_down):
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ mask: Frozen 4510522/45088768 (10.0%)
+[2026-09-24 02:06:08] [safety_warp] [INFO] Layer 24 (attn_q):
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ mask: Frozen 1706585/16777216 (10.2%)
+[2026-09-24 02:06:08] [safety_warp] [INFO] Layer 24 (attn_k):
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ mask: Frozen 1707571/16777216 (10.2%)
+[2026-09-24 02:06:08] [safety_warp] [INFO] Layer 24 (attn_v):
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ mask: Frozen 1690162/16777216 (10.1%)
+[2026-09-24 02:06:08] [safety_warp] [INFO] Layer 24 (ffn_up):
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ mask: Frozen 4522980/45088768 (10.0%)
+[2026-09-24 02:06:08] [safety_warp] [INFO] Layer 24 (ffn_down):
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ mask: Frozen 4529433/45088768 (10.0%)
+[2026-09-24 02:06:08] [safety_warp] [INFO] Layer 25 (attn_q):
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ mask: Frozen 1689585/16777216 (10.1%)
+[2026-09-24 02:06:08] [safety_warp] [INFO] Layer 25 (attn_k):
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ mask: Frozen 1680750/16777216 (10.0%)
+[2026-09-24 02:06:08] [safety_warp] [INFO] Layer 25 (attn_v):
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ mask: Frozen 1687221/16777216 (10.1%)
+[2026-09-24 02:06:08] [safety_warp] [INFO] Layer 25 (ffn_up):
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ mask: Frozen 4520388/45088768 (10.0%)
+[2026-09-24 02:06:08] [safety_warp] [INFO] Layer 25 (ffn_down):
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ mask: Frozen 4561631/45088768 (10.1%)
+[2026-09-24 02:06:08] [safety_warp] [INFO] Layer 26 (attn_q):
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ mask: Frozen 1688365/16777216 (10.1%)
+[2026-09-24 02:06:08] [safety_warp] [INFO] Layer 26 (attn_k):
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ mask: Frozen 1693151/16777216 (10.1%)
+[2026-09-24 02:06:08] [safety_warp] [INFO] Layer 26 (attn_v):
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ mask: Frozen 1686198/16777216 (10.1%)
+[2026-09-24 02:06:08] [safety_warp] [INFO] Layer 26 (ffn_up):
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ mask: Frozen 4539110/45088768 (10.1%)
+[2026-09-24 02:06:08] [safety_warp] [INFO] Layer 26 (ffn_down):
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ mask: Frozen 4564329/45088768 (10.1%)
+[2026-09-24 02:06:08] [safety_warp] [INFO] Layer 27 (attn_q):
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ mask: Frozen 1689178/16777216 (10.1%)
+[2026-09-24 02:06:08] [safety_warp] [INFO] Layer 27 (attn_k):
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ mask: Frozen 1678222/16777216 (10.0%)
+[2026-09-24 02:06:08] [safety_warp] [INFO] Layer 27 (attn_v):
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ mask: Frozen 1690128/16777216 (10.1%)
+[2026-09-24 02:06:08] [safety_warp] [INFO] Layer 27 (ffn_up):
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ mask: Frozen 4521164/45088768 (10.0%)
+[2026-09-24 02:06:08] [safety_warp] [INFO] Layer 27 (ffn_down):
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ mask: Frozen 4556145/45088768 (10.1%)
+[2026-09-24 02:06:08] [safety_warp] [INFO] Layer 28 (attn_q):
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ mask: Frozen 1698328/16777216 (10.1%)
+[2026-09-24 02:06:08] [safety_warp] [INFO] Layer 28 (attn_k):
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ mask: Frozen 1703035/16777216 (10.2%)
+[2026-09-24 02:06:08] [safety_warp] [INFO] Layer 28 (attn_v):
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ mask: Frozen 1691906/16777216 (10.1%)
+[2026-09-24 02:06:08] [safety_warp] [INFO] Layer 28 (ffn_up):
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ mask: Frozen 4530729/45088768 (10.0%)
+[2026-09-24 02:06:08] [safety_warp] [INFO] Layer 28 (ffn_down):
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ mask: Frozen 4588820/45088768 (10.2%)
+[2026-09-24 02:06:08] [safety_warp] [INFO] Layer 29 (attn_q):
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ mask: Frozen 1680901/16777216 (10.0%)
+[2026-09-24 02:06:08] [safety_warp] [INFO] Layer 29 (attn_k):
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ mask: Frozen 1685492/16777216 (10.0%)
+[2026-09-24 02:06:08] [safety_warp] [INFO] Layer 29 (attn_v):
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ mask: Frozen 1679711/16777216 (10.0%)
+[2026-09-24 02:06:08] [safety_warp] [INFO] Layer 29 (ffn_up):
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ mask: Frozen 4533718/45088768 (10.1%)
+[2026-09-24 02:06:08] [safety_warp] [INFO] Layer 29 (ffn_down):
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ mask: Frozen 4559741/45088768 (10.1%)
+[2026-09-24 02:06:08] [safety_warp] [INFO] Layer 30 (attn_q):
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ mask: Frozen 1693989/16777216 (10.1%)
+[2026-09-24 02:06:08] [safety_warp] [INFO] Layer 30 (attn_k):
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ mask: Frozen 1685232/16777216 (10.0%)
+[2026-09-24 02:06:08] [safety_warp] [INFO] Layer 30 (attn_v):
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ mask: Frozen 1687742/16777216 (10.1%)
+[2026-09-24 02:06:08] [safety_warp] [INFO] Layer 30 (ffn_up):
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ mask: Frozen 4526118/45088768 (10.0%)
+[2026-09-24 02:06:08] [safety_warp] [INFO] Layer 30 (ffn_down):
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ mask: Frozen 4534100/45088768 (10.1%)
+[2026-09-24 02:06:08] [safety_warp] [INFO] Layer 31 (attn_q):
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ mask: Frozen 1682287/16777216 (10.0%)
+[2026-09-24 02:06:08] [safety_warp] [INFO] Layer 31 (attn_k):
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ mask: Frozen 1680067/16777216 (10.0%)
+[2026-09-24 02:06:08] [safety_warp] [INFO] Layer 31 (attn_v):
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 4096])
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ mask: Frozen 1680020/16777216 (10.0%)
+[2026-09-24 02:06:08] [safety_warp] [INFO] Layer 31 (ffn_up):
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([11008, 4096])
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ mask: Frozen 4562971/45088768 (10.1%)
+[2026-09-24 02:06:08] [safety_warp] [INFO] Layer 31 (ffn_down):
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ basis_coeff: torch.Size([4096, 11008])
+[2026-09-24 02:06:08] [safety_warp] [INFO]   ✓ mask: Frozen 4541277/45088768 (10.1%)
+[2026-09-24 02:06:08] [safety_warp] [INFO] ======================================================================
+[2026-09-24 02:06:08] [safety_warp] [INFO] ✓ Setup completed: 160 WaRP modules
+[2026-09-24 02:06:08] [safety_warp] [INFO] ======================================================================
+[2026-09-24 02:06:08] [safety_warp] [INFO] Forward에서 자동으로 마스킹 적용:
+[2026-09-24 02:06:08] [safety_warp] [INFO]   W = V @ (basis_coeff * mask).detach() + basis_coeff * (1-mask) @ U
+[2026-09-24 02:06:08] [safety_warp] [INFO]   mask=1: gradient 차단 (동결)
+[2026-09-24 02:06:08] [safety_warp] [INFO]   mask=0: gradient 흐름 (학습 가능)
+[2026-09-24 02:06:08] [safety_warp] [INFO] ======================================================================
+[2026-09-24 02:06:08] [safety_warp] [INFO] [WaRP-Monitor] verification probes registered
+[2026-09-24 02:06:08] [safety_warp] [INFO]   - modules: 160
+[2026-09-24 02:06:08] [safety_warp] [INFO]   - masked probes: 640
+[2026-09-24 02:06:08] [safety_warp] [INFO]   - trainable probes: 640
+[2026-09-24 02:06:08] [safety_warp] [INFO] [PROFILE] ■ Phase 3 / setup_warp_modules ok | time=00:00:01 (1.5s) | torch_alloc_peak=37.02GB | torch_reserved_peak=39.92GB | device_peak=37.33GB
+[2026-09-24 02:06:08] [safety_warp] [INFO] [PROFILE] ▶ Phase 3 / load_data 시작
+[2026-09-24 02:06:08] [safety_warp] [INFO] Loading gsm8k dataset from /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/data/gsm8k_train_task_7473.json...
+[2026-09-24 02:06:08] [safety_warp] [INFO] 
+[gsm8k Sample #0]
+[2026-09-24 02:06:08] [safety_warp] [INFO]   Prompt (first 100 chars): Natalia sold clips to 48 of her friends in April, and then she sold half as many clips in May. How m...
+[2026-09-24 02:06:08] [safety_warp] [INFO]   Answer: Natalia sold 48/2 = <<48/2=24>>24 clips in May.
+Natalia sold 48+24 = <<48+24=72>>72 clips altogether in April and May.
+#### 72
+[2026-09-24 02:06:09] [safety_warp] [INFO] ✓ gsm8k dataset created (7473 samples)
+[2026-09-24 02:06:09] [safety_warp] [INFO] [PROFILE] ■ Phase 3 / load_data ok | time=00:00:02 (1.5s) | torch_alloc_peak=36.38GB | torch_reserved_peak=39.92GB | device_peak=40.69GB
+[2026-09-24 02:06:09] [safety_warp] [INFO] [PROFILE] ▶ Phase 3 / train_and_save 시작
+[2026-09-24 02:06:09] [safety_warp] [INFO] ======================================================================
+[2026-09-24 02:06:09] [safety_warp] [INFO] Phase 3: Incremental Learning with GSM8K (Non-Freeze)
+[2026-09-24 02:06:09] [safety_warp] [INFO] ======================================================================
+[2026-09-24 02:06:09] [safety_warp] [INFO] Non-Freeze 모드: weight_decay=0.01 적용 (WaRPMaskRestoreCallback으로 mask=1 basis_coeff drift 완전 차단)
+[2026-09-24 02:06:09] [safety_warp] [INFO] Parameter freeze status (Non-Freeze mode):
+[2026-09-24 02:06:09] [safety_warp] [INFO]   - Total params: 6,738,415,616
+[2026-09-24 02:06:09] [safety_warp] [INFO]   - Trainable params: 6,738,415,616
+[2026-09-24 02:06:09] [safety_warp] [INFO]   - basis_coeff params: 4,496,293,888
+[2026-09-24 02:06:09] [safety_warp] [INFO]   - Frozen params (requires_grad=False): 0
+[2026-09-24 02:06:09] [safety_warp] [INFO]   - Trainable ratio: 100.00%
+[2026-09-24 02:06:09] [safety_warp] [INFO]   - WaRP masked frozen coeff elems: 452,243,507/4,496,293,888
+[2026-09-24 02:06:09] [safety_warp] [INFO]   - WaRP masked trainable coeff elems: 4,044,050,381 (89.94%)
+[2026-09-24 02:06:09] [safety_warp] [INFO] Training configuration:
+[2026-09-24 02:06:09] [safety_warp] [INFO]   - Epochs: 3
+[2026-09-24 02:06:09] [safety_warp] [INFO]   - Learning rate: 7e-05
+[2026-09-24 02:06:09] [safety_warp] [INFO]   - Weight decay (requested): 0.01
+[2026-09-24 02:06:09] [safety_warp] [INFO]   - Weight decay (effective): 0.01
+[2026-09-24 02:06:09] [safety_warp] [INFO]   - Warmup ratio: 0.1
+[2026-09-24 02:06:09] [safety_warp] [INFO]   - Batch size: 1
+[2026-09-24 02:06:09] [safety_warp] [INFO]   - Gradient accumulation steps: 16
+[2026-09-24 02:06:09] [safety_warp] [INFO]   - Effective batch size: 16
+[2026-09-24 02:06:09] [safety_warp] [INFO]   - Max gradient norm: 1.0
+[2026-09-24 02:06:09] [safety_warp] [INFO]   - Optimizer: adamw_torch
+[2026-09-24 02:06:09] [safety_warp] [INFO]   - LR scheduler: linear
+[2026-09-24 02:06:09] [safety_warp] [INFO]   - Input formatting: Question/Answer plain text
+[2026-09-24 02:06:09] [safety_warp] [INFO]   - Checkpoint directory: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/table1_gsm8k_7b_base_lr7e-5/wsr_p10/phase3_non_freeze_20260924_020609
+[2026-09-24 02:06:09] [safety_warp] [INFO] ======================================================================
+[2026-09-24 02:06:11] [safety_warp] [INFO] [WaRP-GradCheck] one-batch gradient sanity
+[2026-09-24 02:06:11] [safety_warp] [INFO]   - loss: 1.633837
+[2026-09-24 02:06:11] [safety_warp] [INFO]   - masked(=1) grad |mean|: 0.000000e+00, nonzero ratio: 0.00%
+[2026-09-24 02:06:11] [safety_warp] [INFO]   - trainable(=0) grad |mean|: 1.339758e-04, nonzero ratio: 100.00%
+[2026-09-24 02:06:11] [safety_warp] [INFO] [WaRPMaskRestoreCallback] registered 160 modules for post-step weight-decay restore
+[2026-09-24 02:06:11] [safety_warp] [INFO] ✓ Trainer initialized
+[2026-09-24 02:06:11] [safety_warp] [INFO] Starting training (Non-Freeze mode)...
+[2026-09-24 02:06:11] [safety_warp] [INFO]   WaRP forward still applies masking:
+[2026-09-24 02:06:11] [safety_warp] [INFO]     W = V @ (basis_coeff * mask).detach() + basis_coeff * (1-mask) @ U
+[2026-09-24 02:06:11] [safety_warp] [INFO]     mask=1: gradient 차단 (frozen)
+[2026-09-24 02:06:11] [safety_warp] [INFO]     mask=0: gradient 흐름 (trainable)
+[2026-09-24 02:06:11] [safety_warp] [INFO] [PROFILE][train] 학습 시작 (시간/VRAM 측정 시작)
+[2026-09-24 02:06:46] [safety_warp] [INFO] [PROFILE][train] step 10/1404 | elapsed=0.6min | eta=81.1min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:07:20] [safety_warp] [INFO] [PROFILE][train] step 20/1404 | elapsed=1.2min | eta=79.7min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:07:54] [safety_warp] [INFO] [PROFILE][train] step 30/1404 | elapsed=1.7min | eta=78.8min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:08:29] [safety_warp] [INFO] [PROFILE][train] step 40/1404 | elapsed=2.3min | eta=78.1min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:09:03] [safety_warp] [INFO] [PROFILE][train] step 50/1404 | elapsed=2.9min | eta=77.5min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:09:37] [safety_warp] [INFO] [PROFILE][train] step 60/1404 | elapsed=3.4min | eta=76.8min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:10:11] [safety_warp] [INFO] [PROFILE][train] step 70/1404 | elapsed=4.0min | eta=76.1min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:10:45] [safety_warp] [INFO] [PROFILE][train] step 80/1404 | elapsed=4.6min | eta=75.4min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:11:18] [safety_warp] [INFO] [PROFILE][train] step 90/1404 | elapsed=5.1min | eta=74.8min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:11:52] [safety_warp] [INFO] [PROFILE][train] step 100/1404 | elapsed=5.7min | eta=74.2min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:12:26] [safety_warp] [INFO] [PROFILE][train] step 110/1404 | elapsed=6.3min | eta=73.6min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:13:00] [safety_warp] [INFO] [PROFILE][train] step 120/1404 | elapsed=6.8min | eta=72.9min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:13:34] [safety_warp] [INFO] [PROFILE][train] step 130/1404 | elapsed=7.4min | eta=72.3min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:14:08] [safety_warp] [INFO] [PROFILE][train] step 140/1404 | elapsed=7.9min | eta=71.7min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:14:42] [safety_warp] [INFO] [PROFILE][train] step 150/1404 | elapsed=8.5min | eta=71.1min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:15:15] [safety_warp] [INFO] [PROFILE][train] step 160/1404 | elapsed=9.1min | eta=70.5min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:15:49] [safety_warp] [INFO] [PROFILE][train] step 170/1404 | elapsed=9.6min | eta=70.0min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:16:23] [safety_warp] [INFO] [PROFILE][train] step 180/1404 | elapsed=10.2min | eta=69.4min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:16:57] [safety_warp] [INFO] [PROFILE][train] step 190/1404 | elapsed=10.8min | eta=68.8min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:17:31] [safety_warp] [INFO] [PROFILE][train] step 200/1404 | elapsed=11.3min | eta=68.2min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:18:05] [safety_warp] [INFO] [PROFILE][train] step 210/1404 | elapsed=11.9min | eta=67.6min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:18:38] [safety_warp] [INFO] [PROFILE][train] step 220/1404 | elapsed=12.5min | eta=67.0min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:19:12] [safety_warp] [INFO] [PROFILE][train] step 230/1404 | elapsed=13.0min | eta=66.4min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:19:46] [safety_warp] [INFO] [PROFILE][train] step 240/1404 | elapsed=13.6min | eta=65.9min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:20:20] [safety_warp] [INFO] [PROFILE][train] step 250/1404 | elapsed=14.1min | eta=65.3min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:20:54] [safety_warp] [INFO] [PROFILE][train] step 260/1404 | elapsed=14.7min | eta=64.7min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:21:27] [safety_warp] [INFO] [PROFILE][train] step 270/1404 | elapsed=15.3min | eta=64.1min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:22:01] [safety_warp] [INFO] [PROFILE][train] step 280/1404 | elapsed=15.8min | eta=63.6min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:22:35] [safety_warp] [INFO] [PROFILE][train] step 290/1404 | elapsed=16.4min | eta=63.0min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:23:08] [safety_warp] [INFO] [PROFILE][train] step 300/1404 | elapsed=17.0min | eta=62.4min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:23:42] [safety_warp] [INFO] [PROFILE][train] step 310/1404 | elapsed=17.5min | eta=61.8min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:24:16] [safety_warp] [INFO] [PROFILE][train] step 320/1404 | elapsed=18.1min | eta=61.2min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:24:49] [safety_warp] [INFO] [PROFILE][train] step 330/1404 | elapsed=18.6min | eta=60.7min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:25:23] [safety_warp] [INFO] [PROFILE][train] step 340/1404 | elapsed=19.2min | eta=60.1min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:25:57] [safety_warp] [INFO] [PROFILE][train] step 350/1404 | elapsed=19.8min | eta=59.5min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:26:31] [safety_warp] [INFO] [PROFILE][train] step 360/1404 | elapsed=20.3min | eta=58.9min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:27:05] [safety_warp] [INFO] [PROFILE][train] step 370/1404 | elapsed=20.9min | eta=58.4min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:27:38] [safety_warp] [INFO] [PROFILE][train] step 380/1404 | elapsed=21.5min | eta=57.8min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:28:12] [safety_warp] [INFO] [PROFILE][train] step 390/1404 | elapsed=22.0min | eta=57.2min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:28:46] [safety_warp] [INFO] [PROFILE][train] step 400/1404 | elapsed=22.6min | eta=56.7min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:29:20] [safety_warp] [INFO] [PROFILE][train] step 410/1404 | elapsed=23.1min | eta=56.1min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:29:54] [safety_warp] [INFO] [PROFILE][train] step 420/1404 | elapsed=23.7min | eta=55.5min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:30:27] [safety_warp] [INFO] [PROFILE][train] step 430/1404 | elapsed=24.3min | eta=55.0min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:31:01] [safety_warp] [INFO] [PROFILE][train] step 440/1404 | elapsed=24.8min | eta=54.4min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:31:35] [safety_warp] [INFO] [PROFILE][train] step 450/1404 | elapsed=25.4min | eta=53.8min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:32:08] [safety_warp] [INFO] [PROFILE][train] step 460/1404 | elapsed=26.0min | eta=53.3min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:32:39] [safety_warp] [INFO] [PROFILE][train] step 470/1404 | elapsed=26.5min | eta=52.6min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:33:13] [safety_warp] [INFO] [PROFILE][train] step 480/1404 | elapsed=27.0min | eta=52.0min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:33:47] [safety_warp] [INFO] [PROFILE][train] step 490/1404 | elapsed=27.6min | eta=51.5min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:34:20] [safety_warp] [INFO] [PROFILE][train] step 500/1404 | elapsed=28.2min | eta=50.9min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:34:54] [safety_warp] [INFO] [PROFILE][train] step 510/1404 | elapsed=28.7min | eta=50.3min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:35:28] [safety_warp] [INFO] [PROFILE][train] step 520/1404 | elapsed=29.3min | eta=49.8min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:36:02] [safety_warp] [INFO] [PROFILE][train] step 530/1404 | elapsed=29.8min | eta=49.2min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:36:36] [safety_warp] [INFO] [PROFILE][train] step 540/1404 | elapsed=30.4min | eta=48.7min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:37:09] [safety_warp] [INFO] [PROFILE][train] step 550/1404 | elapsed=31.0min | eta=48.1min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:37:43] [safety_warp] [INFO] [PROFILE][train] step 560/1404 | elapsed=31.5min | eta=47.5min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:38:17] [safety_warp] [INFO] [PROFILE][train] step 570/1404 | elapsed=32.1min | eta=47.0min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:38:50] [safety_warp] [INFO] [PROFILE][train] step 580/1404 | elapsed=32.7min | eta=46.4min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:39:24] [safety_warp] [INFO] [PROFILE][train] step 590/1404 | elapsed=33.2min | eta=45.8min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:39:58] [safety_warp] [INFO] [PROFILE][train] step 600/1404 | elapsed=33.8min | eta=45.3min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:40:31] [safety_warp] [INFO] [PROFILE][train] step 610/1404 | elapsed=34.3min | eta=44.7min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:41:05] [safety_warp] [INFO] [PROFILE][train] step 620/1404 | elapsed=34.9min | eta=44.1min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:41:39] [safety_warp] [INFO] [PROFILE][train] step 630/1404 | elapsed=35.5min | eta=43.6min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:42:12] [safety_warp] [INFO] [PROFILE][train] step 640/1404 | elapsed=36.0min | eta=43.0min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:42:46] [safety_warp] [INFO] [PROFILE][train] step 650/1404 | elapsed=36.6min | eta=42.4min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:43:20] [safety_warp] [INFO] [PROFILE][train] step 660/1404 | elapsed=37.1min | eta=41.9min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:43:54] [safety_warp] [INFO] [PROFILE][train] step 670/1404 | elapsed=37.7min | eta=41.3min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:44:27] [safety_warp] [INFO] [PROFILE][train] step 680/1404 | elapsed=38.3min | eta=40.7min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:45:01] [safety_warp] [INFO] [PROFILE][train] step 690/1404 | elapsed=38.8min | eta=40.2min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:45:35] [safety_warp] [INFO] [PROFILE][train] step 700/1404 | elapsed=39.4min | eta=39.6min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:46:08] [safety_warp] [INFO] [PROFILE][train] step 710/1404 | elapsed=40.0min | eta=39.1min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:46:42] [safety_warp] [INFO] [PROFILE][train] step 720/1404 | elapsed=40.5min | eta=38.5min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:47:16] [safety_warp] [INFO] [PROFILE][train] step 730/1404 | elapsed=41.1min | eta=37.9min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:47:49] [safety_warp] [INFO] [PROFILE][train] step 740/1404 | elapsed=41.6min | eta=37.4min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:48:23] [safety_warp] [INFO] [PROFILE][train] step 750/1404 | elapsed=42.2min | eta=36.8min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:48:57] [safety_warp] [INFO] [PROFILE][train] step 760/1404 | elapsed=42.8min | eta=36.2min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:49:31] [safety_warp] [INFO] [PROFILE][train] step 770/1404 | elapsed=43.3min | eta=35.7min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:50:05] [safety_warp] [INFO] [PROFILE][train] step 780/1404 | elapsed=43.9min | eta=35.1min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:50:38] [safety_warp] [INFO] [PROFILE][train] step 790/1404 | elapsed=44.5min | eta=34.5min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:51:12] [safety_warp] [INFO] [PROFILE][train] step 800/1404 | elapsed=45.0min | eta=34.0min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:51:46] [safety_warp] [INFO] [PROFILE][train] step 810/1404 | elapsed=45.6min | eta=33.4min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:52:19] [safety_warp] [INFO] [PROFILE][train] step 820/1404 | elapsed=46.1min | eta=32.9min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:52:53] [safety_warp] [INFO] [PROFILE][train] step 830/1404 | elapsed=46.7min | eta=32.3min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:53:27] [safety_warp] [INFO] [PROFILE][train] step 840/1404 | elapsed=47.3min | eta=31.7min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:54:00] [safety_warp] [INFO] [PROFILE][train] step 850/1404 | elapsed=47.8min | eta=31.2min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:54:34] [safety_warp] [INFO] [PROFILE][train] step 860/1404 | elapsed=48.4min | eta=30.6min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:55:08] [safety_warp] [INFO] [PROFILE][train] step 870/1404 | elapsed=48.9min | eta=30.0min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:55:41] [safety_warp] [INFO] [PROFILE][train] step 880/1404 | elapsed=49.5min | eta=29.5min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:56:15] [safety_warp] [INFO] [PROFILE][train] step 890/1404 | elapsed=50.1min | eta=28.9min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:56:49] [safety_warp] [INFO] [PROFILE][train] step 900/1404 | elapsed=50.6min | eta=28.4min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:57:23] [safety_warp] [INFO] [PROFILE][train] step 910/1404 | elapsed=51.2min | eta=27.8min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:57:56] [safety_warp] [INFO] [PROFILE][train] step 920/1404 | elapsed=51.8min | eta=27.2min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:58:30] [safety_warp] [INFO] [PROFILE][train] step 930/1404 | elapsed=52.3min | eta=26.7min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:59:01] [safety_warp] [INFO] [PROFILE][train] step 940/1404 | elapsed=52.8min | eta=26.1min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 02:59:34] [safety_warp] [INFO] [PROFILE][train] step 950/1404 | elapsed=53.4min | eta=25.5min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 03:00:08] [safety_warp] [INFO] [PROFILE][train] step 960/1404 | elapsed=53.9min | eta=25.0min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 03:00:41] [safety_warp] [INFO] [PROFILE][train] step 970/1404 | elapsed=54.5min | eta=24.4min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 03:01:15] [safety_warp] [INFO] [PROFILE][train] step 980/1404 | elapsed=55.1min | eta=23.8min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 03:01:49] [safety_warp] [INFO] [PROFILE][train] step 990/1404 | elapsed=55.6min | eta=23.3min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 03:02:22] [safety_warp] [INFO] [PROFILE][train] step 1000/1404 | elapsed=56.2min | eta=22.7min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 03:02:56] [safety_warp] [INFO] [PROFILE][train] step 1010/1404 | elapsed=56.7min | eta=22.1min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 03:03:30] [safety_warp] [INFO] [PROFILE][train] step 1020/1404 | elapsed=57.3min | eta=21.6min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 03:04:04] [safety_warp] [INFO] [PROFILE][train] step 1030/1404 | elapsed=57.9min | eta=21.0min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 03:04:37] [safety_warp] [INFO] [PROFILE][train] step 1040/1404 | elapsed=58.4min | eta=20.5min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 03:05:11] [safety_warp] [INFO] [PROFILE][train] step 1050/1404 | elapsed=59.0min | eta=19.9min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 03:05:44] [safety_warp] [INFO] [PROFILE][train] step 1060/1404 | elapsed=59.6min | eta=19.3min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 03:06:18] [safety_warp] [INFO] [PROFILE][train] step 1070/1404 | elapsed=60.1min | eta=18.8min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 03:06:52] [safety_warp] [INFO] [PROFILE][train] step 1080/1404 | elapsed=60.7min | eta=18.2min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 03:07:26] [safety_warp] [INFO] [PROFILE][train] step 1090/1404 | elapsed=61.2min | eta=17.6min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 03:07:59] [safety_warp] [INFO] [PROFILE][train] step 1100/1404 | elapsed=61.8min | eta=17.1min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 03:08:33] [safety_warp] [INFO] [PROFILE][train] step 1110/1404 | elapsed=62.4min | eta=16.5min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 03:09:07] [safety_warp] [INFO] [PROFILE][train] step 1120/1404 | elapsed=62.9min | eta=16.0min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 03:09:41] [safety_warp] [INFO] [PROFILE][train] step 1130/1404 | elapsed=63.5min | eta=15.4min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 03:10:14] [safety_warp] [INFO] [PROFILE][train] step 1140/1404 | elapsed=64.1min | eta=14.8min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 03:10:48] [safety_warp] [INFO] [PROFILE][train] step 1150/1404 | elapsed=64.6min | eta=14.3min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 03:11:22] [safety_warp] [INFO] [PROFILE][train] step 1160/1404 | elapsed=65.2min | eta=13.7min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 03:11:55] [safety_warp] [INFO] [PROFILE][train] step 1170/1404 | elapsed=65.7min | eta=13.1min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 03:12:29] [safety_warp] [INFO] [PROFILE][train] step 1180/1404 | elapsed=66.3min | eta=12.6min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 03:13:03] [safety_warp] [INFO] [PROFILE][train] step 1190/1404 | elapsed=66.9min | eta=12.0min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 03:13:37] [safety_warp] [INFO] [PROFILE][train] step 1200/1404 | elapsed=67.4min | eta=11.5min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 03:14:11] [safety_warp] [INFO] [PROFILE][train] step 1210/1404 | elapsed=68.0min | eta=10.9min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 03:14:44] [safety_warp] [INFO] [PROFILE][train] step 1220/1404 | elapsed=68.6min | eta=10.3min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 03:15:18] [safety_warp] [INFO] [PROFILE][train] step 1230/1404 | elapsed=69.1min | eta=9.8min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 03:15:52] [safety_warp] [INFO] [PROFILE][train] step 1240/1404 | elapsed=69.7min | eta=9.2min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 03:16:26] [safety_warp] [INFO] [PROFILE][train] step 1250/1404 | elapsed=70.2min | eta=8.7min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 03:16:59] [safety_warp] [INFO] [PROFILE][train] step 1260/1404 | elapsed=70.8min | eta=8.1min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 03:17:33] [safety_warp] [INFO] [PROFILE][train] step 1270/1404 | elapsed=71.4min | eta=7.5min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 03:18:07] [safety_warp] [INFO] [PROFILE][train] step 1280/1404 | elapsed=71.9min | eta=7.0min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 03:18:40] [safety_warp] [INFO] [PROFILE][train] step 1290/1404 | elapsed=72.5min | eta=6.4min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 03:19:14] [safety_warp] [INFO] [PROFILE][train] step 1300/1404 | elapsed=73.1min | eta=5.8min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 03:19:48] [safety_warp] [INFO] [PROFILE][train] step 1310/1404 | elapsed=73.6min | eta=5.3min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 03:20:21] [safety_warp] [INFO] [PROFILE][train] step 1320/1404 | elapsed=74.2min | eta=4.7min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 03:20:55] [safety_warp] [INFO] [PROFILE][train] step 1330/1404 | elapsed=74.7min | eta=4.2min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 03:21:29] [safety_warp] [INFO] [PROFILE][train] step 1340/1404 | elapsed=75.3min | eta=3.6min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 03:22:03] [safety_warp] [INFO] [PROFILE][train] step 1350/1404 | elapsed=75.9min | eta=3.0min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 03:22:36] [safety_warp] [INFO] [PROFILE][train] step 1360/1404 | elapsed=76.4min | eta=2.5min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 03:23:10] [safety_warp] [INFO] [PROFILE][train] step 1370/1404 | elapsed=77.0min | eta=1.9min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 03:23:44] [safety_warp] [INFO] [PROFILE][train] step 1380/1404 | elapsed=77.6min | eta=1.3min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 03:24:18] [safety_warp] [INFO] [PROFILE][train] step 1390/1404 | elapsed=78.1min | eta=0.8min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 03:24:52] [safety_warp] [INFO] [PROFILE][train] step 1400/1404 | elapsed=78.7min | eta=0.2min | alloc_peak=87.44GB | reserved_peak=89.38GB | device=90.22GB (peak 90.22GB)
+[2026-09-24 03:25:02] [safety_warp] [INFO] [PROFILE][train] 학습 종료 | time=78.9min (4731s) | alloc_peak=87.44GB | reserved_peak=89.38GB | device_peak=90.22GB
+[2026-09-24 03:25:02] [safety_warp] [INFO] ✓ Training completed
+[2026-09-24 03:25:02] [safety_warp] [INFO] [WaRP-ParamCheck] post-train sampled delta
+[2026-09-24 03:25:02] [safety_warp] [INFO]   - masked(=1) delta |mean|: 0.000000e+00, changed ratio: 0.00%
+[2026-09-24 03:25:02] [safety_warp] [INFO]   - trainable(=0) delta |mean|: 4.895683e-04, changed ratio: 62.03%
+[2026-09-24 03:25:17] [safety_warp] [INFO] ======================================================================
+[2026-09-24 03:25:17] [safety_warp] [INFO] Phase 3 (Non-Freeze) Completed
+[2026-09-24 03:25:17] [safety_warp] [INFO]   - Final model: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/table1_gsm8k_7b_base_lr7e-5/wsr_p10/phase3_non_freeze_20260924_020609/final_model
+[2026-09-24 03:25:17] [safety_warp] [INFO] ======================================================================
+[2026-09-24 03:25:17] [safety_warp] [INFO] ✓ Metadata saved to: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/table1_gsm8k_7b_base_lr7e-5/wsr_p10/phase3_non_freeze_20260924_020609/metadata.json
+[2026-09-24 03:25:17] [safety_warp] [INFO] [PROFILE] ■ Phase 3 / train_and_save ok | time=01:19:08 (4747.8s) | torch_alloc_peak=87.44GB | torch_reserved_peak=89.38GB | device_peak=90.22GB
+[2026-09-24 03:25:17] [safety_warp] [INFO] ======================================================================
+[2026-09-24 03:25:17] [safety_warp] [INFO] Phase 3 Completed!
+[2026-09-24 03:25:17] [safety_warp] [INFO] Final model saved to: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/table1_gsm8k_7b_base_lr7e-5/wsr_p10/phase3_non_freeze_20260924_020609/final_model
+[2026-09-24 03:25:17] [safety_warp] [INFO] ======================================================================
+[2026-09-24 03:25:18] [safety_warp] [INFO] ==============================================================================
+[2026-09-24 03:25:18] [safety_warp] [INFO] [PROFILE] Phase 3 리소스 요약 (시간 / VRAM)
+[2026-09-24 03:25:18] [safety_warp] [INFO] ==============================================================================
+[2026-09-24 03:25:18] [safety_warp] [INFO] stage                               time   torch_alloc   torch_resv     device  device-base
+[2026-09-24 03:25:18] [safety_warp] [INFO] -------------------------------------------------------------------------------------------
+[2026-09-24 03:25:18] [safety_warp] [INFO] load_basis                      00:00:08         0.00G        0.00G      0.61G        0.00G
+[2026-09-24 03:25:18] [safety_warp] [INFO] load_masks                      00:00:31         0.00G        0.00G      0.61G        0.00G
+[2026-09-24 03:25:18] [safety_warp] [INFO] load_model                      00:00:06        25.26G       25.48G     26.19G       25.57G
+[2026-09-24 03:25:18] [safety_warp] [INFO] setup_warp_modules              00:00:01        37.02G       39.92G     37.33G       36.72G
+[2026-09-24 03:25:18] [safety_warp] [INFO] load_data                       00:00:02        36.38G       39.92G     40.69G       40.08G
+[2026-09-24 03:25:18] [safety_warp] [INFO] train_and_save                  01:19:08        87.44G       89.38G     90.22G       89.61G
+[2026-09-24 03:25:18] [safety_warp] [INFO] -------------------------------------------------------------------------------------------
+[2026-09-24 03:25:18] [safety_warp] [INFO] TOTAL                           01:20:01        87.44G       89.38G     90.22G       89.61G
+[2026-09-24 03:25:18] [safety_warp] [INFO]   GPU 0 (NVIDIA B200): capacity 178.4GB
+[2026-09-24 03:25:18] [safety_warp] [INFO]   device baseline (프로파일 시작 시점 사용량, 타 프로세스 포함): 0.61GB
+[2026-09-24 03:25:18] [safety_warp] [INFO]   torch_alloc/torch_resv = 이 프로세스의 torch allocator 기준, device = nvidia-smi 기준 전체 사용량
+[2026-09-24 03:25:18] [safety_warp] [INFO] ==============================================================================
+[2026-09-24 03:25:18] [safety_warp] [INFO] [PROFILE] 요약 저장: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/table1_gsm8k_7b_base_lr7e-5/wsr_p10/phase3_profile.json
+[2026-09-24 03:25:18] [safety_warp] [INFO] ======================================================================
+[2026-09-24 03:25:18] [safety_warp] [INFO] All tasks completed successfully!
+[2026-09-24 03:25:18] [safety_warp] [INFO] ======================================================================

@@ -1,0 +1,3 @@
+[2026-09-23 15:47:21] ════ Table 1 · Llama-3.1-8B base · MATH · lr 5e-5 ════
+[2026-09-23 15:47:21] 큐 GPU0 pid=1188905  (로그 /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/logs/table1_math_8b_base/queue_gpu0.log)
+[2026-09-23 15:47:21] 큐 GPU1 pid=1188906  (로그 /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/logs/table1_math_8b_base/queue_gpu1.log)

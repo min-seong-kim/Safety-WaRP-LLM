@@ -1,0 +1,9 @@
+  mask ok: keep_ratio=0.5 space=original_weight_space
+[2026-09-23 17:10:50] ▶ p50  (GPU1, 원공간 동결 0.5, masks=/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/checkpoints/origspace_base_llama31_8b_base/phase2_original_space_20260920_063147/checkpoints/masks)
+[2026-09-23 17:31:45] ✔ p50 → /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/table1_math_8b_base/p50/phase3_original_space_20260923_171118/final_model
+  mask ok: keep_ratio=0.2 space=original_weight_space
+[2026-09-23 17:31:45] ▶ p20  (GPU1, 원공간 동결 0.2, masks=/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/checkpoints/origspace_base_llama31_8b_base/phase2_original_space_20260920_052655/checkpoints/masks)
+[2026-09-23 17:52:04] ✔ p20 → /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/table1_math_8b_base/p20/phase3_original_space_20260923_173212/final_model
+  mask ok: keep_ratio=0.4 space=original_weight_space
+[2026-09-23 17:52:04] ▶ p40  (GPU1, 원공간 동결 0.4, masks=/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/checkpoints/origspace_base_llama31_8b_base/phase2_original_space_20260920_060924/checkpoints/masks)
+[2026-09-23 18:12:51] ✔ p40 → /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/table1_math_8b_base/p40/phase3_original_space_20260923_175233/final_model

@@ -1,0 +1,10 @@
+[2026-09-22 22:58:36] 1. 7B 주 셀 완성 대기 (outputs/wsr_rsn_col_p3/llama2_7b/k1200_200_u300_50/MODEL_DIR)
+[2026-09-22 22:58:36]    7B 완성: outputs/wsr_rsn_col_p3/llama2_7b/k1200_200_u300_50/gsm8k/phase3_non_freeze_20260922_222837/final_model
+[2026-09-22 22:58:36] 2. 오케스트레이터 정지 (13B 는 나중에 이어감)
+[2026-09-22 22:58:36]    GPU: 0 MiB
+[2026-09-22 22:58:36] 3. 7B 평가
+[2026-09-22 22:58:36]    평가: outputs/wsr_rsn_col_p3/llama2_7b/k1200_200_u300_50
+[2026-09-22 23:07:35]    평가 rc=0
+[2026-09-22 23:07:35] 4. 7B 판정
+[2026-09-22 23:07:35]    판정: sn
+[2026-09-22 23:07:35]    [run ] llama2_7b ARM=sn SKIP_TUNE=0 MB=4 → outputs/wsr_rsn_col_p3/llama2_7b/k1200_200_u300_50_sn  (log logs/wsr_rsn_col/train_llama2_7b_sn0_20260922_230735.log)

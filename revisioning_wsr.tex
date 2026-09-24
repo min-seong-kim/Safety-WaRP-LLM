@@ -418,7 +418,8 @@ WSR-Tune can be integrated with existing methods such as SafeInstr, SN-Tune, and
 
 
 
-\textbf{Datasets and models.} Unless otherwise specified, we use the Circuit Breakers dataset~\citep{circuit_breakers} as the safety dataset, consisting of harmful prompts with safe refusal responses. To evaluate sensitivity to the safety-data source, we conduct additional experiments using safety data selected from BeaverTails~\citep{beavertails} in Appendix~\ref{app:safety_data}. For downstream adaptation, we use GSM8K~\citep{gsm8k}, Hendrycks MATH~\citep{hendrycksmath}, MedQA~\citep{medqa}, and ARC-Challenge~\citep{arc-c}. \djh{AGNEWS도 결과 넣는다면 언급.} We conduct experiments on a diverse set of large language models spanning the Llama\citep{llama2, llama3}, Qwen~\citep{qwen2.5}, and Gemma~\citep{gemma2} families, where the exact configurations are provided in  Appendix~\ref{app:experimental_setup}. %기존 문장 and report the exact model configurations in the corresponding result tables.
+\textbf{Datasets and models.} Unless otherwise specified, we use the Circuit Breakers dataset~\citep{circuit_breakers} as the safety dataset, consisting of harmful prompts with safe refusal responses. To evaluate sensitivity to the safety-data source, we conduct additional experiments using safety data selected from BeaverTails~\citep{beavertails} in Appendix~\ref{app:safety_data}. For downstream adaptation, we use GSM8K~\citep{gsm8k}, Hendrycks MATH~\citep{hendrycksmath}, MedQA~\citep{medqa}, and ARC-Challenge~\citep{arc-c}. \textcolor{orange}{We additionally evaluate AGNEWS and report the results in Appendix~\ref{app:agnews_results}, extending the downstream evaluation beyond reasoning tasks.}  %\djh{AGNEWS도 결과 넣는다면 언급.} 
+We conduct experiments on a diverse set of large language models spanning the Llama\citep{llama2, llama3}, Qwen~\citep{qwen2.5}, and Gemma~\citep{gemma2} families, where the exact configurations are provided in  Appendix~\ref{app:experimental_setup}. %기존 문장 and report the exact model configurations in the corresponding result tables.
 %\textcolor{purple}{and exact configurations are provided in Appendix~\ref{app:experimental_setup}.}
 
 
@@ -435,8 +436,8 @@ SafeInstr~\citep{safeInstr} and SEAL~\citep{seal}, which use safety supervision 
 
 
 \textbf{Evaluation metrics.}
-We evaluate downstream performance using 5-shot accuracy on each downstream dataset. For safety evaluation, we use harmful prompts from AdvBench~\citep{advbench} and report attack success rate (ASR). We consider one direct prompting setting using the original AdvBench prompts, and three jailbreak attack methods, AutoDAN~\citep{autodan}, PAIR~\citep{pair}, and PAP~\citep{pap}, which generate attack prompts. We generate jailbreak prompts using the HarmBench~\citep{harmbench} and measure ASR with its refusal keywords, counting an attack as successful if the response does not begin with these keywords. \djh{다른 방법으로 measure한 결과들도 appendix에 있다고 언급}
-
+We evaluate downstream performance using 5-shot accuracy on each downstream dataset. For safety evaluation, we use harmful prompts from AdvBench~\citep{advbench} and report attack success rate (ASR). We consider one direct prompting setting using the original AdvBench prompts, and three jailbreak attack methods, AutoDAN~\citep{autodan}, PAIR~\citep{pair}, and PAP~\citep{pap}, which generate attack prompts. We generate jailbreak prompts using the HarmBench~\citep{harmbench} and measure ASR with its refusal keywords, counting an attack as successful if the response does not begin with these keywords. \textcolor{orange}{We additionally evaluate the same responses using WildGuard~\citep{wildguard}, an LLM-based judge, in Appendix~\ref{sec:wildguard_judge}.}
+% \djh{다른 방법으로 measure한 결과들도 appendix에 있다고 언급}
 
 % \kms{실험의 하이퍼 파라미터와 method 별 하이퍼 파라미터는 Appendix A에 작성}
 
@@ -497,7 +498,7 @@ Resta
 & 10.34 & +0.30 & 44.20 & -1.74 & -2.04 \\
 
 SEAL
-& 30.45 & +9.67 & 38.89 & -2.28 & -11.95
+& 12.75 & -8.03 & 38.89 & -2.28 & +5.75
 & 10.28 & +0.24 & 45.19 & -0.75 & -0.99 \\
 
 AsFT
@@ -670,7 +671,7 @@ RSN-Tune
 \begin{wrapfigure}{r}{0.5\textwidth}
     \vspace{-8mm}
     \centering
-    \includegraphics[width=\linewidth]{figures/llama_2_13b_chat_gsm8k_tradeoff_before.pdf}
+    \includegraphics[width=\linewidth]{figures/llama_2_13b_chat_gsm8k_tradeoff.pdf}
         \vspace{-5mm}
     \caption{Safety-downstream trade-off among full-parameter fine-tuning on Llama-2-13B-Chat. The x-axis shows downstream accuracy, and the y-axis shows defense success rate ($1 -$ ASR), where higher indicates better safety.}
     \label{fig:main_all_figure}
@@ -718,23 +719,23 @@ A useful property of WSR-Tune is that it can be combined with existing safety-pr
 \textbf{Method} & \textbf{Direct} & \textbf{AutoDAN} & \textbf{PAIR} & \textbf{PAP} & \textbf{AVG} & \textbf{Accuracy} \\
 \midrule
 
-SN-Tune & 0 & 17.69 & 45.58 & 45.46 & 27.18 & 38.99 \\
+SN-Tune & 0.00 & 17.69 & 45.58 & 45.46 & 27.18 & 38.99 \\
 %\rowcolor{green!12} 
-\rowcolor{green!12}SN-Tune + WSR-Tune & \textbf{0} & \textbf{11.92} & \textbf{41.92} & \textbf{38.46} & \textbf{23.07} & \textbf{41.02} \\
+\rowcolor{green!12}SN-Tune + WSR-Tune & \textbf{0.00} & \textbf{11.92} & \textbf{41.92} & \textbf{38.46} & \textbf{23.07} & \textbf{41.02} \\
 
 \midrule
 
-SafeInstr & 0 & 0.38 & 18.85 & 34.96 & 13.55 & 38.44 \\
+SafeInstr & 0.00 & 0.38 & 18.85 & 34.96 & 13.55 & 38.44 \\
 %\rowcolor{green!12} 
-\rowcolor{green!12}SafeInstr + WSR-Tune & \textbf{0} & \textbf{0} & \textbf{8.46} & \textbf{29.69} & \textbf{9.53} & \textbf{39.27} \\
+\rowcolor{green!12}SafeInstr + WSR-Tune & \textbf{0.00} & \textbf{0.00} & \textbf{8.46} & \textbf{29.69} & \textbf{9.53} & \textbf{39.27} \\
 
 \midrule
 
 SEAL
-& 0.19 & 10.77 & 44.81 & 66.04 & 30.45 & 38.89 \\
+& 0.00 & 4.23 & 16.92 & 29.85 & 12.75 & 38.89 \\
 \rowcolor{green!12}
 SEAL + WSR-Tune
-& \textbf{0} & \textbf{0} & \textbf{15.38} & \textbf{23.46}
+& \textbf{0.00} & \textbf{0.00} & \textbf{15.38} & \textbf{23.46}
 & \textbf{9.71} & \textbf{39.13} \\
 
 \bottomrule
@@ -804,7 +805,7 @@ SEAL + WSR-Tune
 Full Params FT
 & 3.62 & 0.00 & 67.32 & 0.00 & 0.00
 & 5.37 & 0.00 & 69.75 & 0.00 & 0.00 \\
-%\midrule
+\midrule
 
 SafeInstr
 & 6.66 & +3.04 & 67.70 & +0.38 & -2.66
@@ -819,12 +820,12 @@ SEAL
 & 5.19 & -0.18 & 68.31 & -1.44 & -1.26 \\
 
 AsFT
-& 0.00 & 0.00 & 0.00 & 0.00 & 0.00
-& 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\
+& 3.72 & +0.11 & 71.57 & +4.25 & +4.14
+& 4.77 & -0.60 & 36.62 & -33.13 & -32.53 \\
 
 Lisa
-& 0.00 & 0.00 & 0.00 & 0.00 & 0.00
-& 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\
+& 4.16 & +0.55 & 70.89 & +3.57 & +3.02
+& 3.03 & -2.34 & 65.38 & -4.47 & -2.13 \\
 
 SafeDelta
 & 3.82 & +0.20 & 66.87 & -0.45 & -0.65
@@ -838,9 +839,9 @@ RSN-Tune
 & 38.31 & +34.69 & 71.34 & +4.02 & -30.67
 & 41.15 & +35.78 & 71.57 & +1.82 & -33.96 \\
 %\midrule
-
+\midrule
 \textbf{WSR-Tune (Ours)}
-& 2.89 & -0.73 & 69.45 & +2.13 & \cellcolor{green!20}\textbf{+2.86}
+& 2.68 & -0.94 & 70.81 & +3.49 & \cellcolor{green!20}\textbf{+4.42}
 & 4.99 & -0.38 & 70.81 & +1.06 & \cellcolor{green!20}\textbf{+1.44} \\
 
 % \midrule
@@ -894,7 +895,7 @@ RSN-Tune
 \begin{figure}[t]
 %\vspace{-3mm}
     \centering
-    \includegraphics[width=\textwidth]{figures/llama2_7b_chat_downstream_before.pdf}
+    \includegraphics[width=\textwidth]{figures/llama2_7b_chat_downstream.pdf}
         \vspace{-5mm}
     \caption{Comparison of safety-preserving downstream among full-parameter fine-tuning methods on Llama-2-7B-Chat under GSM8K, ARC-C and MedQA fine-tuning.}
     \label{fig:main_all_figure_2}
@@ -1004,7 +1005,8 @@ Table~\ref{tab:keep_ratio_ablation} analyzes the effect of the freeze ratio usin
 
 \textbf{Other results.} 
 Appendix~\ref{app:runtime} reports runtime and memory measurements, showing that SVD-based basis construction incurs a one-time cost relative to downstream training. 
-Appendix~\ref{app:v_basis} examines sensitivity to the output-side basis $V_l$. Appendix~\ref{app:additional_results} further reports results on Llama-3 models (Appendix~\ref{app:llama3_results}), adaptation from the Llama-3.1-8B base model (Appendix~\ref{app:base_model_results}), robustness when BeaverTails is used as the safety dataset and when different data fractions are used for basis construction and importance masking (Appendix~\ref{app:safety_data}), freeze-ratio results up to $50\%$ (Appendix~\ref{app:freeze_ratio}), and complete attack-wise results for the main experiments (Appendix~\ref{app:detailed_main_results}). Finally, Appendix~\ref{app:baseline_compatibility} extends the experiments combining WSR-Tune with existing fine-tuning methods to Llama-2-13B-Chat. Appendix~\ref{sec:wildguard_judge} re-evaluates the same generations with an LLM-based refusal judge instead of refusal-keyword matching, and shows that the method ranking and the safety--utility trade-off are unchanged.
+Appendix~\ref{app:v_basis} examines sensitivity to the output-side basis $V_l$. Appendix~\ref{app:additional_results} further reports results on Llama-3 models (Appendix~\ref{app:llama3_results}), adaptation from the Llama-3.1-8B base model (Appendix~\ref{app:base_model_results}), robustness when BeaverTails is used as the safety dataset and when different data fractions are used for basis construction and importance masking (Appendix~\ref{app:safety_data}), freeze-ratio results up to $50\%$ (Appendix~\ref{app:freeze_ratio}), \textcolor{orange}{evaluate on AGNEWS (Appendix~\ref{app:agnews_results}), } and complete attack-wise results for the main experiments (Appendix~\ref{app:detailed_main_results}). \textcolor{orange}{Appendix~\ref{sec:wildguard_judge} shows that WSR-Tune's favorable safety--utility trade-off persists under an LLM-based judge (WildGuard).}
+Finally, Appendix~\ref{app:baseline_compatibility} extends the experiments combining WSR-Tune with existing fine-tuning methods to Llama-2-13B-Chat.
 
 
 
@@ -1343,12 +1345,12 @@ Here, we provide the full breakdown for each model, including attack-specific sa
 \subsection{Results on Llama-3 Models}
 \label{app:llama3_results}
 
-Table~\ref{tab:llama3_models_delta} compares full-parameter and PEFT methods on Llama-3.2-3B-Instruct and Llama-3.1-8B-Instruct with MATH fine-tuning. WSR-Tune improves Overall by +3.11 and +5.24 points over Full Params FT, respectively, while WSR-LoRA improves Overall by +2.35 and +0.34 points over Vanilla LoRA FT.
+Table~\ref{tab:llama3_models_delta} compares safety-preserving fine-tuning methods on Llama-3.2-3B-Instruct and Llama-3.1-8B-Instruct with MATH fine-tuning. WSR-Tune improves Overall by +3.11 and +5.24 points over Full Params FT, respectively, while WSR-LoRA improves Overall by +2.35 and +0.34 points over Vanilla LoRA FT.
 
 \begin{table}[htbp]
 \centering
 \scriptsize
-\caption{Results on Llama-3.2-3B-Instruct and Llama-3.1-8B-Instruct with MATH fine-tuning. Metrics follow Table~\ref{tab:main_all_models_delta}; deltas are relative to Full Params FT for full-parameter methods and Vanilla LoRA FT for PEFT methods. Lower JB AVG and higher MATH accuracy and Overall are better.}
+\caption{Results on Llama-3.2-3B-Instruct and Llama-3.1-8B-Instruct with MATH fine-tuning. Metrics follow Table~\ref{tab:main_all_models_delta}; deltas in the upper block, including AsFT and Lisa, are relative to Full Params FT, while those in the lower block are relative to Vanilla LoRA FT. AsFT and Lisa use LoRA adapters in these experiments. Lower JB AVG and higher MATH accuracy and Overall are better.}
 \label{tab:llama3_models_delta}
 \resizebox{\textwidth}{!}{
 \begin{tabular}{lccccc|ccccc}
@@ -1374,7 +1376,6 @@ Table~\ref{tab:llama3_models_delta} compares full-parameter and PEFT methods on 
 Full Params FT
 & 8.65 & 0.00 & 21.52 & 0.00 & 0.00
 & 9.28 & 0.00 & 12.12 & 0.00 & 0.00 \\
-\midrule
 
 SafeInstr
 & 8.23 & -0.42 & 22.26 & +0.74 &  +1.16
@@ -1388,6 +1389,14 @@ SEAL
 & 8.37 & -0.28 & 21.62 & +0.10 & +0.38
 & 5.45 & -3.83 & 13.18 & +1.06 & +4.89 \\
 
+AsFT
+& 7.11 & -1.54 & 7.76 & -13.76 & -12.22
+& 3.36 & -5.92 & 5.66 & -6.46 & -0.54 \\
+
+Lisa
+& 6.83 & -1.82 & 8.82 & -12.70 & -10.88
+& 3.52 & -5.76 & 11.32 & -0.80 & +4.96 \\
+
 SafeDelta
 & 6.48 &  -2.17 & 6.48 & -15.04 & -12.87
 & 4.55 &  -4.73 & 1.18 & -10.94 & -6.21 \\
@@ -1399,7 +1408,6 @@ SN-Tune
 RSN-Tune
 & 24.49 & +15.84 & 19.62 & -1.90 & -17.74
 & 55.34 & +46.06 & 14.10 & +1.98 & -44.08 \\
-\midrule
 
 \textbf{WSR-Tune (Ours)}
 & 6.40 &  -2.25  & 22.38 &  +0.86  & \cellcolor{green!20}\textbf{+3.11}
@@ -1411,16 +1419,6 @@ Vanilla LoRA FT
 & 8.23 & 0.00 & 24.80 & 0.00 & 0.00
 & 5.82 & 0.00 & 25.30 & 0.00 & 0.00 \\
 
-\midrule
-
-AsFT
-& 7.11 & -1.12 & 7.76 & -17.04 & -15.92
-& 3.36 & -2.46 & 5.66 & -19.64 & -17.18 \\
-
-Lisa
-& 6.83 & -1.40 & 8.82 & -15.98 & -14.58
-& 3.52 & -2.30 & 11.32 & -13.98 & -11.68 \\
-
 SafeLoRA
 & 6.26 & -1.97 & 23.04 & -1.76 & +0.21
 & 3.94 & -1.88 & 22.04 & -3.26 & -1.38 \\
@@ -1428,8 +1426,6 @@ SafeLoRA
 SaLoRA
 & 9.35 & +1.12 & 22.38 & -2.42 & -3.54
 & 6.56 & +0.74 & 23.20 & -2.10 & -2.84 \\
-
-\midrule
 
 \textbf{WSR-LoRA (Ours)}
 & 6.76 & -1.47 & 25.68 & +0.88 & \cellcolor{green!20}\textbf{+2.35}
@@ -1645,7 +1641,7 @@ Table~\ref{tab:llama31_8b_base_results} reports full-parameter and PEFT results 
 \begin{table*}[t]
 \centering
 \scriptsize
-\caption{Results on Llama-3.1-8B Base with GSM8K fine-tuning. Safety is measured by ASR under Direct, AutoDAN, PAIR, and PAP and their average JB AVG (lower is better); higher GSM8K accuracy is better. Deltas are relative to Full Params FT for full-parameter methods and Vanilla LoRA FT for PEFT methods, with $\Delta_{\mathrm{Overall}}=-\Delta_{\mathrm{S}}+\Delta_{\mathrm{D}}$. Values are percentages without the percent sign. Bold and underlined raw values indicate the best and second-best results within each adaptation regime.}
+\caption{Results on Llama-3.1-8B Base with GSM8K fine-tuning. Safety is measured by ASR under Direct, AutoDAN, PAIR, and PAP and their average JB AVG (lower is better); higher GSM8K accuracy is better. Deltas in the upper block, including AsFT and Lisa, are relative to Full Params FT, while those in the lower block are relative to Vanilla LoRA FT, with $\Delta_{\mathrm{Overall}}=-\Delta_{\mathrm{S}}+\Delta_{\mathrm{D}}$. AsFT and Lisa use LoRA adapters in these experiments. Raw scores are percentages and deltas are percentage-point differences. Bold and underlined raw values indicate the best and second-best results within each comparison block.}
 \label{tab:llama31_8b_base_results}
 \resizebox{\textwidth}{!}{
 \begin{tabular}{lccccccccc}
@@ -1662,8 +1658,6 @@ Table~\ref{tab:llama31_8b_base_results} reports full-parameter and PEFT results 
 & \textbf{Overall $\uparrow$} \\
 \midrule
 
-\multicolumn{10}{l}{\textit{Full-parameter methods}} \\
-\midrule
 Full Params FT
 & \textbf{0.00} & \uline{0.19} & 9.04 & 26.00 & 8.81 & 57.32
 & 0.00 & 0.00 & 0.00 \\
@@ -1680,8 +1674,16 @@ SEAL
 & \textbf{0.00} & \uline{0.19} & 8.08 & 25.00 & 8.32 & 55.95
 & -0.49 & -1.37 & -0.88 \\
 
+AsFT
+& \textbf{0.00} & \textbf{0.00} & 0.96 & \uline{15.62} & \uline{4.14} & 27.14
+& -4.67 & -30.18 & -25.51 \\
+
+Lisa
+& \textbf{0.00} & \textbf{0.00} & \textbf{0.19} & 18.73 & 4.73 & 30.25
+& -4.08 & -27.07 & -22.99 \\
+
 SafeDelta
-& \textbf{0.00} & \textbf{0.00} & \textbf{0.77} & \textbf{15.19} & \textbf{3.99} & 41.32
+& \textbf{0.00} & \textbf{0.00} & \uline{0.77} & \textbf{15.19} & \textbf{3.99} & 41.32
 & -4.82 & -16.00 & -11.18 \\
 
 SN-Tune
@@ -1692,37 +1694,26 @@ RSN-Tune
 & 23.27 & 12.12 & 40.38 & 38.38 & 28.54 & \textbf{63.53}
 & +19.73 & +6.21 & -13.52 \\
 
-\midrule
 \textbf{WSR-Tune (Ours)}
-& \textbf{0.00} & \textbf{0.00} & \uline{1.35} & \uline{16.50} & \uline{4.46} & 55.12
+& \textbf{0.00} & \textbf{0.00} & 1.35 & 16.50 & 4.46 & 55.12
 & -4.35 & -2.20 & \cellcolor{green!20}\textbf{+2.15} \\
 
 \midrule
-\multicolumn{10}{l}{\textit{PEFT methods}} \\
-\midrule
+
 Vanilla LoRA FT
 & \uline{1.15} & 81.73 & 38.85 & 68.12 & 47.46 & \uline{57.24}
 & 0.00 & 0.00 & 0.00 \\
 
-AsFT
-& \textbf{0.00} & \textbf{0.00} & \uline{0.96} & \textbf{15.62} & \textbf{4.14} & 27.14
-& -43.32 & -30.10 & +13.22 \\
-
-Lisa
-& \textbf{0.00} & \textbf{0.00} & \textbf{0.19} & \uline{18.73} & \uline{4.73} & 30.25
-& -42.73 & -26.99 & +15.74 \\
-
 SafeLoRA
-& \textbf{0.00} & \uline{0.38} & 7.31 & 33.58 & 10.32 & 48.37
+& \textbf{0.00} & \textbf{0.38} & \textbf{7.31} & \uline{33.58} & \textbf{10.32} & 48.37
 & -37.14 & -8.87 & +28.27 \\
 
 SaLoRA
 & 1.54 & 93.27 & 28.27 & 70.69 & 48.44 & 56.41
 & +0.98 & -0.83 & -1.81 \\
 
-\midrule
 \textbf{WSR-LoRA (Ours)}
-& \textbf{0.00} & 5.96 & 8.08 & 27.50 & 10.38 & \textbf{59.29}
+& \textbf{0.00} & \uline{5.96} & \uline{8.08} & \textbf{27.50} & \uline{10.38} & \textbf{59.29}
 & -37.08 & +2.05 & \cellcolor{green!20}\textbf{+39.13} \\
 
 \bottomrule
@@ -1730,6 +1721,7 @@ SaLoRA
 }
 \vspace{-4mm}
 \end{table*}
+
 
 
 
@@ -1765,7 +1757,7 @@ Table~\ref{tab:beavertails_results} reports results when the WSR pipeline is con
 \centering
 \scriptsize
 \caption{
-Results using the BeaverTails-based safety source on Llama-2-7B-Chat with GSM8K. Safety is measured by ASR under Direct, AutoDAN, PAIR, and PAP and their average JB AVG (lower is better); GSM8K accuracy is higher-is-better. Deltas are relative to Full Params FT for full-parameter methods and Vanilla LoRA FT for PEFT methods. Values are percentages without the percent sign. Bold and underlined raw values indicate the best and second-best results within each adaptation regime.
+Results using the BeaverTails-based safety source on Llama-2-7B-Chat with GSM8K. Safety is measured by ASR under Direct, AutoDAN, PAIR, and PAP and their average JB AVG (lower is better); GSM8K accuracy is higher-is-better. Deltas in the upper block, including AsFT and Lisa, are relative to Full Params FT, while those in the lower block are relative to Vanilla LoRA FT, with $\Delta_{\mathrm{Overall}}=-\Delta_{\mathrm{S}}+\Delta_{\mathrm{D}}$. AsFT and Lisa use LoRA adapters in these experiments. Raw scores are percentages and deltas are percentage-point differences. Bold and underlined raw values indicate the best and second-best results within each comparison block.
 }
 \label{tab:beavertails_results}
 \resizebox{\textwidth}{!}{
@@ -1783,8 +1775,6 @@ Results using the BeaverTails-based safety source on Llama-2-7B-Chat with GSM8K.
 & \textbf{Overall $\uparrow$} \\
 \midrule
 
-\multicolumn{10}{l}{\textit{Full-parameter methods}} \\
-\midrule
 Full Params FT
 & \uline{0.19} & 6.73 & 34.04 & 35.69 & 19.16 & \textbf{41.85}
 & 0.00 & 0.00 & 0.00 \\
@@ -1801,6 +1791,14 @@ SEAL
 & \uline{0.19} & 5.58 & 27.50 & 26.08 & 14.84 & 39.04
 & -4.32 & -2.81 & +1.51 \\
 
+AsFT
+& 0.38 & 26.92 & 26.35 & 25.85 & 19.87 & 21.15
+& +0.71 & -20.70 & -21.41 \\
+
+Lisa
+& \textbf{0.00} & 0.77 & 16.15 & \uline{15.19} & 8.03 & 18.73
+& -11.13 & -23.12 & -11.99 \\
+
 SafeDelta
 & \textbf{0.00} & \textbf{0.00} & \textbf{10.19} & 20.08 & \uline{7.57} & 24.49
 & -11.59 & -17.36 & -5.77 \\
@@ -1814,41 +1812,32 @@ RSN-Tune
 & +5.48 & -0.61 & -6.09 \\
 
 \textbf{WSR-Tune (Ours)}
-& \textbf{0.00} & \uline{0.19} & \uline{13.27} & \uline{15.27}
-& \textbf{7.18} & 41.09
+& \textbf{0.00} & \uline{0.19} & \uline{13.27} & 15.27 & \textbf{7.18} & 41.09
 & -11.98 & -0.76 & \cellcolor{green!20}\textbf{+11.22} \\
 
 \midrule
-\multicolumn{10}{l}{\textit{PEFT methods}} \\
-\midrule
+
 Vanilla LoRA FT
-& \uline{0.19} & 0.96 & 21.92 & 32.38 & 13.86 & 36.62
+& \textbf{0.19} & 0.96 & 21.92 & 32.38 & 13.86 & 36.62
 & 0.00 & 0.00 & 0.00 \\
 
-AsFT
-& 0.38 & 26.92 & 26.35 & 25.85 & 19.87 & 21.15
-& +6.01 & -15.47 & -21.48 \\
-
-Lisa
-& \textbf{0.00} & 0.77 & \textbf{16.15} & \textbf{15.19} & \textbf{8.03} & 18.73
-& -5.83 & -17.89 & -12.06 \\
-
 SafeLoRA
-& \uline{0.19} & \textbf{0.38} & 20.19 & 27.31 & 12.02 & \textbf{37.53}
+& \textbf{0.19} & \textbf{0.38} & \uline{20.19} & \uline{27.31} & \uline{12.02} & \textbf{37.53}
 & -1.84 & +0.91 & +2.75 \\
 
 SaLoRA
-& \uline{0.19} & 18.27 & 36.15 & 44.12 & 24.68 & 36.16
+& \textbf{0.19} & 18.27 & 36.15 & 44.12 & 24.68 & 36.16
 & +10.82 & -0.46 & -11.28 \\
 
 \textbf{WSR-LoRA (Ours)}
-& \uline{0.19} & \uline{0.58} & \uline{18.65} & \uline{22.65} & \uline{10.52} & \uline{36.92}
+& \textbf{0.19} & \uline{0.58} & \textbf{18.65} & \textbf{22.65} & \textbf{10.52} & \uline{36.92}
 & -3.34 & +0.30 & \cellcolor{green!20}\textbf{+3.64} \\
 
 \bottomrule
 \end{tabular}
 }
 \end{table*}
+
 
 
 
@@ -1963,6 +1952,83 @@ WSR-Tune maintains low average ASR and competitive downstream accuracy across th
 \end{tabular}
 \end{table}
 
+
+
+
+
+
+
+
+
+
+\subsection{Results on AGNEWS}
+\label{app:agnews_results}
+
+To evaluate downstream adaptation beyond reasoning tasks, we consider AGNEWS news classification on Llama-2-7B-Chat. Table~\ref{tab:agnews_results} reports results for selected baselines, including attack-specific ASR, average ASR, and classification accuracy. We compare AsFT and Lisa with WSR-Tune using Full Params FT as the reference, and report the four LoRA-family methods in a separate block using Vanilla LoRA FT as the reference.
+% WSR-Tune reduces average ASR from 14.45\% to 5.23\% while retaining 93.78\% accuracy, compared with 94.00\% for Full Params FT, yielding $\Delta_{\mathrm{Overall}}=+9.00$. AsFT and Lisa achieve lower average ASR (4.08\% and 4.64\%, respectively), but their accuracies decrease to 91.50\% and 90.80\%. 
+These results show that WSR-Tune also preserves a favorable safety--utility trade-off on a classification task. 
+%In the LoRA block, WSR-LoRA increases accuracy from 92.80\% to 93.30\%, while average ASR increases from 7.52\% to 7.98\%, resulting in a small net change of $\Delta_{\mathrm{Overall}}=+0.04$.
+
+\begin{table}[htbp]
+\centering
+\scriptsize
+\caption{AGNEWS results on Llama-2-7B-Chat for selected baselines. Safety is measured by ASR under Direct, AutoDAN, PAIR, and PAP, with JB AVG denoting their mean; downstream performance is AGNEWS accuracy. Raw scores are percentages and deltas are percentage-point differences. Deltas in the upper block, including AsFT and Lisa, are relative to Full Params FT; those in the lower block are relative to Vanilla LoRA FT. AsFT and Lisa use LoRA adapters in these experiments. We use $\Delta_{\mathrm{Overall}}=-\Delta_{\mathrm{S}}+\Delta_{\mathrm{D}}$, as in Table~\ref{tab:main_all_models_delta}.}
+\label{tab:agnews_results}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{lccccccccc}
+\toprule
+& \multicolumn{6}{c}{\textbf{Safety $\downarrow$}}
+& \multicolumn{2}{c}{\textbf{Downstream $\uparrow$}}
+& \textbf{Overall $\uparrow$} \\
+\cmidrule(lr){2-7} \cmidrule(lr){8-9} \cmidrule(lr){10-10}
+\textbf{Method}
+& \textbf{Direct} & \textbf{AutoDAN} & \textbf{PAIR} & \textbf{PAP}
+& \textbf{JB AVG} & $\boldsymbol{\Delta_{\mathrm{S}}}$
+& \textbf{AGNEWS} & $\boldsymbol{\Delta_{\mathrm{D}}}$
+& $\boldsymbol{\Delta_{\mathrm{Overall}}}$ \\
+\midrule
+Full Params FT
+& 0.00 & 0.00 & 25.77 & 32.04 & 14.45 & 0.00 & 94.00 & 0.00 & 0.00 \\
+Resta
+& 0.00 & 0.00 & 14.62 & 17.54 & 8.04 & -6.41 & 93.60 & -0.40 & +6.01 \\
+SEAL
+& 0.00 & 0.00 & 12.69 & 14.46 & 6.79 & -7.66 & 92.50 & -1.50 & +6.16 \\
+AsFT
+& 0.00 & 0.00 & 5.58 & 10.73 & 4.08 & -10.37 & 91.50 & -2.50 & +7.87 \\
+Lisa
+& 0.00 & 0.00 & 6.92 & 11.65 & 4.64 & -9.81 & 90.80 & -3.20 & +6.61 \\
+SafeDelta
+& 0.00 & 0.00 & 8.65 & 23.23 & 7.97 & -6.48 & 91.10 & -2.90 & +3.58 \\
+SN-Tune
+& 0.96 & 55.96 & 66.15 & 89.54 & 53.15 & +38.70 & 94.00 & 0.00 & -38.70 \\
+RSN-Tune
+& 0.96 & 49.42 & 65.00 & 88.62 & 51.00 & +36.55 & 94.40 & +0.40 & -36.15 \\
+\textbf{WSR-Tune (Ours)}
+& 0.00 & 0.00 & 9.04 & 11.88 & 5.23 & -9.22 & 93.78 & -0.22 & \cellcolor{green!20}\textbf{+9.00} \\
+\midrule
+Vanilla LoRA FT
+& 0.00 & 0.00 & 10.77 & 19.31 & 7.52 & 0.00 & 92.80 & 0.00 & 0.00 \\
+SafeLoRA
+& 0.00 & 0.00 & 7.50 & 15.38 & 5.72 & -1.80 & 83.20 & -9.60 & -7.80 \\
+SaLoRA
+& 0.00 & 0.00 & 14.23 & 24.62 & 9.71 & +2.19 & 92.70 & -0.10 & -2.29 \\
+\textbf{WSR-LoRA (Ours)}
+& 0.00 & 0.00 & 10.19 & 21.73 & 7.98 & +0.46 & 93.30 & +0.50 & \cellcolor{green!20}\textbf{+0.04} \\
+\bottomrule
+\end{tabular}
+}
+\end{table}
+
+
+
+
+
+
+
+
+
+
+
 \subsection{Detailed Results for Main Experiments}
 \label{app:detailed_main_results}
 
@@ -1983,7 +2049,7 @@ Table~\ref{tab:other_two_instruct_models_combined} provides the exact attack-wis
 \begin{table*}[t]
 \centering
 \scriptsize
-\caption{Attack-wise safety and downstream results for full-parameter and PEFT methods on Llama-2 models with GSM8K and Llama-3 models with MATH. AVG denotes the mean ASR over Direct, AutoDAN, PAIR, and PAP. Lower ASR and higher downstream accuracy are better. All values are percentages. Bold and underlined values indicate the best and second-best results within each adaptation regime.}
+\caption{Attack-wise safety and downstream results on Llama-2 models with GSM8K and Llama-3 models with MATH. AVG denotes the mean ASR over Direct, AutoDAN, PAIR, and PAP. Lower ASR and higher downstream accuracy are better. All values are percentages. In each panel, AsFT and Lisa use LoRA adapters and are grouped with WSR-Tune above the divider; the lower block compares Vanilla LoRA FT, SafeLoRA, SaLoRA, and WSR-LoRA. Bold and underlined values indicate the best and second-best results within each comparison block for each model.}
 \label{tab:main_all_models}
 \resizebox{\textwidth}{!}{
 \begin{tabular}{lcccccc|cccccc}
@@ -2001,12 +2067,10 @@ Table~\ref{tab:other_two_instruct_models_combined} provides the exact attack-wis
 & \textbf{Direct} & \textbf{AutoDAN} & \textbf{PAIR} & \textbf{PAP} & \textbf{AVG} & \textbf{GSM8K}
 & \textbf{Direct} & \textbf{AutoDAN} & \textbf{PAIR} & \textbf{PAP} & \textbf{AVG} & \textbf{GSM8K} \\
 \midrule
-\multicolumn{13}{l}{\textit{Full-parameter methods}} \\
-\midrule
+
 Full Params FT
 & \textbf{0.00} & 8.27 & 26.35 & 48.50 & 20.78 & \textbf{41.17}
 & \textbf{0.00} & \uline{0.38} & 15.58 & 24.19 & 10.04 & 45.94 \\
-\midrule
 
 SafeInstr
 & \textbf{0.00} & \uline{0.38} & 18.85 & 34.96 & 13.55 & 38.44
@@ -2017,12 +2081,20 @@ Resta
 & \uline{0.19} & \textbf{0.00} & 15.19 & 25.96 & 10.34 & 44.20 \\
 
 SEAL
-& \uline{0.19} & 10.77 & 44.81 & 66.04 & 30.45 & 38.89
+& \textbf{0.00} & 4.23 & 16.92 & 29.85 & 12.75 & 38.89
 & \textbf{0.00} & 0.96 & 15.19 & 24.96 & 10.28 & 45.19 \\
 
+AsFT
+& \textbf{0.00} & \textbf{0.00} & \uline{8.46} & \textbf{12.62} & \textbf{5.27} & 19.71
+& \textbf{0.00} & \textbf{0.00} & \uline{1.73} & \uline{1.73} & \textbf{0.86} & 28.43 \\
+
+Lisa
+& \textbf{0.00} & \uline{0.38} & 16.35 & 23.08 & 9.95 & 14.40
+& \textbf{0.00} & \textbf{0.00} & 4.62 & \textbf{0.96} & 1.39 & 36.24 \\
+
 SafeDelta
-& \textbf{0.00} & \textbf{0.00} & \textbf{6.92} & \textbf{15.35} & \textbf{5.57} & 19.79
-& \textbf{0.00} & \textbf{0.00} & \textbf{1.54} & \uline{2.35} & \textbf{0.97} & 28.43 \\
+& \textbf{0.00} & \textbf{0.00} & \textbf{6.92} & \uline{15.35} & \uline{5.57} & 19.79
+& \textbf{0.00} & \textbf{0.00} & \textbf{1.54} & 2.35 & \uline{0.97} & 28.43 \\
 
 SN-Tune
 & \textbf{0.00} & 17.69 & 45.58 & 45.46 & 27.18 & 38.99
@@ -2032,39 +2104,27 @@ RSN-Tune
 & \uline{0.19} & 5.96 & 38.85 & 37.92 & 20.73 & \uline{40.26}
 & \textbf{0.00} & 17.88 & 37.88 & 59.38 & 28.79 & \textbf{49.96} \\
 
-\midrule
 \textbf{WSR-Tune (Ours)}
-& \textbf{0.00} & \textbf{0.00} & \uline{9.62} & \uline{18.00} & \uline{6.90} & 38.99
-& \textbf{0.00} & \textbf{0.00} & \uline{3.46} & \textbf{1.92} & \uline{1.35} & \uline{49.58} \\
+& \textbf{0.00} & \textbf{0.00} & 9.62 & 18.00 & 6.90 & 38.99
+& \textbf{0.00} & \textbf{0.00} & 3.46 & 1.92 & 1.35 & \uline{49.58} \\
 
 \midrule
-\multicolumn{13}{l}{\textit{PEFT methods}} \\
-\midrule
+
 Vanilla LoRA FT
 & \textbf{0.00} & 2.69 & 37.31 & 63.42 & 25.86 & \uline{36.16}
 & \textbf{0.00} & \uline{0.96} & 31.35 & 54.04 & 21.59 & \textbf{48.60} \\
-\midrule
-
-AsFT
-& \textbf{0.00} & \textbf{0.00} & \textbf{8.46} & \textbf{12.62} & \textbf{5.27} & 19.71
-& \textbf{0.00} & \textbf{0.00} & \textbf{1.73} & \uline{1.73} & \textbf{0.86} & 28.43 \\
-
-Lisa
-& \textbf{0.00} & 0.38 & 16.35 & 23.08 & 9.95 & 14.40
-& \textbf{0.00} & \textbf{0.00} & \uline{4.62} & \textbf{0.96} & \uline{1.39} & 36.24 \\
 
 SafeLoRA
-& \textbf{0.00} & \textbf{0.00} & 13.46 & 19.62 & 8.27 & 31.08
-& \textbf{0.00} & \textbf{0.00} & 10.58 & 3.96 & 3.64 & 42.30 \\
+& \textbf{0.00} & \textbf{0.00} & \uline{13.46} & \uline{19.62} & \uline{8.27} & 31.08
+& \textbf{0.00} & \textbf{0.00} & \uline{10.58} & \textbf{3.96} & \uline{3.64} & 42.30 \\
 
 SaLoRA
 & \textbf{0.00} & 5.96 & 46.15 & 70.88 & 30.75 & \textbf{38.74}
 & \textbf{0.00} & \uline{0.96} & 17.88 & 52.46 & 17.82 & 38.44 \\
 
-\midrule
 \textbf{WSR-LoRA (Ours)}
-& \textbf{0.00} & \uline{0.19} & \uline{12.50} & \uline{17.00} & \uline{7.42} & 33.45
-& \textbf{0.00} & \textbf{0.00} & 7.88 & 4.12 & 3.00 & \uline{44.81} \\
+& \textbf{0.00} & \uline{0.19} & \textbf{12.50} & \textbf{17.00} & \textbf{7.42} & 33.45
+& \textbf{0.00} & \textbf{0.00} & \textbf{7.88} & \uline{4.12} & \textbf{3.00} & \uline{44.81} \\
 
 \bottomrule
 \end{tabular}
@@ -2088,12 +2148,10 @@ SaLoRA
 & \textbf{Direct} & \textbf{AutoDAN} & \textbf{PAIR} & \textbf{PAP} & \textbf{AVG} & \textbf{MATH}
 & \textbf{Direct} & \textbf{AutoDAN} & \textbf{PAIR} & \textbf{PAP} & \textbf{AVG} & \textbf{MATH} \\
 \midrule
-\multicolumn{13}{l}{\textit{Full-parameter methods}} \\
-\midrule
+
 Full Params FT
 & \uline{0.19} & \textbf{0.00} & 5.77 & 28.62 & 8.65 & 21.52
 & \textbf{0.00} & \textbf{0.00} & 4.04 & 33.08 & 9.28 & 12.12 \\
-\midrule
 
 SafeInstr
 & \uline{0.19} & \textbf{0.00} & 6.54 & 26.19 & 8.23 & \uline{22.26}
@@ -2105,11 +2163,19 @@ Resta
 
 SEAL
 & \textbf{0.00} & \textbf{0.00} & 7.31 & 26.15 & 8.37 & 21.62
-& \textbf{0.00} & \textbf{0.00} & 1.46 & \uline{20.35} & \uline{5.45} & 13.18 \\
+& \textbf{0.00} & \textbf{0.00} & 1.46 & 20.35 & 5.45 & 13.18 \\
+
+AsFT
+& \textbf{0.00} & \textbf{0.00} & \uline{5.19} & 23.23 & 7.11 & 7.76
+& \textbf{0.00} & \textbf{0.00} & \textbf{0.38} & \textbf{13.08} & \textbf{3.36} & 5.66 \\
+
+Lisa
+& \textbf{0.00} & \textbf{0.00} & 5.96 & \uline{21.35} & 6.83 & 8.82
+& \textbf{0.00} & \textbf{0.00} & \uline{0.77} & \uline{13.31} & \uline{3.52} & 11.32 \\
 
 SafeDelta
 & \textbf{0.00} & \textbf{0.00} & \uline{5.19} & \textbf{20.73} & \uline{6.48} & 6.48
-& \textbf{0.00} & \textbf{0.00} & \textbf{0.38} & \textbf{17.81} & \textbf{4.55} & 1.18 \\
+& \textbf{0.00} & \textbf{0.00} & \textbf{0.38} & 17.81 & 4.55 & 1.18 \\
 
 SN-Tune
 & 0.38 & \textbf{0.00} & 18.46 & 68.50 & 21.84 & 19.36
@@ -2119,39 +2185,27 @@ RSN-Tune
 & 0.96 & \textbf{0.00} & 26.35 & 70.65 & 24.49 & 19.62
 & 6.54 & \uline{61.35} & 68.85 & 84.62 & 55.34 & \textbf{14.10} \\
 
-\midrule
 \textbf{WSR-Tune (Ours)}
 & \textbf{0.00} & \textbf{0.00} & \textbf{4.23} & \uline{21.35} & \textbf{6.40} & \textbf{22.38}
-& \textbf{0.00} & \textbf{0.00} & \uline{1.15} & 21.31 & 5.62 & 13.70 \\
+& \textbf{0.00} & \textbf{0.00} & 1.15 & 21.31 & 5.62 & 13.70 \\
 
 \midrule
-\multicolumn{13}{l}{\textit{PEFT methods}} \\
-\midrule
+
 Vanilla LoRA FT
 & \textbf{0.00} & \textbf{0.00} & 7.12 & 25.81 & 8.23 & \uline{24.80}
-& \textbf{0.00} & \textbf{0.00} & 1.54 & 21.73 & 5.82 & \textbf{25.30} \\
-\midrule
-
-AsFT
-& \textbf{0.00} & \textbf{0.00} & \uline{5.19} & 23.23 & 7.11 & 7.76
-& \textbf{0.00} & \textbf{0.00} & \textbf{0.38} & \textbf{13.08} & \textbf{3.36} & 5.66 \\
-
-Lisa
-& \textbf{0.00} & \textbf{0.00} & 5.96 & \uline{21.35} & 6.83 & 8.82
-& \textbf{0.00} & \textbf{0.00} & 0.77 & \uline{13.31} & \uline{3.52} & 11.32 \\
+& \textbf{0.00} & \textbf{0.00} & \uline{1.54} & 21.73 & 5.82 & \textbf{25.30} \\
 
 SafeLoRA
-& \textbf{0.00} & \textbf{0.00} & 6.15 & \textbf{18.88} & \textbf{6.26} & 23.04
-& \textbf{0.00} & \textbf{0.00} & \uline{0.58} & 15.19 & 3.94 & 22.04 \\
+& \textbf{0.00} & \textbf{0.00} & \uline{6.15} & \textbf{18.88} & \textbf{6.26} & 23.04
+& \textbf{0.00} & \textbf{0.00} & \textbf{0.58} & \textbf{15.19} & \textbf{3.94} & 22.04 \\
 
 SaLoRA
 & \uline{0.19} & \textbf{0.00} & 7.50 & 29.69 & 9.35 & 22.38
-& \textbf{0.00} & \textbf{0.00} & \uline{0.58} & 25.65 & 6.56 & 23.20 \\
+& \textbf{0.00} & \textbf{0.00} & \textbf{0.58} & 25.65 & 6.56 & 23.20 \\
 
-\midrule
 \textbf{WSR-LoRA (Ours)}
-& \textbf{0.00} & \textbf{0.00} & \textbf{4.81} & 22.23 & \uline{6.76} & \textbf{25.68}
-& \textbf{0.00} & \textbf{0.00} & \uline{0.58} & 16.15 & 4.18 & \uline{24.00} \\
+& \textbf{0.00} & \textbf{0.00} & \textbf{4.81} & \uline{22.23} & \uline{6.76} & \textbf{25.68}
+& \textbf{0.00} & \textbf{0.00} & \textbf{0.58} & \uline{16.15} & \uline{4.18} & \uline{24.00} \\
 
 \bottomrule
 \end{tabular}
@@ -2166,7 +2220,7 @@ SaLoRA
 \begin{table*}[t]
 \centering
 \scriptsize
-\caption{Additional results on Qwen-2.5-7B-Instruct and Gemma-2-9B-IT with GSM8K fine-tuning. The upper table reports deltas relative to Full Params FT for full-parameter methods and Vanilla LoRA FT for PEFT methods, with $\Delta_{\mathrm{Overall}}=-\Delta_{\mathrm{S}}+\Delta_{\mathrm{D}}$. The lower table reports attack-wise ASR and downstream accuracy in percent. Lower ASR and higher accuracy and Overall are better. Bold and underlined raw values indicate the best and second-best results within each adaptation regime.}
+\caption{Additional results on Qwen-2.5-7B-Instruct and Gemma-2-9B-IT with GSM8K fine-tuning. The upper table reports summary scores and $\Delta_{\mathrm{Overall}}=-\Delta_{\mathrm{S}}+\Delta_{\mathrm{D}}$; the lower table reports attack-wise ASR and downstream accuracy. In each table, AsFT and Lisa are grouped with WSR-Tune above the divider, while Vanilla LoRA FT, SafeLoRA, SaLoRA, and WSR-LoRA form the lower comparison block. Deltas are relative to Full Params FT in the upper block and Vanilla LoRA FT in the lower block. AsFT and Lisa use LoRA adapters. Raw scores are percentages and deltas are percentage-point differences. Lower ASR and higher accuracy and Overall are better. Bold and underlined raw values indicate the best and second-best results within each comparison block for each model.}
 \label{tab:other_two_instruct_models_combined}
 % Values follow tem_csv.txt; deltas are computed from the reported AVG and accuracy.
 
@@ -2190,12 +2244,10 @@ SaLoRA
 & \textbf{JB AVG} & $\boldsymbol{\Delta_{\mathrm{S}}}$
 & \textbf{GSM8K} & $\boldsymbol{\Delta_{\mathrm{D}}}$ & $\boldsymbol{\Delta_{\mathrm{Overall}}}$ \\
 \midrule
-\multicolumn{11}{l}{\textit{Full-parameter methods}} \\
-\midrule
+
 Full Params FT
 & 3.62 & 0.00 & 67.32 & 0.00 & 0.00
 & 5.37 & 0.00 & 69.75 & 0.00 & 0.00 \\
-\midrule
 
 SafeInstr
 & 6.66 & +3.04 & 67.70 & +0.38 & -2.66
@@ -2209,6 +2261,14 @@ SEAL
 & 4.34 & +0.72 & 70.05 & +2.73 & +2.01
 & 5.19 & -0.18 & 68.31 & -1.44 & -1.26 \\
 
+AsFT
+& 3.72 & +0.10 & 71.57 & +4.25 & +4.15
+& 4.77 & -0.60 & 36.62 & -33.13 & -32.53 \\
+
+Lisa
+& 4.16 & +0.54 & 70.89 & +3.57 & +3.03
+& 3.03 & -2.34 & 65.28 & -4.47 & -2.13 \\
+
 SafeDelta
 & 3.82 & +0.20 & 66.87 & -0.45 & -0.65
 & 4.52 & -0.85 & 64.37 & -5.38 & -4.53 \\
@@ -2221,26 +2281,15 @@ RSN-Tune
 & 38.31 & +34.69 & 71.34 & +4.02 & -30.67
 & 41.15 & +35.78 & 71.57 & +1.82 & -33.96 \\
 
-\midrule
 \textbf{WSR-Tune (Ours)}
-& 2.89 & -0.73 & 69.45 & +2.13 & \cellcolor{green!20}\textbf{+2.86}
+& 2.68 & -0.94 & 70.81 & +3.49 & \cellcolor{green!20}\textbf{+4.43}
 & 4.99 & -0.38 & 70.81 & +1.06 & \cellcolor{green!20}\textbf{+1.44} \\
 
 \midrule
-\multicolumn{11}{l}{\textit{PEFT methods}} \\
-\midrule
+
 Vanilla LoRA FT
 & 3.11 & 0.00 & 71.19 & 0.00 & 0.00
 & 12.92 & 0.00 & 70.74 & 0.00 & 0.00 \\
-\midrule
-
-AsFT
-& 3.71 & +0.60 & 72.02 & +0.83 & +0.23
-& 4.77 & -8.15 & 36.62 & -34.12 & -25.97 \\
-
-Lisa
-& 4.24 & +1.13 & 71.34 & +0.15 & -0.98
-& 3.03 & -9.89 & 65.28 & -5.46 & +4.43 \\
 
 SafeLoRA
 & 3.24 & +0.13 & 73.74 & +2.55 & +2.42
@@ -2250,7 +2299,6 @@ SaLoRA
 & 4.40 & +1.29 & 70.66 & -0.53 & -1.82
 & 11.32 & -1.60 & 68.23 & -2.51 & -0.91 \\
 
-\midrule
 \textbf{WSR-LoRA (Ours)}
 & 3.00 & -0.11 & 73.54 & +2.35 & \cellcolor{green!20}\textbf{+2.46}
 & 5.20 & -7.72 & 70.81 & +0.07 & \cellcolor{green!20}\textbf{+7.79} \\
@@ -2277,12 +2325,10 @@ SaLoRA
 & \textbf{Direct} & \textbf{AutoDAN} & \textbf{PAIR} & \textbf{PAP} & \textbf{AVG} & \textbf{GSM8K}
 & \textbf{Direct} & \textbf{AutoDAN} & \textbf{PAIR} & \textbf{PAP} & \textbf{AVG} & \textbf{GSM8K} \\
 \midrule
-\multicolumn{13}{l}{\textit{Full-parameter methods}} \\
-\midrule
+
 Full Params FT
 & \textbf{0.00} & \textbf{0.00} & 2.31 & 12.15 & 3.62 & 67.32
-& \textbf{0.00} & \uline{0.38} & \uline{0.96} & 20.15 & 5.37 & 69.75 \\
-\midrule
+& \textbf{0.00} & \uline{0.38} & 0.96 & 20.15 & 5.37 & 69.75 \\
 
 SafeInstr
 & \textbf{0.00} & \textbf{0.00} & 4.81 & 21.81 & 6.66 & 67.70
@@ -2290,57 +2336,53 @@ SafeInstr
 
 Resta
 & \textbf{0.00} & \textbf{0.00} & \textbf{0.96} & \textbf{6.31} & \textbf{1.82} & 66.87
-& \textbf{0.00} & \textbf{0.00} & 1.35 & \textbf{16.96} & \uline{4.58} & 57.85 \\
+& \textbf{0.00} & \textbf{0.00} & 1.35 & \uline{16.96} & 4.58 & 57.85 \\
 
 SEAL
-& \textbf{0.00} & \textbf{0.00} & 3.85 & 13.50 & 4.34 & \uline{70.05}
-& \textbf{0.00} & \uline{0.38} & \textbf{0.77} & 0.1961 & 5.19 & 68.31 \\
+& \textbf{0.00} & \textbf{0.00} & 3.85 & 13.50 & 4.34 & 70.05
+& \textbf{0.00} & \uline{0.38} & \uline{0.77} & 19.61 & 5.19 & 68.31 \\
+
+AsFT
+& \textbf{0.00} & \textbf{0.00} & 2.12 & 12.77 & 3.72 & \textbf{71.57}
+& \textbf{0.00} & \textbf{0.00} & \uline{0.77} & 18.31 & 4.77 & 36.62 \\
+
+Lisa
+& \textbf{0.00} & \textbf{0.00} & 2.88 & 13.77 & 4.16 & 70.89
+& \textbf{0.00} & \textbf{0.00} & \textbf{0.19} & \textbf{11.92} & \textbf{3.03} & 65.28 \\
 
 SafeDelta
-& \textbf{0.00} & \textbf{0.00} & \uline{1.73} & 13.54 & 3.82 & 66.87
-& \textbf{0.00} & \textbf{0.00} & \uline{0.96} & \uline{17.12} & \textbf{4.52} & 64.37 \\
+& \textbf{0.00} & \textbf{0.00} & 1.73 & 13.54 & 3.82 & 66.87
+& \textbf{0.00} & \textbf{0.00} & 0.96 & 17.12 & \uline{4.52} & 64.37 \\
 
 SN-Tune
 & \uline{1.15} & 10.96 & 53.08 & 85.00 & 37.55 & 69.52
 & \textbf{0.00} & 50.38 & 41.54 & 55.54 & 36.87 & \textbf{74.37} \\
 
 RSN-Tune
-& 1.35 & \uline{10.19} & 58.08 & 83.62 & 38.31 & \textbf{71.34}
+& 1.35 & \uline{10.19} & 58.08 & 83.62 & 38.31 & \uline{71.34}
 & \uline{0.38} & 64.23 & 39.80 & 60.18 & 41.15 & \uline{71.57} \\
 
-\midrule
 \textbf{WSR-Tune (Ours)}
-& \textbf{0.00} & \textbf{0.00} & 1.92 & \uline{9.65} & \uline{2.89} & 69.45
-& \textbf{0.00} & \textbf{0.00} & \textbf{0.77} & 19.19 & 4.99 & 70.81 \\
+& \textbf{0.00} & \textbf{0.00} & \uline{1.35} & \uline{9.38} & \uline{2.68} & 70.81
+& \textbf{0.00} & \textbf{0.00} & \uline{0.77} & 19.19 & 4.99 & 70.81 \\
 
 \midrule
-\multicolumn{13}{l}{\textit{PEFT methods}} \\
-\midrule
+
 Vanilla LoRA FT
 & \textbf{0.00} & \textbf{0.00} & 3.85 & \textbf{8.58} & \uline{3.11} & 71.19
-& \textbf{0.00} & 14.23 & 7.50 & 29.96 & 12.92 & \uline{70.74} \\
-\midrule
-
-AsFT
-& \textbf{0.00} & \textbf{0.00} & \textbf{2.12} & 12.73 & 3.71 & 72.02
-& \textbf{0.00} & \textbf{0.00} & \uline{0.77} & 18.31 & \uline{4.77} & 36.62 \\
-
-Lisa
-& \textbf{0.00} & \textbf{0.00} & 3.08 & 13.88 & 4.24 & 71.34
-& \textbf{0.00} & \textbf{0.00} & \textbf{0.19} & \textbf{11.92} & \textbf{3.03} & 65.28 \\
+& \textbf{0.00} & 14.23 & \uline{7.50} & 29.96 & 12.92 & \uline{70.74} \\
 
 SafeLoRA
 & \textbf{0.00} & \textbf{0.00} & \uline{2.69} & 10.26 & 3.24 & \textbf{73.74}
-& \uline{0.19} & \textbf{0.00} & 1.35 & \uline{18.23} & 4.94 & 69.29 \\
+& \uline{0.19} & \textbf{0.00} & \textbf{1.35} & \textbf{18.23} & \textbf{4.94} & 69.29 \\
 
 SaLoRA
 & \textbf{0.00} & \textbf{0.00} & 5.19 & 12.42 & 4.40 & 70.66
 & \textbf{0.00} & 1.92 & 10.38 & 32.96 & 11.32 & 68.23 \\
 
-\midrule
 \textbf{WSR-LoRA (Ours)}
 & \textbf{0.00} & \textbf{0.00} & \textbf{2.12} & \uline{9.88} & \textbf{3.00} & \uline{73.54}
-& \textbf{0.00} & \uline{0.77} & 1.35 & 18.69 & 5.20 & \textbf{70.81} \\
+& \textbf{0.00} & \uline{0.77} & \textbf{1.35} & \uline{18.69} & \uline{5.20} & \textbf{70.81} \\
 
 \bottomrule
 \end{tabular}
@@ -2355,7 +2397,7 @@ SaLoRA
 \begin{table*}[t]
 \centering
 \scriptsize
-\caption{Complete results on Llama-2-7B-Chat with MedQA and ARC-C fine-tuning. The upper table reports deltas relative to Full Params FT for full-parameter methods and Vanilla LoRA FT for PEFT methods, with $\Delta_{\mathrm{Overall}}=-\Delta_{\mathrm{S}}+\Delta_{\mathrm{D}}$. The lower table reports attack-wise ASR and downstream accuracy in percent; AVG is the mean ASR over the four attacks. Lower ASR and higher accuracy and Overall are better. Green highlights denote WSR methods; bold Overall values mark the best score within each adaptation regime. Bold and underlined raw values indicate the best and second-best results within each regime.}
+\caption{Complete results on Llama-2-7B-Chat with MedQA and ARC-C fine-tuning. The upper table reports summary scores and $\Delta_{\mathrm{Overall}}=-\Delta_{\mathrm{S}}+\Delta_{\mathrm{D}}$; the lower table reports attack-wise ASR and downstream accuracy, with AVG denoting the mean ASR over the four attacks. In each table, AsFT and Lisa are grouped with WSR-Tune above the divider; the lower block contains Vanilla LoRA FT, SafeLoRA, SaLoRA, and WSR-LoRA. Deltas are relative to Full Params FT in the upper block and Vanilla LoRA FT in the lower block. AsFT and Lisa use LoRA adapters. Raw scores are percentages and deltas are percentage-point differences. Lower ASR and higher accuracy and Overall are better. Green highlights denote WSR methods. Bold Overall values mark the best score within each comparison block for each task; bold and underlined raw values mark the best and second-best results within the same block.}
 \label{tab:llama2_7b_chat_medqa_arcc_delta}
 % Values follow tem_csv.txt; deltas are computed from the reported AVG and accuracy.
 
@@ -2379,12 +2421,10 @@ SaLoRA
 & \textbf{JB AVG} & $\boldsymbol{\Delta_{\mathrm{S}}}$
 & \textbf{ARC-C} & $\boldsymbol{\Delta_{\mathrm{D}}}$ & $\boldsymbol{\Delta_{\mathrm{Overall}}}$ \\
 \midrule
-\multicolumn{11}{l}{\textit{Full-parameter methods}} \\
-\midrule
+
 Full Params FT
 & 7.77 & 0.00 & 44.30 & 0.00 & 0.00
 & 20.64 & 0.00 & 56.31 & 0.00 & 0.00 \\
-\midrule
 
 SafeInstr
 & 7.57 & -0.20 & 43.83 & -0.47 & -0.27
@@ -2398,6 +2438,14 @@ SEAL
 & 33.64 & +25.87 & 35.74 & -8.56 & -34.43
 & 20.84 & +0.20 & 60.67 & +4.36 & +4.16 \\
 
+AsFT
+& 3.86 & -3.91 & 32.84 & -11.46 & -7.55
+& 6.01 & -14.63 & 38.74 & -17.57 & -2.94 \\
+
+Lisa
+& 6.96 & -0.81 & 31.81 & -12.49 & -11.68
+& 9.16 & -11.48 & 31.57 & -24.74 & -13.26 \\
+
 SafeDelta
 & 5.50 & -2.27 & 33.62 & -10.68 & -8.41
 & 8.26 & -12.38 & 36.52 & -19.79 & -7.41 \\
@@ -2410,26 +2458,15 @@ RSN-Tune
 & 16.01 & +8.24 & 43.44 & -0.86 & -9.10
 & 31.83 & +11.19 & 59.13 & +2.82 & -8.37 \\
 
-\midrule
 \textbf{WSR-Tune (Ours)}
 & 5.45 & -2.32 & 43.28 & -1.02 & \cellcolor{green!20}\textbf{+1.30}
 & 11.29 & -9.35 & 58.53 & +2.22 & \cellcolor{green!20}\textbf{+11.57} \\
 
 \midrule
-\multicolumn{11}{l}{\textit{PEFT methods}} \\
-\midrule
+
 Vanilla LoRA FT
 & 16.12 & 0.00 & 45.95 & 0.00 & 0.00
 & 14.06 & 0.00 & 61.09 & 0.00 & 0.00 \\
-\midrule
-
-AsFT
-& 3.86 & -12.26 & 32.84 & -13.11 & -0.85
-& 6.01 & -8.05 & 38.74 & -22.35 & -14.30 \\
-
-Lisa
-& 6.96 & -9.16 & 31.81 & -14.14 & -4.98
-& 9.16 & -4.90 & 31.57 & -29.52 & -24.62 \\
 
 SafeLoRA
 & 14.84 & -1.28 & 45.95 & 0.00 & +1.28
@@ -2439,7 +2476,6 @@ SaLoRA
 & 24.98 & +8.86 & 42.11 & -3.84 & -12.70
 & 14.64 & +0.58 & 62.97 & +1.88 & +1.30 \\
 
-\midrule
 \textbf{WSR-LoRA (Ours)}
 & 10.02 & -6.10 & 45.17 & -0.78 & \cellcolor{green!20}\textbf{+5.32}
 & 12.13 & -1.93 & 61.57 & +0.48 & \cellcolor{green!20}\textbf{+2.41} \\
@@ -2466,16 +2502,14 @@ SaLoRA
 & \textbf{Direct} & \textbf{AutoDAN} & \textbf{PAIR} & \textbf{PAP} & \textbf{AVG} & \textbf{MedQA}
 & \textbf{Direct} & \textbf{AutoDAN} & \textbf{PAIR} & \textbf{PAP} & \textbf{AVG} & \textbf{ARC-C} \\
 \midrule
-\multicolumn{13}{l}{\textit{Full-parameter methods}} \\
-\midrule
+
 Full Params FT
 & \textbf{0.00} & \textbf{0.00} & 10.00 & 21.08 & 7.77 & \textbf{44.30}
 & \textbf{0.00} & \textbf{0.00} & 31.54 & 51.00 & 20.64 & 56.31 \\
-\midrule
 
 SafeInstr
 & \textbf{0.00} & \textbf{0.00} & 10.00 & 20.27 & 7.57 & \uline{43.83}
-& \textbf{0.00} & \textbf{0.00} & 22.88 & \textbf{22.00} & \uline{11.22} & 58.45 \\
+& \textbf{0.00} & \textbf{0.00} & 22.88 & \uline{22.00} & 11.22 & 58.45 \\
 
 Resta
 & \textbf{0.00} & \textbf{0.00} & 7.50 & 17.35 & 6.21 & 41.01
@@ -2485,9 +2519,17 @@ SEAL
 & 0.38 & 13.27 & 45.58 & 75.31 & 33.64 & 35.74
 & \textbf{0.00} & \uline{0.58} & 29.23 & 53.54 & 20.84 & \textbf{60.67} \\
 
+AsFT
+& \textbf{0.00} & \textbf{0.00} & \textbf{5.19} & \textbf{10.23} & \textbf{3.86} & 32.84
+& \textbf{0.00} & \textbf{0.00} & \textbf{5.96} & \textbf{18.08} & \textbf{6.01} & 38.74 \\
+
+Lisa
+& \textbf{0.00} & \textbf{0.00} & 12.12 & 15.73 & 6.96 & 31.81
+& \textbf{0.00} & \textbf{0.00} & \uline{9.42} & 27.23 & 9.16 & 31.57 \\
+
 SafeDelta
-& \textbf{0.00} & \textbf{0.00} & \textbf{6.54} & \uline{15.46} & \uline{5.50} & 33.62
-& \textbf{0.00} & \textbf{0.00} & \textbf{10.77} & \uline{22.27} & \textbf{8.26} & 36.52 \\
+& \textbf{0.00} & \textbf{0.00} & \uline{6.54} & 15.46 & 5.50 & 33.62
+& \textbf{0.00} & \textbf{0.00} & 10.77 & 22.27 & \uline{8.26} & 36.52 \\
 
 SN-Tune
 & \uline{0.19} & 0.96 & 25.00 & 49.58 & 18.93 & 42.89
@@ -2497,39 +2539,27 @@ RSN-Tune
 & \textbf{0.00} & \uline{0.58} & 22.31 & 41.15 & 16.01 & 43.44
 & \uline{0.19} & 18.85 & 32.88 & 75.38 & 31.83 & 59.13 \\
 
-\midrule
 \textbf{WSR-Tune (Ours)}
-& \textbf{0.00} & \textbf{0.00} & \uline{7.12} & \textbf{14.69} & \textbf{5.45} & 43.28
-& \textbf{0.00} & \textbf{0.00} & \uline{18.27} & 26.88 & 11.29 & 58.53 \\
+& \textbf{0.00} & \textbf{0.00} & 7.12 & \uline{14.69} & \uline{5.45} & 43.28
+& \textbf{0.00} & \textbf{0.00} & 18.27 & 26.88 & 11.29 & 58.53 \\
 
 \midrule
-\multicolumn{13}{l}{\textit{PEFT methods}} \\
-\midrule
+
 Vanilla LoRA FT
 & \textbf{0.00} & \uline{0.19} & 23.46 & 40.81 & 16.12 & \textbf{45.95}
 & \textbf{0.00} & \textbf{0.00} & 20.00 & 36.23 & 14.06 & 61.09 \\
-\midrule
-
-AsFT
-& \textbf{0.00} & \textbf{0.00} & \textbf{5.19} & \textbf{10.23} & \textbf{3.86} & 32.84
-& \textbf{0.00} & \textbf{0.00} & \textbf{5.96} & \textbf{18.08} & \textbf{6.01} & 38.74 \\
-
-Lisa
-& \textbf{0.00} & \textbf{0.00} & \uline{12.12} & \uline{15.73} & \uline{6.96} & 31.81
-& \textbf{0.00} & \textbf{0.00} & \uline{9.42} & \uline{27.23} & \uline{9.16} & 31.57 \\
 
 SafeLoRA
-& \textbf{0.00} & \uline{0.19} & 20.38 & 38.77 & 14.84 & \textbf{45.95}
-& \textbf{0.00} & \textbf{0.00} & 18.46 & 33.12 & 12.90 & \uline{61.95} \\
+& \textbf{0.00} & \uline{0.19} & \uline{20.38} & \uline{38.77} & \uline{14.84} & \textbf{45.95}
+& \textbf{0.00} & \textbf{0.00} & \textbf{18.46} & \uline{33.12} & \uline{12.90} & \uline{61.95} \\
 
 SaLoRA
 & \textbf{0.00} & 1.15 & 29.23 & 69.54 & 24.98 & 42.11
 & \textbf{0.00} & \uline{0.38} & 21.35 & 36.85 & 14.64 & \textbf{62.97} \\
 
-\midrule
 \textbf{WSR-LoRA (Ours)}
-& \textbf{0.00} & \textbf{0.00} & 13.65 & 26.42 & 10.02 & \uline{45.17}
-& \textbf{0.00} & \textbf{0.00} & 18.85 & 29.69 & 12.13 & 61.57 \\
+& \textbf{0.00} & \textbf{0.00} & \textbf{13.65} & \textbf{26.42} & \textbf{10.02} & \uline{45.17}
+& \textbf{0.00} & \textbf{0.00} & \uline{18.85} & \textbf{29.69} & \textbf{12.13} & 61.57 \\
 
 \bottomrule
 \end{tabular}
@@ -2578,7 +2608,7 @@ SafeInstr & 0 & 0.38 & 18.85 & 34.96 & 13.55 & 38.44 \\
 \midrule
 
 SEAL
-& 0.19 & 10.77 & 44.81 & 66.04 & 30.45 & 38.89 \\
+& 0.00 & 4.23 & 16.92 & 29.85 & 12.75 & 38.89 \\
 \rowcolor{green!12}
 SEAL + WSR-Tune
 & \textbf{0} & \textbf{0} & \textbf{15.38} & \textbf{23.46}
@@ -2633,7 +2663,7 @@ Each point represents the safety--downstream trade-off of an existing baseline, 
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.85\textwidth]{figures/wsr-improvement.pdf}
+    \includegraphics[width=0.80\textwidth]{figures/wsr-improvement.pdf}
     \caption{Visualization of the results in Tables~\ref{tab:baseline_plus_warp_full}. Each arrow indicates the change from an existing baseline to its WSR-Tune-enhanced variant, where ``+WSR'' denotes applying WSR-Tune on top of the corresponding baseline. The x-axis denotes GSM8K accuracy, and the y-axis denotes defense success rate. Moving toward the upper-right direction indicates a better safety--downstream trade-off.}
     \label{fig:baseline_plus_wsr}
 \end{figure}
@@ -3076,36 +3106,28 @@ Each point represents the safety--downstream trade-off of an existing baseline, 
 % \end{table*}
 
 
+
+
 \FloatBarrier
+
 
 
 
 \section{Robustness of the Safety Metric: An LLM-Based Refusal Judge}
 \label{sec:wildguard_judge}
 
-All safety numbers reported so far use refusal-keyword matching, which labels a response as a
-successful attack when it does not begin with a refusal phrase. A natural concern is that this
-lexical heuristic, rather than the methods themselves, drives the comparison. To test this, we
-re-evaluate the \emph{same} generations with \textbf{WildGuard}~\citep{wildguard}, an
-open safety classifier, and use its judgment of whether the response constitutes a refusal. The
-attacks, the test cases, the system prompt, and the generations are all unchanged; only the judge
-is replaced, so any difference is attributable to the metric alone.
 
-Table~\ref{tab:wildguard_refusal_delta} reports the result. The ordering of methods is essentially
-unchanged: SN-Tune and RSN-Tune remain the least safe on both models, and WSR-Tune attains the
-best safety--utility trade-off, with $\Delta_{\mathrm{Overall}}$ of $+8.02$ on Llama-2-7B-Chat and
-$+10.82$ on Llama-2-13B-Chat. Across the eleven configurations of Table~\ref{tab:main_all_models_delta}
-the two metrics agree closely in rank (Spearman $\rho = 1.000$ on Llama-2-7B-Chat and $0.989$ on
-Llama-2-13B-Chat), and their absolute levels differ by only $5$--$8\%$ on average. The conclusions
-drawn from the keyword metric therefore do not depend on that metric: an independent LLM judge,
-asked the same question, reproduces them.
+
+All safety numbers reported so far use refusal keyword matching, which labels a response as a successful attack when it does not begin with a refusal phrase. A natural concern is that this lexical heuristic, rather than the methods themselves, drives the comparison. To test this, we evaluate the same generations with WildGuard~\citep{wildguard}, an open safety classifier LLM, and use its judgment of whether the response constitutes a refusal. The attacks, the test cases, the system prompt, and the generations are all unchanged; only the judge is replaced, so any difference is attributable to the metric alone.
+
+Table~\ref{tab:wildguard_refusal_delta} reports the result. The ordering of baselines is essentially unchanged and WSR-Tune attains the best safety--utility trade-off, with $\Delta_{\mathrm{Overall}}$ of $+8.02$ on Llama-2-7B-Chat and $+10.82$ on Llama-2-13B-Chat. These results indicate that the main refusal-based comparison is not an artifact of lexical keyword matching: replacing the heuristic with a model-based refusal classifier preserves the qualitative safety--utility pattern observed for WSR-Tune.
 
 \begin{table*}[t]
 \vspace{-4mm}
 \centering
 \scriptsize
-\caption{Comparison under an \textbf{LLM-based refusal judge} (WildGuard) instead of refusal-keyword matching, on Llama-2-7B-Chat and Llama-2-13B-Chat with GSM8K fine-tuning. The generations, attacks, and system prompt are identical to Table~\ref{tab:main_all_models_delta}; only the judge is replaced. Jailbreak (JB) AVG is the fraction of responses that WildGuard judges \emph{not} to be refusals, averaged over Direct, AutoDAN, PAIR, and PAP (lower is better); downstream performance is task accuracy (higher is better). We report changes relative to Full Params FT: $\Delta_{\mathrm{S}}$ (safety, lower is better) and $\Delta_{\mathrm{D}}$ (downstream, higher is better), and $\Delta_{\mathrm{Overall}} = -\Delta_{\mathrm{S}} + \Delta_{\mathrm{D}}$.
-}
+\caption{Comparison under an \textbf{LLM-based refusal judge} (WildGuard) instead of refusal-keyword matching, on Llama-2-7B-Chat and Llama-2-13B-Chat with GSM8K fine-tuning. The generations, attacks, and system prompt are identical to Table~\ref{tab:main_all_models_delta}; only the judge is replaced. 
+Safety is measured by Jailbreak (JB) AVG (averaged over Direct, AutoDAN, PAIR, and PAP; lower is better); downstream performance is task accuracy (higher is better). We report changes relative to Full Params FT: $\Delta_{\mathrm{S}}$ (safety, lower is better) and $\Delta_{\mathrm{D}}$ (downstream, higher is better), and $\Delta_{\mathrm{Overall}} = -\Delta_{\mathrm{S}} + \Delta_{\mathrm{D}}$.}
 \label{tab:wildguard_refusal_delta}
 \resizebox{\textwidth}{!}{
 \begin{tabular}{lccccc|ccccc}
@@ -3176,13 +3198,21 @@ RSN-Tune
 \vspace{-3mm}
 \end{table*}
 
+
+
+
+
+
+
+
+
 \section{Comparison with Null space projection in Original Space}
 \label{app:actsved}
-\kms{Rebuttal에서 설명한 내용 설명 및 실험 서술}
+% \kms{Rebuttal에서 설명한 내용 설명 및 실험 서술}
 
-\wjb{ActSVD와의 직접 비교를 넣을 필요까지는 없다고 생각함. 오히려 ActSVD의 표현보다, "comparison with Null space projection in Original Space"라는 제목으로 비교하면 어떨까 생각함. ActSVD 자체가 우리의 비교 대상은 아니기 때문임.}
+% \wjb{ActSVD와의 직접 비교를 넣을 필요까지는 없다고 생각함. 오히려 ActSVD의 표현보다, "comparison with Null space projection in Original Space"라는 제목으로 비교하면 어떨까 생각함. ActSVD 자체가 우리의 비교 대상은 아니기 때문임.}
 
-\wjb{이 섹션을 맨 마지막으로 내리면 어떨까 싶음.}
+% \wjb{이 섹션을 맨 마지막으로 내리면 어떨까 싶음.}
 
 A common way to separate safety-relevant and task-relevant components is to construct subspaces in the original parameterization and explicitly project weights or updates onto, or away from, these subspaces. In particular, null-space projection can remove components aligned with a utility subspace from a safety-related subspace, yielding a more safety-specific component. WSR-Tune differs in that it does not directly project the original weight matrix onto a predefined safety subspace. Instead, it first constructs a safety-conditioned coordinate system and performs importance estimation and selective protection within that reparameterized space.
 

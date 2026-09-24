@@ -1,0 +1,298 @@
+[2026-09-23 20:53:00] [eval] 대상 8개
+   - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p00-math-lr5e-5
+   - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p10-math-lr5e-5
+   - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p20-math-lr5e-5
+   - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p30-math-lr5e-5
+   - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p40-math-lr5e-5
+   - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p50-math-lr5e-5
+   - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-wsr-tune-kr0.1-math-lr5e-5
+   - kmseong/Llama-3.1-8B-base-SSFT_lr5e-5
+════════════════════════════════════════════════════════════════
+  평가 대상 8 개 (HB_VARIANTS=sys)
+   - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p00-math-lr5e-5
+   - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p10-math-lr5e-5
+   - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p20-math-lr5e-5
+   - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p30-math-lr5e-5
+   - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p40-math-lr5e-5
+   - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p50-math-lr5e-5
+   - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-wsr-tune-kr0.1-math-lr5e-5
+   - kmseong/Llama-3.1-8B-base-SSFT_lr5e-5
+════════════════════════════════════════════════════════════════
+==============================================================================
+🧪 통합 평가 시작
+   모델 (8개):
+     - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p00-math-lr5e-5
+     - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p10-math-lr5e-5
+     - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p20-math-lr5e-5
+     - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p30-math-lr5e-5
+     - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p40-math-lr5e-5
+     - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p50-math-lr5e-5
+     - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-wsr-tune-kr0.1-math-lr5e-5
+     - kmseong/Llama-3.1-8B-base-SSFT_lr5e-5
+   시각      : 2026-09-23_20-53-00
+   HarmBench : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/HarmBench   (env: harmbench, GPU 0)
+   lm-eval   : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/lm-evaluation-harness   (env: hb, GPU 0)
+   conda.sh  : /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/etc/profile.d/conda.sh
+   범위      : HB_ONLY=0, LM_ONLY=1, PARALLEL=0
+   HB 변형   : sys  (safety system prompt 유/무)
+==============================================================================
+
+🔎 [repo-check] HF 에 존재하는 모델만 남깁니다 (8개 확인 중)
+[repo-check] ⚠️ 확인 실패했지만 통과시킨 repo 7개:
+    ? /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p00-math-lr5e-5  (확인 실패(HFValidationError) → 일단 통과)
+    ? /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p10-math-lr5e-5  (확인 실패(HFValidationError) → 일단 통과)
+    ? /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p20-math-lr5e-5  (확인 실패(HFValidationError) → 일단 통과)
+    ? /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p30-math-lr5e-5  (확인 실패(HFValidationError) → 일단 통과)
+    ? /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p40-math-lr5e-5  (확인 실패(HFValidationError) → 일단 통과)
+    ? /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p50-math-lr5e-5  (확인 실패(HFValidationError) → 일단 통과)
+    ? /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-wsr-tune-kr0.1-math-lr5e-5  (확인 실패(HFValidationError) → 일단 통과)
+[repo-check] 입력 8개 → 사용 8개 / 제외 0개
+   캐시 완료 0개 먼저, 미수신 8개 나중
+   평가 대상 : 8개  →  lm-eval 8개 / agnews·sst2 0개
+
+⏬ [Prefetch] 건너뜀 (PREFETCH_MODE=off)
+
+###############################  [2/2] lm-eval-harness  ###############################
+▶ eval_models.sh  (8개 모델, TASK=고정 'hendrycks_math_safe')
+평가 시작 시간: Wed Sep 23 08:53:04 PM KST 2026
+고정 시드: 42
+GPU: CUDA_VISIBLE_DEVICES=0  (shard: gpu0)
+
+실행 계획:
+  - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p00-math-lr5e-5 → hendrycks_math_safe   [task_list(폴백)]
+  - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p10-math-lr5e-5 → hendrycks_math_safe   [task_list(폴백)]
+  - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p20-math-lr5e-5 → hendrycks_math_safe   [task_list(폴백)]
+  - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p30-math-lr5e-5 → hendrycks_math_safe   [task_list(폴백)]
+  - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p40-math-lr5e-5 → hendrycks_math_safe   [task_list(폴백)]
+  - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p50-math-lr5e-5 → hendrycks_math_safe   [task_list(폴백)]
+  - /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-wsr-tune-kr0.1-math-lr5e-5 → hendrycks_math_safe   [task_list(폴백)]
+  - kmseong/Llama-3.1-8B-base-SSFT_lr5e-5 → hendrycks_math_safe   [task_list(폴백)]
+  총 8개 모델 / 8회 실행
+
+
+==========================================
+[1/8] 모델 평가 중: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p00-math-lr5e-5
+  task: hendrycks_math_safe
+==========================================
+[1/1] task 평가 중: hendrycks_math_safe
+(EngineCore_DP0 pid=1647816) /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/torch/library.py:357: UserWarning: Warning only once for all operators,  other operators may also be overridden.
+(EngineCore_DP0 pid=1647816)   Overriding a previously registered kernel for the same operator and the same dispatch key
+(EngineCore_DP0 pid=1647816)   operator: aten::mm(Tensor self, Tensor mat2) -> Tensor
+(EngineCore_DP0 pid=1647816)     registered at /pytorch/build/aten/src/ATen/RegisterSchema.cpp:6
+(EngineCore_DP0 pid=1647816)   dispatch key: CUDA
+(EngineCore_DP0 pid=1647816)   previous kernel: registered at /pytorch/aten/src/ATen/LegacyBatchingRegistrations.cpp:1076
+(EngineCore_DP0 pid=1647816)        new kernel: registered at /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/vllm/model_executor/layers/batch_invariant.py:935 (Triggered internally at /pytorch/aten/src/ATen/core/dispatch/OperatorEntry.cpp:208.)
+(EngineCore_DP0 pid=1647816)   self.m.impl(
+[W923 20:53:41.073753589 Context.cpp:534] Warning: torch.backends.cuda.preferred_blas_library is an experimental feature. If you see any error or unexpected behavior when this flag is set please file an issue on GitHub. (function operator())
+(EngineCore_DP0 pid=1647816) Loading safetensors checkpoint shards:   0% Completed | 0/4 [00:00<?, ?it/s]
+(EngineCore_DP0 pid=1647816) Loading safetensors checkpoint shards:  25% Completed | 1/4 [00:01<00:05,  1.80s/it]
+(EngineCore_DP0 pid=1647816) Loading safetensors checkpoint shards:  50% Completed | 2/4 [00:03<00:03,  1.81s/it]
+(EngineCore_DP0 pid=1647816) Loading safetensors checkpoint shards:  75% Completed | 3/4 [00:05<00:01,  1.80s/it]
+(EngineCore_DP0 pid=1647816) Loading safetensors checkpoint shards: 100% Completed | 4/4 [00:05<00:00,  1.30s/it]
+(EngineCore_DP0 pid=1647816) Loading safetensors checkpoint shards: 100% Completed | 4/4 [00:05<00:00,  1.48s/it]
+(EngineCore_DP0 pid=1647816) 
+(EngineCore_DP0 pid=1647816) 2026-09-23 20:53:52,446 - INFO - autotuner.py:256 - flashinfer.jit: [Autotuner]: Autotuning process starts ...
+(EngineCore_DP0 pid=1647816) 2026-09-23 20:53:52,473 - INFO - autotuner.py:262 - flashinfer.jit: [Autotuner]: Autotuning process ends
+  0%|          | 0/1187 [00:00<?, ?it/s]  9%|▉         | 107/1187 [00:00<00:01, 1061.73it/s] 19%|█▊        | 221/1187 [00:00<00:00, 1104.05it/s] 28%|██▊       | 336/1187 [00:00<00:00, 1121.02it/s] 38%|███▊      | 449/1187 [00:00<00:00, 1119.78it/s] 47%|████▋     | 563/1187 [00:00<00:00, 1125.46it/s] 57%|█████▋    | 676/1187 [00:00<00:00, 1121.64it/s] 67%|██████▋   | 790/1187 [00:00<00:00, 1125.84it/s] 76%|███████▌  | 904/1187 [00:00<00:00, 1128.10it/s] 86%|████████▌ | 1019/1187 [00:00<00:00, 1131.94it/s] 95%|█████████▌| 1133/1187 [00:01<00:00, 1133.34it/s]100%|██████████| 1187/1187 [00:01<00:00, 1125.31it/s]
+  0%|          | 0/474 [00:00<?, ?it/s] 24%|██▎       | 112/474 [00:00<00:00, 1119.14it/s] 47%|████▋     | 225/474 [00:00<00:00, 1121.38it/s] 71%|███████▏  | 338/474 [00:00<00:00, 1116.37it/s] 95%|█████████▌| 451/474 [00:00<00:00, 1120.25it/s]100%|██████████| 474/474 [00:00<00:00, 1119.74it/s]
+  0%|          | 0/479 [00:00<?, ?it/s] 24%|██▎       | 113/479 [00:00<00:00, 1122.46it/s] 47%|████▋     | 226/479 [00:00<00:00, 396.39it/s]  70%|███████   | 337/479 [00:00<00:00, 558.02it/s] 93%|█████████▎| 445/479 [00:00<00:00, 685.69it/s]100%|██████████| 479/479 [00:00<00:00, 641.64it/s]
+  0%|          | 0/903 [00:00<?, ?it/s] 12%|█▏        | 112/903 [00:00<00:00, 1111.60it/s] 25%|██▍       | 225/903 [00:00<00:00, 1118.25it/s] 37%|███▋      | 338/903 [00:00<00:00, 1120.88it/s] 50%|████▉     | 451/903 [00:00<00:00, 1120.91it/s] 62%|██████▏   | 564/903 [00:00<00:00, 1106.30it/s] 75%|███████▍  | 677/903 [00:00<00:00, 1111.26it/s] 87%|████████▋ | 790/903 [00:00<00:00, 1116.97it/s]100%|██████████| 903/903 [00:00<00:00, 1117.38it/s]
+  0%|          | 0/540 [00:00<?, ?it/s] 21%|██        | 113/540 [00:00<00:00, 1125.63it/s] 42%|████▏     | 227/540 [00:00<00:00, 1129.68it/s] 63%|██████▎   | 341/540 [00:00<00:00, 1131.05it/s] 84%|████████▍ | 455/540 [00:00<00:00, 1132.73it/s]100%|██████████| 540/540 [00:00<00:00, 1124.27it/s]
+  0%|          | 0/871 [00:00<?, ?it/s] 13%|█▎        | 111/871 [00:00<00:00, 1109.32it/s] 26%|██▌       | 224/871 [00:00<00:00, 1117.35it/s] 39%|███▊      | 336/871 [00:00<00:00, 1114.87it/s] 52%|█████▏    | 449/871 [00:00<00:00, 1119.34it/s] 65%|██████▍   | 562/871 [00:00<00:00, 1122.25it/s] 77%|███████▋  | 675/871 [00:00<00:00, 1109.82it/s] 90%|█████████ | 788/871 [00:00<00:00, 1116.18it/s]100%|██████████| 871/871 [00:00<00:00, 1117.54it/s]
+  0%|          | 0/546 [00:00<?, ?it/s] 20%|██        | 111/546 [00:00<00:00, 1103.23it/s] 41%|████      | 223/546 [00:00<00:00, 1110.03it/s] 61%|██████▏   | 335/546 [00:00<00:00, 1101.15it/s] 82%|████████▏ | 448/546 [00:00<00:00, 1111.10it/s]100%|██████████| 546/546 [00:00<00:00, 1114.07it/s]
+Running generate_until requests:   0%|          | 0/5000 [00:00<?, ?it/s]Running generate_until requests:   0%|          | 1/5000 [00:18<25:53:24, 18.64s/it]Running generate_until requests:   3%|▎         | 129/5000 [00:25<12:48,  6.34it/s] Running generate_until requests:   5%|▌         | 257/5000 [00:32<07:38, 10.34it/s]Running generate_until requests:   8%|▊         | 385/5000 [00:39<05:50, 13.18it/s]Running generate_until requests:  10%|█         | 513/5000 [00:45<04:53, 15.29it/s]Running generate_until requests:  13%|█▎        | 641/5000 [00:51<04:17, 16.92it/s]Running generate_until requests:  15%|█▌        | 769/5000 [00:57<03:52, 18.23it/s]Running generate_until requests:  18%|█▊        | 897/5000 [01:03<03:33, 19.21it/s]Running generate_until requests:  20%|██        | 1025/5000 [01:09<03:18, 20.07it/s]Running generate_until requests:  23%|██▎       | 1153/5000 [01:15<03:04, 20.81it/s]Running generate_until requests:  26%|██▌       | 1281/5000 [01:20<02:53, 21.44it/s]Running generate_until requests:  28%|██▊       | 1409/5000 [01:26<02:43, 22.00it/s]Running generate_until requests:  31%|███       | 1537/5000 [01:31<02:34, 22.40it/s]Running generate_until requests:  33%|███▎      | 1665/5000 [01:36<02:26, 22.82it/s]Running generate_until requests:  36%|███▌      | 1793/5000 [01:42<02:18, 23.09it/s]Running generate_until requests:  38%|███▊      | 1921/5000 [01:47<02:11, 23.38it/s]Running generate_until requests:  41%|████      | 2049/5000 [01:52<02:04, 23.70it/s]Running generate_until requests:  44%|████▎     | 2177/5000 [01:58<01:57, 23.93it/s]Running generate_until requests:  46%|████▌     | 2305/5000 [02:03<01:51, 24.11it/s]Running generate_until requests:  49%|████▊     | 2433/5000 [02:08<01:45, 24.30it/s]Running generate_until requests:  51%|█████     | 2561/5000 [02:13<01:39, 24.46it/s]Running generate_until requests:  54%|█████▍    | 2689/5000 [02:18<01:33, 24.71it/s]Running generate_until requests:  56%|█████▋    | 2817/5000 [02:23<01:27, 24.83it/s]Running generate_until requests:  59%|█████▉    | 2945/5000 [02:28<01:22, 25.03it/s]Running generate_until requests:  61%|██████▏   | 3073/5000 [02:33<01:16, 25.22it/s]Running generate_until requests:  64%|██████▍   | 3201/5000 [02:38<01:10, 25.36it/s]Running generate_until requests:  67%|██████▋   | 3329/5000 [02:43<01:05, 25.56it/s]Running generate_until requests:  69%|██████▉   | 3457/5000 [02:48<01:00, 25.68it/s]Running generate_until requests:  72%|███████▏  | 3585/5000 [02:53<00:54, 25.82it/s]Running generate_until requests:  74%|███████▍  | 3713/5000 [02:58<00:49, 25.95it/s]Running generate_until requests:  77%|███████▋  | 3841/5000 [03:03<00:44, 26.05it/s]Running generate_until requests:  79%|███████▉  | 3969/5000 [03:08<00:39, 26.20it/s]Running generate_until requests:  82%|████████▏ | 4097/5000 [03:12<00:34, 26.37it/s]Running generate_until requests:  84%|████████▍ | 4225/5000 [03:17<00:29, 26.45it/s]Running generate_until requests:  87%|████████▋ | 4353/5000 [03:22<00:24, 26.59it/s]Running generate_until requests:  90%|████████▉ | 4481/5000 [03:27<00:19, 26.86it/s]Running generate_until requests:  92%|█████████▏| 4609/5000 [03:31<00:14, 27.04it/s]Running generate_until requests:  95%|█████████▍| 4737/5000 [03:36<00:09, 27.27it/s]Running generate_until requests:  97%|█████████▋| 4865/5000 [03:40<00:04, 27.46it/s]Running generate_until requests: 100%|█████████▉| 4993/5000 [03:42<00:00, 33.27it/s]Running generate_until requests: 100%|██████████| 5000/5000 [03:42<00:00, 22.43it/s]
+vllm ({'pretrained': '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p00-math-lr5e-5', 'seed': 42, 'attention_backend': 'FLASH_ATTN', 'enforce_eager': True, 'enable_prefix_caching': False, 'tensor_parallel_size': 1, 'data_parallel_size': 1, 'dtype': 'auto', 'gpu_memory_utilization': 0.4}), gen_kwargs: ({}), limit: None, num_fewshot: 5, batch_size: 128
+|                   Tasks                   |Version|Filter|n-shot|  Metric   |   |Value |   |Stderr|
+|-------------------------------------------|------:|------|-----:|-----------|---|-----:|---|-----:|
+|hendrycks_math_safe                        |      1|none  |      |exact_match|↑  |0.0798|±  |0.0038|
+| - hendrycks_math_algebra_safe             |      1|none  |     5|exact_match|↑  |0.0944|±  |0.0085|
+| - hendrycks_math_counting_and_prob_safe   |      1|none  |     5|exact_match|↑  |0.0781|±  |0.0123|
+| - hendrycks_math_geometry_safe            |      1|none  |     5|exact_match|↑  |0.0501|±  |0.0100|
+| - hendrycks_math_intermediate_algebra_safe|      1|none  |     5|exact_match|↑  |0.0454|±  |0.0069|
+| - hendrycks_math_num_theory_safe          |      1|none  |     5|exact_match|↑  |0.0963|±  |0.0127|
+| - hendrycks_math_prealgebra_safe          |      1|none  |     5|exact_match|↑  |0.1343|±  |0.0116|
+| - hendrycks_math_precalc_safe             |      1|none  |     5|exact_match|↑  |0.0293|±  |0.0072|
+
+|      Groups       |Version|Filter|n-shot|  Metric   |   |Value |   |Stderr|
+|-------------------|------:|------|------|-----------|---|-----:|---|-----:|
+|hendrycks_math_safe|      1|none  |      |exact_match|↑  |0.0798|±  |0.0038|
+
+✓ 완료: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p00-math-lr5e-5 (task: hendrycks_math_safe)
+
+==========================================
+[2/8] 모델 평가 중: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p10-math-lr5e-5
+  task: hendrycks_math_safe
+==========================================
+[1/1] task 평가 중: hendrycks_math_safe
+(EngineCore_DP0 pid=1659886) /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/torch/library.py:357: UserWarning: Warning only once for all operators,  other operators may also be overridden.
+(EngineCore_DP0 pid=1659886)   Overriding a previously registered kernel for the same operator and the same dispatch key
+(EngineCore_DP0 pid=1659886)   operator: aten::mm(Tensor self, Tensor mat2) -> Tensor
+(EngineCore_DP0 pid=1659886)     registered at /pytorch/build/aten/src/ATen/RegisterSchema.cpp:6
+(EngineCore_DP0 pid=1659886)   dispatch key: CUDA
+(EngineCore_DP0 pid=1659886)   previous kernel: registered at /pytorch/aten/src/ATen/LegacyBatchingRegistrations.cpp:1076
+(EngineCore_DP0 pid=1659886)        new kernel: registered at /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/vllm/model_executor/layers/batch_invariant.py:935 (Triggered internally at /pytorch/aten/src/ATen/core/dispatch/OperatorEntry.cpp:208.)
+(EngineCore_DP0 pid=1659886)   self.m.impl(
+[W923 20:58:26.951808483 Context.cpp:534] Warning: torch.backends.cuda.preferred_blas_library is an experimental feature. If you see any error or unexpected behavior when this flag is set please file an issue on GitHub. (function operator())
+(EngineCore_DP0 pid=1659886) Loading safetensors checkpoint shards:   0% Completed | 0/4 [00:00<?, ?it/s]
+(EngineCore_DP0 pid=1659886) Loading safetensors checkpoint shards:  25% Completed | 1/4 [00:01<00:05,  1.77s/it]
+(EngineCore_DP0 pid=1659886) Loading safetensors checkpoint shards:  50% Completed | 2/4 [00:03<00:03,  1.82s/it]
+(EngineCore_DP0 pid=1659886) Loading safetensors checkpoint shards:  75% Completed | 3/4 [00:05<00:01,  1.82s/it]
+(EngineCore_DP0 pid=1659886) Loading safetensors checkpoint shards: 100% Completed | 4/4 [00:05<00:00,  1.32s/it]
+(EngineCore_DP0 pid=1659886) Loading safetensors checkpoint shards: 100% Completed | 4/4 [00:05<00:00,  1.50s/it]
+(EngineCore_DP0 pid=1659886) 
+(EngineCore_DP0 pid=1659886) 2026-09-23 20:58:36,826 - INFO - autotuner.py:256 - flashinfer.jit: [Autotuner]: Autotuning process starts ...
+(EngineCore_DP0 pid=1659886) 2026-09-23 20:58:36,838 - INFO - autotuner.py:262 - flashinfer.jit: [Autotuner]: Autotuning process ends
+  0%|          | 0/1187 [00:00<?, ?it/s]  9%|▉         | 105/1187 [00:00<00:01, 1023.15it/s] 18%|█▊        | 219/1187 [00:00<00:00, 1087.92it/s] 28%|██▊       | 334/1187 [00:00<00:00, 1112.06it/s] 38%|███▊      | 449/1187 [00:00<00:00, 1124.85it/s] 48%|████▊     | 564/1187 [00:00<00:00, 1132.54it/s] 57%|█████▋    | 679/1187 [00:00<00:00, 1136.36it/s] 67%|██████▋   | 793/1187 [00:00<00:00, 1128.04it/s] 76%|███████▋  | 908/1187 [00:00<00:00, 1133.50it/s] 86%|████████▋ | 1024/1187 [00:00<00:00, 1139.46it/s] 96%|█████████▌| 1140/1187 [00:01<00:00, 1143.22it/s]100%|██████████| 1187/1187 [00:01<00:00, 1130.07it/s]
+  0%|          | 0/474 [00:00<?, ?it/s] 24%|██▍       | 114/474 [00:00<00:00, 1133.64it/s] 48%|████▊     | 228/474 [00:00<00:00, 1121.44it/s] 72%|███████▏  | 343/474 [00:00<00:00, 1133.16it/s] 97%|█████████▋| 458/474 [00:00<00:00, 1138.10it/s]100%|██████████| 474/474 [00:00<00:00, 1135.00it/s]
+  0%|          | 0/479 [00:00<?, ?it/s] 24%|██▍       | 114/479 [00:00<00:00, 1139.48it/s] 48%|████▊     | 228/479 [00:00<00:00, 370.61it/s]  71%|███████   | 341/479 [00:00<00:00, 532.56it/s] 95%|█████████▍| 454/479 [00:00<00:00, 672.21it/s]100%|██████████| 479/479 [00:00<00:00, 616.96it/s]
+  0%|          | 0/903 [00:00<?, ?it/s] 12%|█▏        | 111/903 [00:00<00:00, 1104.19it/s] 25%|██▍       | 224/903 [00:00<00:00, 1114.06it/s] 37%|███▋      | 338/903 [00:00<00:00, 1122.12it/s] 50%|█████     | 452/903 [00:00<00:00, 1126.61it/s] 63%|██████▎   | 565/903 [00:00<00:00, 1127.80it/s] 75%|███████▌  | 678/903 [00:00<00:00, 1128.12it/s] 88%|████████▊ | 792/903 [00:00<00:00, 1129.85it/s]100%|██████████| 903/903 [00:00<00:00, 1128.37it/s]
+  0%|          | 0/540 [00:00<?, ?it/s] 21%|██        | 113/540 [00:00<00:00, 1124.46it/s] 42%|████▏     | 227/540 [00:00<00:00, 1131.14it/s] 63%|██████▎   | 341/540 [00:00<00:00, 1128.44it/s] 84%|████████▍ | 455/540 [00:00<00:00, 1130.55it/s]100%|██████████| 540/540 [00:00<00:00, 1130.79it/s]
+  0%|          | 0/871 [00:00<?, ?it/s] 13%|█▎        | 113/871 [00:00<00:00, 1122.24it/s] 26%|██▌       | 227/871 [00:00<00:00, 1127.80it/s] 39%|███▉      | 341/871 [00:00<00:00, 1132.89it/s] 52%|█████▏    | 456/871 [00:00<00:00, 1136.26it/s] 66%|██████▌   | 571/871 [00:00<00:00, 1140.43it/s] 79%|███████▉  | 686/871 [00:00<00:00, 1140.31it/s] 92%|█████████▏| 801/871 [00:00<00:00, 1141.15it/s]100%|██████████| 871/871 [00:00<00:00, 1130.50it/s]
+  0%|          | 0/546 [00:00<?, ?it/s] 21%|██        | 113/546 [00:00<00:00, 1128.30it/s] 42%|████▏     | 227/546 [00:00<00:00, 1133.82it/s] 62%|██████▏   | 341/546 [00:00<00:00, 1136.62it/s] 84%|████████▎ | 456/546 [00:00<00:00, 1138.85it/s]100%|██████████| 546/546 [00:00<00:00, 1137.95it/s]
+Running generate_until requests:   0%|          | 0/5000 [00:00<?, ?it/s]Running generate_until requests:   0%|          | 1/5000 [00:18<25:05:40, 18.07s/it]Running generate_until requests:   3%|▎         | 129/5000 [00:25<12:34,  6.46it/s] Running generate_until requests:   5%|▌         | 257/5000 [00:32<07:33, 10.45it/s]Running generate_until requests:   8%|▊         | 385/5000 [00:38<05:47, 13.26it/s]Running generate_until requests:  10%|█         | 513/5000 [00:45<04:52, 15.34it/s]Running generate_until requests:  13%|█▎        | 641/5000 [00:51<04:16, 16.97it/s]Running generate_until requests:  15%|█▌        | 769/5000 [00:57<03:52, 18.23it/s]Running generate_until requests:  18%|█▊        | 897/5000 [01:03<03:32, 19.28it/s]Running generate_until requests:  20%|██        | 1025/5000 [01:08<03:17, 20.11it/s]Running generate_until requests:  23%|██▎       | 1153/5000 [01:14<03:04, 20.80it/s]Running generate_until requests:  26%|██▌       | 1281/5000 [01:20<02:54, 21.36it/s]Running generate_until requests:  28%|██▊       | 1409/5000 [01:25<02:44, 21.87it/s]Running generate_until requests:  31%|███       | 1537/5000 [01:31<02:35, 22.33it/s]Running generate_until requests:  33%|███▎      | 1665/5000 [01:36<02:27, 22.67it/s]Running generate_until requests:  36%|███▌      | 1793/5000 [01:42<02:19, 22.95it/s]Running generate_until requests:  38%|███▊      | 1921/5000 [01:47<02:12, 23.22it/s]Running generate_until requests:  41%|████      | 2049/5000 [01:52<02:05, 23.54it/s]Running generate_until requests:  44%|████▎     | 2177/5000 [01:57<01:58, 23.81it/s]Running generate_until requests:  46%|████▌     | 2305/5000 [02:03<01:52, 24.00it/s]Running generate_until requests:  49%|████▊     | 2433/5000 [02:08<01:46, 24.12it/s]Running generate_until requests:  51%|█████     | 2561/5000 [02:13<01:40, 24.33it/s]Running generate_until requests:  54%|█████▍    | 2689/5000 [02:18<01:34, 24.58it/s]Running generate_until requests:  56%|█████▋    | 2817/5000 [02:23<01:28, 24.77it/s]Running generate_until requests:  59%|█████▉    | 2945/5000 [02:28<01:22, 24.95it/s]Running generate_until requests:  61%|██████▏   | 3073/5000 [02:33<01:16, 25.06it/s]Running generate_until requests:  64%|██████▍   | 3201/5000 [02:38<01:11, 25.20it/s]Running generate_until requests:  67%|██████▋   | 3329/5000 [02:43<01:05, 25.32it/s]Running generate_until requests:  69%|██████▉   | 3457/5000 [02:48<01:00, 25.51it/s]Running generate_until requests:  72%|███████▏  | 3585/5000 [02:53<00:55, 25.63it/s]Running generate_until requests:  74%|███████▍  | 3713/5000 [02:58<00:49, 25.78it/s]Running generate_until requests:  77%|███████▋  | 3841/5000 [03:03<00:44, 25.92it/s]Running generate_until requests:  79%|███████▉  | 3969/5000 [03:08<00:39, 26.06it/s]Running generate_until requests:  82%|████████▏ | 4097/5000 [03:13<00:34, 26.17it/s]Running generate_until requests:  84%|████████▍ | 4225/5000 [03:17<00:29, 26.33it/s]Running generate_until requests:  87%|████████▋ | 4353/5000 [03:22<00:24, 26.50it/s]Running generate_until requests:  90%|████████▉ | 4481/5000 [03:27<00:19, 26.71it/s]Running generate_until requests:  92%|█████████▏| 4609/5000 [03:32<00:14, 26.90it/s]Running generate_until requests:  95%|█████████▍| 4737/5000 [03:35<00:09, 29.22it/s]Running generate_until requests:  97%|█████████▋| 4865/5000 [03:40<00:04, 28.83it/s]Running generate_until requests: 100%|█████████▉| 4993/5000 [03:41<00:00, 36.20it/s]Running generate_until requests: 100%|██████████| 5000/5000 [03:41<00:00, 22.56it/s]
+vllm ({'pretrained': '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p10-math-lr5e-5', 'seed': 42, 'attention_backend': 'FLASH_ATTN', 'enforce_eager': True, 'enable_prefix_caching': False, 'tensor_parallel_size': 1, 'data_parallel_size': 1, 'dtype': 'auto', 'gpu_memory_utilization': 0.4}), gen_kwargs: ({}), limit: None, num_fewshot: 5, batch_size: 128
+|                   Tasks                   |Version|Filter|n-shot|  Metric   |   |Value |   |Stderr|
+|-------------------------------------------|------:|------|-----:|-----------|---|-----:|---|-----:|
+|hendrycks_math_safe                        |      1|none  |      |exact_match|↑  |0.0900|±  |0.0040|
+| - hendrycks_math_algebra_safe             |      1|none  |     5|exact_match|↑  |0.0944|±  |0.0085|
+| - hendrycks_math_counting_and_prob_safe   |      1|none  |     5|exact_match|↑  |0.0928|±  |0.0133|
+| - hendrycks_math_geometry_safe            |      1|none  |     5|exact_match|↑  |0.0689|±  |0.0116|
+| - hendrycks_math_intermediate_algebra_safe|      1|none  |     5|exact_match|↑  |0.0443|±  |0.0069|
+| - hendrycks_math_num_theory_safe          |      1|none  |     5|exact_match|↑  |0.0926|±  |0.0125|
+| - hendrycks_math_prealgebra_safe          |      1|none  |     5|exact_match|↑  |0.1596|±  |0.0124|
+| - hendrycks_math_precalc_safe             |      1|none  |     5|exact_match|↑  |0.0586|±  |0.0101|
+
+|      Groups       |Version|Filter|n-shot|  Metric   |   |Value|   |Stderr|
+|-------------------|------:|------|------|-----------|---|----:|---|-----:|
+|hendrycks_math_safe|      1|none  |      |exact_match|↑  | 0.09|±  | 0.004|
+
+✓ 완료: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p10-math-lr5e-5 (task: hendrycks_math_safe)
+
+==========================================
+[3/8] 모델 평가 중: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p20-math-lr5e-5
+  task: hendrycks_math_safe
+==========================================
+[1/1] task 평가 중: hendrycks_math_safe
+(EngineCore_DP0 pid=1668764) /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/torch/library.py:357: UserWarning: Warning only once for all operators,  other operators may also be overridden.
+(EngineCore_DP0 pid=1668764)   Overriding a previously registered kernel for the same operator and the same dispatch key
+(EngineCore_DP0 pid=1668764)   operator: aten::mm(Tensor self, Tensor mat2) -> Tensor
+(EngineCore_DP0 pid=1668764)     registered at /pytorch/build/aten/src/ATen/RegisterSchema.cpp:6
+(EngineCore_DP0 pid=1668764)   dispatch key: CUDA
+(EngineCore_DP0 pid=1668764)   previous kernel: registered at /pytorch/aten/src/ATen/LegacyBatchingRegistrations.cpp:1076
+(EngineCore_DP0 pid=1668764)        new kernel: registered at /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/vllm/model_executor/layers/batch_invariant.py:935 (Triggered internally at /pytorch/aten/src/ATen/core/dispatch/OperatorEntry.cpp:208.)
+(EngineCore_DP0 pid=1668764)   self.m.impl(
+[W923 21:03:10.806321673 Context.cpp:534] Warning: torch.backends.cuda.preferred_blas_library is an experimental feature. If you see any error or unexpected behavior when this flag is set please file an issue on GitHub. (function operator())
+(EngineCore_DP0 pid=1668764) Loading safetensors checkpoint shards:   0% Completed | 0/4 [00:00<?, ?it/s]
+(EngineCore_DP0 pid=1668764) Loading safetensors checkpoint shards:  25% Completed | 1/4 [00:01<00:05,  1.76s/it]
+(EngineCore_DP0 pid=1668764) Loading safetensors checkpoint shards:  50% Completed | 2/4 [00:03<00:03,  1.84s/it]
+(EngineCore_DP0 pid=1668764) Loading safetensors checkpoint shards:  75% Completed | 3/4 [00:05<00:01,  1.84s/it]
+(EngineCore_DP0 pid=1668764) Loading safetensors checkpoint shards: 100% Completed | 4/4 [00:06<00:00,  1.34s/it]
+(EngineCore_DP0 pid=1668764) Loading safetensors checkpoint shards: 100% Completed | 4/4 [00:06<00:00,  1.52s/it]
+(EngineCore_DP0 pid=1668764) 
+(EngineCore_DP0 pid=1668764) 2026-09-23 21:03:19,884 - INFO - autotuner.py:256 - flashinfer.jit: [Autotuner]: Autotuning process starts ...
+(EngineCore_DP0 pid=1668764) 2026-09-23 21:03:19,896 - INFO - autotuner.py:262 - flashinfer.jit: [Autotuner]: Autotuning process ends
+  0%|          | 0/1187 [00:00<?, ?it/s]  9%|▉         | 111/1187 [00:00<00:00, 1103.63it/s] 19%|█▉        | 224/1187 [00:00<00:00, 1116.48it/s] 29%|██▊       | 339/1187 [00:00<00:00, 1127.61it/s] 38%|███▊      | 452/1187 [00:00<00:00, 1114.28it/s] 48%|████▊     | 565/1187 [00:00<00:00, 1118.47it/s] 57%|█████▋    | 677/1187 [00:00<00:00, 1118.19it/s] 67%|██████▋   | 790/1187 [00:00<00:00, 1119.65it/s] 76%|███████▌  | 903/1187 [00:00<00:00, 1121.28it/s] 86%|████████▌ | 1016/1187 [00:00<00:00, 1103.58it/s] 95%|█████████▌| 1129/1187 [00:01<00:00, 1108.77it/s]100%|██████████| 1187/1187 [00:01<00:00, 1114.40it/s]
+  0%|          | 0/474 [00:00<?, ?it/s] 24%|██▍       | 113/474 [00:00<00:00, 1121.76it/s] 48%|████▊     | 226/474 [00:00<00:00, 1124.63it/s] 72%|███████▏  | 339/474 [00:00<00:00, 1124.41it/s] 95%|█████████▌| 452/474 [00:00<00:00, 1123.76it/s]100%|██████████| 474/474 [00:00<00:00, 1123.42it/s]
+  0%|          | 0/479 [00:00<?, ?it/s] 24%|██▎       | 113/479 [00:00<00:00, 1121.40it/s] 47%|████▋     | 226/479 [00:00<00:00, 378.44it/s]  70%|███████   | 337/479 [00:00<00:00, 538.59it/s] 94%|█████████▎| 449/479 [00:00<00:00, 676.33it/s]100%|██████████| 479/479 [00:00<00:00, 625.35it/s]
+  0%|          | 0/903 [00:00<?, ?it/s] 12%|█▏        | 111/903 [00:00<00:00, 1109.08it/s] 25%|██▍       | 224/903 [00:00<00:00, 1116.20it/s] 37%|███▋      | 336/903 [00:00<00:00, 1117.58it/s] 50%|████▉     | 449/903 [00:00<00:00, 1119.14it/s] 62%|██████▏   | 561/903 [00:00<00:00, 1118.71it/s] 75%|███████▍  | 673/903 [00:00<00:00, 1117.93it/s] 87%|████████▋ | 786/903 [00:00<00:00, 1120.78it/s]100%|█████████▉| 899/903 [00:00<00:00, 1121.99it/s]100%|██████████| 903/903 [00:00<00:00, 1119.33it/s]
+  0%|          | 0/540 [00:00<?, ?it/s] 21%|██        | 113/540 [00:00<00:00, 1122.03it/s] 42%|████▏     | 226/540 [00:00<00:00, 1124.58it/s] 63%|██████▎   | 339/540 [00:00<00:00, 1103.14it/s] 84%|████████▎ | 452/540 [00:00<00:00, 1111.79it/s]100%|██████████| 540/540 [00:00<00:00, 1113.70it/s]
+  0%|          | 0/871 [00:00<?, ?it/s] 13%|█▎        | 112/871 [00:00<00:00, 1111.57it/s] 26%|██▌       | 224/871 [00:00<00:00, 1100.74it/s] 38%|███▊      | 335/871 [00:00<00:00, 1103.35it/s] 51%|█████▏    | 447/871 [00:00<00:00, 1107.40it/s] 64%|██████▍   | 559/871 [00:00<00:00, 1109.55it/s] 77%|███████▋  | 671/871 [00:00<00:00, 1111.34it/s] 90%|████████▉ | 783/871 [00:00<00:00, 1113.83it/s]100%|██████████| 871/871 [00:00<00:00, 1111.58it/s]
+  0%|          | 0/546 [00:00<?, ?it/s] 21%|██        | 112/546 [00:00<00:00, 1117.17it/s] 41%|████      | 225/546 [00:00<00:00, 1119.42it/s] 62%|██████▏   | 337/546 [00:00<00:00, 1116.94it/s] 82%|████████▏ | 450/546 [00:00<00:00, 1119.73it/s]100%|██████████| 546/546 [00:00<00:00, 1119.84it/s]
+Running generate_until requests:   0%|          | 0/5000 [00:00<?, ?it/s]Running generate_until requests:   0%|          | 1/5000 [00:18<25:05:44, 18.07s/it]Running generate_until requests:   3%|▎         | 129/5000 [00:25<12:33,  6.47it/s] Running generate_until requests:   5%|▌         | 257/5000 [00:32<07:32, 10.49it/s]Running generate_until requests:   8%|▊         | 385/5000 [00:38<05:47, 13.30it/s]Running generate_until requests:  10%|█         | 513/5000 [00:45<04:51, 15.41it/s]Running generate_until requests:  13%|█▎        | 641/5000 [00:51<04:15, 17.04it/s]Running generate_until requests:  15%|█▌        | 769/5000 [00:57<03:50, 18.35it/s]Running generate_until requests:  18%|█▊        | 897/5000 [01:02<03:31, 19.38it/s]Running generate_until requests:  20%|██        | 1025/5000 [01:08<03:16, 20.28it/s]Running generate_until requests:  23%|██▎       | 1153/5000 [01:14<03:02, 21.04it/s]Running generate_until requests:  26%|██▌       | 1281/5000 [01:19<02:51, 21.66it/s]Running generate_until requests:  28%|██▊       | 1409/5000 [01:25<02:42, 22.16it/s]Running generate_until requests:  31%|███       | 1537/5000 [01:30<02:32, 22.64it/s]Running generate_until requests:  33%|███▎      | 1665/5000 [01:35<02:24, 23.07it/s]Running generate_until requests:  36%|███▌      | 1793/5000 [01:41<02:16, 23.42it/s]Running generate_until requests:  38%|███▊      | 1921/5000 [01:46<02:09, 23.71it/s]Running generate_until requests:  41%|████      | 2049/5000 [01:51<02:02, 24.00it/s]Running generate_until requests:  44%|████▎     | 2177/5000 [01:56<01:56, 24.21it/s]Running generate_until requests:  46%|████▌     | 2305/5000 [02:01<01:50, 24.40it/s]Running generate_until requests:  49%|████▊     | 2433/5000 [02:06<01:44, 24.57it/s]Running generate_until requests:  51%|█████     | 2561/5000 [02:12<01:38, 24.76it/s]Running generate_until requests:  54%|█████▍    | 2689/5000 [02:17<01:32, 24.97it/s]Running generate_until requests:  56%|█████▋    | 2817/5000 [02:22<01:26, 25.14it/s]Running generate_until requests:  59%|█████▉    | 2945/5000 [02:27<01:21, 25.22it/s]Running generate_until requests:  61%|██████▏   | 3073/5000 [02:32<01:15, 25.45it/s]Running generate_until requests:  64%|██████▍   | 3201/5000 [02:36<01:10, 25.59it/s]Running generate_until requests:  67%|██████▋   | 3329/5000 [02:41<01:04, 25.77it/s]Running generate_until requests:  69%|██████▉   | 3457/5000 [02:46<00:59, 25.87it/s]Running generate_until requests:  72%|███████▏  | 3585/5000 [02:51<00:54, 25.98it/s]Running generate_until requests:  74%|███████▍  | 3713/5000 [02:56<00:49, 26.15it/s]Running generate_until requests:  77%|███████▋  | 3841/5000 [03:01<00:44, 26.31it/s]Running generate_until requests:  79%|███████▉  | 3969/5000 [03:06<00:39, 26.39it/s]Running generate_until requests:  82%|████████▏ | 4097/5000 [03:10<00:34, 26.51it/s]Running generate_until requests:  84%|████████▍ | 4225/5000 [03:15<00:29, 26.65it/s]Running generate_until requests:  87%|████████▋ | 4353/5000 [03:20<00:24, 26.79it/s]Running generate_until requests:  90%|████████▉ | 4481/5000 [03:25<00:19, 26.98it/s]Running generate_until requests:  92%|█████████▏| 4609/5000 [03:29<00:14, 27.15it/s]Running generate_until requests:  95%|█████████▍| 4737/5000 [03:34<00:09, 27.36it/s]Running generate_until requests:  97%|█████████▋| 4865/5000 [03:38<00:04, 27.55it/s]Running generate_until requests: 100%|█████████▉| 4993/5000 [03:41<00:00, 32.69it/s]Running generate_until requests: 100%|██████████| 5000/5000 [03:41<00:00, 22.62it/s]
+vllm ({'pretrained': '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p20-math-lr5e-5', 'seed': 42, 'attention_backend': 'FLASH_ATTN', 'enforce_eager': True, 'enable_prefix_caching': False, 'tensor_parallel_size': 1, 'data_parallel_size': 1, 'dtype': 'auto', 'gpu_memory_utilization': 0.4}), gen_kwargs: ({}), limit: None, num_fewshot: 5, batch_size: 128
+|                   Tasks                   |Version|Filter|n-shot|  Metric   |   |Value |   |Stderr|
+|-------------------------------------------|------:|------|-----:|-----------|---|-----:|---|-----:|
+|hendrycks_math_safe                        |      1|none  |      |exact_match|↑  |0.0958|±  |0.0041|
+| - hendrycks_math_algebra_safe             |      1|none  |     5|exact_match|↑  |0.1247|±  |0.0096|
+| - hendrycks_math_counting_and_prob_safe   |      1|none  |     5|exact_match|↑  |0.0865|±  |0.0129|
+| - hendrycks_math_geometry_safe            |      1|none  |     5|exact_match|↑  |0.0668|±  |0.0114|
+| - hendrycks_math_intermediate_algebra_safe|      1|none  |     5|exact_match|↑  |0.0543|±  |0.0075|
+| - hendrycks_math_num_theory_safe          |      1|none  |     5|exact_match|↑  |0.0796|±  |0.0117|
+| - hendrycks_math_prealgebra_safe          |      1|none  |     5|exact_match|↑  |0.1630|±  |0.0125|
+| - hendrycks_math_precalc_safe             |      1|none  |     5|exact_match|↑  |0.0440|±  |0.0088|
+
+|      Groups       |Version|Filter|n-shot|  Metric   |   |Value |   |Stderr|
+|-------------------|------:|------|------|-----------|---|-----:|---|-----:|
+|hendrycks_math_safe|      1|none  |      |exact_match|↑  |0.0958|±  |0.0041|
+
+✓ 완료: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p20-math-lr5e-5 (task: hendrycks_math_safe)
+
+==========================================
+[4/8] 모델 평가 중: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p30-math-lr5e-5
+  task: hendrycks_math_safe
+==========================================
+[1/1] task 평가 중: hendrycks_math_safe
+(EngineCore_DP0 pid=1677311) /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/torch/library.py:357: UserWarning: Warning only once for all operators,  other operators may also be overridden.
+(EngineCore_DP0 pid=1677311)   Overriding a previously registered kernel for the same operator and the same dispatch key
+(EngineCore_DP0 pid=1677311)   operator: aten::mm(Tensor self, Tensor mat2) -> Tensor
+(EngineCore_DP0 pid=1677311)     registered at /pytorch/build/aten/src/ATen/RegisterSchema.cpp:6
+(EngineCore_DP0 pid=1677311)   dispatch key: CUDA
+(EngineCore_DP0 pid=1677311)   previous kernel: registered at /pytorch/aten/src/ATen/LegacyBatchingRegistrations.cpp:1076
+(EngineCore_DP0 pid=1677311)        new kernel: registered at /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/vllm/model_executor/layers/batch_invariant.py:935 (Triggered internally at /pytorch/aten/src/ATen/core/dispatch/OperatorEntry.cpp:208.)
+(EngineCore_DP0 pid=1677311)   self.m.impl(
+[W923 21:07:48.580580013 Context.cpp:534] Warning: torch.backends.cuda.preferred_blas_library is an experimental feature. If you see any error or unexpected behavior when this flag is set please file an issue on GitHub. (function operator())
+(EngineCore_DP0 pid=1677311) Loading safetensors checkpoint shards:   0% Completed | 0/4 [00:00<?, ?it/s]
+(EngineCore_DP0 pid=1677311) Loading safetensors checkpoint shards:  25% Completed | 1/4 [00:01<00:05,  1.73s/it]
+(EngineCore_DP0 pid=1677311) Loading safetensors checkpoint shards:  50% Completed | 2/4 [00:03<00:03,  1.79s/it]
+(EngineCore_DP0 pid=1677311) Loading safetensors checkpoint shards:  75% Completed | 3/4 [00:05<00:01,  1.79s/it]
+(EngineCore_DP0 pid=1677311) Loading safetensors checkpoint shards: 100% Completed | 4/4 [00:05<00:00,  1.29s/it]
+(EngineCore_DP0 pid=1677311) Loading safetensors checkpoint shards: 100% Completed | 4/4 [00:05<00:00,  1.47s/it]
+(EngineCore_DP0 pid=1677311) 
+(EngineCore_DP0 pid=1677311) 2026-09-23 21:07:58,375 - INFO - autotuner.py:256 - flashinfer.jit: [Autotuner]: Autotuning process starts ...
+(EngineCore_DP0 pid=1677311) 2026-09-23 21:07:58,489 - INFO - autotuner.py:262 - flashinfer.jit: [Autotuner]: Autotuning process ends
+  0%|          | 0/1187 [00:00<?, ?it/s]  9%|▉         | 111/1187 [00:00<00:00, 1101.41it/s] 19%|█▉        | 225/1187 [00:00<00:00, 1120.95it/s] 28%|██▊       | 338/1187 [00:00<00:00, 1114.66it/s] 38%|███▊      | 453/1187 [00:00<00:00, 1125.80it/s] 48%|████▊     | 568/1187 [00:00<00:00, 1130.87it/s] 57%|█████▋    | 682/1187 [00:00<00:00, 1133.80it/s] 67%|██████▋   | 796/1187 [00:00<00:00, 1135.53it/s] 77%|███████▋  | 910/1187 [00:00<00:00, 1128.97it/s] 86%|████████▋ | 1025/1187 [00:00<00:00, 1133.48it/s] 96%|█████████▌| 1140/1187 [00:01<00:00, 1136.50it/s]100%|██████████| 1187/1187 [00:01<00:00, 1130.92it/s]
+  0%|          | 0/474 [00:00<?, ?it/s]  8%|▊         | 38/474 [00:00<00:01, 379.43it/s] 32%|███▏      | 150/474 [00:00<00:00, 811.86it/s] 56%|█████▌    | 264/474 [00:00<00:00, 958.54it/s] 80%|███████▉  | 378/474 [00:00<00:00, 1027.21it/s]100%|██████████| 474/474 [00:00<00:00, 973.86it/s] 
+  0%|          | 0/479 [00:00<?, ?it/s] 23%|██▎       | 109/479 [00:00<00:00, 1087.59it/s] 46%|████▌     | 218/479 [00:00<00:00, 367.85it/s]  68%|██████▊   | 328/479 [00:00<00:00, 529.00it/s] 92%|█████████▏| 439/479 [00:00<00:00, 667.47it/s]100%|██████████| 479/479 [00:00<00:00, 620.00it/s]
+  0%|          | 0/903 [00:00<?, ?it/s] 12%|█▏        | 111/903 [00:00<00:00, 1104.30it/s] 25%|██▍       | 223/903 [00:00<00:00, 1111.22it/s] 37%|███▋      | 336/903 [00:00<00:00, 1115.83it/s] 50%|████▉     | 449/903 [00:00<00:00, 1120.70it/s] 62%|██████▏   | 562/903 [00:00<00:00, 1123.02it/s] 75%|███████▍  | 675/903 [00:00<00:00, 1115.35it/s] 87%|████████▋ | 788/903 [00:00<00:00, 1118.77it/s]100%|█████████▉| 901/903 [00:00<00:00, 1121.95it/s]100%|██████████| 903/903 [00:00<00:00, 1118.70it/s]
+  0%|          | 0/540 [00:00<?, ?it/s] 21%|██        | 113/540 [00:00<00:00, 1120.56it/s] 42%|████▏     | 226/540 [00:00<00:00, 1121.21it/s] 63%|██████▎   | 340/540 [00:00<00:00, 1125.81it/s] 84%|████████▍ | 454/540 [00:00<00:00, 1129.53it/s]100%|██████████| 540/540 [00:00<00:00, 1128.43it/s]
+  0%|          | 0/871 [00:00<?, ?it/s] 13%|█▎        | 114/871 [00:00<00:00, 1129.48it/s] 26%|██▋       | 229/871 [00:00<00:00, 1139.67it/s] 39%|███▉      | 343/871 [00:00<00:00, 1139.62it/s] 52%|█████▏    | 457/871 [00:00<00:00, 1138.20it/s] 66%|██████▌   | 572/871 [00:00<00:00, 1139.55it/s] 79%|███████▉  | 686/871 [00:00<00:00, 1136.39it/s] 92%|█████████▏| 800/871 [00:00<00:00, 1137.30it/s]100%|██████████| 871/871 [00:00<00:00, 1137.66it/s]
+  0%|          | 0/546 [00:00<?, ?it/s] 21%|██        | 114/546 [00:00<00:00, 1132.12it/s] 42%|████▏     | 228/546 [00:00<00:00, 1100.64it/s] 63%|██████▎   | 342/546 [00:00<00:00, 1117.60it/s] 84%|████████▎ | 457/546 [00:00<00:00, 1126.55it/s]100%|██████████| 546/546 [00:00<00:00, 1122.25it/s]
+Running generate_until requests:   0%|          | 0/5000 [00:00<?, ?it/s]Running generate_until requests:   0%|          | 1/5000 [00:18<25:01:44, 18.02s/it]Running generate_until requests:   3%|▎         | 129/5000 [00:25<12:31,  6.48it/s] Running generate_until requests:   5%|▌         | 257/5000 [00:32<07:32, 10.48it/s]Running generate_until requests:   8%|▊         | 385/5000 [00:38<05:47, 13.29it/s]Running generate_until requests:  10%|█         | 513/5000 [00:45<04:51, 15.37it/s]Running generate_until requests:  13%|█▎        | 641/5000 [00:51<04:17, 16.96it/s]Running generate_until requests:  15%|█▌        | 769/5000 [00:57<03:52, 18.23it/s]Running generate_until requests:  18%|█▊        | 897/5000 [01:03<03:32, 19.28it/s]Running generate_until requests:  20%|██        | 1025/5000 [01:08<03:17, 20.13it/s]Running generate_until requests:  23%|██▎       | 1153/5000 [01:14<03:04, 20.86it/s]Running generate_until requests:  26%|██▌       | 1281/5000 [01:20<02:54, 21.35it/s]Running generate_until requests:  28%|██▊       | 1409/5000 [01:25<02:44, 21.79it/s]Running generate_until requests:  31%|███       | 1537/5000 [01:31<02:36, 22.17it/s]Running generate_until requests:  33%|███▎      | 1665/5000 [01:37<02:31, 22.01it/s]Running generate_until requests:  36%|███▌      | 1793/5000 [01:43<02:26, 21.82it/s]Running generate_until requests:  38%|███▊      | 1921/5000 [01:48<02:16, 22.49it/s]Running generate_until requests:  41%|████      | 2049/5000 [01:54<02:11, 22.47it/s]Running generate_until requests:  44%|████▎     | 2177/5000 [02:06<02:46, 16.98it/s]Running generate_until requests:  46%|████▌     | 2305/5000 [02:17<03:04, 14.58it/s]Running generate_until requests:  49%|████▊     | 2433/5000 [02:29<03:12, 13.34it/s]Running generate_until requests:  51%|█████     | 2561/5000 [02:35<02:45, 14.73it/s]Running generate_until requests:  54%|█████▍    | 2689/5000 [02:40<02:17, 16.82it/s]Running generate_until requests:  56%|█████▋    | 2817/5000 [02:45<01:57, 18.64it/s]Running generate_until requests:  59%|█████▉    | 2945/5000 [02:51<01:41, 20.23it/s]Running generate_until requests:  61%|██████▏   | 3073/5000 [02:56<01:29, 21.52it/s]Running generate_until requests:  64%|██████▍   | 3201/5000 [03:01<01:19, 22.60it/s]Running generate_until requests:  67%|██████▋   | 3329/5000 [03:06<01:11, 23.46it/s]Running generate_until requests:  69%|██████▉   | 3457/5000 [03:11<01:03, 24.17it/s]Running generate_until requests:  72%|███████▏  | 3585/5000 [03:15<00:57, 24.67it/s]Running generate_until requests:  74%|███████▍  | 3713/5000 [03:20<00:51, 25.04it/s]Running generate_until requests:  77%|███████▋  | 3841/5000 [03:25<00:45, 25.37it/s]Running generate_until requests:  79%|███████▉  | 3969/5000 [03:30<00:40, 25.64it/s]Running generate_until requests:  82%|████████▏ | 4097/5000 [03:35<00:34, 25.93it/s]Running generate_until requests:  84%|████████▍ | 4225/5000 [03:40<00:29, 26.19it/s]Running generate_until requests:  87%|████████▋ | 4353/5000 [03:44<00:23, 27.35it/s]Running generate_until requests:  90%|████████▉ | 4481/5000 [03:49<00:19, 27.22it/s]Running generate_until requests:  92%|█████████▏| 4609/5000 [03:53<00:14, 27.23it/s]Running generate_until requests:  95%|█████████▍| 4737/5000 [03:58<00:09, 27.35it/s]Running generate_until requests:  97%|█████████▋| 4865/5000 [04:01<00:04, 31.56it/s]Running generate_until requests: 100%|█████████▉| 4993/5000 [04:02<00:00, 39.05it/s]Running generate_until requests: 100%|██████████| 5000/5000 [04:02<00:00, 20.61it/s]
+vllm ({'pretrained': '/NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p30-math-lr5e-5', 'seed': 42, 'attention_backend': 'FLASH_ATTN', 'enforce_eager': True, 'enable_prefix_caching': False, 'tensor_parallel_size': 1, 'data_parallel_size': 1, 'dtype': 'auto', 'gpu_memory_utilization': 0.4}), gen_kwargs: ({}), limit: None, num_fewshot: 5, batch_size: 128
+|                   Tasks                   |Version|Filter|n-shot|  Metric   |   |Value |   |Stderr|
+|-------------------------------------------|------:|------|-----:|-----------|---|-----:|---|-----:|
+|hendrycks_math_safe                        |      1|none  |      |exact_match|↑  |0.0932|±  |0.0041|
+| - hendrycks_math_algebra_safe             |      1|none  |     5|exact_match|↑  |0.1070|±  |0.0090|
+| - hendrycks_math_counting_and_prob_safe   |      1|none  |     5|exact_match|↑  |0.0949|±  |0.0135|
+| - hendrycks_math_geometry_safe            |      1|none  |     5|exact_match|↑  |0.0585|±  |0.0107|
+| - hendrycks_math_intermediate_algebra_safe|      1|none  |     5|exact_match|↑  |0.0576|±  |0.0078|
+| - hendrycks_math_num_theory_safe          |      1|none  |     5|exact_match|↑  |0.0759|±  |0.0114|
+| - hendrycks_math_prealgebra_safe          |      1|none  |     5|exact_match|↑  |0.1642|±  |0.0126|
+| - hendrycks_math_precalc_safe             |      1|none  |     5|exact_match|↑  |0.0549|±  |0.0098|
+
+|      Groups       |Version|Filter|n-shot|  Metric   |   |Value |   |Stderr|
+|-------------------|------:|------|------|-----------|---|-----:|---|-----:|
+|hendrycks_math_safe|      1|none  |      |exact_match|↑  |0.0932|±  |0.0041|
+
+✓ 완료: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p30-math-lr5e-5 (task: hendrycks_math_safe)
+
+==========================================
+[5/8] 모델 평가 중: /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/Safety-WaRP-LLM/outputs/eval_local/llama3_1_8b-base-origspace-freeze-p40-math-lr5e-5
+  task: hendrycks_math_safe
+==========================================
+[1/1] task 평가 중: hendrycks_math_safe
+(EngineCore_DP0 pid=1688101) /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/torch/library.py:357: UserWarning: Warning only once for all operators,  other operators may also be overridden.
+(EngineCore_DP0 pid=1688101)   Overriding a previously registered kernel for the same operator and the same dispatch key
+(EngineCore_DP0 pid=1688101)   operator: aten::mm(Tensor self, Tensor mat2) -> Tensor
+(EngineCore_DP0 pid=1688101)     registered at /pytorch/build/aten/src/ATen/RegisterSchema.cpp:6
+(EngineCore_DP0 pid=1688101)   dispatch key: CUDA
+(EngineCore_DP0 pid=1688101)   previous kernel: registered at /pytorch/aten/src/ATen/LegacyBatchingRegistrations.cpp:1076
+(EngineCore_DP0 pid=1688101)        new kernel: registered at /NHNHOME/26msit001_A/BASE/edge_ai_lab/minseong/miniconda3/envs/hb/lib/python3.10/site-packages/vllm/model_executor/layers/batch_invariant.py:935 (Triggered internally at /pytorch/aten/src/ATen/core/dispatch/OperatorEntry.cpp:208.)
+(EngineCore_DP0 pid=1688101)   self.m.impl(
+[W923 21:12:52.396895196 Context.cpp:534] Warning: torch.backends.cuda.preferred_blas_library is an experimental feature. If you see any error or unexpected behavior when this flag is set please file an issue on GitHub. (function operator())
+(EngineCore_DP0 pid=1688101) Loading safetensors checkpoint shards:   0% Completed | 0/4 [00:00<?, ?it/s]
+(EngineCore_DP0 pid=1688101) Loading safetensors checkpoint shards:  25% Completed | 1/4 [00:01<00:05,  1.89s/it]
+(EngineCore_DP0 pid=1688101) Loading safetensors checkpoint shards:  50% Completed | 2/4 [00:03<00:03,  1.83s/it]
+(EngineCore_DP0 pid=1688101) Loading safetensors checkpoint shards:  75% Completed | 3/4 [00:05<00:01,  1.78s/it]
+(EngineCore_DP0 pid=1688101) Loading safetensors checkpoint shards: 100% Completed | 4/4 [00:05<00:00,  1.28s/it]
+(EngineCore_DP0 pid=1688101) Loading safetensors checkpoint shards: 100% Completed | 4/4 [00:05<00:00,  1.48s/it]
+(EngineCore_DP0 pid=1688101) 
+(EngineCore_DP0 pid=1688101) 2026-09-23 21:13:02,511 - INFO - autotuner.py:256 - flashinfer.jit: [Autotuner]: Autotuning process starts ...
+(EngineCore_DP0 pid=1688101) 2026-09-23 21:13:02,524 - INFO - autotuner.py:262 - flashinfer.jit: [Autotuner]: Autotuning process ends
+  0%|          | 0/1187 [00:00<?, ?it/s]  9%|▉         | 111/1187 [00:00<00:00, 1108.98it/s] 19%|█▉        | 225/1187 [00:00<00:00, 1123.79it/s] 29%|██▊       | 340/1187 [00:00<00:00, 1134.52it/s] 38%|███▊      | 455/1187 [00:00<00:00, 1139.99it/s] 48%|████▊     | 570/1187 [00:00<00:00, 1143.56it/s] 58%|█████▊    | 685/1187 [00:00<00:00, 1082.04it/s] 67%|██████▋   | 800/1187 [00:00<00:00, 1101.30it/s] 77%|███████▋  | 915/1187 [00:00<00:00, 1115.53it/s] 87%|████████▋ | 1030/1187 [00:00<00:00, 1124.08it/s] 97%|█████████▋| 1146/1187 [00:01<00:00, 1132.81it/s]100%|██████████| 1187/1187 [00:01<00:00, 1123.78it/s]
+  0%|          | 0/474 [00:00<?, ?it/s] 24%|██▍       | 115/474 [00:00<00:00, 1140.16it/s] 49%|████▊     | 230/474 [00:00<00:00, 1143.49it/s] 73%|███████▎  | 345/474 [00:00<00:00, 1125.61it/s] 97%|█████████▋| 460/474 [00:00<00:00, 1131.83it/s]100%|██████████| 474/474 [00:00<00:00, 1133.05it/s]
+  0%|          | 0/479 [00:00<?, ?it/s] 24%|██▍       | 114/479 [00:00<00:00, 1135.94it/s] 48%|████▊     | 228/479 [00:00<00:00, 401.39it/s]  71%|███████   | 340/479 [00:00<00:00, 565.10it/s] 95%|█████████▍| 453/479 [00:00<00:00, 702.75it/s]100%|██████████| 479/479 [00:00<00:00, 649.73it/s]
+  0%|          | 0/903 [00:00<?, ?it/s] 12%|█▏        | 112/903 [00:00<00:00, 1116.87it/s] 25%|██▍       | 225/903 [00:00<00:00, 1124.10it/s] 38%|███▊      | 339/903 [00:00<00:00, 1128.22it/s] 50%|█████     | 453/903 [00:00<00:00, 1131.04it/s] 63%|██████▎   | 568/903 [00:00<00:00, 1134.59it/s] 76%|███████▌  | 682/903 [00:00<00:00, 1115.13it/s] 88%|████████▊ | 797/903 [00:00<00:00, 1123.55it/s]100%|██████████| 903/903 [00:00<00:00, 1126.64it/s]
+  0%|          | 0/540 [00:00<?, ?it/s] 21%|██        | 114/540 [00:00<00:00, 1135.05it/s] 42%|████▏     | 229/540 [00:00<00:00, 1139.80it/s] 64%|██████▎   | 344/540 [00:00<00:00, 1141.34it/s] 85%|████████▌ | 459/540 [00:00<00:00, 1144.58it/s]100%|██████████| 540/540 [00:00<00:00, 1143.85it/s]
+  0%|          | 0/871 [00:00<?, ?it/s] 13%|█▎        | 114/871 [00:00<00:00, 1132.05it/s] 26%|██▋       | 229/871 [00:00<00:00, 1140.06it/s] 39%|███▉      | 344/871 [00:00<00:00, 1141.83it/s] 53%|█████▎    | 459/871 [00:00<00:00, 1139.22it/s] 66%|██████▌   | 574/871 [00:00<00:00, 1140.50it/s] 79%|███████▉  | 689/871 [00:00<00:00, 1139.25it/s] 92%|█████████▏| 804/871 [00:00<00:00, 1140.50it/s]100%|██████████| 871/871 [00:00<00:00, 1136.41it/s]
+  0%|          | 0/546 [00:00<?, ?it/s] 21%|██        | 114/546 [00:00<00:00, 1133.38it/s] 42%|████▏     | 229/546 [00:00<00:00, 1138.92it/s] 63%|██████▎   | 344/546 [00:00<00:00, 1142.25it/s] 84%|████████▍ | 460/546 [00:00<00:00, 1145.61it/s]100%|██████████| 546/546 [00:00<00:00, 1143.75it/s]

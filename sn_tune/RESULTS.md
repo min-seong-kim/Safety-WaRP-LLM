@@ -502,3 +502,94 @@ RSN 끼리 비교하면:
 3. **회전 공간 top-k 의 근거 부재** (B-3 주의). 검출 후 파라미터%를 보고 재조정할지 판단.
 4. **`finetune_downstream_freeze_warp_sn.py` 는 한 번도 끝까지 안 돌아본 코드** (A-3).
    열 버전을 돌릴 때 여유를 둘 것.
+
+---
+
+# F. 2026-09-22 (밤) — 출처 확정과 열 버전 재구현
+
+## F-1. 논문 Table 3 의 "SN-Tune + WSR-Tune" 은 **행 버전**이었다 (확정)
+
+§B-0b 의 미확정 사항을 HarmBench 결과 트리로 닫았다. 7B 값 0 / 11.92 / 41.92 / 38.46 (AVG 23.07) 이
+`~/HarmBench/results/evaluation_summary_2026-05-06_00-20-42.csv` 의
+`llama2_7b-chat-gsm8k_ft_basis_rotation_sn-lr5e-5` 행과 소수점까지 같다. 5월 5~6일 로그 체인:
+
+| 단계 | 스크립트 | 비고 |
+|---|---|---|
+| 검출 | `Safety-Neuron/.../safety_neuron_detection_v2_basis_rotation.py --use_basis_rotation_score` | 패치 transformers, `x U Wᵀ` 점수, **행** 인덱스, 1200/200, basis `phase1_20260505_164049` → 1.0778% |
+| SN-Tune | `sn_tune.py` (원공간) | `..._only_sn_tuned_lr5e-5_basis_rotation` |
+| GSM8K | `finetune_gsm8k_freeze_sn.py` (원공간, 행 동결) | `..._gsm8k_ft_freeze_basis_rotation_sn_lr5e-5` |
+
+13B 도 같은 훅(1800/300, `..._gsm8k_ft_freeze_sn_rotation_space_lr5e-5`, AutoDAN 7.12 · PAP 58.38 일치).
+**같은 라인의 RSN 모델도 이미 있다**: `kmseong/Llama-2-7b-chat-hf_gsm8k_ft_freeze_basis_rotation_rsn_lr5e-5`,
+HarmBench 0.19 / 3.85 / 56.15 / 57.38 → **29.39** (RSN-Tune 20.73 보다 나빠 표에 실리지 않은 것으로 보인다).
+§A-3 의 "WaRP-SN 계열 downstream 모델은 없다" 는 틀렸다 — `basis_rotation` 이름으로 셋이 있다.
+
+행 버전 재실행 분산: 같은 방법이 5월 29.39, 9/22 15.25. 방법의 차이가 아니라 run 분산이다(§D-3).
+**주의**: 오늘 포팅본의 7B 검출(13,005)은 5월 7B basis_rotation(14,657, Jaccard 0.87)과 다르고 원공간(12,998,
+Jaccard 0.998)과 같다. 13B 는 5월과 동일(20,406). 5월 7B basis `phase1_20260505_164049` 의 제조법을 알 수 없어
+차이의 원인은 확정 못 한다.
+
+## F-2. 사용자 결정: RSN + WSR 은 **열 버전**으로 (2026-09-22)
+
+행 버전은 (R)SN-Tune 과 제약이 같아(§B-0) "재파라미터화 공간에서 보호" 주장이 서지 않는다.
+열 버전 = `basis_coeff` 의 열(입력 basis 방향)을 뉴런으로 정의 — ActSVD ablation arm C 와 같다.
+**논문 행과 정의가 다른 새 실험**이므로 표에 실을 때 그 점을 밝혀야 한다.
+
+## F-3. 구현 — 전용 트레이너를 버리고 `train.py --phase 3` 재사용
+
+이전 세대 `finetune_downstream_freeze_warp_sn.py` 는 전 파라미터 학습 + 모듈마다 `basis_coeff@Uᵀ` 물질화로
+**10.8 s/it, 178 GB OOM(7B)** 이었다. 새 경로:
+
+```
+sn_tune/warp_col_masks.py             열 뉴런 파일 → Phase 3 마스크 디렉토리 (tune / freeze 2종)
+sn_tune/scripts/run_wsr_rsn_col_phase3.sh   검출→critical→마스크→[6] RSN-Tune→[7] GSM8K, .done 마커
+sn_tune/scripts/eval_wsr_rsn_col.sh   models.yaml 등록 + HarmBench(sys·keyword) + GSM8K 5-shot
+sn_tune/summarize_wsr_rsn_col.py      결과표 (outputs/wsr_rsn_col_p3/RESULTS.md)
+```
+
+| 단계 | 트레이너 | 마스크 | 데이터 | 학습 범위 |
+|---|---|---|---|---|
+| [6] RSN-Tune | Phase 3 기본(freeze) 변형 | `masks_tune` (critical 열만 mask=0) | circuit_breakers 4994, 3ep | 5개 projection 의 `basis_coeff` 중 critical 열만 (wd 0 강제) |
+| [7] GSM8K | Phase 3 `--non_freeze` | `masks_freeze` (critical 열만 mask=1) | `gsm8k_train_task_7473.json`, 3ep | **전 파라미터** + mask=1 은 detach + `WaRPMaskRestoreCallback` |
+
+[7] 의 플래그는 공개 WSR-Tune 셀과 동일하다 (`scripts/revision/12_wsr_tune.sh`, `run_all_phases_integrated.sh`
+둘 다 `--non_freeze`; `outputs/revision/cb/qwen25_7b/gsm8k/wsr_tune/phase3_metadata.json` 의
+`mode: non_freeze, trainable_params 7.6B`). lr 5e-5 · wd 0.01 · warmup 0.1 · cosine · max_len 1024 · seed 42 ·
+유효배치 16 (7B 4×4, 13B 2×8) · gradient checkpointing. 출발 모델 plain chat.
+
+**걸린 것 둘 (고침):**
+- freeze 변형 + `--gradient_checkpointing` 은 step 0 에서 `element 0 of tensors does not require grad` 로 죽는다.
+  임베딩이 얼어 있어 reentrant checkpoint 가 그래프를 끊는 것. `models/phase3_extra_learning.py` 에
+  `enable_input_require_grads()` 추가 (수치 불변). 공개 모델은 전부 `--non_freeze` 라 이 조합을 쓴 적이 없었다.
+- Phase 3 는 `--phase0_model_dir` **문자열**에 chat/instruct 가 있어야 chat template 을 쓴다. [7] 이 받는
+  [6] 의 로컬 경로에 그게 없으면 조용히 plain 프롬프트가 된다 → 경로에 `rsn_tune_Llama-2-7b-chat-hf` 로 이름을 박았다.
+
+## F-4. 열 공간에서는 utility 차집합이 다르게 작동한다 — 예산 보정
+
+7B, utility 300/50 고정, 열 기준 파라미터%:
+
+| safety top-k | safety 열 | critical 열 | critical 파라미터% |
+|---|---:|---:|---:|
+| 400/80 | 13,537 | **198** | 0.016% |
+| 600/120 | 20,383 | 4,372 | 0.43% |
+| 1200/200 | 39,680 | 23,569 | 2.43% |
+| 800/135 | (검출 중) | | (≈1% 목표) |
+
+원공간은 utility 300/50 이 safety 의 14%(1,826/12,998)였는데, 열 공간은 프롬프트 간 순위가 안정적이라
+교집합 생존율이 높아 utility 가 16,111 로 **safety(400/80)보다 크다**. 그래서 §D-2 의 "400/80 → critical ≈ 0.8%"
+외삽은 틀렸다(실제 0.016%). 예산 조정은 원저자 방식대로 **utility 는 300/50 고정, safety k 만 조정**한다.
+주 설정은 이미 critical 이 있는 1200/200(7B, 2.43%) · 1800/300(13B, 3.55%), ≤1% arm 은 보정 후 추가.
+
+## F-5. 부수 발견 — 저장소 루트 RESULTS.md 추가 실험 6 의 전제
+
+추가 실험 6 은 "WSR-Tune 은 q,k,v,up,down 의 basis_coeff 만 학습한다" 는 전제로 AsFT·Lisa 의 학습 범위를
+맞췄는데, 공개 WSR-Tune 은 전부 `--non_freeze`(전 파라미터 학습, 마스크 원소만 동결)다. 위 metadata 가 증거.
+실험 6 의 `tgtonly` 비교는 WSR-Tune 과 범위가 맞지 않는다 — 오히려 실험 5(전체 학습)가 맞는 비교다. 별건이라
+여기 기록만 한다.
+
+## F-6. 부수 발견 — 공개 RSN 기준행의 GSM8K
+
+09-22 재측정: 7B `llama2_7b_chat_gsm8k_ft_freeze_rsn_lr5e-5_new_revised` flexible **0.3336** / strict 0.4026
+(논문 40.26 = strict 값), 13B `wvnvwn/llama-2-13b-chat-hf-gsm8k-rsn-tuned-lr5e-5` flexible **0.4594**
+(논문 49.96 과 불일치). ASR 은 둘 다 논문과 일치(20.68 / 28.78). Table 3 의 RSN 기준행 downstream 을 어느 값으로
+둘지 결정 필요.

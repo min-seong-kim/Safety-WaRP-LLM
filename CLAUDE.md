@@ -571,6 +571,13 @@ shared GPU).
 - Hub uploads/downloads drop with `IncompleteRead` a few times a day; `harmbench_eval.sh` retries 3×
   but a whole combo can still fail — always finish with a `RESUME=true LMEVAL_RESUME=1` gap-fill pass.
 - `pgrep -f <script>` again matched the shell issuing it (two shells killed this round). Use pid files.
+- **Two conda installs on edgeai-03 (2026-09-23).** The login shell is activated from
+  `jeesuppark/svd_safety/miniconda3` (only `base`); `hb`/`harmbench` live in `minseong/miniconda3`.
+  With the foreign `CONDA_*` vars set, `source minseong/.../conda.sh; conda activate harmbench`
+  returns rc=0 but does **not** change PATH → HarmBench runs `/usr/bin/python` and dies with
+  `No module named 'transformers'`. `unset CONDA_EXE CONDA_PREFIX CONDA_SHLVL CONDA_DEFAULT_ENV
+  CONDA_PYTHON_EXE CONDA_PROMPT_MODIFIER` before calling `run_all_eval.sh` / `32_eval_cells.sh`
+  (`33_table1_math_8b_base.sh` does). Training is unaffected when it calls the env's python by absolute path.
 
 **Environment gotcha:** `environment_hb.yml`'s `apex==0.9.10.dev0` is *not* NVIDIA Apex — it is a
 Pyramid auth toolkit whose `cryptacular` dependency cannot build, and pip resolves all metadata

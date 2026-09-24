@@ -1,0 +1,33 @@
+[2026-09-23 23:01:19] ════ 시작: A(7B, GPU0) · B(8B, GPU1) — base × GSM8K × lr 5e-5 ════
+[2026-09-23 23:01:19] [7b] 학습 시도 1 (GPU0)
+[2026-09-23 23:01:49] [8b] 학습 시도 1 (GPU1)
+[2026-09-24 01:10:37] [7b] 학습 시도 1 종료 — 완료 셀 5/5 
+[2026-09-24 01:10:37] [7b] 평가 대기(lock)
+[2026-09-24 01:10:37] [7b] 평가 시작 (HarmBench + gsm8k, GPU0)
+[2026-09-24 01:51:26] [7b] 평가 종료 rc=0 (No module: 0)
+[2026-09-24 01:53:08] [8b] 학습 시도 1 종료 — 완료 셀 5/5 
+[2026-09-24 01:53:08] [8b] 평가 대기(lock)
+[2026-09-24 01:53:08] [8b] 평가 시작 (HarmBench + gsm8k, GPU1)
+[2026-09-24 02:19:55] [8b] 평가 종료 rc=0 (No module: 0)
+[2026-09-24 02:19:55] ════ 요약 ════
+llama2_7b-base-origspace-freeze-p00-gsm8k-lr5e-5	0.0077	0.7346	0.6981	0.7131	0.5384	(4/4)
+llama2_7b-base-origspace-freeze-p10-gsm8k-lr5e-5	0.0000	0.3731	0.4615	0.5235	0.3395	(4/4)
+llama2_7b-base-origspace-freeze-p30-gsm8k-lr5e-5	0.0000	0.0000	0.3808	0.4769	0.2144	(4/4)
+llama2_7b-base-origspace-freeze-p50-gsm8k-lr5e-5	0.0000	0.0019	0.3058	0.4296	0.1843	(4/4)
+llama2_7b-base-wsr-tune-kr0.1-gsm8k-lr5e-5	0.0000	0.0000	0.2192	0.3677	0.1467	(4/4)
+llama2_7b-base-origspace-freeze-p00-gsm8k-lr5e-5	gsm8k(flexible)=0.3912054586808188
+llama2_7b-base-origspace-freeze-p10-gsm8k-lr5e-5	gsm8k(flexible)=0.40636846095526913
+llama2_7b-base-origspace-freeze-p30-gsm8k-lr5e-5	gsm8k(flexible)=0.3912054586808188
+llama2_7b-base-origspace-freeze-p50-gsm8k-lr5e-5	gsm8k(flexible)=0.4086429112964367
+llama2_7b-base-wsr-tune-kr0.1-gsm8k-lr5e-5	gsm8k(flexible)=0.3858984078847612
+llama3_1_8b-base-origspace-freeze-p00-gsm8k-lr5e-5	0.0019	0.0019	0.3558	0.6588	0.2546	(4/4)
+llama3_1_8b-base-origspace-freeze-p10-gsm8k-lr5e-5	0.0000	0.0000	0.2058	0.5796	0.1963	(4/4)
+llama3_1_8b-base-origspace-freeze-p30-gsm8k-lr5e-5	0.0000	0.0000	0.0962	0.4331	0.1323	(4/4)
+llama3_1_8b-base-origspace-freeze-p50-gsm8k-lr5e-5	0.0000	0.0846	0.0577	0.3754	0.1294	(4/4)
+llama3_1_8b-base-wsr-tune-kr0.1-gsm8k-lr5e-5	0.0000	0.0000	0.0481	0.2958	0.0860	(4/4)
+llama3_1_8b-base-origspace-freeze-p00-gsm8k-lr5e-5	gsm8k(flexible)=0.1728582259287339
+llama3_1_8b-base-origspace-freeze-p10-gsm8k-lr5e-5	gsm8k(flexible)=0.47081122062168307
+llama3_1_8b-base-origspace-freeze-p30-gsm8k-lr5e-5	gsm8k(flexible)=0.49507202426080366
+llama3_1_8b-base-origspace-freeze-p50-gsm8k-lr5e-5	gsm8k(flexible)=0.530705079605762
+llama3_1_8b-base-wsr-tune-kr0.1-gsm8k-lr5e-5	gsm8k(flexible)=0.14025777103866566
+[2026-09-24 02:20:20] NIGHT_DONE
